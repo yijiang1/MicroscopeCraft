@@ -38,7 +38,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
     inv.append(ch);
     for (const r of data.recipes) {
       const b = document.createElement('button');
-      b.textContent = r.name;
+      b.textContent = `${r.name} (${r.station})`;
       b.disabled = !canCraft(ctx, r.id);
       b.style.cssText = 'display:block;margin:2px 0;width:100%';
       b.onclick = () => craft(ctx, r.id);

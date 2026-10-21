@@ -34,7 +34,7 @@ Every module depends on `src/shared`; **no module imports another** (ESLint enfo
 - **Events** (`src/shared/events.ts`): `openEyepiece({sampleId})`, `closeEyepiece`, `itemGathered`, `itemCrafted`, `discoveryUnlocked`, `tierChanged`, `guideAsked`, `guideReplied`.
 - **Sim**: `visibility(feature, scope)` in `src/shared/sim/optics.ts` returns whether a feature shows and the reason it does not (`unresolved`, `empty-magnification`, `too-small-to-see`, `low-contrast`). The scope view and the guide both use it.
 
-The stubs in each module run on day one: a flat plane with cubes, a scope that blurs unseen features, canned guide replies, and a fixed world spec (`data/worlds/default.json`). Replace a stub inside your own folder; keep the exported `mount*` signature.
+Each module runs from day one. The world has gatherable cubes and a leaf, the eyepiece blurs a procedural specimen by the scope's effective resolution, the guide gives canned replies keyed on the sim's reason code, and `data/worlds/default.json` is the fixed world spec. Replace internals inside your own folder; keep the exported `mount*` signature.
 
 Units: lengths are micrometres (µm) everywhere, spelled in field names (`sizeUm`, `dLensUm`).
 Simplified physics is labelled in comments next to the formula.

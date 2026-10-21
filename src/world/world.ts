@@ -1,5 +1,5 @@
-// Day-one stub: flat plane and a few cubes. Replace with the real voxel world.
-// Controls: click to lock mouse, WASD to move, E gathers the aimed cube, F looks through the eyepiece at a sample.
+// Flat-colored cube world. Click to lock the mouse, WASD to move, E gathers the aimed cube,
+// F looks at the aimed sample through the player's current microscope (or the naked eye).
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 import { gather, type GameContext } from '../shared/state';
@@ -10,53 +10,67 @@ interface Aim {
   sample?: string;
 }
 
-const CUBES: { color: string; pos: [number, number]; aim: Aim }[] = [
-  { color: '#4caf50', pos: [0, -4], aim: { gather: 'leaf_fiber', sample: 'leaf' } },
-  { color: '#e8d9a0', pos: [3, -4], aim: { gather: 'beach_sand', sample: 'sand_grain' } },
-  { color: '#8a5a44', pos: [-3, -4], aim: { gather: 'iron_ore' } },
+interface Spot {
+  color: string;
+  x: number;
+  z: number;
+  aim: Aim;
+}
+
+const sand = (x: number, z: number): Spot => ({ color: '#e8d9a0', x, z, aim: { gather: 'beach_sand', sample: 'sand_grain' } });
+const iron = (x: number, z: number): Spot => ({ color: '#8a5a44', x, z, aim: { gather: 'iron_ore' } });
+// Leaf is a sample only: looking never uses it up.
+const SPOTS: Spot[] = [
+  sand(3, -4), sand(4, -4), sand(3, -5), sand(4, -5),
+  iron(-3, -4), iron(-4, -4),
+  { color: '#2e8b3a', x: 0, z: -5, aim: { sample: 'leaf' } },
 ];
 const REACH = 6;
+const RESPAWN_MS = 15_000; // no scarcity: gathered cubes grow back
 
-export function mountStubWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
+export function mountVoxelWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   el.appendChild(renderer.domElement);
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#9ed0ff');
-  scene.add(new THREE.HemisphereLight('#ffffff', '#557755', 1.6));
+  scene.add(new THREE.HemisphereLight('#ffffff', '#99aa99', 2.2));
 
-  const ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(60, 60),
-    new THREE.MeshLambertMaterial({ color: '#6aa84f' }),
-  );
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.MeshLambertMaterial({ color: '#6aa84f' }));
   ground.rotation.x = -Math.PI / 2;
   scene.add(ground);
 
-  const targets: THREE.Mesh[] = CUBES.map(({ color, pos, aim }) => {
+  const targets = new Set<THREE.Mesh>();
+  const timers = new Set<number>();
+  const spawn = ({ color, x, z, aim }: Spot) => {
     const m = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshLambertMaterial({ color }));
-    m.position.set(pos[0], 0.5, pos[1]);
-    m.userData = aim;
+    m.position.set(x, 0.5, z);
+    m.userData = { aim, spot: { color, x, z, aim } };
     scene.add(m);
-    return m;
-  });
+    targets.add(m);
+  };
+  SPOTS.forEach(spawn);
 
   const camera = new THREE.PerspectiveCamera(70, 1, 0.1, 200);
   camera.position.set(0, 1.7, 2);
   const controls = new PointerLockControls(camera, renderer.domElement);
 
+  const css = 'position:fixed;color:#fff;text-shadow:0 0 3px #000;pointer-events:none';
   const hint = document.createElement('div');
-  hint.style.cssText = 'position:fixed;left:12px;bottom:12px;color:#fff;text-shadow:0 0 3px #000;pointer-events:none';
-  hint.textContent = 'Click to look · WASD move · E gather · F eyepiece · Esc frees the mouse';
+  hint.style.cssText = `${css};left:12px;bottom:12px`;
+  hint.textContent = 'Click to look · WASD move · E gather · F look through your instrument · Esc frees the mouse';
+  const prompt = document.createElement('div');
+  prompt.style.cssText = `${css};left:calc(50% - 130px);width:260px;text-align:center;top:calc(50% + 16px)`;
   const cross = document.createElement('div');
   cross.style.cssText = 'position:fixed;left:50%;top:50%;width:6px;height:6px;margin:-3px;background:#fff;mix-blend-mode:difference;pointer-events:none';
-  el.append(hint, cross);
+  el.append(hint, prompt, cross);
 
   const keys = new Set<string>();
   let paused = false;
   const ray = new THREE.Raycaster();
   ray.far = REACH;
-  const aimed = (): Aim | null => {
+  const aimedMesh = () => {
     ray.setFromCamera(new THREE.Vector2(0, 0), camera);
-    return (ray.intersectObjects(targets)[0]?.object.userData as Aim | undefined) ?? null;
+    return ray.intersectObjects([...targets])[0]?.object as THREE.Mesh | undefined;
   };
 
   const onKey = (e: KeyboardEvent, down: boolean) => {
@@ -64,9 +78,16 @@ export function mountStubWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     if (down) keys.add(k);
     else keys.delete(k);
     if (!down || paused || !controls.isLocked) return;
-    const aim = aimed();
-    if (k === 'e' && aim?.gather) gather(ctx, aim.gather);
-    if (k === 'f' && aim?.sample) {
+    const mesh = aimedMesh();
+    const aim = mesh?.userData.aim as Aim | undefined;
+    if (!mesh || !aim) return;
+    if (k === 'e' && aim.gather) {
+      gather(ctx, aim.gather);
+      scene.remove(mesh);
+      targets.delete(mesh);
+      timers.add(window.setTimeout(() => spawn(mesh.userData.spot as Spot), RESPAWN_MS));
+    }
+    if (k === 'f' && aim.sample) {
       controls.unlock();
       ctx.bus.emit('openEyepiece', { sampleId: aim.sample });
     }
@@ -90,6 +111,14 @@ export function mountStubWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   ro.observe(el);
   resize();
 
+  const describe = (aim: Aim | undefined) => {
+    if (!aim) return '';
+    const parts: string[] = [];
+    if (aim.gather) parts.push(`E gather ${ctx.data.items[aim.gather]?.name ?? aim.gather}`);
+    if (aim.sample) parts.push(`F look at ${ctx.data.samples[aim.sample]?.name ?? aim.sample}`);
+    return parts.join(' · ');
+  };
+
   let last = performance.now();
   let raf = requestAnimationFrame(function frame(now) {
     raf = requestAnimationFrame(frame);
@@ -100,12 +129,14 @@ export function mountStubWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       controls.moveForward(((keys.has('w') ? 1 : 0) - (keys.has('s') ? 1 : 0)) * speed);
       controls.moveRight(((keys.has('d') ? 1 : 0) - (keys.has('a') ? 1 : 0)) * speed);
     }
+    prompt.textContent = controls.isLocked && !paused ? describe(aimedMesh()?.userData.aim as Aim | undefined) : '';
     renderer.render(scene, camera);
   });
 
   return {
     dispose() {
       cancelAnimationFrame(raf);
+      timers.forEach((t) => clearTimeout(t));
       ro.disconnect();
       offOpen();
       offClose();

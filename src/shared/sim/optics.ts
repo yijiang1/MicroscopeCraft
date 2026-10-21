@@ -32,6 +32,10 @@ export const dose = (electronsPerSecond: number, seconds: number, areaNm2: numbe
 /** Classic "useful magnification" ceiling, M ≤ 1000·NA; beyond it the view only enlarges blur. */
 export const usefulMagnificationMax = (NA: number) => 1000 * NA;
 
+/** d_eff of a whole scope, µm. */
+export const scopeResolutionUm = (scope: ScopeParams) =>
+  effectiveResolutionUm(abbeLimitUm(scope.wavelengthUm, scope.NA), scope.dLensUm);
+
 export type VisibilityReason =
   | 'ok'
   /** Smaller than d_eff: the optics cannot separate it. */
@@ -53,7 +57,7 @@ export interface Visibility {
 
 /** The three visibility rules of DESIGN.md, checked in the order the player hits the walls. */
 export function visibility(feature: Pick<Feature, 'sizeUm' | 'contrast'>, scope: ScopeParams): Visibility {
-  const dEffUm = effectiveResolutionUm(abbeLimitUm(scope.wavelengthUm, scope.NA), scope.dLensUm);
+  const dEffUm = scopeResolutionUm(scope);
   const apparentUm = feature.sizeUm * scope.magnification;
   const result = (reason: VisibilityReason): Visibility => ({ visible: reason === 'ok', reason, dEffUm, apparentUm });
 
