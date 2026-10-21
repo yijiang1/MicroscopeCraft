@@ -102,7 +102,7 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
     const { scope } = ctx.state;
     focusLabel.style.display = scope.tier >= 2 ? '' : 'none';
     // Instrument picker: every microscope owned, keys 1-9. Only shown when there is a choice.
-    const owned = ownedScopes(ctx.state.inventory, ctx.data);
+    const owned = ownedScopes(ctx.state.inventory, ctx.data, ctx.state.inLab);
     scopeBox.replaceChildren();
     scopeBox.style.cssText = `display:${owned.length > 1 ? 'flex' : 'none'};flex-wrap:wrap;justify-content:center;gap:4px;align-items:center`;
     scopeBox.append('Instrument:');
@@ -267,7 +267,7 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
     if (e.repeat || performance.now() - openedAt < 200) return;
     if (el.style.display !== 'block') return;
     if (e.key === 'Escape' || e.key.toLowerCase() === 'f') ctx.bus.emit('closeEyepiece', {});
-    const pick = ownedScopes(ctx.state.inventory, ctx.data)[+e.key - 1];
+    const pick = ownedScopes(ctx.state.inventory, ctx.data, ctx.state.inLab)[+e.key - 1];
     if (pick) selectScope(ctx, pick.scope.tier);
   };
   const onWheel = (e: WheelEvent) => {

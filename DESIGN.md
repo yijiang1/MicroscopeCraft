@@ -93,15 +93,15 @@ The goal panel lists the crafts in order and highlights the next one; the full r
 
 ## World and scale content
 
-The world is a small open 3D landscape, about 150 m across, that the player walks, runs and jumps through in first person. It is built entirely from procedural models and textures generated in code, so there are no art assets to license: rolling hills, a pond, rocky highlands, a pine grove and a lab pad, with tens of thousands of instanced grass blades, flowers and trees, a sky, soft shadows and distance fog. Gatherable things are real-looking models, not blocks: noise-shaped ore rocks with colored veins, mounds of sand, quartz crystal clusters, veined leaves, flowers, sunflowers, resin-dripping stumps and a butterfly wing on a stone. Aiming is forgiving (a ring and a prompt show what the crosshair is on), and the player collides with trees, rocks and gatherables.
+The world is a small open 3D landscape, about 190 m across, that the player walks, runs and jumps through in first person. It is built entirely from procedural models and textures generated in code, so there are no art assets to license: a university campus (a quad lined with stone halls, a clock tower, a long slope, a gorge with a waterfall, a lake, and a science building), with tens of thousands of instanced grass blades, flowers and trees, a sky, soft shadows and distance fog. Gatherable things are real-looking models, not blocks: noise-shaped ore rocks with colored veins, mounds of sand, quartz crystal clusters, veined leaves, flowers, sunflowers, resin-dripping stumps and a butterfly wing on a stone. Aiming is forgiving (a ring and a prompt show what the crosshair is on), and the player collides with buildings, trees, rocks and gatherables. The electron microscope is installed in the science lab and works only there: the player carries samples to it.
 
 | Area | Where | What the player finds |
 | --- | --- | --- |
-| Meadow | Centre (spawn) | Leafy plants, flowers, a butterfly wing, sunflowers (look at a seed under the compound microscope), grass and oaks |
-| Pond | West | Pond water to sample, sand along the shore |
-| Highlands (the mine) | East | Iron rocks, quartz crystals, and plain grey and heavy grey rocks that hide copper and tungsten, boulders |
-| Pine grove | North-east | Resin stumps among pines |
-| Workshop lab | Far north | A flat pad with lamp posts and a glowing crystal |
+| Quad | Centre | Leafy plants, flowers, a butterfly wing, sunflowers (look at a seed under the compound microscope), lawn, paths and elms |
+| Lake | North-east (spawn) | Lake water to sample, sand along the south shore, the waterfall into the gorge |
+| Gorge rim and west slope | North and west | Iron rocks, quartz crystals, and plain grey and heavy grey rocks that hide copper and tungsten, boulders |
+| Lower west slope | South-west | Resin stumps among pines |
+| Science building | South-east | The electron microscopy lab on the glass ground floor; a glowing crystal outside. The electron microscope only works here, so samples are carried in |
 
 Every sample has a hidden layer at each smaller scale, and a layer appears only when the player's microscope can resolve it. Sizes below are approximate.
 
@@ -187,7 +187,7 @@ The MVP is one complete play loop that can be demoed in about five minutes: gath
 
 | Area | Must ship | Faked or hand-authored | Stretch | Status |
 | --- | --- | --- | --- | --- |
-| World | One small open 3D map with a meadow and a pond | Other biomes shown as locked areas | Mine and workshop biomes | Built, and larger than planned: meadow, pond, highlands, pine grove and lab |
+| World | One small open 3D map with a meadow and a pond | Other biomes shown as locked areas | Mine and workshop biomes | Built, and larger than planned: a campus map (quad, slope, gorge, lake, science lab) |
 | Crafting | About eight recipes: glass, lens, frame, tube, light source, immersion oil | Recipe values tuned by hand | Full materials property system | 18 recipes, values tuned by hand |
 | Microscopes | Tiers 1 to 3, working end to end | Tier 5 as a scripted showpiece view | Tiers 4 and 6 | Tiers 0 to 3 and 5 built; tier 5 is a computed view with beam damage, not scripted |
 | Samples | About ten hand-authored discoveries in the Microdex | Atomic view drawn from a prepared image | Samples generated from a prompt | 17 discoveries; the atomic lattice is drawn procedurally |

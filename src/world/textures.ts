@@ -112,3 +112,53 @@ export const barkTexture = () =>
       g.stroke();
     }
   });
+
+/** One window bay of a building facade (one floor high); repeat it across a wall. */
+export const facadeTexture = (wall: string, glass: string) =>
+  canvasTexture(64, 64, (g) => {
+    g.fillStyle = wall;
+    g.fillRect(0, 0, 64, 64);
+    const rng = mulberry32(5);
+    for (let i = 0; i < 120; i++) {
+      g.fillStyle = rng() > 0.5 ? '#0000000f' : '#ffffff12';
+      g.fillRect(rng() * 64, rng() * 64, 2 + rng() * 6, 1 + rng() * 2);
+    }
+    g.fillStyle = '#00000022';
+    g.fillRect(16, 12, 32, 42);
+    g.fillStyle = glass;
+    g.fillRect(19, 15, 26, 36);
+    g.fillStyle = '#ffffff30';
+    g.fillRect(19, 15, 26, 3);
+    g.fillRect(31, 15, 2, 36);
+    g.fillStyle = '#00000030';
+    g.fillRect(14, 52, 36, 3);
+  });
+
+/** White lettering on a dark sign. */
+export const labelTexture = (text: string) =>
+  canvasTexture(1024, 128, (g) => {
+    g.fillStyle = '#26292d';
+    g.fillRect(0, 0, 1024, 128);
+    g.fillStyle = '#f4f1ea';
+    g.font = '600 64px Georgia, serif';
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.fillText(text, 512, 68, 980);
+  });
+
+/** Falling water: pale vertical streaks on blue, scrolled downward every frame. */
+export const waterfallTexture = () => {
+  const t = canvasTexture(64, 256, (g) => {
+    g.fillStyle = '#a9d2e6';
+    g.fillRect(0, 0, 64, 256);
+    const rng = mulberry32(13);
+    for (let i = 0; i < 140; i++) {
+      g.fillStyle = `rgba(255,255,255,${0.3 + rng() * 0.6})`;
+      const [x, y, w, h] = [rng() * 64, rng() * 256, 1 + rng() * 4, 30 + rng() * 120];
+      g.fillRect(x, y, w, h);
+      g.fillRect(x, y - 256, w, h); // wrap, so the tiles join without a seam
+    }
+  });
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  return t;
+};

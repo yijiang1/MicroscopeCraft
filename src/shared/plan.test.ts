@@ -93,7 +93,7 @@ describe('where to find things', () => {
   });
 
   it('answers for raw and crafted items; matches the longest name', () => {
-    expect(howToGet('beach_sand', data)).toMatch(/pond shore/);
+    expect(howToGet('beach_sand', data)).toMatch(/the lake/);
     expect(howToGet('glass', data)).toMatch(/crafted.*2 Beach sand/);
     expect(howToGet('copper_ore', data)).toMatch(/only gather it after you have looked at it with a Hand lens and spotted Copper veins/);
     expect(howToGet('copper_ore', data, ['copper_veins'])).toMatch(/press E/);

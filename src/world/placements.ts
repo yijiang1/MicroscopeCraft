@@ -1,5 +1,6 @@
 // What stands where in the world. Pure data (plus a seeded scatter), no rendering, so it is easy to test and retune.
-import { LAB, mulberry32, POND } from './terrain';
+import { CRYSTAL_SPOT } from './campus';
+import { LAKE, mulberry32 } from './terrain';
 
 export type Kind =
   | 'sand' | 'quartz' | 'iron' | 'copper' | 'tungsten' | 'sunflower' | 'resin' // gatherable
@@ -54,22 +55,28 @@ function cluster(kind: Kind, cx: number, cz: number, n: number, spread: number, 
   return out;
 }
 
+/** Where the player starts: on the lake's south shore, facing north over the sand (the first thing to gather). */
+export const SPAWN = { x: 38, z: -38 };
+
 export const PLACEMENTS: Placement[] = [
-  // Meadow around the spawn at the origin (looking toward -z)
+  // A couple of leafy plants by the spawn, for a first look with the naked eye
+  ...cluster('leaf', 33, -37, 2, 1.5, 10),
+  // Quad lawn, south-west of the spawn
   ...cluster('leaf', -3, -7, 3, 3, 1),
   ...cluster('flower', 5, -5, 4, 3, 2, 1.2),
   { kind: 'wing', x: 2, z: -11 },
   ...cluster('sunflower', -3, -14, 3, 2.2, 3),
-  // Pond to the west (its bowl reaches x = -8), sand along the eastern shore
-  { kind: 'pond', x: POND.x, z: POND.z },
-  ...cluster('sand', -6, -6, 9, 3.2, 4, 1.3),
-  // Rocky highlands (the mine) to the east
-  ...cluster('iron', 16, -10, 8, 4.5, 5),
-  ...cluster('quartz', 22, -3, 7, 4, 6),
-  ...cluster('copper', 25, -17, 6, 4, 7),
-  ...cluster('tungsten', 31, -24, 3, 2.5, 8),
-  // Pine grove with resin stumps to the north-east
-  ...cluster('resin', 8, -26, 3, 3, 9),
-  // Workshop lab far to the north
-  { kind: 'crystal', x: LAB.x, z: LAB.z },
+  // The lake, sand on its south shore right ahead of the spawn
+  { kind: 'pond', x: LAKE.x, z: LAKE.z },
+  ...cluster('sand', 46, -47, 9, 3.2, 4, 1.3),
+  // Rocky rim of the gorge: iron near the waterfall (west of the spawn), quartz farther west behind the halls
+  ...cluster('iron', 24, -49, 8, 4.5, 5),
+  ...cluster('quartz', -26, -48, 7, 4, 6),
+  // Shale outcrops on the west slope, west below the clock tower; the heavy rocks at its foot
+  ...cluster('copper', -54, -16, 6, 4, 7),
+  ...cluster('tungsten', -68, -30, 3, 2.5, 8),
+  // Pines with resin stumps on the lower west slope, south-west
+  ...cluster('resin', -56, 24, 3, 3, 9),
+  // Mineral garden by the science building
+  { kind: 'crystal', x: CRYSTAL_SPOT.x, z: CRYSTAL_SPOT.z },
 ];

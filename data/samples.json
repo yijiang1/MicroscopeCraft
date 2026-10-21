@@ -41,7 +41,7 @@
   },
   {
     "id": "pond_water",
-    "name": "Pond water",
+    "name": "Lake water",
     "worldObject": "pond_water",
     "biome": "pond",
     "features": [

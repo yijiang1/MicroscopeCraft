@@ -107,7 +107,10 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
     ctx.bus.on('itemCrafted', render),
     ctx.bus.on('tierChanged', ({ tier }) => {
       const built = ctx.data.recipes.find((r) => r.scope?.tier === tier);
-      if (built) toast.notify(`You built the ${built.name}! Aim at something and press F to look closer.`, 6000, 3);
+      const how = tier >= 5
+        ? 'It is installed in the lab of the science building (south-east): look (F) at a sample to take some, then carry it there.'
+        : 'Aim at something and press F to look closer.';
+      if (built) toast.notify(`You built the ${built.name}! ${how}`, 8000, 3);
     }),
     ctx.bus.on('discoveryUnlocked', ({ id }) => {
       render();

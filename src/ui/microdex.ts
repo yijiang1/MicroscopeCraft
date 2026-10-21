@@ -3,7 +3,7 @@ import { microdex } from '../shared/microdex';
 import { fmtUm } from '../shared/sim/walls';
 import type { GameContext } from '../shared/state';
 
-const BIOME_NAMES = { meadow: 'Meadow', pond: 'Pond', mine: 'Mine', lab: 'Workshop lab' } as const;
+const BIOME_NAMES = { meadow: 'Quad', pond: 'Lake', mine: 'Gorge and slope rocks', lab: 'Science lab' } as const;
 
 export interface MicrodexHandle {
   toggle(): void;

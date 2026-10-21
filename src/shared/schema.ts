@@ -153,6 +153,8 @@ export interface GameState {
   currentSampleId: string | null;
   /** Tier of the microscope the player picked in the eyepiece; null = the best one owned. */
   scopeChoice: Tier | null;
+  /** Player is inside the lab in the science building, the only place an electron microscope can be used. */
+  inLab: boolean;
   scope: ScopeParams;
 }
 

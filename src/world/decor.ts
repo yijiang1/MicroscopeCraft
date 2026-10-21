@@ -1,10 +1,11 @@
-// Scenery that is never gathered: sky, grass, trees, boulders, wild flowers, the lab pad.
+// Scenery that is never gathered: sky, grass, trees, boulders, wild flowers. Buildings are in campus.ts.
 // Everything repeated is instanced, so thousands of plants cost a handful of draw calls.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { Sky } from 'three/addons/objects/Sky.js';
 import { stoneGeometry } from './models';
-import { heightAt, LAB, mulberry32, noise3, POND, WATER_LEVEL, WORLD_RADIUS } from './terrain';
+import { insideBuilding } from './campus';
+import { heightAt, LAKE, mulberry32, noise3, pathAt, waterLevelAt, WORLD_RADIUS } from './terrain';
 
 export interface Blocker {
   x: number;
@@ -72,8 +73,8 @@ export function buildDecor(avoid: { x: number; z: number }[]): { group: THREE.Gr
   const blockers: Blocker[] = [];
   const rng = mulberry32(2026);
 
-  const dry = (x: number, z: number) => heightAt(x, z) > WATER_LEVEL + 0.35 && Math.hypot(x - POND.x, z - POND.z) > POND.r + 1;
-  const offPad = (x: number, z: number) => Math.hypot(x - LAB.x, z - LAB.z) > LAB.r + 2.5;
+  const dry = (x: number, z: number) => heightAt(x, z) > waterLevelAt(x, z) + 0.35 && Math.hypot(x - LAKE.x, z - LAKE.z) > LAKE.r + 4;
+  const offPad = (x: number, z: number) => !insideBuilding(x, z, 2);
   const clear = (x: number, z: number, gap: number) => avoid.every((a) => Math.hypot(a.x - x, a.z - z) > gap);
   const points = (n: number, ok: (x: number, z: number) => boolean, cx = 0, cz = 0, spread = WORLD_RADIUS - 6) => {
     const out: { x: number; z: number }[] = [];
@@ -86,7 +87,13 @@ export function buildDecor(avoid: { x: number; z: number }[]): { group: THREE.Gr
     }
     return out;
   };
-  const meadow = (x: number, z: number) => dry(x, z) && offPad(x, z) && x < 18 && Math.hypot(x - POND.x, z - POND.z) > POND.r + 5;
+  const steep = (x: number, z: number) => {
+    const h = heightAt(x, z);
+    return Math.hypot(heightAt(x + 0.6, z) - h, heightAt(x, z + 0.6) - h) / 0.6 > 0.5;
+  };
+  /** Lawn: dry, off the paths, out of buildings, not on a gorge wall. */
+  const meadow = (x: number, z: number) => dry(x, z) && !insideBuilding(x, z, 0.6) && pathAt(x, z) < 0.05 && !steep(x, z);
+  const quadLawn = (x: number, z: number) => x > -23 && x < 23 && z > -38 && z < 1;
 
   // --- grass tufts: three crossed blades each
   const blade = (angle: number) => {
@@ -98,7 +105,7 @@ export function buildDecor(avoid: { x: number; z: number }[]): { group: THREE.Gr
     return g;
   };
   const tuftGeo = mergeGeometries([blade(0), blade(1.05), blade(2.1)])!;
-  const tufts = points(9000, (x, z) => meadow(x, z) && clear(x, z, 0.5), 0, 0, 62);
+  const tufts = points(14000, (x, z) => meadow(x, z) && clear(x, z, 0.5), 0, 0, 88);
   group.add(
     instanced(
       tuftGeo,
@@ -109,7 +116,7 @@ export function buildDecor(avoid: { x: number; z: number }[]): { group: THREE.Gr
   );
 
   // --- wild flowers: stems and coloured heads
-  const flowers = points(900, (x, z) => meadow(x, z) && clear(x, z, 0.8), 0, 0, 55);
+  const flowers = points(1000, (x, z) => meadow(x, z) && !quadLawn(x, z) && clear(x, z, 0.8), 0, 0, 85);
   const stemGeo = new THREE.CylinderGeometry(0.004, 0.005, 0.26, 4);
   stemGeo.translate(0, 0.13, 0);
   group.add(instanced(stemGeo, new THREE.MeshStandardMaterial({ color: '#3f7a2c', roughness: 1 }), flowers.map((p) => placeMatrix(p.x, p.z, 1, 0))));
@@ -126,7 +133,7 @@ export function buildDecor(avoid: { x: number; z: number }[]): { group: THREE.Gr
     ),
   );
 
-  // --- pine trees: one merged geometry, a grove in the north-east plus scattered ones
+  // --- pine trees: one merged geometry, a grove on the lower west slope plus scattered ones off the campus hilltop
   const pineParts: THREE.BufferGeometry[] = [];
   const trunk = new THREE.CylinderGeometry(0.1, 0.18, 2.4, 7);
   trunk.translate(0, 1.2, 0);
@@ -138,8 +145,8 @@ export function buildDecor(avoid: { x: number; z: number }[]): { group: THREE.Gr
   }
   const pineGeo = mergeGeometries(pineParts)!;
   const pines = [
-    ...points(34, (x, z) => dry(x, z) && offPad(x, z) && clear(x, z, 2.5), 10, -28, 11),
-    ...points(22, (x, z) => dry(x, z) && offPad(x, z) && clear(x, z, 2.5) && Math.hypot(x, z) > 20, 0, 0, WORLD_RADIUS - 8),
+    ...points(34, (x, z) => dry(x, z) && offPad(x, z) && clear(x, z, 2.5), -58, 22, 13),
+    ...points(40, (x, z) => dry(x, z) && offPad(x, z) && clear(x, z, 2.5) && (x < -46 || z < -54 || z > 36 || x > 50), 0, 0, WORLD_RADIUS - 8),
   ];
   group.add(
     instanced(
@@ -173,7 +180,11 @@ export function buildDecor(avoid: { x: number; z: number }[]): { group: THREE.Gr
     oakParts.push(tinted(crown, hex, 0.75, 6));
   }
   const oakGeo = mergeGeometries(oakParts)!;
-  const oaks = points(24, (x, z) => meadow(x, z) && clear(x, z, 3) && Math.hypot(x, z) > 12 && z > -34, 0, 0, 60);
+  // big trees line the quad, a few more stand around campus
+  const oaks = [
+    ...[-34, -28, -22, -16, -10, -4].flatMap((z) => [{ x: -21, z }, { x: 21, z }]),
+    ...points(26, (x, z) => meadow(x, z) && !quadLawn(x, z) && clear(x, z, 3) && Math.hypot(x, z) > 12, 0, 0, 80),
+  ];
   const oakMesh = instanced(
     oakGeo,
     new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95 }),
@@ -190,8 +201,10 @@ export function buildDecor(avoid: { x: number; z: number }[]): { group: THREE.Gr
   const stoneMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9 });
   for (let variant = 0; variant < 3; variant++) {
     const spots = [
-      ...points(14, (x, z) => dry(x, z) && offPad(x, z) && clear(x, z, 1.8) && x > 14, 26, -12, 24),
-      ...points(5, (x, z) => dry(x, z) && offPad(x, z) && clear(x, z, 1.8), 0, 0, WORLD_RADIUS - 8),
+      ...points(4, (x, z) => dry(x, z) && offPad(x, z) && clear(x, z, 1.8), -26, -50, 8),
+      ...points(4, (x, z) => dry(x, z) && offPad(x, z) && clear(x, z, 1.8), 24, -51, 8),
+      ...points(6, (x, z) => dry(x, z) && offPad(x, z) && clear(x, z, 1.8), -60, -18, 16),
+      ...points(5, (x, z) => dry(x, z) && clear(x, z, 1.8), -10, -66, 30), // down in the gorge
     ];
     const rocks = instanced(
       stoneGeometry(20 + variant, 1),
@@ -207,25 +220,5 @@ export function buildDecor(avoid: { x: number; z: number }[]): { group: THREE.Gr
     group.add(rocks);
   }
 
-  // --- lab pad with lamp posts
-  const padY = heightAt(LAB.x, LAB.z);
-  const pad = new THREE.Mesh(new THREE.CylinderGeometry(LAB.r - 0.5, LAB.r, 0.3, 56), new THREE.MeshStandardMaterial({ color: '#9aa0a8', roughness: 0.75 }));
-  pad.position.set(LAB.x, padY - 0.1, LAB.z);
-  pad.receiveShadow = true;
-  group.add(pad);
-  const postMat = new THREE.MeshStandardMaterial({ color: '#3b4048', metalness: 0.6, roughness: 0.4 });
-  const lampMat = new THREE.MeshStandardMaterial({ color: '#d8ecff', emissive: '#bfe3ff', emissiveIntensity: 2.2 });
-  for (let i = 0; i < 6; i++) {
-    const a = (i / 6) * Math.PI * 2;
-    const px = LAB.x + Math.cos(a) * (LAB.r - 1.2);
-    const pz = LAB.z + Math.sin(a) * (LAB.r - 1.2);
-    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.09, 2.6, 8), postMat);
-    post.position.set(px, padY + 1.3, pz);
-    const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.17, 14, 10), lampMat);
-    lamp.position.set(px, padY + 2.7, pz);
-    post.castShadow = true;
-    group.add(post, lamp);
-    blockers.push({ x: px, z: pz, r: 0.15 });
-  }
   return { group, blockers };
 }

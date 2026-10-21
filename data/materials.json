@@ -1,10 +1,10 @@
 [
-  {"id": "beach_sand", "name": "Beach sand", "color": "#e8d9a0", "properties": {"purity": 0.6}, "where": "Tan sand mounds on the pond shore, west of the spawn"},
-  {"id": "quartz_sand", "name": "Quartz sand", "color": "#f4f1ea", "properties": {"purity": 0.95}, "where": "White crystal clusters in the rocky highlands, about 22 m east"},
-  {"id": "iron_ore", "name": "Iron ore", "color": "#8a5a44", "properties": {"strength": 0.7}, "where": "Dark rust-flecked rocks in the highlands, about 15 m east"},
-  {"id": "copper_ore", "name": "Copper ore", "color": "#c27d4a", "properties": {"conductivity": 0.9}, "where": "Plain grey rocks in the highlands, about 25 m east. Look at one with your hand lens (F) to find out what it is", "unlockedBy": "copper_veins"},
-  {"id": "plant_oil", "name": "Plant oil", "color": "#d9c84a", "properties": {"refractiveIndex": 1.47}, "where": "Sunflowers north-west of the spawn. Look at a sunflower seed with a compound microscope (F) to find the oil", "unlockedBy": "seed_oil"},
+  {"id": "beach_sand", "name": "Beach sand", "color": "#e8d9a0", "properties": {"purity": 0.6}, "where": "Tan sand mounds on the south shore of the lake, just ahead of where you start"},
+  {"id": "quartz_sand", "name": "Quartz sand", "color": "#f4f1ea", "properties": {"purity": 0.95}, "where": "White crystal clusters on the rim of the gorge, north-west behind the west row of halls"},
+  {"id": "iron_ore", "name": "Iron ore", "color": "#8a5a44", "properties": {"strength": 0.7}, "where": "Dark rust-flecked rocks on the rim of the gorge, west of the lake near the waterfall"},
+  {"id": "copper_ore", "name": "Copper ore", "color": "#c27d4a", "properties": {"conductivity": 0.9}, "where": "Plain grey rocks on the west slope, west below the clock tower. Look at one with your hand lens (F) to find out what it is", "unlockedBy": "copper_veins"},
+  {"id": "plant_oil", "name": "Plant oil", "color": "#d9c84a", "properties": {"refractiveIndex": 1.47}, "where": "Sunflowers in the middle of the quad lawn, south-west of the lake. Look at a sunflower seed with a compound microscope (F) to find the oil", "unlockedBy": "seed_oil"},
   {"id": "leaf_fiber", "name": "Leaf fiber", "color": "#5fa05a", "properties": {}},
-  {"id": "tungsten_ore", "name": "Tungsten ore", "color": "#4a4f57", "properties": {"meltingPointC": 3422}, "where": "Heavy grey rocks at the far end of the highlands, about 31 m east. Look at one with a high-quality microscope (F) to see what is inside", "unlockedBy": "tungsten_grains"},
-  {"id": "resin", "name": "Resin", "color": "#c8742a", "properties": {"leakRate": 0.1}, "where": "Amber-dripping stumps in the pine grove, north-east, about 25 m away"}
+  {"id": "tungsten_ore", "name": "Tungsten ore", "color": "#4a4f57", "properties": {"meltingPointC": 3422}, "where": "Heavy grey rocks at the foot of the west slope, far to the west. Look at one with a high-quality microscope (F) to see what is inside", "unlockedBy": "tungsten_grains"},
+  {"id": "resin", "name": "Resin", "color": "#c8742a", "properties": {"leakRate": 0.1}, "where": "Amber-dripping stumps among the pines on the lower west slope, south-west"}
 ]

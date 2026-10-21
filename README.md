@@ -54,7 +54,7 @@ Simplified physics is labelled in comments next to the formula.
 | E | Gather the item you are aiming at (a ring and a prompt show what it is) |
 | C | Craft the next ready step of your goal (no mouse needed) |
 | Tab | Menu: inventory, all recipes, guide, sound (G jumps straight to the guide box) |
-| F | Look at the aimed sample through your newest instrument (F or Esc to leave) |
+| F | Look at the aimed sample through your newest portable instrument (F or Esc to leave). Once you own the electron microscope, this also takes a bit of the sample along; F at the electron microscope in the science lab puts it in |
 | 1, 2, 3… | In the eyepiece: switch to another microscope you own, to compare (or click its button) |
 | I | Show or hide the inventory box (bottom right: materials, parts, microscopes) |
 | Wheel or slider | Focus (compound microscope and up) |
@@ -71,23 +71,26 @@ The nearest source of the material you need is shown by an **arrow and distance*
 
 | To build | You need | Identify it with | Look (F) at |
 | --- | --- | --- | --- |
-| Compound microscope | Copper (for the lamp) | Hand lens: copper veins | A plain grey rock in the highlands |
+| Compound microscope | Copper (for the lamp) | Hand lens: copper veins | A plain grey rock on the west slope |
 | High-quality microscope | Plant oil (immersion oil) | Compound microscope: oil droplets | A sunflower seed |
-| Electron microscope | Tungsten (the filament) | High-quality microscope: tungsten grains | A heavy grey rock at the far end of the highlands |
+| Electron microscope | Tungsten (the filament) | High-quality microscope: tungsten grains | A heavy grey rock at the foot of the west slope |
 
 Ask the guide with **G**: "where do I find quartz sand?", "how do I make glass?" or "what next?".
 
 ## The world
 
-A walkable landscape, about 150 m across, in four areas. Everything is procedural: terrain, models and textures are generated in code, with no asset files.
+A university campus: about 190 m across (north is up the quad, -z). Everything is procedural: terrain, buildings, models and textures are generated in code (`src/world/terrain.ts`, `campus.ts`), with no asset files.
 
 | Where | What is there |
 | --- | --- |
-| Meadow (spawn, centre) | Leafy plants, flowers, a butterfly wing on a stone, sunflowers (plant oil), grass and oaks |
-| Pond (west) | Water to look at, sand mounds on the eastern shore |
-| Highlands, the mine (east) | Iron, copper and tungsten rocks, quartz crystals, boulders |
-| Pine grove (north-east) | Resin on tree stumps |
-| Lab (far north) | A flat pad with lamp posts and a glowing crystal |
+| Quad (centre) | Lawn with crossing paths, a domed hall at the north end, three stone halls to the west, a columned hall to the east, bronze statues of Antonie van Leeuwenhoek (the first microbes, through a single lens) and Ernst Ruska (the electron microscope) facing each other. Leafy plants, flowers, a butterfly wing, sunflowers (plant oil) |
+| Clock tower (south-west) | Beside the library, at the top of the west slope; the clocks show your local time |
+| West slope | Falls away about 8 m to the west: copper rocks, tungsten rocks at its foot, pines with resin stumps |
+| Gorge (north) | Iron rocks by the waterfall and quartz crystals farther west on its rim; walk down to the creek |
+| Lake (north-east, where you start) | Water to look at, sand on the south shore right ahead of you, a couple of leafy plants; the waterfall spills from it into the gorge |
+| Science building (south-east) | The glass ground floor is the electron microscopy lab; the glowing crystal stands outside the door |
+
+**The electron microscope stays in the lab.** Once built it appears in the science lab, and it only works there. Look (F) at any sample outside (you see it through your best light microscope) and you take a bit of it along; the HUD shows an arrow to the lab. Walk in through the west door, aim at the microscope and press F. Light microscopes work anywhere.
 
 The top-left corner shows a compass heading and your x, z position.
 
@@ -104,11 +107,11 @@ The top-left corner shows a compass heading and your x, z position.
 
 Open `http://localhost:5173/?demo`. The LLM prompt-to-world step of the full pitch is not built yet; see DESIGN.md.
 
-1. **Blurry world (0:00).** Walk to a leafy plant (a few steps north-west of the spawn), aim at it and press F with no instrument. The side veins are fuzzy and the fine veins are gone. Say: "Everything we can see is limited by the eye." Press F or Esc to leave.
-2. **Build a hand lens (0:45).** Follow the goal card: gather 2 sand mounds (by the pond, west) and 1 iron rock (the highlands, east) with E, then press C four times. Look at the leaf again: the vein network is sharp and the Microdex toast appears. The banner says the hand lens resolves about 30 µm, so the leaf cells are still blurred.
-3. **Discover something to unlock the next tier (1:45).** The goal card now says to identify copper. Walk east to a plain grey rock and press F: the hand lens shows green copper veins, the rocks turn into copper ore and E works. Say: "A better instrument needs something only the last one could see." Press K to restock the rest, press C through the compound microscope's crafts, then look at the pond water at 100× (alga threads) and 800× (the banner: more magnification only makes a bigger blur). Ask the guide "why is it blurry?" (press G).
-4. **High-quality optics (3:00).** Look at a sunflower seed with the compound microscope to spot the oil droplets (this unlocks plant oil), then craft the high-quality microscope. Look at the pond at 1000× with oil immersion: bacteria rods appear. Virus particles stay blurred; the banner explains the diffraction limit and points to electrons.
-5. **Electron showpiece (3:45).** Look at a heavy grey rock with the high-quality microscope to spot tungsten grains, then craft the electron microscope. Look at the pond at 150,000×: a virus, then watch the beam damage warning as the dose builds (zoom out or close the eyepiece to reset). Walk far north to the lab pad and look at the glowing crystal at 500,000×: grains, then 2,000,000×: the atomic lattice. Press M to show the Microdex.
+1. **Blurry world (0:00).** Turn left to the leafy plants a few steps west of where you start, aim at it and press F with no instrument. The side veins are fuzzy and the fine veins are gone. Say: "Everything we can see is limited by the eye." Press F or Esc to leave.
+2. **Build a hand lens (0:45).** Follow the goal card: gather 2 sand mounds (straight ahead on the lake shore) and 1 iron rock (the gorge rim by the waterfall, to the west) with E, then press C four times. Look at the leaf again: the vein network is sharp and the Microdex toast appears. The banner says the hand lens resolves about 30 µm, so the leaf cells are still blurred.
+3. **Discover something to unlock the next tier (1:45).** The goal card now says to identify copper. Walk down the west slope to a plain grey rock and press F: the hand lens shows green copper veins, the rocks turn into copper ore and E works. Say: "A better instrument needs something only the last one could see." Press K to restock the rest, press C through the compound microscope's crafts, then look at the lake water at 100× (alga threads) and 800× (the banner: more magnification only makes a bigger blur). Ask the guide "why is it blurry?" (press G).
+4. **High-quality optics (3:00).** Look at a sunflower seed with the compound microscope to spot the oil droplets (this unlocks plant oil), then craft the high-quality microscope. Look at the lake at 1000× with oil immersion: bacteria rods appear. Virus particles stay blurred; the banner explains the diffraction limit and points to electrons.
+5. **Electron showpiece (3:45).** Look at a heavy grey rock with the high-quality microscope to spot tungsten grains, then craft the electron microscope. Look (F) at the lake to take a water sample, carry it to the science lab and press F at the electron microscope; at 150,000×: a virus, then watch the beam damage warning as the dose builds (zoom out or close the eyepiece to reset). Then take a piece of the glowing crystal outside the lab door back in: 500,000× shows grains, 2,000,000× the atomic lattice. Press M to show the Microdex.
 
 Pitch points: the instrument is earned by building it; every upgrade has a numeric reason (shown in the HUD: resolution, NA, dose); all content is JSON in `data/`.
 

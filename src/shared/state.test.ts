@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { loadGameData } from './data';
 import type { GameEvents } from './events';
 import { scopeFromInventory } from './sim/scope';
-import { craft, createGame, discover, gather, selectScope, setZoom } from './state';
+import { craft, createGame, discover, gather, selectScope, setInLab, setZoom } from './state';
 
 describe('state actions', () => {
   it('sand → glass → lens, iron → frame → hand lens raises the tier and emits events', () => {
@@ -86,14 +86,24 @@ describe('event order', () => {
 });
 
 describe('tier 5 crafting', () => {
-  it('tungsten, resin, iron and copper make an electron microscope at tier 5', () => {
+  it('tungsten, resin, iron and copper make an electron microscope at tier 5, usable only in the lab', () => {
     const ctx = createGame(loadGameData());
+    ctx.state.inventory.hand_lens = 1;
     const have = { tungsten_ore: 1, resin: 2, iron_ore: 4, copper_ore: 4 };
     for (const [id, n] of Object.entries(have)) gather(ctx, id, n);
+    const tiers: number[] = [];
+    ctx.bus.on('tierChanged', ({ tier }) => tiers.push(tier));
     for (const id of ['filament', 'vacuum_seal', 'vacuum_chamber', 'magnetic_lens', 'magnetic_lens', 'electron_microscope']) {
       expect(craft(ctx, id), id).toBe(true);
     }
+    expect(tiers).toEqual([5]); // built, even though it is far away in the lab
+    expect(ctx.state.scope.tier).toBe(1); // outside the lab you still look through the hand lens
+    expect(selectScope(ctx, 5)).toBe(false);
+    setInLab(ctx, true);
     expect(ctx.state.scope.tier).toBe(5);
+    setInLab(ctx, false);
+    expect(ctx.state.scope.tier).toBe(1);
+    setInLab(ctx, true);
     expect(ctx.state.scope.steps.map((s) => s.magnification)).toEqual([50_000, 150_000, 500_000, 2_000_000]);
   });
 });

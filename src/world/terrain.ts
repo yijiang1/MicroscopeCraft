@@ -1,13 +1,31 @@
-// The ground: rolling hills, a pond basin, rocky highlands (the mine, to the east) and a flat lab pad (north).
+// The ground: a university campus on a flat hilltop, with a quad and its paths, a long slope falling away to
+// the west, a lake to the north-east, and a gorge running west from the waterfall at the lake's outlet. North is -z.
 // heightAt() is the single source of truth: the mesh, the player's feet and every placed object read it.
 import * as THREE from 'three';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 
-export const WORLD_RADIUS = 78;
-export const POND = { x: -24, z: -12, r: 9 };
-export const LAB = { x: 0, z: -48, r: 9 };
-export const WATER_LEVEL = -0.9;
-const MINE_X0 = 8; // highlands rise east of this
+export const WORLD_RADIUS = 95;
+const CAMPUS_Y = 0.5;
+export const LAKE = { x: 48, z: -66, r: 12 }; 
+export const WATER_LEVEL = -0.9; // the lake surface
+/** The waterfall: the lake spills over this lip (an x) into the gorge, at the west edge of the lake's water. */
+export const FALLS_X = LAKE.x - LAKE.r - 3;
+const SLOPE_X = -44; // the slope starts falling west of here...
+const SLOPE_DROP = 8; // ...by this much over 30 m
+const GORGE = { bed: 3, top: 10 }; // half-widths of the creek bed and of the gorge at its rim
+
+/** Centre line of the gorge (a z) at x: a gentle meander that starts at the falls. */
+export const gorgeZ = (x: number) => LAKE.z + 3 * Math.sin((x - FALLS_X) * 0.06);
+/** The creek's surface below the falls, dropping gently westward. */
+export const creekY = (x: number) => -8.5 - 0.03 * (FALLS_X - x);
+
+/** Walkways (segments x0, z0, x1, z1): the quad's crossing paths and the ways to the tower and the science building. */
+const PATHS: [number, number, number, number][] = [
+  [-22, -36, 22, -2], [22, -36, -22, -2], // the quad's diagonals
+  [0, -38, 0, 6], [-22, -19, 22, -19], // and its cross
+  [-36, 5, 22, 5], // south walkway, the clock tower to the east
+  [22, -2, 22, 20], [22, 20, 25, 20], // down to the science building door
+];
 
 const perlin = new ImprovedNoise();
 
@@ -45,41 +63,64 @@ export const smoothstep = (a: number, b: number, x: number) => {
 };
 const mix = (a: number, b: number, t: number) => a + (b - a) * t;
 
+/** 1 on the paths, fading to 0 a little past their edges. */
+export function pathAt(x: number, z: number): number {
+  let d = Infinity;
+  for (const [x0, z0, x1, z1] of PATHS) {
+    const dx = x1 - x0;
+    const dz = z1 - z0;
+    const t = clamp01(((x - x0) * dx + (z - z0) * dz) / (dx * dx + dz * dz));
+    d = Math.min(d, Math.hypot(x - x0 - t * dx, z - z0 - t * dz));
+  }
+  return 1 - smoothstep(0.9, 1.3, d);
+}
+
 export function heightAt(x: number, z: number): number {
-  let h = 1.8 * fbm2(x * 0.02, z * 0.02) + 0.25 * fbm2(x * 0.15 + 10, z * 0.15, 2);
-  h += 4.5 * smoothstep(MINE_X0, MINE_X0 + 26, x) * (0.6 + 0.4 * fbm2(x * 0.05 + 3, z * 0.05, 3)); // highlands
-  h = mix(h, 0.4, 1 - smoothstep(6, 16, Math.hypot(x, z))); // gentle meadow around the spawn
-  const dPond = Math.hypot(x - POND.x, z - POND.z);
-  h -= 3.4 * (1 - smoothstep(POND.r - 2, POND.r + 7, dPond)); // pond bowl
-  const dLab = Math.hypot(x - LAB.x, z - LAB.z);
-  h = mix(h, 0.5, 1 - smoothstep(LAB.r, LAB.r + 8, dLab)); // flat pad for the lab
+  let h = CAMPUS_Y + 1.6 * fbm2(x * 0.02, z * 0.02) + 0.25 * fbm2(x * 0.15 + 10, z * 0.15, 2);
+  // flat hilltop for the quads and buildings, and flat ground around the lake
+  const outside = (lo: number, hi: number, v: number) => Math.max(lo - v, v - hi, 0);
+  const core = (1 - smoothstep(0, 8, outside(-46, 48, x))) * (1 - smoothstep(0, 8, outside(-54, 34, z)));
+  const dLake = Math.hypot(x - LAKE.x, z - LAKE.z);
+  h = mix(h, CAMPUS_Y, Math.max(core, 1 - smoothstep(LAKE.r + 8, LAKE.r + 18, dLake)));
+  h -= SLOPE_DROP * smoothstep(SLOPE_X, SLOPE_X - 30, x); // the west slope
+  h -= 3.4 * (1 - smoothstep(LAKE.r - 2, LAKE.r + 5, dLake)); // lake bowl
+  if (x < LAKE.x) {
+    // The gorge: a shallow outlet channel from the lake, then a sheer drop at the falls
+    const bed = mix(creekY(x) - 0.6, -2, smoothstep(FALLS_X - 1.2, FALLS_X, x));
+    h = Math.min(h, mix(h, bed, 1 - smoothstep(GORGE.bed, GORGE.top, Math.abs(z - gorgeZ(x)))));
+  }
   const r = Math.hypot(x, z);
-  if (r > 60) h += 0.014 * (r - 60) ** 2; // hills rise toward the edge and hide the end of the map
+  if (r > WORLD_RADIUS - 18) h += 0.014 * (r - WORLD_RADIUS + 18) ** 2; // hills rise toward the edge and hide the end of the map
   return h;
+}
+
+/** Height of the water surface over (x, z): the lake, the creek, or -Infinity where there is no water. */
+export function waterLevelAt(x: number, z: number): number {
+  if (Math.hypot(x - LAKE.x, z - LAKE.z) < LAKE.r + 3) return WATER_LEVEL;
+  if (x < FALLS_X && Math.abs(z - LAKE.z) < 7) return creekY(x);
+  return -Infinity;
 }
 
 /** Tiny seeded value used to roughen colours. */
 const speckle = (x: number, z: number) => 0.5 + 0.5 * noise3(x * 0.9, 1.3, z * 0.9, 2);
 
-/** Ground colour: meadow grass, beach sand by the pond, bare rock in the highlands and on steep slopes, concrete at the lab. */
+/** Ground colour: lawn, sand on the lake shore, shale on steep slopes and gorge walls, stone paths. */
 export function groundColor(x: number, z: number, h: number, out: THREE.Color): THREE.Color {
   const slope = Math.hypot(heightAt(x + 0.6, z) - h, heightAt(x, z + 0.6) - h) / 0.6;
   const patch = speckle(x * 0.25, z * 0.25);
   out.set('#4f7f33').lerp(new THREE.Color('#86a64a'), patch);
   out.lerp(new THREE.Color('#9a9a4e'), 0.35 * smoothstep(0.55, 0.9, speckle(x * 0.07 + 40, z * 0.07)));
-  const dPond = Math.hypot(x - POND.x, z - POND.z);
-  out.lerp(new THREE.Color('#d6c28c'), 1 - smoothstep(POND.r + 1, POND.r + 5, dPond));
-  const rocky = Math.max(smoothstep(MINE_X0 + 2, MINE_X0 + 14, x) * 0.85, smoothstep(0.45, 0.9, slope));
-  out.lerp(new THREE.Color('#7a7268').lerp(new THREE.Color('#5d574f'), speckle(x * 0.6, z * 0.6)), rocky);
-  const dLab = Math.hypot(x - LAB.x, z - LAB.z);
-  out.lerp(new THREE.Color('#8b9097'), 1 - smoothstep(LAB.r - 1, LAB.r + 2, dLab));
+  const dLake = Math.hypot(x - LAKE.x, z - LAKE.z);
+  out.lerp(new THREE.Color('#d6c28c'), 1 - smoothstep(LAKE.r + 3, LAKE.r + 8, dLake));
+  out.lerp(new THREE.Color('#6d665d').lerp(new THREE.Color('#4f4a44'), speckle(x * 0.6, z * 0.6)), smoothstep(0.45, 0.9, slope));
+  out.lerp(new THREE.Color('#c9c1b0'), pathAt(x, z));
   out.multiplyScalar(0.92 + 0.16 * speckle(x * 3, z * 3));
   return out;
 }
 
 export function buildTerrain(): THREE.Mesh {
   const size = (WORLD_RADIUS + 12) * 2;
-  const seg = 220;
+  const seg = 260;
   const geo = new THREE.PlaneGeometry(size, size, seg, seg);
   geo.rotateX(-Math.PI / 2);
   const pos = geo.attributes.position as THREE.BufferAttribute;
@@ -100,15 +141,22 @@ export function buildTerrain(): THREE.Mesh {
   return mesh;
 }
 
-/** Pond surface. Aimable: looking at it is how you sample pond water. */
-export function buildWater(): THREE.Mesh {
-  const geo = new THREE.CircleGeometry(POND.r + 6, 64);
-  geo.rotateX(-Math.PI / 2);
-  const mesh = new THREE.Mesh(
-    geo,
-    new THREE.MeshPhysicalMaterial({ color: '#2a6f9e', transparent: true, opacity: 0.78, roughness: 0.04, metalness: 0, clearcoat: 1 }),
-  );
-  mesh.position.set(POND.x, WATER_LEVEL, POND.z);
-  mesh.receiveShadow = true;
-  return mesh;
+/** The lake and the creek. Aimable: looking at either is how you sample the water. */
+export function buildWater(): THREE.Group {
+  const mat = new THREE.MeshPhysicalMaterial({ color: '#2a6f9e', transparent: true, opacity: 0.78, roughness: 0.04, metalness: 0, clearcoat: 1 });
+  const lake = new THREE.Mesh(new THREE.CircleGeometry(LAKE.r + 3, 64).rotateX(-Math.PI / 2), mat);
+  lake.position.set(LAKE.x, WATER_LEVEL, LAKE.z);
+  // The creek: one long strip that follows creekY down the gorge; the gorge walls hide its edges.
+  const x0 = -WORLD_RADIUS - 10;
+  const x1 = FALLS_X - 0.6;
+  const geo = new THREE.PlaneGeometry(x1 - x0, 14, 40, 1).rotateX(-Math.PI / 2);
+  const pos = geo.attributes.position as THREE.BufferAttribute;
+  for (let i = 0; i < pos.count; i++) pos.setY(i, creekY(pos.getX(i) + (x0 + x1) / 2));
+  geo.computeVertexNormals();
+  const creek = new THREE.Mesh(geo, mat);
+  creek.position.set((x0 + x1) / 2, 0, LAKE.z);
+  lake.receiveShadow = creek.receiveShadow = true;
+  const group = new THREE.Group();
+  group.add(lake, creek);
+  return group;
 }

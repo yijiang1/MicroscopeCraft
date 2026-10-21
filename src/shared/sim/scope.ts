@@ -28,10 +28,13 @@ export function scopeParamsFromSpec(spec: ScopeSpec, step = 0): ScopeParams {
   };
 }
 
-/** Microscopes in the inventory, lowest tier first. */
-export function ownedScopes(inventory: Record<string, number>, data: Pick<GameData, 'recipes'>) {
+/** Electron microscopes (tier 5 and up) stay installed in the lab; light microscopes go wherever the player goes. */
+export const FIXED_TIER = 5;
+
+/** Microscopes in the inventory, lowest tier first. Outside the lab (inLab false) only the portable ones. */
+export function ownedScopes(inventory: Record<string, number>, data: Pick<GameData, 'recipes'>, inLab = true) {
   return data.recipes
-    .filter((r): r is Recipe & { scope: ScopeSpec } => !!r.scope && (inventory[r.output.itemId] ?? 0) > 0)
+    .filter((r): r is Recipe & { scope: ScopeSpec } => !!r.scope && (inventory[r.output.itemId] ?? 0) > 0 && (inLab || r.scope.tier < FIXED_TIER))
     .sort((a, b) => a.scope.tier - b.scope.tier);
 }
 
@@ -41,8 +44,9 @@ export function scopeFromInventory(
   data: Pick<GameData, 'recipes'>,
   step = 0,
   choice: number | null = null,
+  inLab = true,
 ): ScopeParams {
-  const owned = ownedScopes(inventory, data);
+  const owned = ownedScopes(inventory, data, inLab);
   const pick = owned.find((r) => r.scope.tier === choice) ?? owned.at(-1);
   return pick ? scopeParamsFromSpec(pick.scope, step) : NAKED_EYE;
 }
