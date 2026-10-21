@@ -2,6 +2,8 @@
 
 A Minecraft-style browser game: gather materials, craft parts, build microscopes (hand lens → compound → high-quality optics), and look through them to see smaller worlds. Game design: [DESIGN.md](DESIGN.md) (source of truth).
 
+Built for the [LLM Hackathon](https://llmhackathon.github.io/).
+
 TypeScript + Vite. Three.js for the 3D world, a plain 2D canvas for the microscope view.
 
 ## Run
