@@ -25,11 +25,18 @@ export const MaterialSchema = z.object({
 });
 export type Material = z.infer<typeof MaterialSchema>;
 
+/** One selectable magnification setting (objective + eyepiece). NA belongs to the objective, so it changes with the step. */
+export const ZoomStepSchema = z.object({
+  label: z.string(),
+  magnification: z.number().positive(),
+  NA: z.number().positive(),
+});
+export type ZoomStep = z.infer<typeof ZoomStepSchema>;
+
 /** What owning a crafted item gives the player: a microscope. Highest tier owned wins. */
 export const ScopeSpecSchema = z.object({
   tier: TierSchema,
-  magnification: z.number().positive(),
-  NA: z.number().positive(),
+  steps: z.array(ZoomStepSchema).min(1),
   /** Lens-defect blur on top of diffraction, µm. */
   dLensUm: z.number().nonnegative(),
   contrastBoost: z.number().positive().default(1),
@@ -110,9 +117,12 @@ export const WorldSpecSchema = z.object({
 });
 export type WorldSpec = z.infer<typeof WorldSpecSchema>;
 
-/** Derived from the best microscope owned; recomputed by state.ts whenever the inventory changes. */
+/** Derived from the best microscope owned and the chosen zoom step; recomputed by state.ts. */
 export interface ScopeParams {
   tier: Tier;
+  steps: ZoomStep[];
+  /** Index into steps; magnification and NA below are steps[step]. */
+  step: number;
   magnification: number;
   NA: number;
   wavelengthUm: number;

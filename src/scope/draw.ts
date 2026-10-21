@@ -57,13 +57,13 @@ const veins: Drawer = (g, f) => {
 };
 
 /** Walk the grid cells that overlap the view; skip the whole layer if there would be too many. */
-function forGrid(v: View, step: number, fn: (i: number, j: number, cx: number, cy: number) => void) {
+function forGrid(v: View, step: number, fn: (i: number, j: number, cx: number, cy: number) => void, stepY = step) {
   const i0 = Math.floor(v.x0 / step);
   const i1 = Math.ceil(v.x1 / step);
-  const j0 = Math.floor(v.y0 / step);
-  const j1 = Math.ceil(v.y1 / step);
+  const j0 = Math.floor(v.y0 / stepY);
+  const j1 = Math.ceil(v.y1 / stepY);
   if ((i1 - i0) * (j1 - j0) > MAX_ITEMS) return;
-  for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) fn(i, j, (i + (j % 2 ? 0.5 : 0)) * step, j * step);
+  for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) fn(i, j, (i + (j % 2 ? 0.5 : 0)) * step, j * stepY);
 }
 
 const cells: Drawer = (g, f, v) => {
@@ -97,11 +97,32 @@ const grains: Drawer = (g, f, v) => {
   });
 };
 
-/** Stand-in for pollen, algae, rods, hair and lattices until someone draws them properly. */
+/** Spirogyra-style filaments: rows of long cells, each with a spiral chloroplast. */
+const algae: Drawer = (g, f, v) => {
+  const seed = seedOf(f.id);
+  const w = f.sizeUm * 2;
+  const h = f.sizeUm;
+  forGrid(v, w * 1.05, (i, j, cx, cy) => {
+    g.fillStyle = '#2f6b32';
+    g.beginPath();
+    g.roundRect(cx - w / 2, cy - h / 2, w, h, h * 0.3);
+    g.fill();
+    g.strokeStyle = `hsl(${105 + noise(i, j, seed) * 20} 70% 60%)`;
+    g.lineWidth = h * 0.12;
+    g.beginPath();
+    for (let k = -1; k <= 1; k++) {
+      g.moveTo(cx + k * h - h * 0.5, cy + h * 0.4);
+      g.lineTo(cx + k * h + h * 0.5, cy - h * 0.4);
+    }
+    g.stroke();
+  }, h * 1.4);
+};
+
+/** Stand-in for pollen, rods, hair and lattices until someone draws them properly. */
 const dots: Drawer = (g, f, v) => {
   const seed = seedOf(f.id);
   g.fillStyle = '#a8e6a1';
-  forGrid(v, f.sizeUm * 3, (i, j, cx, cy) => {
+  forGrid(v, f.sizeUm * (f.drawing === 'rods' ? 2.5 : 3), (i, j, cx, cy) => {
     g.beginPath();
     g.ellipse(cx, cy, f.sizeUm * 0.5, f.sizeUm * (f.drawing === 'rods' ? 0.2 : 0.5), noise(i, j, seed) * Math.PI, 0, Math.PI * 2);
     g.fill();
@@ -109,5 +130,5 @@ const dots: Drawer = (g, f, v) => {
 };
 
 export const DRAWERS: Record<Drawing, Drawer> = {
-  veins, cells, grains, pollen: dots, rods: dots, algae: dots, hair: dots, lattice: dots,
+  veins, cells, grains, pollen: dots, rods: dots, algae, hair: dots, lattice: dots,
 };

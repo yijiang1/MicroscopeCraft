@@ -21,8 +21,17 @@ export function createGame(data: GameData, bus: Bus = createBus()): GameContext 
 
 function refreshScope({ data, state, bus }: GameContext) {
   const before = state.scope.tier;
-  state.scope = scopeFromInventory(state.inventory, data);
+  // A new best microscope starts at its lowest zoom step.
+  state.scope = scopeFromInventory(state.inventory, data, 0);
   if (state.scope.tier !== before) bus.emit('tierChanged', { tier: state.scope.tier });
+}
+
+/** Switch the current microscope to another zoom step (clamped to the steps it has). */
+export function setZoom(ctx: GameContext, step: number) {
+  const next = scopeFromInventory(ctx.state.inventory, ctx.data, step);
+  if (next.step === ctx.state.scope.step) return;
+  ctx.state.scope = next;
+  ctx.bus.emit('zoomChanged', { step: next.step });
 }
 
 export function gather(ctx: GameContext, itemId: string, count = 1) {

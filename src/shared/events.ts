@@ -10,6 +10,8 @@ export interface GameEvents {
   itemCrafted: { itemId: string };
   discoveryUnlocked: { id: string };
   tierChanged: { tier: Tier };
+  /** Player picked another zoom step on the current microscope. */
+  zoomChanged: { step: number };
   /** ui → guide: the player asked the guide a question. */
   guideAsked: { question: string };
   /** guide → ui: the guide's answer. */

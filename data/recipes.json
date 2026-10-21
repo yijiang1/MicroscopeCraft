@@ -18,6 +18,80 @@
     "id": "hand_lens", "name": "Hand lens", "station": "bench", "color": "#7fb2c4",
     "inputs": [{ "itemId": "lens", "count": 1 }, { "itemId": "frame", "count": 1 }],
     "output": { "itemId": "hand_lens", "count": 1 },
-    "scope": { "tier": 1, "magnification": 10, "NA": 0.1, "dLensUm": 30 }
+    "scope": { "tier": 1, "dLensUm": 30, "steps": [{ "label": "10×", "magnification": 10, "NA": 0.1 }] }
+  },
+
+  {
+    "id": "tube", "name": "Iron tube", "station": "bench", "color": "#7a7a7a",
+    "inputs": [{ "itemId": "iron_ore", "count": 1 }],
+    "output": { "itemId": "tube", "count": 1 }
+  },
+  {
+    "id": "focus_knob", "name": "Focus knob", "station": "bench", "color": "#b0906a",
+    "inputs": [{ "itemId": "iron_ore", "count": 1 }],
+    "output": { "itemId": "focus_knob", "count": 1 }
+  },
+  {
+    "id": "light_source", "name": "Lamp", "station": "bench", "color": "#ffe9a0",
+    "inputs": [{ "itemId": "copper_ore", "count": 1 }, { "itemId": "glass", "count": 1 }],
+    "output": { "itemId": "light_source", "count": 1 }
+  },
+  {
+    "id": "compound_microscope", "name": "Compound microscope", "station": "bench", "color": "#5b8fd0",
+    "inputs": [
+      { "itemId": "lens", "count": 2 },
+      { "itemId": "tube", "count": 1 },
+      { "itemId": "light_source", "count": 1 },
+      { "itemId": "focus_knob", "count": 1 }
+    ],
+    "output": { "itemId": "compound_microscope", "count": 1 },
+    "scope": {
+      "tier": 2, "dLensUm": 1.0,
+      "steps": [
+        { "label": "40× (4× objective)", "magnification": 40, "NA": 0.1 },
+        { "label": "100× (10× objective)", "magnification": 100, "NA": 0.25 },
+        { "label": "400× (40× objective)", "magnification": 400, "NA": 0.55 },
+        { "label": "800× (40× + 20× eyepiece)", "magnification": 800, "NA": 0.55 }
+      ]
+    }
+  },
+
+  {
+    "id": "quartz_glass", "name": "Quartz glass", "station": "furnace", "color": "#e6f4f8",
+    "inputs": [{ "itemId": "quartz_sand", "count": 2 }],
+    "output": { "itemId": "quartz_glass", "count": 1 }
+  },
+  {
+    "id": "precision_lens", "name": "Precision lens", "station": "bench", "color": "#d4eef5",
+    "inputs": [{ "itemId": "quartz_glass", "count": 1 }],
+    "output": { "itemId": "precision_lens", "count": 1 }
+  },
+  {
+    "id": "condenser", "name": "Condenser", "station": "bench", "color": "#c8d8e0",
+    "inputs": [{ "itemId": "quartz_glass", "count": 1 }, { "itemId": "copper_ore", "count": 1 }],
+    "output": { "itemId": "condenser", "count": 1 }
+  },
+  {
+    "id": "immersion_oil", "name": "Immersion oil", "station": "bench", "color": "#e0cf55",
+    "inputs": [{ "itemId": "plant_oil", "count": 1 }],
+    "output": { "itemId": "immersion_oil", "count": 1 }
+  },
+  {
+    "id": "hq_microscope", "name": "High-quality microscope", "station": "bench", "color": "#3a6fc0",
+    "inputs": [
+      { "itemId": "compound_microscope", "count": 1 },
+      { "itemId": "precision_lens", "count": 2 },
+      { "itemId": "condenser", "count": 1 },
+      { "itemId": "immersion_oil", "count": 1 }
+    ],
+    "output": { "itemId": "hq_microscope", "count": 1 },
+    "scope": {
+      "tier": 3, "dLensUm": 0.05,
+      "steps": [
+        { "label": "100× (10× objective)", "magnification": 100, "NA": 0.25 },
+        { "label": "400× (40× objective)", "magnification": 400, "NA": 0.75 },
+        { "label": "1000× (100× oil immersion)", "magnification": 1000, "NA": 1.3 }
+      ]
+    }
   }
 ]

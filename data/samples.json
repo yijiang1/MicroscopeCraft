@@ -1,18 +1,74 @@
 [
   {
-    "id": "leaf", "name": "Leaf", "worldObject": "leaf", "biome": "meadow",
+    "id": "leaf",
+    "name": "Leaf",
+    "worldObject": "leaf",
+    "biome": "meadow",
     "features": [
-      { "id": "leaf_veins", "name": "Leaf veins", "sizeUm": 40, "contrast": 0.5, "drawing": "veins",
-        "blurb": "Veins carry water in and sugar out of the leaf. Fine veins branch until no cell is far from one." },
-      { "id": "leaf_cells", "name": "Leaf cells", "sizeUm": 15, "contrast": 0.3, "drawing": "cells",
-        "blurb": "Each green box is a living cell packed with chloroplasts. Cell walls give the leaf its tiled look." }
+      {
+        "id": "leaf_veins",
+        "name": "Leaf veins",
+        "sizeUm": 40,
+        "contrast": 0.5,
+        "drawing": "veins",
+        "blurb": "Veins carry water in and sugar out of the leaf. Fine veins branch until no cell is far from one."
+      },
+      {
+        "id": "leaf_cells",
+        "name": "Leaf cells",
+        "sizeUm": 15,
+        "contrast": 0.3,
+        "drawing": "cells",
+        "blurb": "Each green box is a living cell packed with chloroplasts. Cell walls give the leaf its tiled look."
+      }
     ]
   },
   {
-    "id": "sand_grain", "name": "Sand grain", "worldObject": "sand_grain", "biome": "meadow",
+    "id": "sand_grain",
+    "name": "Sand grain",
+    "worldObject": "sand_grain",
+    "biome": "meadow",
     "features": [
-      { "id": "grain_facets", "name": "Grain facets", "sizeUm": 60, "contrast": 0.6, "drawing": "grains",
-        "blurb": "Each grain is a tiny rock with its own shape. Clear grains are mostly quartz, the stuff of good glass." }
+      {
+        "id": "grain_facets",
+        "name": "Grain facets",
+        "sizeUm": 60,
+        "contrast": 0.6,
+        "drawing": "grains",
+        "blurb": "Each grain is a tiny rock with its own shape. Clear grains are mostly quartz, the stuff of good glass."
+      }
+    ]
+  },
+  {
+    "id": "pond_water",
+    "name": "Pond water",
+    "worldObject": "pond_water",
+    "biome": "pond",
+    "features": [
+      {
+        "id": "pond_alga",
+        "name": "Pond alga",
+        "sizeUm": 25,
+        "contrast": 0.35,
+        "drawing": "algae",
+        "blurb": "Spirogyra grows as long green threads, one cell after another. Its spiral chloroplast is a ribbon wound around each cell."
+      },
+      {
+        "id": "pond_bacteria",
+        "name": "Bacteria",
+        "sizeUm": 1,
+        "contrast": 0.3,
+        "drawing": "rods",
+        "blurb": "These rod-shaped cells are about a thousandth of a millimetre long. Your good glass and oil finally let you resolve them."
+      },
+      {
+        "id": "pond_virus",
+        "name": "Virus particles",
+        "sizeUm": 0.1,
+        "contrast": 0.5,
+        "drawing": "lattice",
+        "blurb": "Viruses are a hundred times smaller than a pond alga cell. Visible light is too coarse to resolve them, so you need electrons."
+      }
     ]
   }
 ]

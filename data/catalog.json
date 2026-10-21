@@ -1,9 +1,10 @@
 {
-  "leaf":       { "label": "Leaf",       "drawing": "veins",  "minSizeUm": 20,   "maxSizeUm": 500, "tiers": [1, 2, 3] },
-  "sand_grain": { "label": "Sand grain", "drawing": "grains", "minSizeUm": 50,   "maxSizeUm": 500, "tiers": [1, 2, 3] },
-  "pollen":     { "label": "Pollen",     "drawing": "pollen", "minSizeUm": 10,   "maxSizeUm": 100, "tiers": [2, 3] },
-  "cell":       { "label": "Cell",       "drawing": "cells",  "minSizeUm": 5,    "maxSizeUm": 100, "tiers": [2, 3] },
-  "alga":       { "label": "Alga",       "drawing": "algae",  "minSizeUm": 5,    "maxSizeUm": 100, "tiers": [2, 3] },
-  "bacteria":   { "label": "Bacteria",   "drawing": "rods",   "minSizeUm": 0.5,  "maxSizeUm": 5,   "tiers": [3] },
-  "crystal":    { "label": "Crystal lattice", "drawing": "lattice", "minSizeUm": 0.0001, "maxSizeUm": 0.001, "tiers": [5] }
+  "leaf": {"label": "Leaf", "drawing": "veins", "minSizeUm": 20, "maxSizeUm": 500, "tiers": [1, 2, 3]},
+  "sand_grain": {"label": "Sand grain", "drawing": "grains", "minSizeUm": 50, "maxSizeUm": 500, "tiers": [1, 2, 3]},
+  "pollen": {"label": "Pollen", "drawing": "pollen", "minSizeUm": 10, "maxSizeUm": 100, "tiers": [2, 3]},
+  "cell": {"label": "Cell", "drawing": "cells", "minSizeUm": 5, "maxSizeUm": 100, "tiers": [2, 3]},
+  "alga": {"label": "Alga", "drawing": "algae", "minSizeUm": 5, "maxSizeUm": 100, "tiers": [2, 3]},
+  "bacteria": {"label": "Bacteria", "drawing": "rods", "minSizeUm": 0.5, "maxSizeUm": 5, "tiers": [3]},
+  "crystal": {"label": "Crystal lattice", "drawing": "lattice", "minSizeUm": 0.0001, "maxSizeUm": 0.001, "tiers": [5]},
+  "pond_water": {"label": "Pond water", "drawing": "algae", "minSizeUm": 0.05, "maxSizeUm": 100, "tiers": [2, 3]}
 }

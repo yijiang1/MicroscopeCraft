@@ -32,7 +32,8 @@ Every module depends on `src/shared`; **no module imports another** (ESLint enfo
 
 - **State**: `ctx.state` is read-only for renderers. Change it only with the actions in `src/shared/state.ts` (`gather`, `craft`, `discover`).
 - **Events** (`src/shared/events.ts`): `openEyepiece({sampleId})`, `closeEyepiece`, `itemGathered`, `itemCrafted`, `discoveryUnlocked`, `tierChanged`, `guideAsked`, `guideReplied`.
-- **Sim**: `visibility(feature, scope)` in `src/shared/sim/optics.ts` returns whether a feature shows and the reason it does not (`unresolved`, `empty-magnification`, `too-small-to-see`, `low-contrast`). The scope view and the guide both use it.
+- **Zoom**: a microscope recipe lists `steps` (label, magnification, NA). `setZoom(ctx, i)` picks one; `state.scope` always holds the current step.
+- **Sim**: `visibility(feature, scope)` in `src/shared/sim/optics.ts` returns whether a feature shows and the reason it does not (`unresolved`, `empty-magnification`, `too-small-to-see`, `low-contrast`). `explainWall()` in `src/shared/sim/walls.ts` turns that into the plain-language "hit a wall" message. The scope banner and the guide both use it.
 
 Each module runs from day one. The world has gatherable cubes and a leaf, the eyepiece blurs a procedural specimen by the scope's effective resolution, the guide gives canned replies keyed on the sim's reason code, and `data/worlds/default.json` is the fixed world spec. Replace internals inside your own folder; keep the exported `mount*` signature.
 
