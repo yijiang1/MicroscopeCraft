@@ -18,6 +18,7 @@ const JUMP = 6.2;
 const REACH = 6;
 const RESPAWN_MS = 15_000; // no scarcity: gathered things grow back
 const ANIM_MS = 260;
+const MARKER_RANGE = 30; // the floating marker only shows when you are this close; the arrow always shows
 
 interface Node {
   kind: Kind;
@@ -99,14 +100,14 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   ring.visible = false;
   scene.add(ring);
 
-  // --- tracking: a golden beam and an arrow to the nearest source of the item the goal panel asks for
+  // --- tracking: an arrow with distance at the top of the screen, plus a small floating marker once you are close
   let tracked: string | null = null;
-  const beam = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.1, 0.1, 80, 12, 1, true),
-    new THREE.MeshBasicMaterial({ color: '#ffd24a', transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }),
+  const marker = new THREE.Mesh(
+    new THREE.OctahedronGeometry(0.11),
+    new THREE.MeshBasicMaterial({ color: '#fff1b8', transparent: true, opacity: 0.85, depthWrite: false, fog: false }),
   );
-  beam.visible = false;
-  scene.add(beam);
+  marker.visible = false;
+  scene.add(marker);
   const offTrack = ctx.bus.on('trackItem', ({ itemId }) => (tracked = itemId));
 
   // --- player
@@ -314,10 +315,11 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
         }
       }
     }
-    beam.visible = !!target;
+    marker.visible = !!target && Math.hypot(target.x - camera.position.x, target.z - camera.position.z) < MARKER_RANGE;
     trackHud.textContent = '';
     if (target) {
-      beam.position.set(target.x, heightAt(target.x, target.z) + 38, target.z);
+      marker.position.set(target.x, target.center.y + target.aimRadius + 0.4 + 0.06 * Math.sin(t * 0.004), target.z);
+      marker.rotation.y = t * 0.002;
       const dx = target.x - camera.position.x;
       const dz = target.z - camera.position.z;
       camera.getWorldDirection(dir);

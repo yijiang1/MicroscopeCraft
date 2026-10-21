@@ -35,7 +35,7 @@ Success is checked in playtests before the demo: a new player builds a second-ti
 
 Every session repeats one loop, at smaller and smaller scales:
 
-1. **Explore and gather.** Walk the landscape and collect sand, ore, plant oil, resin and other raw materials. The game never leaves the player lost: a goal panel names the next microscope, lists what is still needed and where it is found, and a golden beam and arrow point to the nearest source.
+1. **Explore and gather.** Walk the landscape and collect sand, ore, plant oil, resin and other raw materials. The game never leaves the player lost: a goal panel names the next microscope, lists what is still needed and where it is found, and an arrow with the distance points to the nearest source, and a small marker floats over it when the player is close.
 2. **Craft parts.** Smelt sand into glass, grind lenses, forge frames and tubes.
 3. **Assemble.** Craft the microscope from its parts in the crafting panel.
 4. **Look.** Aim at a sample, press a key to look through the instrument, and focus; the view shows only what the instrument can resolve.

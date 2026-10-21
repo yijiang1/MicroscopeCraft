@@ -59,7 +59,7 @@ Simplified physics is labelled in comments next to the formula.
 
 The top of the side panel always shows the **next goal** (the next microscope), the raw materials you still need and where each one is, and the crafts in order. The next button to press is green. Glass and lenses are crafted, not found: they appear in the craft list, not in the world.
 
-The nearest source of the material you need is marked by a **golden beam** in the world, with an arrow and distance at the top of the screen. Click "Show me" on another material to track it instead. You can also ask the guide: "where do I find quartz sand?", "how do I make glass?" or "what next?".
+The nearest source of the material you need is shown by an **arrow and distance** at the top of the screen, and a small floating marker over it once you are within about 30 m. Click "Show me" on another material to track it instead. You can also ask the guide: "where do I find quartz sand?", "how do I make glass?" or "what next?".
 
 ## The world
 

@@ -62,7 +62,7 @@ export function mountGoal(parent: HTMLElement, ctx: GameContext): GoalHandle {
         row.append(head, div('font-size:12px;color:#b8c8b8', data.materials[m.itemId]?.where ?? ''));
         box.append(row);
       }
-      box.append(div('font-size:12px;color:#9ab', 'A golden beam in the world marks the nearest one.'));
+      box.append(div('font-size:12px;color:#9ab', 'An arrow at the top of the screen points to the nearest one.'));
     } else {
       box.append(div('color:#9be59b;margin:4px 0', 'You have everything. Press the green button.'));
     }

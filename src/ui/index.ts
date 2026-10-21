@@ -11,6 +11,19 @@ export interface UIHandle {
 
 export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   el.style.cssText += ';background:#000a;padding:8px;box-sizing:border-box';
+  // Side panel: collapsible, and collapsed by default on narrow windows where it would cover the world.
+  const toggle = document.createElement('button');
+  toggle.style.cssText = 'position:fixed;top:8px;right:8px;z-index:16;padding:2px 8px';
+  const setPanel = (open: boolean) => {
+    document.documentElement.style.setProperty('--panel-w', open ? 'min(260px, 85vw)' : '0px');
+    el.style.display = open ? '' : 'none';
+    toggle.textContent = open ? '✕' : '☰ Panel';
+    toggle.title = open ? 'Hide the panel' : 'Show goals, crafting and the Microdex';
+  };
+  let panelOpen = innerWidth >= 700;
+  toggle.onclick = () => setPanel((panelOpen = !panelOpen));
+  document.body.append(toggle);
+  setPanel(panelOpen);
   const goal = mountGoal(el, ctx);
   const inv = document.createElement('details');
   const dex = document.createElement('button');
@@ -82,6 +95,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   return {
     dispose() {
       offs.forEach((off) => off());
+      toggle.remove();
       goal.dispose();
       microdex.dispose();
       sound.dispose();
