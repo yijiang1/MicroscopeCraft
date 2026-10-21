@@ -75,6 +75,7 @@ export function mountInventory(ctx: GameContext): InventoryHandle {
   const offs = [
     ctx.bus.on('itemGathered', render),
     ctx.bus.on('itemCrafted', render),
+    ctx.bus.on('sampleStained', render), // staining uses up a dye
     ctx.bus.on('scopeChanged', render),
     ctx.bus.on('openEyepiece', () => (box.style.display = 'none')), // the eyepiece has its own controls
     ctx.bus.on('closeEyepiece', () => (box.style.display = '')),

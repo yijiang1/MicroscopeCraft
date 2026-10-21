@@ -38,6 +38,9 @@ export function parseGameData(raw: { materials: unknown; recipes: unknown; sampl
   for (const m of materials) {
     if (m.unlockedBy && !featureIds.includes(m.unlockedBy)) errors.push(`material ${m.id}: unlockedBy "${m.unlockedBy}" is not a feature`);
   }
+  for (const s of samples) {
+    for (const f of s.features) if (f.stain && !items[f.stain.dye]) errors.push(`feature ${f.id}: unknown stain dye "${f.stain.dye}"`);
+  }
   for (const id of featureIds) {
     if (featureIds.indexOf(id) !== featureIds.lastIndexOf(id)) errors.push(`duplicate feature id "${id}"`);
   }

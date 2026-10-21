@@ -226,6 +226,58 @@ const droplets: Drawer = (g, f, v) => {
   });
 };
 
+/** Cell nuclei: one round body per cell, with a darker nucleolus, on the grid of a cell layer three times their size
+ *  (the leaf's 15 µm cells hold 5 µm nuclei). Painted in the stain's color; unstained they are a faint ghost (alpha = contrast). */
+const nuclei: Drawer = (g, f, v) => {
+  const seed = seedOf(f.id);
+  const r = f.sizeUm / 2;
+  forGrid(v, f.sizeUm * 3, (i, j, cx, cy) => {
+    const x = cx + (noise(i, j, seed) - 0.5) * f.sizeUm * 0.6;
+    const y = cy + (noise(j, i, seed) - 0.5) * f.sizeUm * 0.6;
+    g.fillStyle = f.stain?.color ?? '#e8efe6';
+    g.beginPath();
+    g.arc(x, y, r, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = '#00000059';
+    g.beginPath();
+    g.arc(x + r * 0.25, y - r * 0.2, r * 0.32, 0, Math.PI * 2);
+    g.fill();
+  });
+};
+
+/** Amoeba: a lobed body with blunt pseudopods, a nucleus and a few food vacuoles. sizeUm is the body width.
+ *  The grid is offset half a step so the field's centre falls between amoebas and never hides what is under them. */
+const amoeba: Drawer = (g, f, v) => {
+  const seed = seedOf(f.id);
+  const r = f.sizeUm / 2;
+  const step = f.sizeUm * 4;
+  forGrid(v, step, (i, j, cx, cy) => {
+    const x = cx + step / 2 + (noise(i, j, seed) - 0.5) * f.sizeUm;
+    const y = cy + step / 2 + (noise(j, i, seed) - 0.5) * f.sizeUm;
+    const lobes = 3 + Math.floor(noise(i + 1, j, seed) * 3);
+    const phase = noise(i, j + 1, seed) * Math.PI * 2;
+    g.fillStyle = f.stain?.color ?? '#e8efe6';
+    g.beginPath();
+    for (let k = 0; k <= 48; k++) {
+      const a = (k / 48) * Math.PI * 2;
+      const rr = r * (0.7 + 0.55 * Math.max(0, Math.sin(a * lobes + phase)) ** 3);
+      g.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr);
+    }
+    g.fill();
+    g.fillStyle = '#0000004d';
+    g.beginPath();
+    g.arc(x + r * 0.15, y - r * 0.1, r * 0.22, 0, Math.PI * 2);
+    g.fill();
+    g.strokeStyle = '#ffffff73';
+    g.lineWidth = r * 0.04;
+    for (let k = 0; k < 3; k++) {
+      g.beginPath();
+      g.arc(x - r * 0.3 + k * r * 0.2, y + r * (0.25 - k * 0.12), r * 0.08, 0, Math.PI * 2);
+      g.stroke();
+    }
+  });
+};
+
 /** Stand-in for rods until someone draws them properly. */
 const dots: Drawer = (g, f, v) => {
   const seed = seedOf(f.id);
@@ -238,5 +290,5 @@ const dots: Drawer = (g, f, v) => {
 };
 
 export const DRAWERS: Record<Drawing, Drawer> = {
-  veins, cells, grains, pollen, rods: dots, algae, hair, scales, virus, droplets, lattice,
+  veins, cells, grains, pollen, rods: dots, algae, hair, scales, virus, droplets, lattice, nuclei, amoeba,
 };

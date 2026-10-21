@@ -14,6 +14,8 @@ export interface GameEvents {
   zoomChanged: { step: number };
   /** Player switched to another owned microscope in the eyepiece. */
   scopeChanged: { tier: Tier };
+  /** stain → scope, ui: a sample was stained in the staining lab (quality 0..1, see sim/staining.ts). */
+  sampleStained: { sampleId: string; quality: number };
   /** ui → world: point the player at the nearest source of this item (null = stop). */
   trackItem: { itemId: string | null };
   /** ui → guide: the player asked the guide a question. */

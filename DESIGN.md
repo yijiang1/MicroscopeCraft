@@ -55,7 +55,7 @@ The tree follows the real history of microscopy in six tiers. Each tier ends at 
 | 1. Hand lens | One glass lens in a frame | Magnification, focal length, lens shape | Cells and other tiny things are still too small |
 | 2. Compound microscope | Two lenses, a tube, a lamp and a focus knob; four zoom settings | Objective versus eyepiece, illumination, focus | Pushing magnification higher only makes a bigger blur |
 | 3. High-quality optics | Pure quartz glass, a condenser, immersion oil | Aberrations, numerical aperture, the diffraction limit | Visible light cannot resolve anything smaller than about half its wavelength |
-| 4. Contrast methods (not built) | Dark field and fluorescence parts | Contrast, why staining and labeling help | Light itself is still the limit |
+| 4. Contrast methods (staining built as a mini-game) | Saffron stain (built); dark field and fluorescence parts (not built) | Contrast, why staining and labeling help | Light itself is still the limit |
 | 5. Electron microscope | Tungsten filament, vacuum chamber, magnetic lenses | Wavelength versus resolution, vacuum, beam damage | Lens errors and sample damage cap the detail |
 | 6. Aberration-corrected STEM (not built) | Correctors and a stable stage | Imaging individual atoms | End of the tree |
 
@@ -87,7 +87,7 @@ Material choice is the main decision in the game: the properties of what you gat
 | Tungsten ore (identify with the high-quality microscope) | Electron-source filament | Melting point | Needed to emit a steady electron beam |
 | Resin | Vacuum seals | Leak rate | Needed for the vacuum chamber |
 | Glass slides and cover slips (not built) | Sample holders | Thickness, flatness | Thin, flat samples are easier to focus |
-| Natural dyes (not built) | Stains | Which structures they bind | Raise contrast for chosen features |
+| Natural dyes: saffron, from the quad's flowers (others not built) | Stains, applied in the staining lab | Which structures they bind | Raise contrast for chosen features |
 
 The goal panel lists the crafts in order and highlights the next one; the full recipe list is a click away. The guide answers "where do I find X?", "how do I make X?" and "what next?" from the same data (each raw material carries a where-to-find hint in its JSON). Crafting happens in the crafting panel, which labels each recipe with its station (furnace or bench). Stations are not yet places in the world, so any recipe can be crafted from the panel. Recipes are data (JSON): there are 18 now, and adding a part means adding one entry. The raw materials for the whole tree are: 8 beach sand, 6 quartz sand, 7 iron, 6 copper, 1 plant oil, 1 tungsten and 2 resin. Each material carries a where-to-find hint, which the goal card and the guide show. Materials grow back 15 seconds after they are gathered.
 
@@ -110,11 +110,11 @@ Every sample has a hidden layer at each smaller scale, and a layer appears only 
 | 1 | About 0.1 mm and below | Leaf veins, sand grain facets, wing veins, petal hairs, copper veins |
 | 2 | About 10 to 100 µm | Leaf cells, pollen, wing scales, pond algae, seed oil droplets |
 | 3 | About 1 µm | Bacteria in pond water, tiny pits on a quartz grain, tungsten grains |
-| 4 | About 1 µm, with contrast | Transparent cells, stained or labeled structures (not built) |
+| 4 | About 1 µm and up, with contrast | Transparent cells revealed by a stain: an amoeba in the lake, nuclei in leaf cells (built); labeled structures (not built) |
 | 5 | About 10 to 100 nm | Viruses, crystal grains, the atomic lattice |
 | 6 | About 0.1 to 0.4 nm | Single atomic columns (not built) |
 
-The Microdex is a collection log with one card per discovery: a picture of what the player actually saw (kept as their sharpest view), its size, and a two-sentence explanation. Cards are grouped by biome with progress and a completion mark, and a biome with no samples yet would show as locked (all four have samples now). The build has 17 discoveries across 10 hand-authored samples; three of them (copper veins, seed oil, tungsten grains) unlock materials. A discovery toast appears the first time something is seen.
+The Microdex is a collection log with one card per discovery: a picture of what the player actually saw (kept as their sharpest view), its size, and a two-sentence explanation. Cards are grouped by biome with progress and a completion mark, and a biome with no samples yet would show as locked (all four have samples now). The build has 19 discoveries across 10 hand-authored samples; three of them (copper veins, seed oil, tungsten grains) unlock materials, and two (an amoeba, leaf-cell nuclei) only show once stained. A discovery toast appears the first time something is seen.
 
 ## Simulation model
 
@@ -143,6 +143,12 @@ A feature appears in the view only if three rules pass, checked in the order the
 1. **Resolved.** The feature is at least as large as $d_{eff}$. If not, the view says "unresolved", or "empty magnification" when the zoom is already past the useful limit of about 1000 × NA (light microscopes only; electron images are digital and have no such limit).
 2. **Visible to the eye.** The feature's size times M reaches the eye's limit of about 0.1 mm; otherwise it is "too small to see".
 3. **Contrast.** The sample's contrast, scaled by stains and the imaging method, is above a threshold of 0.1; otherwise "low contrast".
+
+**Staining (the staining lab mini-game).** A clear feature (contrast below 0.1) hits the contrast wall even when it is resolved. A dye soaks into the target and its background at different rates, both first-order (uptake $1 - e^{-t/\tau}$, with the target about 4× faster, $\tau_t \approx 1.5$ s and $\tau_b \approx 6$ s), so the added contrast is
+
+$$C(t) = e^{-t/\tau_b} - e^{-t/\tau_t}$$
+
+It peaks at $t^* = \ln(\tau_b/\tau_t)\,\tau_t\tau_b/(\tau_b - \tau_t)$, about 2.8 s, then falls as the background catches up (overstaining). The player rinses by eye; the stain quality $q = C(t)/C(t^*)$ moves the feature's contrast toward the dye's ($c + (c_{dye} - c)\,q$). Each attempt varies both rates by up to 25% so the peak has to be watched, not timed. Simplifications: one dye, no washing-out, and the electron microscope ignores stains.
 
 At tier 5 the player also manages dose, the number of electrons per unit area:
 
@@ -190,7 +196,7 @@ The MVP is one complete play loop that can be demoed in about five minutes: gath
 | World | One small open 3D map with a meadow and a pond | Other biomes shown as locked areas | Mine and workshop biomes | Built, and larger than planned: a campus map (quad, slope, gorge, lake, science lab) |
 | Crafting | About eight recipes: glass, lens, frame, tube, light source, immersion oil | Recipe values tuned by hand | Full materials property system | 18 recipes, values tuned by hand |
 | Microscopes | Tiers 1 to 3, working end to end | Tier 5 as a scripted showpiece view | Tiers 4 and 6 | Tiers 0 to 3 and 5 built; tier 5 is a computed view with beam damage, not scripted |
-| Samples | About ten hand-authored discoveries in the Microdex | Atomic view drawn from a prepared image | Samples generated from a prompt | 17 discoveries; the atomic lattice is drawn procedurally |
+| Samples | About ten hand-authored discoveries in the Microdex | Atomic view drawn from a prepared image | Samples generated from a prompt | 19 discoveries; the atomic lattice is drawn procedurally |
 | AI | Guide grounded in the simulation's numbers | Prompt-to-world limited to three or four templates | Materials Project lookup, abTEM images, agent benchmark | Offline guide only; LLM features deferred |
 | Polish | Simple art, readable UI, one sound per action | Placeholder music | Tutorial and teacher mode | Procedural 3D art, synthesised sounds, demo script; no music or tutorial |
 
@@ -250,9 +256,9 @@ The team has four people and the build window is not fixed yet (see open questio
 
 ## Build status
 
-Built and tested (51 automated tests, plus manual checks in the browser): the shared contract; tiers 0, 1, 2, 3 and 5 with zoom steps, focus and beam damage; the wall messages; 18 recipes; 17 discoveries in the Microdex; the offline guide (including where-to-find and what-next answers); the discovery gates; a keyboard-first goal card (the next action in one line, a checklist, C to craft, an arrow to the nearest source), an always-visible inventory box (materials, parts, microscopes with the one in use marked; I toggles it), an in-eyepiece instrument picker for comparing microscopes, a Tab menu and toasts; the open world with procedural models; synthesised sounds; a demo mode (`?demo`, press K to restock materials).
+Built and tested (62 automated tests, plus manual checks in the browser): the shared contract; the staining lab mini-game (saffron from the flowers, S in the eyepiece, two stainable discoveries); tiers 0, 1, 2, 3 and 5 with zoom steps, focus and beam damage; the wall messages; 18 recipes; 19 discoveries in the Microdex; the offline guide (including where-to-find and what-next answers); the discovery gates; a keyboard-first goal card (the next action in one line, a checklist, C to craft, an arrow to the nearest source), an always-visible inventory box (materials, parts, microscopes with the one in use marked; I toggles it), an in-eyepiece instrument picker for comparing microscopes, a Tab menu and toasts; the open world with procedural models; synthesised sounds; a demo mode (`?demo`, press K to restock materials).
 
-Not built: the LLM planner and guide calls, the server and world cache, tiers 4 and 6, stain and contrast methods, stations as places in the world, saving progress between sessions, music and a tutorial.
+Not built: the LLM planner and guide calls, the server and world cache, tier 6, dark field and fluorescence, stations as places in the world, saving progress between sessions, music and a tutorial.
 
 Not yet checked: whether the discovery gates feel like discovery or like busywork in a playtest; a playtest with someone outside the team, review of the physics numbers and the wall wording by a microscopy expert, and play with real mouse and keyboard on more than one browser.
 

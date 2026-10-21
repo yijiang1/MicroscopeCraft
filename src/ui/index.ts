@@ -121,7 +121,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
 
   const name = (id: string) => ctx.data.items[id]?.name ?? id;
   const offs = [
-    ...(['itemGathered', 'itemCrafted', 'discoveryUnlocked', 'scopeChanged'] as const).map((t) => ctx.bus.on(t, save)),
+    ...(['itemGathered', 'itemCrafted', 'discoveryUnlocked', 'scopeChanged', 'sampleStained'] as const).map((t) => ctx.bus.on(t, save)),
     ctx.bus.on('itemGathered',({ itemId, count }) => {
       render();
       toast.notify(`+${count} ${name(itemId)}`, 1200);

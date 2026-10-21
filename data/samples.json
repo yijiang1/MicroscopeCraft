@@ -20,6 +20,16 @@
         "contrast": 0.3,
         "drawing": "cells",
         "blurb": "Each green box is a living cell packed with chloroplasts. Cell walls give the leaf its tiled look."
+      },
+      {
+        "id": "leaf_nuclei",
+        "name": "Cell nuclei",
+        "sizeUm": 5,
+        "contrast": 0.04,
+        "drawing": "nuclei",
+        "onTop": true,
+        "stain": { "dye": "saffron", "contrast": 0.45, "color": "#e0902a" },
+        "blurb": "The nucleus is the cell's control centre, where its DNA is kept. It is almost as clear as the rest of the cell, so you only see it once a dye soaks in."
       }
     ]
   },
@@ -52,6 +62,15 @@
         "contrast": 0.35,
         "drawing": "algae",
         "blurb": "Spirogyra grows as long green threads, one cell after another. Its spiral chloroplast is a ribbon wound around each cell."
+      },
+      {
+        "id": "pond_amoeba",
+        "name": "Amoeba",
+        "sizeUm": 40,
+        "contrast": 0.05,
+        "drawing": "amoeba",
+        "stain": { "dye": "saffron", "contrast": 0.4, "color": "#e39a2e" },
+        "blurb": "An amoeba is a single cell that crawls by pushing out blunt arms of its own jelly. Its body is nearly as clear as the water around it, so it hides until a stain colours it."
       },
       {
         "id": "pond_bacteria",

@@ -1,6 +1,7 @@
 // Composition root: the only file that imports every module. Wires data → state → modules.
 import { mountGuide } from './guide';
 import { mountScope } from './scope';
+import { mountStain } from './stain';
 import { createGame, gather, parseSave, SAVE_KEY } from './shared/state';
 import { loadGameData } from './shared/data';
 import { mountUI } from './ui';
@@ -18,6 +19,7 @@ try {
   const ctx = createGame(loadGameData(), undefined, saved);
   mountWorld(el('world'), ctx);
   mountScope(el('scope'), ctx);
+  mountStain(el('stain'), ctx);
   mountUI(el('ui'), ctx);
   mountGuide(ctx);
   // Demo mode (?demo): press K to restock every raw material, so a live demo can skip repeat gathering.

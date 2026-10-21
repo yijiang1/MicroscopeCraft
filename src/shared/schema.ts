@@ -13,7 +13,7 @@ const Id = z.string().regex(/^[a-z0-9_]+$/, 'ids are lower_snake_case');
 const Color = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'color is #rrggbb');
 
 /** How the 2D scope renderer draws a feature or catalog type. Add a value here when Person B adds a drawing. */
-export const DrawingSchema = z.enum(['veins', 'grains', 'hair', 'cells', 'pollen', 'rods', 'algae', 'scales', 'virus', 'droplets', 'lattice']);
+export const DrawingSchema = z.enum(['veins', 'grains', 'hair', 'cells', 'pollen', 'rods', 'algae', 'scales', 'virus', 'droplets', 'lattice', 'nuclei', 'amoeba']);
 export type Drawing = z.infer<typeof DrawingSchema>;
 
 export const MaterialSchema = z.object({
@@ -76,6 +76,9 @@ export const FeatureSchema = z.object({
   criticalDoseENm2: z.number().positive().optional(),
   /** Surface texture drawn over the larger features instead of under them (default: smaller features sit underneath). */
   onTop: z.boolean().default(false),
+  /** Staining lab (src/stain): a dye that binds this feature. A perfect stain raises its contrast to `contrast`;
+   *  the drawers paint it in `color`. Absent = stains do not help. */
+  stain: z.object({ dye: Id, contrast: z.number().min(0).max(1), color: Color }).optional(),
   /** Microdex card text: two sentences. */
   blurb: z.string(),
 });
@@ -155,6 +158,8 @@ export interface GameState {
   scopeChoice: Tier | null;
   /** Player is inside the lab in the science building, the only place an electron microscope can be used. */
   inLab: boolean;
+  /** Best stain so far on each sample (staining lab), by sample id: 0..1, 1 = rinsed at the peak contrast. Absent = unstained. */
+  stains: Record<string, number>;
   scope: ScopeParams;
 }
 

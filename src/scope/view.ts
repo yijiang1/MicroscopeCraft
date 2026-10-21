@@ -3,6 +3,7 @@
 // Compound microscopes add a zoom step picker and a focus slider (mouse wheel works too).
 import { DRAWERS, type View } from './draw';
 import { dose, scopeResolutionUm, survivingSignal, visibility } from '../shared/sim/optics';
+import { stainedFeature } from '../shared/sim/staining';
 import { explainWall, fmtUm, nearestWall, resolutionLabel } from '../shared/sim/walls';
 import { discover, ownedScopes, selectScope, setZoom, type GameContext } from '../shared/state';
 import type { ScopeParams } from '../shared/schema';
@@ -157,11 +158,11 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
     sg.save();
     sg.translate(w / 2, h / 2);
     sg.scale(pxPerUm, pxPerUm);
-    // Beam damage fades fragile features: contrast × surviving signal.
-    const features = sample.features.map((f) => ({
-      ...f,
-      contrast: f.contrast * (f.criticalDoseENm2 ? survivingSignal(doseENm2, f.criticalDoseENm2) : 1),
-    }));
+    // A stain from the staining lab raises contrast; beam damage fades fragile features: contrast × surviving signal.
+    const features = sample.features.map((raw) => {
+      const f = stainedFeature(raw, ctx.state.stains[sample.id]);
+      return { ...f, contrast: f.contrast * (f.criticalDoseENm2 ? survivingSignal(doseENm2, f.criticalDoseENm2) : 1) };
+    });
     for (const f of [...features].sort((a, b) => +a.onTop - +b.onTop || a.sizeUm - b.sizeUm)) {
       if (f.sizeUm * pxPerUm > MAX_FEATURE_SCREENS * Math.max(w, h)) continue;
       sg.globalAlpha = Math.min(1, f.contrast * scope.contrastBoost * 2);
@@ -284,6 +285,7 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
       clearInterval(doseTimer);
     }),
     ctx.bus.on('zoomChanged', redraw),
+    ctx.bus.on('sampleStained', redraw),
     ctx.bus.on('scopeChanged', () => {
       if (el.style.display === 'block') syncBeam();
       redraw();

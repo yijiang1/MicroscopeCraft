@@ -28,6 +28,7 @@ src/world/         3D world            (Person A)  mountWorld(el, ctx)
 src/scope/         2D eyepiece         (Person B)  mountScope(el, ctx)
 src/ui/            crafting, Microdex  (Person D)  mountUI(el, ctx)
 src/guide/         guide client        (Person C)  mountGuide(ctx)
+src/stain/         staining lab        (Schuyler)  mountStain(el, ctx)   mini-game, see "Staining lab" below
 server/            LLM backend         (Person C)  added in the AI phase
 src/main.ts        loads data, creates state, mounts every module (the only file that imports them all)
 ```
@@ -59,8 +60,31 @@ Simplified physics is labelled in comments next to the formula.
 | 1, 2, 3… | In the eyepiece: switch to another microscope you own, to compare (or click its button) |
 | I | Show or hide the inventory box (bottom right: materials, parts, microscopes) |
 | Wheel or slider | Focus (compound microscope and up) |
+| S | In the eyepiece, on a sample with clear cells: open the staining lab (needs Saffron; Space adds a drop, then rinses) |
 | M | Microdex |
 | K | Restock every raw material, skipping the identifications (only when the URL ends in `?demo`) |
+
+## Staining lab (mini-game)
+
+A side activity for tier 4 of the design, "Contrast methods". Some cells are almost clear, so the eyepiece lists them as `low-contrast` even though the microscope resolves them: **Amoeba** in the lake water (hand lens and up) and **Cell nuclei** in a leaf (compound microscope and up).
+
+1. Gather **Saffron** from the flowers on the quad lawn (E). Their red threads are the dye; Antonie van Leeuwenhoek tried saffron on his specimens in 1719, one of the first recorded stains.
+2. Look (F) at the lake water or a leaf. A hint above the eyepiece controls says what a stain would show; press **S** to open the lab.
+3. **Space** adds a drop. The dye soaks into the cells faster than into the background, so the contrast meter rises, peaks and falls again. **Space** rinses: rinse at the peak. Too early and the cells stay pale; too late and the background darkens too.
+4. The result (percent of the best possible contrast) stays on the sample, the eyepiece redraws in the dye's colour, and the newly visible cells go in the Microdex. **R** tries again with another saffron; Esc leaves without using any.
+
+Where it lives, so it can be changed without touching anyone's module:
+
+| What | Where |
+| --- | --- |
+| Mini-game UI (hint chip, lab panel, keys) | `src/stain/` (new module; ESLint keeps it from importing other modules) |
+| Dye kinetics, contrast after staining | `src/shared/sim/staining.ts` (+ tests) |
+| `stainSample()` action, `state.stains`, saved with the game | `src/shared/state.ts` |
+| `stain` field on features, `nuclei` and `amoeba` drawings, `sampleStained` event | `src/shared/schema.ts`, `src/shared/events.ts` (additions only) |
+| Stainable features and the Saffron material | `data/samples.json`, `data/materials.json` |
+| Hooks in other modules (a few lines each) | eyepiece draws stained features (`src/scope`), guide reads them (`src/guide`), flowers give saffron (`src/world/placements.ts`), inventory and autosave refresh (`src/ui`) |
+
+To add a stainable feature, give it a `stain` in `data/samples.json`: `{ "dye": "<material id>", "contrast": 0.4, "color": "#rrggbb" }`, with its own `contrast` below 0.1. `npm test` checks that it stays hidden until stained and that its dye is a material.
 
 ## Finding your way
 
@@ -126,6 +150,7 @@ Pitch points: the instrument is earned by building it; every upgrade has a numer
 | `src/scope`, `src/shared/sim` | Person B: microscope view and simulation |
 | `server`, `src/guide`, `src/shared/worldspec.ts` | Person C: AI and backend |
 | `src/ui`, `data/*.json` content | Person D: content and UI |
+| `src/stain`, `src/shared/sim/staining.ts` | Schuyler: staining lab mini-game |
 | `src/shared` (rest), `src/main.ts` | Everyone; see below |
 
 **Branches**: `<area>/<short-description>`, with area one of `world`, `scope`, `ai`, `ui`, `shared`, `docs`. Example: `scope/blur-by-deff`. Branch from `main`.

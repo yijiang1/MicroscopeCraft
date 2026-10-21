@@ -20,11 +20,12 @@ const SaveSchema = z.object({
   discoveries: z.array(z.string()),
   snapshots: z.record(z.string(), z.object({ image: z.string(), quality: z.number() })),
   scopeChoice: TierSchema.nullable(),
+  stains: z.record(z.string(), z.number()).default({}), // older saves have none
 });
 export type SaveData = z.infer<typeof SaveSchema>;
 export const SAVE_KEY = 'microscopecraft:save';
 
-export const toSave = ({ inventory, discoveries, snapshots, scopeChoice }: GameState): SaveData => ({ inventory, discoveries, snapshots, scopeChoice });
+export const toSave = ({ inventory, discoveries, snapshots, scopeChoice, stains }: GameState): SaveData => ({ inventory, discoveries, snapshots, scopeChoice, stains });
 
 export function parseSave(json: string | null): SaveData | null {
   try {
@@ -35,7 +36,7 @@ export function parseSave(json: string | null): SaveData | null {
 }
 
 export function createGame(data: GameData, bus: Bus = createBus(), save?: SaveData | null): GameContext {
-  const state: GameState = { inventory: {}, discoveries: [], snapshots: {}, currentSampleId: null, scopeChoice: null, inLab: false, scope: NAKED_EYE, ...save };
+  const state: GameState = { inventory: {}, discoveries: [], snapshots: {}, currentSampleId: null, scopeChoice: null, inLab: false, stains: {}, scope: NAKED_EYE, ...save };
   const ctx = { data, state, bus };
   state.scope = usableScope(ctx);
   bus.on('openEyepiece', ({ sampleId }) => (state.currentSampleId = sampleId));
@@ -97,6 +98,17 @@ export function craft(ctx: GameContext, recipeId: string): boolean {
   const tier = scopeFromInventory(inv, ctx.data).tier;
   if (tier !== best) ctx.bus.emit('tierChanged', { tier });
   ctx.bus.emit('itemCrafted', { itemId: recipe.output.itemId });
+  return true;
+}
+
+/** Staining lab: use up one dye and keep the stain quality (0..1) on the sample if it beats the one before.
+ *  Returns false (and changes nothing) without the dye. */
+export function stainSample(ctx: GameContext, sampleId: string, dye: string, quality: number): boolean {
+  const inv = ctx.state.inventory;
+  if ((inv[dye] ?? 0) < 1) return false;
+  inv[dye] = (inv[dye] ?? 0) - 1;
+  ctx.state.stains[sampleId] = Math.max(ctx.state.stains[sampleId] ?? 0, Math.min(1, Math.max(0, quality)));
+  ctx.bus.emit('sampleStained', { sampleId, quality });
   return true;
 }
 

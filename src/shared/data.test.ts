@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { loadGameData, parseGameData } from './data';
 import { visibility } from './sim/optics';
 import { NAKED_EYE, scopeParamsFromSpec } from './sim/scope';
+import { stainedFeature } from './sim/staining';
 import materials from '../../data/materials.json';
 import recipes from '../../data/recipes.json';
 import samples from '../../data/samples.json';
@@ -38,9 +39,17 @@ describe('content rules', () => {
     for (const f of features) expect(f.blurb.match(/[.!?](\s|$)/g)?.length, f.id).toBe(2);
   });
 
-  it('every feature can be seen by some microscope step (perfect focus, no beam damage)', () => {
-    const scopes = [NAKED_EYE, ...data.recipes.flatMap((r) => (r.scope ? r.scope.steps.map((_, i) => scopeParamsFromSpec(r.scope!, i)) : []))];
-    for (const f of features) expect(scopes.some((s) => visibility(f, s).visible), f.id).toBe(true);
+  const allScopes = [NAKED_EYE, ...data.recipes.flatMap((r) => (r.scope ? r.scope.steps.map((_, i) => scopeParamsFromSpec(r.scope!, i)) : []))];
+
+  it('every feature can be seen by some microscope step (perfect focus, no beam damage, best stain)', () => {
+    for (const f of features) expect(allScopes.some((s) => visibility(stainedFeature(f, 1), s).visible), f.id).toBe(true);
+  });
+
+  it('a stainable feature is hidden by low contrast until it is stained, and its dye is a material', () => {
+    for (const f of features.filter((x) => x.stain)) {
+      expect(allScopes.some((s) => visibility(f, s).visible), f.id).toBe(false);
+      expect(data.materials[f.stain!.dye], f.id).toBeDefined();
+    }
   });
 
   it('the first discovery needs the right tier: veins at tier 1, bacteria at 3, atoms only at 5', () => {

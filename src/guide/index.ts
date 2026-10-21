@@ -4,6 +4,7 @@
 //   - anything else, while looking at something → the nearest wall, via explainWall
 // Later: fetch('/api/guide') with the same snapshot, falling back to this on failure.
 import { actionText, currentAction, howToGet, itemsMentioned, nextGoalRecipe, planFor } from '../shared/plan';
+import { stainedFeatures } from '../shared/sim/staining';
 import { explainWall, nearestWall } from '../shared/sim/walls';
 import type { GameContext } from '../shared/state';
 
@@ -31,7 +32,7 @@ export function mountGuide(ctx: GameContext): () => void {
     }
 
     const sample = state.currentSampleId ? data.samples[state.currentSampleId] : undefined;
-    const wall = sample && nearestWall(sample, state.scope);
+    const wall = sample && nearestWall({ features: stainedFeatures(sample, state.stains) }, state.scope);
     reply(
       wall
         ? (explainWall(wall.f, state.scope, wall.v) ?? '')

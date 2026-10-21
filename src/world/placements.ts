@@ -23,7 +23,7 @@ export const AIMS: Record<Kind, Aim> = {
   sunflower: { gather: 'plant_oil', sample: 'sunflower_seed' },
   resin: { gather: 'resin' },
   leaf: { sample: 'leaf' },
-  flower: { sample: 'flower' },
+  flower: { gather: 'saffron', sample: 'flower' }, // saffron: the dye for the staining lab (src/stain)
   wing: { sample: 'insect_wing' },
   pond: { sample: 'pond_water' },
   crystal: { sample: 'crystal_sample' },

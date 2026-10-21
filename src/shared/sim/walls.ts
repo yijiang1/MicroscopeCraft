@@ -1,6 +1,6 @@
 // "Hit a wall" messages: plain-language explanations grounded in the sim's own numbers.
 // Used by the eyepiece banner and the guide so both say the same true thing. Owner: Person B.
-import type { Feature, Sample, ScopeParams, Tier } from '../schema';
+import type { Feature, ScopeParams, Tier } from '../schema';
 import {
   abbeLimitUm, EYE_LIMIT_UM, scopeResolutionUm, usefulMagnificationMax, visibility, type Visibility,
 } from './optics';
@@ -22,7 +22,7 @@ export function fmtUm(um: number): string {
 }
 
 /** Why this feature can't be seen with this scope, and what to do next; null if it can be seen. */
-export function explainWall(f: Pick<Feature, 'name' | 'sizeUm' | 'contrast'>, scope: ScopeParams, v?: Visibility): string | null {
+export function explainWall(f: Pick<Feature, 'name' | 'sizeUm' | 'contrast'> & Partial<Pick<Feature, 'stain'>>, scope: ScopeParams, v?: Visibility): string | null {
   const vis = v ?? visibility(f, scope);
   if (vis.visible) return null;
   const who = TIER_NAMES[scope.tier];
@@ -43,18 +43,22 @@ export function explainWall(f: Pick<Feature, 'name' | 'sizeUm' | 'contrast'>, sc
     case 'too-small-to-see':
       return `${f.name} is resolved, but at ${scope.magnification}× it looks only ${fmtUm(vis.apparentUm)} wide, below what the eye can see (${fmtUm(EYE_LIMIT_UM)}). Zoom in to at least ${Math.ceil(EYE_LIMIT_UM / f.sizeUm)}×.`;
     case 'low-contrast':
-      return `${f.name} is big enough to resolve but almost transparent against its background. It needs more contrast, such as a stain.`;
+      return f.stain
+        ? `${f.name} is big enough to resolve but almost transparent against its background. Stain it: press S to add a dye, and rinse when the contrast peaks.`
+        : `${f.name} is big enough to resolve but almost transparent against its background. It needs more contrast, such as a stain.`;
     default:
       return null;
   }
 }
 
-/** The biggest feature this scope fails to show: the nearest goal for the player. */
-export function nearestWall(sample: Pick<Sample, 'features'>, scope: ScopeParams) {
+/** The biggest feature this scope fails to show: the nearest goal for the player. Low-contrast walls come last:
+ *  staining is a side path, and the resolution walls are what lead to the next microscope. */
+export function nearestWall<F extends Pick<Feature, 'sizeUm' | 'contrast'>>(sample: { features: F[] }, scope: ScopeParams) {
+  const side = (x: { v: Visibility }) => +(x.v.reason === 'low-contrast');
   return sample.features
     .map((f) => ({ f, v: visibility(f, scope) }))
     .filter((x) => !x.v.visible)
-    .sort((a, b) => b.f.sizeUm - a.f.sizeUm)[0];
+    .sort((a, b) => side(a) - side(b) || b.f.sizeUm - a.f.sizeUm)[0];
 }
 
 /** Resolution as a one-liner for HUDs: "resolves ≥ 1.5 µm". */
