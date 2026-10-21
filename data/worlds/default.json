@@ -1,0 +1,8 @@
+{
+  "name": "Pond water drop",
+  "scales": [
+    { "tier": 2, "features": [{ "type": "alga", "species_hint": "Spirogyra", "density": 12 }] },
+    { "tier": 3, "features": [{ "type": "bacteria", "shape": "rod", "density": 200 }] }
+  ],
+  "learning_notes": { "3": "Bacteria become visible once you can resolve about 1 micrometer." }
+}

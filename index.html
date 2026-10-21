@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MicroscopeCraft</title>
+    <style>
+      html, body { margin: 0; height: 100%; overflow: hidden; font: 14px system-ui, sans-serif; background: #111; color: #eee; }
+      #world, #scope { position: fixed; inset: 0; }
+      #scope { display: none; z-index: 10; }
+      #ui { position: fixed; top: 0; right: 0; bottom: 0; width: 260px; z-index: 5; overflow: auto; }
+    </style>
+  </head>
+  <body>
+    <div id="world"></div>
+    <div id="ui"></div>
+    <div id="scope"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

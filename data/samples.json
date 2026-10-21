@@ -1,0 +1,18 @@
+[
+  {
+    "id": "leaf", "name": "Leaf", "worldObject": "leaf", "biome": "meadow",
+    "features": [
+      { "id": "leaf_veins", "name": "Leaf veins", "sizeUm": 40, "contrast": 0.5, "drawing": "veins",
+        "blurb": "Veins carry water in and sugar out of the leaf. Fine veins branch until no cell is far from one." },
+      { "id": "leaf_cells", "name": "Leaf cells", "sizeUm": 15, "contrast": 0.3, "drawing": "cells",
+        "blurb": "Each green box is a living cell packed with chloroplasts. Cell walls give the leaf its tiled look." }
+    ]
+  },
+  {
+    "id": "sand_grain", "name": "Sand grain", "worldObject": "sand_grain", "biome": "meadow",
+    "features": [
+      { "id": "grain_facets", "name": "Grain facets", "sizeUm": 60, "contrast": 0.6, "drawing": "grains",
+        "blurb": "Each grain is a tiny rock with its own shape. Clear grains are mostly quartz, the stuff of good glass." }
+    ]
+  }
+]

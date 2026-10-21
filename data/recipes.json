@@ -1,0 +1,23 @@
+[
+  {
+    "id": "glass", "name": "Glass", "station": "furnace", "color": "#bfe3ea",
+    "inputs": [{ "itemId": "beach_sand", "count": 2 }],
+    "output": { "itemId": "glass", "count": 1 }
+  },
+  {
+    "id": "lens", "name": "Glass lens", "station": "bench", "color": "#9fd0e0",
+    "inputs": [{ "itemId": "glass", "count": 1 }],
+    "output": { "itemId": "lens", "count": 1 }
+  },
+  {
+    "id": "frame", "name": "Iron frame", "station": "bench", "color": "#6b6b6b",
+    "inputs": [{ "itemId": "iron_ore", "count": 1 }],
+    "output": { "itemId": "frame", "count": 1 }
+  },
+  {
+    "id": "hand_lens", "name": "Hand lens", "station": "bench", "color": "#7fb2c4",
+    "inputs": [{ "itemId": "lens", "count": 1 }, { "itemId": "frame", "count": 1 }],
+    "output": { "itemId": "hand_lens", "count": 1 },
+    "scope": { "tier": 1, "magnification": 10, "NA": 0.1, "dLensUm": 30 }
+  }
+]
