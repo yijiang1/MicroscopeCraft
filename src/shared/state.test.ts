@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { loadGameData } from './data';
 import type { GameEvents } from './events';
 import { scopeFromInventory } from './sim/scope';
-import { craft, createGame, discover, gather, selectScope, setInLab, setZoom } from './state';
+import { craft, createGame, discover, gather, parseSave, selectScope, setInLab, setZoom, toSave } from './state';
 
 describe('state actions', () => {
   it('sand → glass → lens, iron → frame → hand lens raises the tier and emits events', () => {
@@ -105,5 +105,19 @@ describe('tier 5 crafting', () => {
     expect(ctx.state.scope.tier).toBe(1);
     setInLab(ctx, true);
     expect(ctx.state.scope.steps.map((s) => s.magnification)).toEqual([50_000, 150_000, 500_000, 2_000_000]);
+  });
+
+  it('a save round-trips progress and the microscope; a bad save starts fresh', () => {
+    const ctx = createGame(loadGameData());
+    gather(ctx, 'beach_sand', 2);
+    gather(ctx, 'iron_ore');
+    for (const id of ['glass', 'lens', 'frame', 'hand_lens']) craft(ctx, id);
+    discover(ctx, 'leaf_veins');
+    const back = createGame(loadGameData(), undefined, parseSave(JSON.stringify(toSave(ctx.state))));
+    expect(back.state.inventory).toEqual(ctx.state.inventory);
+    expect(back.state.discoveries).toEqual(['leaf_veins']);
+    expect(back.state.scope.tier).toBe(1);
+    expect(parseSave('{"inventory":5}')).toBeNull();
+    expect(parseSave(null)).toBeNull();
   });
 });

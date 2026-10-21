@@ -1,7 +1,8 @@
 // Game state lives here, not in any renderer. Only the actions below mutate it,
 // and each emits its event after mutating. Renderers read ctx.state and call actions.
+import { z } from 'zod';
 import { createBus, type Bus } from './events';
-import type { GameData, GameState, Tier } from './schema';
+import { TierSchema, type GameData, type GameState, type Tier } from './schema';
 import { NAKED_EYE, ownedScopes, scopeFromInventory } from './sim/scope';
 
 export { ownedScopes }; // microscopes in the inventory, lowest tier first (UI modules may not import sim/scope)
@@ -13,9 +14,30 @@ export interface GameContext {
   bus: Bus;
 }
 
-export function createGame(data: GameData, bus: Bus = createBus()): GameContext {
-  const state: GameState = { inventory: {}, discoveries: [], snapshots: {}, currentSampleId: null, scopeChoice: null, inLab: false, scope: NAKED_EYE };
+/** The part of the state worth keeping between visits. A bad or old save parses to null (start fresh). */
+const SaveSchema = z.object({
+  inventory: z.record(z.string(), z.number()),
+  discoveries: z.array(z.string()),
+  snapshots: z.record(z.string(), z.object({ image: z.string(), quality: z.number() })),
+  scopeChoice: TierSchema.nullable(),
+});
+export type SaveData = z.infer<typeof SaveSchema>;
+export const SAVE_KEY = 'microscopecraft:save';
+
+export const toSave = ({ inventory, discoveries, snapshots, scopeChoice }: GameState): SaveData => ({ inventory, discoveries, snapshots, scopeChoice });
+
+export function parseSave(json: string | null): SaveData | null {
+  try {
+    return SaveSchema.parse(JSON.parse(json ?? ''));
+  } catch {
+    return null;
+  }
+}
+
+export function createGame(data: GameData, bus: Bus = createBus(), save?: SaveData | null): GameContext {
+  const state: GameState = { inventory: {}, discoveries: [], snapshots: {}, currentSampleId: null, scopeChoice: null, inLab: false, scope: NAKED_EYE, ...save };
   const ctx = { data, state, bus };
+  state.scope = usableScope(ctx);
   bus.on('openEyepiece', ({ sampleId }) => (state.currentSampleId = sampleId));
   bus.on('closeEyepiece', () => (state.currentSampleId = null));
   return ctx;

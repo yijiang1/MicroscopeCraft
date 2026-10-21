@@ -1,6 +1,6 @@
 // Person D. The goal card (always visible, keyboard-first), a menu panel (Tab) with the guide, the tech tree (T),
 // the Microdex (M), toasts and sound. Plain DOM; swap for anything.
-import type { GameContext } from '../shared/state';
+import { SAVE_KEY, toSave, type GameContext } from '../shared/state';
 import { fmtUm } from '../shared/sim/walls';
 import { mountGoal } from './goal';
 import { mountInventory } from './inventory';
@@ -40,6 +40,39 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
     syncMute();
   };
   syncMute();
+  // --- save (also automatic after every change and on leaving the page) and restart
+  const saveBtn = document.createElement('button');
+  const restart = document.createElement('button');
+  saveBtn.style.cssText = restart.style.cssText = 'display:block;width:100%;margin:2px 0';
+  saveBtn.textContent = 'Save game';
+  restart.textContent = 'Restart game';
+  let resetting = false;
+  const save = (): boolean => {
+    if (resetting) return false;
+    try {
+      localStorage.setItem(SAVE_KEY, JSON.stringify(toSave(ctx.state)));
+    } catch {
+      // ponytail: quota full (snapshots are images) → keep progress, drop the pictures
+      try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify({ ...toSave(ctx.state), snapshots: {} }));
+      } catch {
+        return false;
+      }
+    }
+    return true;
+  };
+  saveBtn.onclick = () => toast.notify(save() ? 'Game saved' : 'Could not save (browser storage blocked)', 1600, 2);
+  restart.onclick = () => {
+    if (!confirm('Restart from scratch? Your inventory, microscopes and Microdex will be erased.')) return;
+    resetting = true;
+    try {
+      localStorage.removeItem(SAVE_KEY);
+    } catch {
+      /* nothing saved */
+    }
+    location.reload();
+  };
+  addEventListener('pagehide', save);
   input.placeholder = 'Ask the guide (try "where do I find sand?")';
   input.style.cssText = 'width:100%;box-sizing:border-box';
   input.addEventListener('keydown', (e) => {
@@ -57,7 +90,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   const title = document.createElement('h4');
   title.textContent = 'Menu (Tab to close)';
   title.style.margin = '4px 0 8px';
-  el.append(title, tree, dex, mute, guide);
+  el.append(title, tree, dex, mute, saveBtn, restart, guide);
 
   let menuOpen = false;
   const setMenu = (open: boolean) => {
@@ -88,7 +121,8 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
 
   const name = (id: string) => ctx.data.items[id]?.name ?? id;
   const offs = [
-    ctx.bus.on('itemGathered', ({ itemId, count }) => {
+    ...(['itemGathered', 'itemCrafted', 'discoveryUnlocked', 'scopeChanged'] as const).map((t) => ctx.bus.on(t, save)),
+    ctx.bus.on('itemGathered',({ itemId, count }) => {
       render();
       toast.notify(`+${count} ${name(itemId)}`, 1200);
     }),
@@ -114,6 +148,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
     dispose() {
       offs.forEach((off) => off());
       removeEventListener('keydown', onKey);
+      removeEventListener('pagehide', save);
       goal.dispose();
       inventory.dispose();
       techTree.dispose();
