@@ -218,6 +218,7 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
 
   const open = (id: string) => {
     sampleId = id;
+    openedAt = performance.now();
     doseENm2 = 0;
     el.style.display = 'block';
     slider.value = '0';
@@ -233,7 +234,10 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
     render();
   };
 
+  // The F that opens the eyepiece (handled by the world) reaches this listener too; it must not also close it.
+  let openedAt = 0;
   const onKey = (e: KeyboardEvent) => {
+    if (e.repeat || performance.now() - openedAt < 200) return;
     if (el.style.display === 'block' && (e.key === 'Escape' || e.key.toLowerCase() === 'f')) {
       ctx.bus.emit('closeEyepiece', {});
     }

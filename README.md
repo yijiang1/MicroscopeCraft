@@ -38,7 +38,7 @@ Every module depends on `src/shared`; **no module imports another** (ESLint enfo
 - **Microdex**: `microdex(data, state)` (`src/shared/microdex.ts`) groups one card per feature by biome. The eyepiece keeps the best picture of each discovery in `state.snapshots`. A sample is a `data/samples.json` entry; `npm test` checks every blurb is two sentences and every feature is reachable by some microscope.
 - **Sim**: `visibility(feature, scope)` in `src/shared/sim/optics.ts` returns whether a feature shows and the reason it does not (`unresolved`, `empty-magnification`, `too-small-to-see`, `low-contrast`). `explainWall()` in `src/shared/sim/walls.ts` turns that into the plain-language "hit a wall" message. The scope banner and the guide both use it.
 
-Each module runs from day one. The world has gatherable cubes and a leaf, the eyepiece blurs a procedural specimen by the scope's effective resolution, the guide gives canned replies keyed on the sim's reason code, and `data/worlds/default.json` is the fixed world spec. Replace internals inside your own folder; keep the exported `mount*` signature.
+Each module runs from day one. The world is an open landscape with procedural 3D models (see `src/world`), the eyepiece blurs a procedural specimen by the scope's effective resolution, the guide gives canned replies keyed on the sim's reason code, and `data/worlds/default.json` is the fixed world spec. Replace internals inside your own folder; keep the exported `mount*` signature.
 
 Units: lengths are micrometres (µm) everywhere, spelled in field names (`sizeUm`, `dLensUm`).
 Simplified physics is labelled in comments next to the formula.
@@ -48,11 +48,26 @@ Simplified physics is labelled in comments next to the formula.
 | Key | Action |
 | --- | --- |
 | Click, WASD, mouse | Look and walk (Esc frees the mouse) |
-| E | Gather the cube you are aiming at |
+| Shift, Space | Run, jump |
+| E | Gather the item you are aiming at (a ring and a prompt show what it is) |
 | F | Look at the aimed sample through your best instrument (F or Esc to leave) |
 | Wheel or slider | Focus (compound microscope and up) |
 | M | Microdex |
 | K | Restock every raw material (only when the URL ends in `?demo`) |
+
+## The world
+
+A walkable landscape, about 150 m across, in four areas. Everything is procedural: terrain, models and textures are generated in code, with no asset files.
+
+| Where | What is there |
+| --- | --- |
+| Meadow (spawn, centre) | Leafy plants, flowers, a butterfly wing on a stone, sunflowers (plant oil), grass and oaks |
+| Pond (west) | Water to look at, sand mounds on the eastern shore |
+| Highlands, the mine (east) | Iron, copper and tungsten rocks, quartz crystals, boulders |
+| Pine grove (north-east) | Resin on tree stumps |
+| Lab (far north) | A flat pad with lamp posts and a glowing crystal |
+
+The top-left corner shows a compass heading and your x, z position.
 
 ## What to build (from `data/recipes.json`)
 
@@ -67,11 +82,11 @@ Simplified physics is labelled in comments next to the formula.
 
 Open `http://localhost:5173/?demo`. The LLM prompt-to-world step of the full pitch is not built yet; see DESIGN.md.
 
-1. **Blurry world (0:00).** Walk to the green leaf cube, press F with no instrument. The side veins are fuzzy and the fine veins are gone. Say: "Everything we can see is limited by the eye." Press F or Esc to leave.
-2. **Build a hand lens (0:45).** Gather 2 sand cubes and 1 iron cube with E. In the side panel craft Glass, Glass lens, Iron frame, Hand lens. Look at the leaf again: the vein network is sharp and the Microdex toast appears. Read the banner: the hand lens resolves about 30 µm, so the leaf cells are still blurred.
-3. **Hit the wall, then upgrade (1:45).** Press K to restock. Craft the compound microscope (see table). Look at the pond cube at 100×: alga threads. Switch to 800×: the banner says more magnification only makes a bigger blur. Ask the guide "why is it blurry?" (the guide box stays usable while you look).
+1. **Blurry world (0:00).** Walk to a leafy plant (a few steps north-west of the spawn), aim at it and press F with no instrument. The side veins are fuzzy and the fine veins are gone. Say: "Everything we can see is limited by the eye." Press F or Esc to leave.
+2. **Build a hand lens (0:45).** Gather 2 sand mounds (by the pond, west) and 1 iron rock (the rocky highlands, east) with E. In the side panel craft Glass, Glass lens, Iron frame, Hand lens. Look at the leaf again: the vein network is sharp and the Microdex toast appears. Read the banner: the hand lens resolves about 30 µm, so the leaf cells are still blurred.
+3. **Hit the wall, then upgrade (1:45).** Press K to restock. Craft the compound microscope (see table). Look at the pond water (aim at the surface from the shore) at 100×: alga threads. Switch to 800×: the banner says more magnification only makes a bigger blur. Ask the guide "why is it blurry?" (the guide box stays usable while you look).
 4. **High-quality optics (3:00).** Craft the high-quality microscope. Look at the pond at 1000× with oil immersion: bacteria rods appear. Virus particles stay blurred; the banner explains the diffraction limit and points to electrons.
-5. **Electron showpiece (3:45).** Craft the electron microscope. Look at the pond at 150,000×: a virus, then watch the beam damage warning as the dose builds (zoom out or close the eyepiece to reset). Look at the crystal cube at 500,000×: grains, then 2,000,000×: the atomic lattice. Press M to show the Microdex.
+5. **Electron showpiece (3:45).** Craft the electron microscope. Look at the pond at 150,000×: a virus, then watch the beam damage warning as the dose builds (zoom out or close the eyepiece to reset). Walk far north to the lab pad and look at the glowing crystal at 500,000×: grains, then 2,000,000×: the atomic lattice. Press M to show the Microdex.
 
 Pitch points: the instrument is earned by building it; every upgrade has a numeric reason (shown in the HUD: resolution, NA, dose); all content is JSON in `data/`.
 

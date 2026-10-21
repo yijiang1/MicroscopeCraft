@@ -1,114 +1,189 @@
-// Flat-colored cube world. Click to lock the mouse, WASD to move, E gathers the aimed cube,
-// F looks at the aimed sample through the player's current microscope (or the naked eye).
+// The open world: terrain you walk and jump across, a pond, highlands, a lab, and 3D models you gather or look at.
+// Click to lock the mouse; WASD move, Shift run, Space jump, E gather the aimed item, F look at the aimed sample.
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 import { gather, type GameContext } from '../shared/state';
+import { buildDecor, buildSky, FOG_COLOR, SUN_DIRECTION, type Blocker } from './decor';
 import type { WorldHandle } from './index';
+import { buildModel } from './models';
+import { AIMS, PLACEMENTS, RADIUS, type Aim, type Kind } from './placements';
+import { buildTerrain, buildWater, heightAt, LAB, POND, WATER_LEVEL, WORLD_RADIUS } from './terrain';
 
-interface Aim {
-  gather?: string;
-  sample?: string;
-}
+const EYE_HEIGHT = 1.7;
+const PLAYER_RADIUS = 0.35;
+const WALK = 5;
+const RUN = 8.5;
+const GRAVITY = 20;
+const JUMP = 6.2;
+const REACH = 6;
+const RESPAWN_MS = 15_000; // no scarcity: gathered things grow back
+const ANIM_MS = 260;
 
-interface Spot {
-  color: string;
+interface Node {
+  kind: Kind;
+  aim: Aim;
+  root: THREE.Object3D;
   x: number;
   z: number;
-  aim: Aim;
+  radius: number;
+  alive: boolean;
+  index: number;
+  /** Aim sphere: where the crosshair counts as pointing at this node (forgiving for thin things like leaves). */
+  center: THREE.Vector3;
+  aimRadius: number;
 }
 
-const sand = (x: number, z: number): Spot => ({ color: '#e8d9a0', x, z, aim: { gather: 'beach_sand', sample: 'sand_grain' } });
-const quartz = (x: number, z: number): Spot => ({ color: '#f4f1ea', x, z, aim: { gather: 'quartz_sand', sample: 'quartz_grain' } });
-const iron = (x: number, z: number): Spot => ({ color: '#8a5a44', x, z, aim: { gather: 'iron_ore' } });
-const copper = (x: number, z: number): Spot => ({ color: '#c27d4a', x, z, aim: { gather: 'copper_ore' } });
-const tungsten = (x: number, z: number): Spot => ({ color: '#4a4f57', x, z, aim: { gather: 'tungsten_ore' } });
-const resin = (x: number, z: number): Spot => ({ color: '#c8742a', x, z, aim: { gather: 'resin' } });
-const oil = (x: number, z: number): Spot => ({ color: '#d9c84a', x, z, aim: { gather: 'plant_oil' } });
-const block = (x0: number, x1: number, z0: number, z1: number, make: (x: number, z: number) => Spot): Spot[] => {
-  const out: Spot[] = [];
-  for (let x = x0; x <= x1; x++) for (let z = z0; z <= z1; z++) out.push(make(x, z));
-  return out;
-};
-// Leaf, flower, wing, pond and crystal are samples only: looking never uses them up.
-const SPOTS: Spot[] = [
-  ...block(3, 5, -6, -4, sand),
-  ...block(8, 9, -6, -4, quartz),
-  ...block(-5, -3, -4, -3, iron),
-  ...block(-5, -3, -7, -6, copper),
-  ...block(-8, -8, -5, -4, tungsten),
-  ...block(5, 6, -9, -9, resin),
-  ...block(0, 1, -9, -9, oil),
-  { color: '#2e8b3a', x: 0, z: -5, aim: { sample: 'leaf' } },
-  { color: '#d95fa8', x: -1, z: -7, aim: { sample: 'flower' } },
-  { color: '#e89a3c', x: 2, z: -8, aim: { sample: 'insect_wing' } },
-  { color: '#3d7fd6', x: -8, z: -10, aim: { sample: 'pond_water' } },
-  { color: '#b9c4ff', x: 8, z: -10, aim: { sample: 'crystal_sample' } },
-];
-const REACH = 6;
-const RESPAWN_MS = 15_000; // no scarcity: gathered cubes grow back
-
-export function mountVoxelWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
+export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 0.6;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   el.appendChild(renderer.domElement);
+
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color('#9ed0ff');
-  scene.add(new THREE.HemisphereLight('#ffffff', '#99aa99', 2.2));
+  scene.fog = new THREE.Fog(FOG_COLOR, 55, 200);
+  scene.add(buildSky());
+  scene.add(new THREE.HemisphereLight('#cfe6ff', '#6b7a4f', 1.7));
+  const sun = new THREE.DirectionalLight('#fff1dc', 3);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048);
+  Object.assign(sun.shadow.camera, { left: -38, right: 38, top: 38, bottom: -38, near: 1, far: 200 });
+  sun.shadow.bias = -0.0004;
+  sun.shadow.normalBias = 0.05;
+  scene.add(sun, sun.target);
 
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.MeshLambertMaterial({ color: '#6aa84f' }));
-  ground.rotation.x = -Math.PI / 2;
-  scene.add(ground);
+  scene.add(buildTerrain());
+  const water = buildWater();
+  scene.add(water);
 
-  const targets = new Set<THREE.Mesh>();
-  const timers = new Set<number>();
-  const spawn = ({ color, x, z, aim }: Spot) => {
-    const m = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshLambertMaterial({ color }));
-    m.position.set(x, 0.5, z);
-    m.userData = { aim, spot: { color, x, z, aim } };
-    scene.add(m);
-    targets.add(m);
+  // --- things to gather or look at
+  const nodes: Node[] = [];
+  const spawnNode = (kind: Kind, x: number, z: number, index: number) => {
+    const root = buildModel(kind, index);
+    root.position.set(x, heightAt(x, z), z);
+    root.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(root);
+    const aimRadius = Math.min(1.3, Math.max(0.35, box.getSize(new THREE.Vector3()).length() * 0.4));
+    const node: Node = { kind, aim: AIMS[kind], root, x, z, radius: RADIUS[kind], alive: true, index, center: box.getCenter(new THREE.Vector3()), aimRadius };
+    root.userData.node = node;
+    scene.add(root);
+    nodes.push(node);
+    return node;
   };
-  SPOTS.forEach(spawn);
+  PLACEMENTS.forEach((p, i) => {
+    if (p.kind === 'pond') return;
+    spawnNode(p.kind, p.x, p.z, i);
+  });
+  const pondNode: Node = {
+    kind: 'pond', aim: AIMS.pond, root: water, x: POND.x, z: POND.z, radius: 0, alive: true, index: -1,
+    center: water.position.clone(), aimRadius: 0,
+  };
 
-  const camera = new THREE.PerspectiveCamera(70, 1, 0.1, 200);
-  camera.position.set(0, 1.7, 2);
+  const crystal = nodes.find((n) => n.kind === 'crystal');
+  const crystalLight = new THREE.PointLight('#8a7bff', 14, 18, 2);
+  crystalLight.position.set(LAB.x, heightAt(LAB.x, LAB.z) + 2.6, LAB.z);
+  scene.add(crystalLight);
+
+  const { group: decor, blockers } = buildDecor(PLACEMENTS.map((p) => ({ x: p.x, z: p.z })));
+  scene.add(decor);
+
+  // --- aim ring
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(0.92, 1, 40),
+    new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.8, depthTest: false, side: THREE.DoubleSide }),
+  );
+  ring.rotation.x = -Math.PI / 2;
+  ring.renderOrder = 10;
+  ring.visible = false;
+  scene.add(ring);
+
+  // --- player
+  const camera = new THREE.PerspectiveCamera(70, 1, 0.1, 1500);
+  camera.position.set(0, heightAt(0, 3) + EYE_HEIGHT, 3);
   const controls = new PointerLockControls(camera, renderer.domElement);
+  let vy = 0;
+  let paused = false;
 
   const css = 'position:fixed;color:#fff;text-shadow:0 0 3px #000;pointer-events:none';
   const hint = document.createElement('div');
   hint.style.cssText = `${css};left:12px;bottom:12px`;
-  hint.textContent = 'Click to look · WASD move · E gather · F look through your instrument · Esc frees the mouse';
+  hint.textContent = 'Click to look · WASD move · Shift run · Space jump · E gather · F look through your instrument · M Microdex';
   const prompt = document.createElement('div');
-  prompt.style.cssText = `${css};left:calc(50% - 130px);width:260px;text-align:center;top:calc(50% + 16px)`;
+  prompt.style.cssText = `${css};left:calc(50% - 150px);width:300px;text-align:center;top:calc(50% + 18px)`;
+  const compass = document.createElement('div');
+  compass.style.cssText = `${css};left:12px;top:12px;font-size:13px`;
   const cross = document.createElement('div');
   cross.style.cssText = 'position:fixed;left:50%;top:50%;width:6px;height:6px;margin:-3px;background:#fff;mix-blend-mode:difference;pointer-events:none';
-  el.append(hint, prompt, cross);
+  el.append(hint, prompt, compass, cross);
 
   const keys = new Set<string>();
-  let paused = false;
   const ray = new THREE.Raycaster();
   ray.far = REACH;
-  const aimedMesh = () => {
-    ray.setFromCamera(new THREE.Vector2(0, 0), camera);
-    return ray.intersectObjects([...targets])[0]?.object as THREE.Mesh | undefined;
+  let hitPoint = new THREE.Vector3();
+  const dir = new THREE.Vector3();
+  /** The node under the crosshair: the nearest aim sphere the view line passes through, or the pond surface. */
+  const aimed = (): Node | null => {
+    camera.getWorldDirection(dir);
+    let best: Node | null = null;
+    let bestT = Infinity;
+    for (const n of nodes) {
+      if (!n.alive) continue;
+      const v = n.center.clone().sub(camera.position);
+      const t = v.dot(dir);
+      if (t < 0 || t > REACH + n.aimRadius || t >= bestT) continue;
+      if (v.addScaledVector(dir, -t).length() <= n.aimRadius) {
+        best = n;
+        bestT = t;
+      }
+    }
+    ray.set(camera.position, dir);
+    const hit = ray.intersectObject(water)[0];
+    // the water plane extends under the banks, so only count it where the ground is really below the surface
+    if (hit && hit.distance < bestT && heightAt(hit.point.x, hit.point.z) < WATER_LEVEL - 0.02) {
+      hitPoint = hit.point;
+      return pondNode;
+    }
+    return best;
+  };
+
+  // --- gathering: shrink away, grow back later
+  const anims: { obj: THREE.Object3D; from: number; to: number; start: number; done?: () => void }[] = [];
+  const timers = new Set<number>();
+  const animate = (obj: THREE.Object3D, from: number, to: number, done?: () => void) =>
+    anims.push({ obj, from, to, start: performance.now(), done });
+
+  const gatherNode = (n: Node) => {
+    gather(ctx, n.aim.gather!);
+    n.alive = false;
+    animate(n.root, 1, 0.001, () => scene.remove(n.root));
+    timers.add(
+      window.setTimeout(() => {
+        n.alive = true;
+        n.root.scale.setScalar(0.001);
+        scene.add(n.root);
+        animate(n.root, 0.001, 1);
+      }, RESPAWN_MS),
+    );
   };
 
   const onKey = (e: KeyboardEvent, down: boolean) => {
     const k = e.key.toLowerCase();
     if (down) keys.add(k);
     else keys.delete(k);
-    if (!down || paused || !controls.isLocked) return;
-    const mesh = aimedMesh();
-    const aim = mesh?.userData.aim as Aim | undefined;
-    if (!mesh || !aim) return;
-    if (k === 'e' && aim.gather) {
-      gather(ctx, aim.gather);
-      scene.remove(mesh);
-      targets.delete(mesh);
-      timers.add(window.setTimeout(() => spawn(mesh.userData.spot as Spot), RESPAWN_MS));
+    if (e.code === 'Space') {
+      if (down) keys.add(' ');
+      else keys.delete(' ');
+      if (controls.isLocked) e.preventDefault();
     }
-    if (k === 'f' && aim.sample) {
+    if (!down || paused || !controls.isLocked) return;
+    const n = aimed();
+    if (!n) return;
+    if (k === 'e' && n.aim.gather) gatherNode(n);
+    if (k === 'f' && n.aim.sample) {
       controls.unlock();
-      ctx.bus.emit('openEyepiece', { sampleId: aim.sample });
+      ctx.bus.emit('openEyepiece', { sampleId: n.aim.sample });
     }
   };
   const onDown = (e: KeyboardEvent) => onKey(e, true);
@@ -117,45 +192,132 @@ export function mountVoxelWorld(el: HTMLElement, ctx: GameContext): WorldHandle 
   addEventListener('keydown', onDown);
   addEventListener('keyup', onUp);
   renderer.domElement.addEventListener('click', onClick);
-
   const offOpen = ctx.bus.on('openEyepiece', () => (paused = true));
   const offClose = ctx.bus.on('closeEyepiece', () => (paused = false));
 
   const resize = () => {
     renderer.setSize(el.clientWidth, el.clientHeight);
-    camera.aspect = el.clientWidth / el.clientHeight;
+    camera.aspect = el.clientWidth / Math.max(1, el.clientHeight);
     camera.updateProjectionMatrix();
   };
   const ro = new ResizeObserver(resize);
   ro.observe(el);
   resize();
 
-  const describe = (aim: Aim | undefined) => {
-    if (!aim) return '';
+  const describe = (n: Node | null) => {
+    if (!n) return '';
     const parts: string[] = [];
-    if (aim.gather) parts.push(`E gather ${ctx.data.items[aim.gather]?.name ?? aim.gather}`);
-    if (aim.sample) parts.push(`F look at ${ctx.data.samples[aim.sample]?.name ?? aim.sample}`);
+    if (n.aim.gather) parts.push(`E gather ${ctx.data.items[n.aim.gather]?.name ?? n.aim.gather}`);
+    if (n.aim.sample) parts.push(`F look at ${ctx.data.samples[n.aim.sample]?.name ?? n.aim.sample}`);
     return parts.join(' · ');
   };
 
-  let last = performance.now();
-  let raf = requestAnimationFrame(function frame(now) {
+  /** Push the player out of anything solid: scenery blockers and live nodes. */
+  const collide = (p: THREE.Vector3) => {
+    const push = (x: number, z: number, r: number) => {
+      const dx = p.x - x;
+      const dz = p.z - z;
+      const d = Math.hypot(dx, dz);
+      const min = r + PLAYER_RADIUS;
+      if (d < min && d > 1e-4) {
+        p.x = x + (dx / d) * min;
+        p.z = z + (dz / d) * min;
+      }
+    };
+    blockers.forEach((b: Blocker) => push(b.x, b.z, b.r));
+    nodes.forEach((n) => n.alive && n.radius > 0 && push(n.x, n.z, n.radius));
+  };
+
+  const heading = () => {
+    const d = new THREE.Vector3();
+    camera.getWorldDirection(d);
+    const deg = (Math.atan2(d.x, -d.z) * 180) / Math.PI;
+    return ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.round((((deg % 360) + 360) % 360) / 45) % 8]!;
+  };
+
+  const clock = new THREE.Clock();
+  let raf = requestAnimationFrame(function frame() {
     raf = requestAnimationFrame(frame);
-    const dt = Math.min((now - last) / 1000, 0.05);
-    last = now;
+    const dt = Math.min(clock.getDelta(), 0.05);
+    const t = performance.now();
+
     if (controls.isLocked && !paused) {
-      const speed = 5 * dt;
+      const p = camera.position;
+      const ground = heightAt(p.x, p.z);
+      const wading = ground < WATER_LEVEL;
+      const speed = (keys.has('shift') ? RUN : WALK) * (wading ? 0.55 : 1) * dt;
       controls.moveForward(((keys.has('w') ? 1 : 0) - (keys.has('s') ? 1 : 0)) * speed);
       controls.moveRight(((keys.has('d') ? 1 : 0) - (keys.has('a') ? 1 : 0)) * speed);
+      collide(p);
+      const r = Math.hypot(p.x, p.z);
+      if (r > WORLD_RADIUS - 2) p.multiplyScalar((WORLD_RADIUS - 2) / r); // keeps x, z; y is reset below
+      const feet = heightAt(p.x, p.z);
+      const eye = feet + EYE_HEIGHT;
+      const onGround = p.y <= eye + 0.02;
+      if (onGround && keys.has(' ')) vy = JUMP;
+      vy -= GRAVITY * dt;
+      p.y += vy * dt;
+      if (p.y <= eye) {
+        p.y = eye;
+        vy = 0;
+      }
+    } else {
+      camera.position.y = Math.max(camera.position.y, heightAt(camera.position.x, camera.position.z) + EYE_HEIGHT);
     }
-    prompt.textContent = controls.isLocked && !paused ? describe(aimedMesh()?.userData.aim as Aim | undefined) : '';
+
+    // sun and its shadow follow the player
+    sun.position.copy(camera.position).addScaledVector(SUN_DIRECTION, 90);
+    sun.target.position.copy(camera.position);
+
+    for (let i = anims.length - 1; i >= 0; i--) {
+      const a = anims[i]!;
+      const k = Math.min(1, (t - a.start) / ANIM_MS);
+      a.obj.scale.setScalar(a.from + (a.to - a.from) * k * k * (3 - 2 * k));
+      if (k >= 1) {
+        anims.splice(i, 1);
+        a.done?.();
+      }
+    }
+    if (crystal) crystalLight.intensity = 12 + 4 * Math.sin(t * 0.0021);
+
+    const n = controls.isLocked && !paused ? aimed() : null;
+    prompt.textContent = describe(n);
+    ring.visible = !!n;
+    if (n) {
+      const radius = n.radius > 0 ? n.radius + 0.2 : 0.8;
+      const rx = n.radius > 0 ? n.x : hitPoint.x;
+      const rz = n.radius > 0 ? n.z : hitPoint.z;
+      ring.position.set(rx, n.radius > 0 ? heightAt(rx, rz) + 0.05 : WATER_LEVEL + 0.03, rz);
+      ring.scale.setScalar(radius * (1 + 0.04 * Math.sin(t * 0.006)));
+    }
+    compass.textContent = `${heading()} · ${camera.position.x.toFixed(0)}, ${camera.position.z.toFixed(0)}`;
     renderer.render(scene, camera);
   });
+
+  if (import.meta.env.DEV) {
+    // Dev only: jump around for screenshots, e.g. __world.lookAtKind('iron').
+    const teleport = (x: number, z: number, yawDeg = 0, pitchDeg = 0) => {
+      camera.position.set(x, heightAt(x, z) + EYE_HEIGHT, z);
+      camera.rotation.set(THREE.MathUtils.degToRad(pitchDeg), THREE.MathUtils.degToRad(yawDeg), 0, 'YXZ');
+    };
+    (window as unknown as { __world: unknown }).__world = {
+      camera,
+      controls,
+      teleport,
+      nodes: nodes.map((n) => ({ kind: n.kind, x: n.x, z: n.z })),
+      /** Stand `dist` m south of the first node of a kind, looking at it. */
+      lookAtKind(kind: string, dist = 2.5) {
+        const n = nodes.find((m) => m.kind === kind);
+        if (n) teleport(n.x, n.z + dist, 0, -12);
+        return !!n;
+      },
+    };
+  }
 
   return {
     dispose() {
       cancelAnimationFrame(raf);
-      timers.forEach((t) => clearTimeout(t));
+      timers.forEach((id) => clearTimeout(id));
       ro.disconnect();
       offOpen();
       offClose();
