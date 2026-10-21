@@ -160,7 +160,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const css = 'position:fixed;color:#fff;text-shadow:0 0 3px #000;pointer-events:none';
   const hint = document.createElement('div');
   hint.style.cssText = `${css};left:12px;bottom:12px`;
-  hint.textContent = 'Click to look · WASD move · Shift run · Space jump · E gather · F look closer · C craft · Tab menu · M Microdex';
+  hint.textContent = 'Click to look · WASD move · Shift run · Space jump · E gather · F look closer · C craft · T tech tree · I inventory · Tab menu · G guide · M Microdex';
   const prompt = document.createElement('div');
   prompt.style.cssText = `${css};left:calc(50% - 150px);width:300px;text-align:center;top:calc(50% + 18px)`;
   const trackHud = document.createElement('div');

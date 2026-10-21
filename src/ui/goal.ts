@@ -1,9 +1,9 @@
-// Goal card: always on screen, tells the player what to do right now and shows the whole checklist for the next
-// microscope. Works without the mouse: C crafts the next ready step. It also tells the world which material to
+// Goal card: always on screen, tells the player what to do right now and shows the tech tree of the next
+// microscope (click a material to track it). Works without the mouse: C crafts the next ready step. It also tells the world which material to
 // point at (trackItem). Owner: Person D.
 import { actionText, currentAction, nextGoalRecipe, planFor, type Plan } from '../shared/plan';
-import { fmtUm } from '../shared/sim/walls';
-import { canCraft, craft, type GameContext } from '../shared/state';
+import { craft, type GameContext } from '../shared/state';
+import { drawTree, goalLayout } from './techtree';
 import type { Toast } from './toast';
 
 export interface GoalHandle {
@@ -19,8 +19,6 @@ const div = (css = '', text = '') => {
   d.textContent = text;
   return d;
 };
-
-const MARK = { done: '✓', now: '▶', todo: '○', locked: '🔒' } as const;
 
 export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void): GoalHandle {
   const card = div(
@@ -52,7 +50,7 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void):
     const now = div('flex:1;font-size:14px;font-weight:600;color:#ffe08a', plan ? (action ? actionText(action, data) : 'Look around') : 'You built every microscope!');
     const toggle = document.createElement('button');
     toggle.textContent = expanded ? '▾' : '▸';
-    toggle.title = 'Show or hide the checklist';
+    toggle.title = 'Show or hide the tree';
     toggle.onclick = () => {
       expanded = !expanded;
       render();
@@ -71,61 +69,29 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void):
       const trackedRaw = plan.raw.find((r) => r.itemId === pinned && r.missing > 0) ?? plan.raw.find((r) => r.missing > 0);
       if (pinned && trackedRaw?.itemId !== pinned) pinned = null;
       track(trackedRaw?.itemId ?? null);
-      if (expanded) card.append(...checklist(plan, trackedRaw?.itemId ?? null));
+      const p = plan;
+      const where = action?.kind === 'gather' && trackedRaw ? data.materials[trackedRaw.itemId]?.where : undefined;
+      if (where) card.append(div('font-size:11px;color:#b8c8b8;margin-top:2px', where));
+      if (expanded) {
+        const left = (id: string) => p.steps.find((x) => x.recipe.output.itemId === id)?.times ?? 0;
+        const raw = (id: string) => p.raw.find((r) => r.itemId === id);
+        card.append(
+          drawTree(ctx, goalLayout(p.goal, data), {
+            size: 'small',
+            done: (id) => (raw(id) ? raw(id)!.missing === 0 : left(id) === 0),
+            badge: (id) => {
+              const r = raw(id);
+              const have = state.inventory[id] ?? 0;
+              return r ? `${r.total - r.missing}/${r.total}` : have ? `${have}` : null;
+            },
+            hi: action?.kind === 'craft' ? action.step.recipe.output.itemId : trackedRaw?.itemId,
+            onPick: (id) => raw(id) && raw(id)!.missing > 0 && ((pinned = id), render()),
+          }),
+        );
+      }
     }
 
     if (said) card.append(div('margin-top:8px;padding:6px 8px;border-radius:6px;background:#1c3a1f;color:#fff', said));
-    card.append(div('margin-top:6px;font-size:11px;color:#789', 'C craft next · F look · I inventory · Tab menu · G guide · M Microdex'));
-  };
-
-  const checklist = (p: Plan, tracked: string | null): HTMLElement[] => {
-    const { data } = ctx;
-    const rows: HTMLElement[] = [];
-    const row = (mark: keyof typeof MARK, text: string, opts: { sub?: string; onClick?: () => void; hi?: boolean; dim?: boolean } = {}) => {
-      const r = div(
-        `margin:3px 0;padding:3px 6px;border-radius:6px;${opts.onClick ? 'cursor:pointer;' : ''}${opts.hi ? 'background:#2c4a2f;' : ''}${opts.dim ? 'opacity:.55;' : ''}`,
-      );
-      r.append(div('', `${MARK[mark]} ${text}`));
-      if (opts.sub) r.append(div('font-size:11px;color:#b8c8b8;margin-left:16px', opts.sub));
-      if (opts.onClick) r.onclick = opts.onClick;
-      rows.push(r);
-    };
-    const nextId = p.nextStep?.recipe.id;
-    const firstOpen = p.raw.find((r) => r.missing > 0);
-
-    for (const r of p.raw) {
-      const name = data.items[r.itemId]?.name ?? r.itemId;
-      const idn = r.identify;
-      if (idn) {
-        const mark = idn.done ? 'done' : r === firstOpen ? 'now' : 'todo';
-        row(mark, `Identify ${idn.feature.name} (${fmtUm(idn.feature.sizeUm)})`, {
-          sub: idn.done ? undefined : `Look (F) at a ${idn.sample.name} with a ${idn.scope?.name ?? 'microscope'}`,
-          hi: !idn.done && r === firstOpen,
-          onClick: () => (pinned = r.itemId, render()),
-        });
-      }
-      const done = r.missing === 0;
-      const locked = !!idn && !idn.done;
-      const have = r.total - r.missing;
-      row(done ? 'done' : locked ? 'locked' : r === firstOpen ? 'now' : 'todo', `Gather ${name} ${have}/${r.total}`, {
-        sub: !done && (r.itemId === tracked || r === firstOpen) ? data.materials[r.itemId]?.where : undefined,
-        hi: r.itemId === tracked && !done,
-        dim: done || locked,
-        onClick: done ? undefined : () => (pinned = r.itemId, render()),
-      });
-    }
-    for (const s of p.allSteps) {
-      const left = p.steps.find((x) => x.recipe.id === s.recipe.id)?.times ?? 0;
-      const ready = nextId === s.recipe.id;
-      const uses = s.recipe.inputs.map((x) => `${x.count} ${data.items[x.itemId]?.name ?? x.itemId}`).join(' + ');
-      row(left === 0 ? 'done' : ready ? 'now' : 'todo', `Craft ${s.recipe.name}${left > 1 ? ` ×${left}` : ''}${ready ? '  [C]' : ''}`, {
-        sub: left > 0 ? `uses ${uses}` : undefined,
-        hi: ready,
-        dim: left === 0,
-        onClick: left > 0 && canCraft(ctx, s.recipe.id) ? () => doCraft(s.recipe.id) : undefined,
-      });
-    }
-    return rows;
   };
 
   const doCraft = (recipeId: string) => {

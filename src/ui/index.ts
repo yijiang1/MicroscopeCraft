@@ -1,11 +1,12 @@
-// Person D. The goal card (always visible, keyboard-first), a menu panel (Tab) with inventory, every recipe and
-// the guide, the Microdex (M), toasts and sound. Plain DOM; swap for anything.
-import { canCraft, craft, type GameContext } from '../shared/state';
+// Person D. The goal card (always visible, keyboard-first), a menu panel (Tab) with the guide, the tech tree (T),
+// the Microdex (M), toasts and sound. Plain DOM; swap for anything.
+import type { GameContext } from '../shared/state';
 import { fmtUm } from '../shared/sim/walls';
 import { mountGoal } from './goal';
 import { mountInventory } from './inventory';
 import { mountMicrodex } from './microdex';
 import { mountSound } from './sound';
+import { mountTechTree } from './techtree';
 import { createToast } from './toast';
 
 export interface UIHandle {
@@ -17,16 +18,20 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   const microdex = mountMicrodex(document.body, ctx);
   const sound = mountSound(ctx);
   const inventory = mountInventory(ctx);
+  const techTree = mountTechTree(document.body, ctx);
 
-  // --- menu panel (hidden until Tab): inventory, every recipe, microdex button, sound, guide
+  // --- menu panel (hidden until Tab): tech tree and microdex buttons, sound, guide
   el.style.cssText += ';background:#000d;padding:8px;box-sizing:border-box;display:none';
-  const inv = document.createElement('div');
+  const tree = document.createElement('button');
   const dex = document.createElement('button');
   const mute = document.createElement('button');
   const guide = document.createElement('div');
   const input = document.createElement('input');
   const reply = document.createElement('p');
-  dex.style.cssText = 'display:block;width:100%;margin:8px 0';
+  tree.style.cssText = 'display:block;width:100%;margin:8px 0 2px';
+  tree.textContent = 'Tech tree (T)';
+  tree.onclick = () => techTree.toggle();
+  dex.style.cssText = 'display:block;width:100%;margin:2px 0';
   dex.onclick = () => microdex.toggle();
   mute.style.cssText = 'display:block;width:100%;margin:2px 0';
   const syncMute = () => (mute.textContent = sound.muted() ? 'Sound: off' : 'Sound: on');
@@ -52,7 +57,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   const title = document.createElement('h4');
   title.textContent = 'Menu (Tab to close)';
   title.style.margin = '4px 0 8px';
-  el.append(title, inv, dex, mute, guide);
+  el.append(title, tree, dex, mute, guide);
 
   let menuOpen = false;
   const setMenu = (open: boolean) => {
@@ -64,23 +69,6 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   const goal = mountGoal(ctx, toast, () => setMenu(!menuOpen));
 
   const render = () => {
-    const { data } = ctx;
-    inv.replaceChildren();
-    const all = document.createElement('details');
-    const sum = document.createElement('summary');
-    sum.textContent = 'All recipes';
-    sum.style.cssText = 'cursor:pointer;font-weight:600;margin:8px 0 4px';
-    all.append(sum);
-    for (const r of data.recipes) {
-      const b = document.createElement('button');
-      b.textContent = r.name;
-      b.title = `Uses ${r.inputs.map((x) => `${x.count} ${data.items[x.itemId]?.name ?? x.itemId}`).join(' + ')}`;
-      b.disabled = !canCraft(ctx, r.id);
-      b.style.cssText = 'display:block;margin:2px 0;width:100%';
-      b.onclick = () => craft(ctx, r.id);
-      all.append(b);
-    }
-    inv.append(all);
     dex.textContent = `Microdex (M) · ${microdex.summary()}`;
   };
   render();
@@ -128,6 +116,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
       removeEventListener('keydown', onKey);
       goal.dispose();
       inventory.dispose();
+      techTree.dispose();
       microdex.dispose();
       sound.dispose();
       toast.dispose();
