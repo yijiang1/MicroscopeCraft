@@ -161,6 +161,8 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   let thirdPerson = false;
   const viewDirection = new THREE.Vector3();
   const shoulder = new THREE.Vector3();
+  const boom = new THREE.Vector3();
+  const boomRay = new THREE.Raycaster();
   const updateView = () => {
     player.root.position.copy(camera.position);
     player.root.position.y -= EYE_HEIGHT;
@@ -171,7 +173,14 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     if (thirdPerson) {
       camera.getWorldDirection(viewDirection);
       shoulder.set(1, 0, 0).applyQuaternion(camera.quaternion);
-      viewCamera.position.addScaledVector(viewDirection, -3.2).addScaledVector(shoulder, 0.7);
+      // pull the camera in front of any wall, ceiling or statue between it and the player's eyes
+      boom.copy(viewDirection).multiplyScalar(-3.2).addScaledVector(shoulder, 0.7);
+      const length = boom.length();
+      boomRay.set(camera.position, boom.divideScalar(length));
+      boomRay.far = length;
+      const hit = boomRay.intersectObject(campus.group)[0];
+      viewCamera.position.addScaledVector(boom, hit ? Math.max(0.2, hit.distance - 0.3) : length);
+      player.root.visible = !hit || hit.distance > 1;
       viewCamera.position.y = Math.max(viewCamera.position.y, heightAt(viewCamera.position.x, viewCamera.position.z) + 0.3);
       viewCamera.lookAt(camera.position.clone().addScaledVector(viewDirection, REACH));
     }
