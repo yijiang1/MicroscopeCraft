@@ -1,5 +1,7 @@
 // Person D. Inventory, crafting, Microdex and guide box. Plain DOM; swap for anything.
 import { canCraft, craft, type GameContext } from '../shared/state';
+import { fmtUm } from '../shared/sim/walls';
+import { mountMicrodex } from './microdex';
 
 export interface UIHandle {
   dispose(): void;
@@ -8,7 +10,14 @@ export interface UIHandle {
 export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   el.style.cssText += ';background:#000a;padding:8px;box-sizing:border-box';
   const inv = document.createElement('div');
-  const dex = document.createElement('div');
+  const dex = document.createElement('button');
+  const toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:30;padding:10px 18px;border-radius:8px;background:#1c3a1fee;color:#fff;font:15px system-ui;display:none;pointer-events:none';
+  document.body.append(toast);
+  let toastTimer = 0;
+  const microdex = mountMicrodex(document.body, ctx);
+  dex.style.cssText = 'display:block;width:100%;margin:8px 0';
+  dex.onclick = () => microdex.toggle();
   const guide = document.createElement('div');
   const input = document.createElement('input');
   const reply = document.createElement('p');
@@ -44,22 +53,27 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
       b.onclick = () => craft(ctx, r.id);
       inv.append(b);
     }
-    dex.replaceChildren(Object.assign(document.createElement('h4'), { textContent: 'Microdex' }));
-    for (const id of state.discoveries) {
-      const f = Object.values(data.samples).flatMap((s) => s.features).find((x) => x.id === id);
-      dex.append(Object.assign(document.createElement('div'), { textContent: f ? `${f.name}: ${f.blurb}` : id }));
-    }
+    dex.textContent = `Microdex (M) · ${microdex.summary()}`;
   };
   render();
   const offs = [
     ctx.bus.on('itemGathered', render),
     ctx.bus.on('itemCrafted', render),
-    ctx.bus.on('discoveryUnlocked', render),
+    ctx.bus.on('discoveryUnlocked', ({ id }) => {
+      render();
+      const f = Object.values(ctx.data.samples).flatMap((x) => x.features).find((x) => x.id === id);
+      toast.textContent = `New discovery: ${f?.name ?? id}${f ? ` (${fmtUm(f.sizeUm)})` : ''}. Open the Microdex (M)`;
+      toast.style.display = 'block';
+      clearTimeout(toastTimer);
+      toastTimer = window.setTimeout(() => (toast.style.display = 'none'), 4000);
+    }),
     ctx.bus.on('guideReplied', ({ text }) => (reply.textContent = text)),
   ];
   return {
     dispose() {
       offs.forEach((off) => off());
+      microdex.dispose();
+      toast.remove();
       el.replaceChildren();
     },
   };

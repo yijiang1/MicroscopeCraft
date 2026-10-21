@@ -6,5 +6,8 @@
   "alga": {"label": "Alga", "drawing": "algae", "minSizeUm": 5, "maxSizeUm": 100, "tiers": [2, 3]},
   "bacteria": {"label": "Bacteria", "drawing": "rods", "minSizeUm": 0.5, "maxSizeUm": 5, "tiers": [3]},
   "crystal": {"label": "Crystal lattice", "drawing": "lattice", "minSizeUm": 0.0001, "maxSizeUm": 0.001, "tiers": [5]},
-  "pond_water": {"label": "Pond water", "drawing": "algae", "minSizeUm": 0.05, "maxSizeUm": 100, "tiers": [2, 3]}
+  "pond_water": {"label": "Pond water", "drawing": "algae", "minSizeUm": 0.05, "maxSizeUm": 100, "tiers": [2, 3]},
+  "flower": {"label": "Flower", "drawing": "pollen", "minSizeUm": 20, "maxSizeUm": 500, "tiers": [1, 2, 3]},
+  "insect_wing": {"label": "Insect wing", "drawing": "veins", "minSizeUm": 5, "maxSizeUm": 500, "tiers": [1, 2, 3]},
+  "quartz_grain": {"label": "Quartz grain", "drawing": "grains", "minSizeUm": 0.5, "maxSizeUm": 500, "tiers": [1, 2, 3]}
 }

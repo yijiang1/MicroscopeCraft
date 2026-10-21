@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameData, parseGameData } from './data';
+import { visibility } from './sim/optics';
+import { NAKED_EYE, scopeParamsFromSpec } from './sim/scope';
 import materials from '../../data/materials.json';
 import recipes from '../../data/recipes.json';
 import samples from '../../data/samples.json';
@@ -23,5 +25,24 @@ describe('game data', () => {
   it('rejects a sample on an object missing from the catalog', () => {
     const bad = { ...raw, samples: [{ ...samples[0], worldObject: 'ghost' }] };
     expect(() => parseGameData(bad)).toThrow(/not in catalog/);
+  });
+});
+
+describe('content rules', () => {
+  const data = loadGameData();
+  const features = Object.values(data.samples).flatMap((s) => s.features);
+
+  it('has about a dozen discoveries', () => expect(features.length).toBeGreaterThanOrEqual(10));
+
+  it('every Microdex blurb is exactly two sentences', () => {
+    for (const f of features) expect(f.blurb.match(/[.!?](\s|$)/g)?.length, f.id).toBe(2);
+  });
+
+  it('every feature can be seen by some microscope step (perfect focus), except the electron showpieces', () => {
+    const scopes = [NAKED_EYE, ...data.recipes.flatMap((r) => (r.scope ? r.scope.steps.map((_, i) => scopeParamsFromSpec(r.scope!, i)) : []))];
+    const showpieces = ['pond_virus']; // needs the tier 5 electron microscope, built in phase 6
+    for (const f of features.filter((x) => !showpieces.includes(x.id))) {
+      expect(scopes.some((s) => visibility(f, s).visible), f.id).toBe(true);
+    }
   });
 });

@@ -24,9 +24,11 @@ function noise(a: number, b: number, seed: number) {
   return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
 }
 
-/** Midrib, secondary veins and finer veins. Width scales from the feature's sizeUm (the finest vein). */
+/** Midrib, secondary veins and finer veins. sizeUm is the finest vein width; the rest of the pattern scales
+ *  with it (tuned at 40 µm) so a coarser vein feature, like an insect wing, gets a coarser network. */
 const veins: Drawer = (g, f) => {
   const seed = seedOf(f.id);
+  const k = f.sizeUm / 40;
   g.strokeStyle = '#a8e6a1';
   g.lineCap = 'round';
   const line = (x0: number, y0: number, x1: number, y1: number, w: number) => {
@@ -36,19 +38,19 @@ const veins: Drawer = (g, f) => {
     g.lineTo(x1, y1);
     g.stroke();
   };
-  line(-6000, 0, 6000, 0, f.sizeUm * 8);
+  line(-6000 * k, 0, 6000 * k, 0, f.sizeUm * 4);
   for (let i = -6; i <= 6; i++) {
     for (const side of [-1, 1]) {
-      const x = i * 900 + noise(i, side, seed) * 200;
-      const len = 3200;
+      const x = (i * 900 + noise(i, side, seed) * 200) * k;
+      const len = 3200 * k;
       const ex = x + len * 0.55;
       const ey = side * len * 0.8;
-      line(x, 0, ex, ey, f.sizeUm * 3);
-      for (let k = 1; k < 14; k++) {
-        const t = k / 14;
+      line(x, 0, ex, ey, f.sizeUm * 2);
+      for (let n = 1; n < 14; n++) {
+        const t = n / 14;
         const bx = x + (ex - x) * t;
         const by = side * Math.abs(ey) * t;
-        const l = 320 * (1 - t * 0.6);
+        const l = 320 * k * (1 - t * 0.6);
         line(bx, by, bx + l * 0.9, by + side * l * 0.45, f.sizeUm);
         line(bx, by, bx - l * 0.4, by + side * l * 0.9, f.sizeUm);
       }
@@ -118,7 +120,60 @@ const algae: Drawer = (g, f, v) => {
   }, h * 1.4);
 };
 
-/** Stand-in for pollen, rods, hair and lattices until someone draws them properly. */
+/** Pollen: a round grain with a ring and a crown of spikes. */
+const pollen: Drawer = (g, f, v) => {
+  const seed = seedOf(f.id);
+  const r = f.sizeUm / 2;
+  forGrid(v, f.sizeUm * 2.4, (i, j, cx, cy) => {
+    const a0 = noise(i, j, seed) * Math.PI;
+    g.fillStyle = `hsl(${48 + noise(j, i, seed) * 10} 75% ${55 + noise(i, j, seed + 1) * 10}%)`;
+    g.strokeStyle = '#f6e27a';
+    g.lineWidth = r * 0.12;
+    g.beginPath();
+    g.arc(cx, cy, r, 0, Math.PI * 2);
+    g.fill();
+    for (let k = 0; k < 14; k++) {
+      const a = a0 + (k / 14) * Math.PI * 2;
+      g.moveTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+      g.lineTo(cx + Math.cos(a) * r * 1.28, cy + Math.sin(a) * r * 1.28);
+    }
+    g.stroke();
+  });
+};
+
+/** Hairs: thin curved strands at random angles; sizeUm is the strand width. */
+const hair: Drawer = (g, f, v) => {
+  const seed = seedOf(f.id);
+  const len = f.sizeUm * 10;
+  g.strokeStyle = '#d9e8c4';
+  g.lineWidth = f.sizeUm * 0.5;
+  g.lineCap = 'round';
+  forGrid(v, len * 0.5, (i, j, cx, cy) => {
+    const a = noise(i, j, seed) * Math.PI;
+    const bend = (noise(j, i, seed) - 0.5) * len * 0.5;
+    g.beginPath();
+    g.moveTo(cx - Math.cos(a) * len / 2, cy - Math.sin(a) * len / 2);
+    g.quadraticCurveTo(cx - Math.sin(a) * bend, cy + Math.cos(a) * bend, cx + Math.cos(a) * len / 2, cy + Math.sin(a) * len / 2);
+    g.stroke();
+  });
+};
+
+/** Overlapping wing scales, like roof tiles; sizeUm is the scale width. */
+const scales: Drawer = (g, f, v) => {
+  const seed = seedOf(f.id);
+  const w = f.sizeUm;
+  forGrid(v, w, (i, j, cx, cy) => {
+    g.fillStyle = `hsl(${25 + noise(i, j, seed) * 35} 55% ${40 + noise(j, i, seed) * 20}%)`;
+    g.strokeStyle = '#00000055';
+    g.lineWidth = w * 0.06;
+    g.beginPath();
+    g.ellipse(cx, cy, w * 0.55, w * 1.1, 0, 0, Math.PI * 2);
+    g.fill();
+    g.stroke();
+  }, w * 0.7);
+};
+
+/** Stand-in for rods and lattices until someone draws them properly. */
 const dots: Drawer = (g, f, v) => {
   const seed = seedOf(f.id);
   g.fillStyle = '#a8e6a1';
@@ -130,5 +185,5 @@ const dots: Drawer = (g, f, v) => {
 };
 
 export const DRAWERS: Record<Drawing, Drawer> = {
-  veins, cells, grains, pollen: dots, rods: dots, algae, hair: dots, lattice: dots,
+  veins, cells, grains, pollen, rods: dots, algae, hair, scales, lattice: dots,
 };

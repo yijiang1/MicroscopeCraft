@@ -70,5 +70,78 @@
         "blurb": "Viruses are a hundred times smaller than a pond alga cell. Visible light is too coarse to resolve them, so you need electrons."
       }
     ]
+  },
+  {
+    "id": "flower",
+    "name": "Flower",
+    "worldObject": "flower",
+    "biome": "meadow",
+    "features": [
+      {
+        "id": "flower_hairs",
+        "name": "Petal hairs",
+        "sizeUm": 60,
+        "contrast": 0.45,
+        "drawing": "hair",
+        "blurb": "Tiny hairs cover petals and stems. They slow the wind at the surface and keep small pests off."
+      },
+      {
+        "id": "flower_pollen",
+        "name": "Pollen grains",
+        "sizeUm": 30,
+        "contrast": 0.5,
+        "drawing": "pollen",
+        "blurb": "Each pollen grain carries half of a plant's genes inside a tough shell. The spikes and ridges on that shell are different for every species."
+      }
+    ]
+  },
+  {
+    "id": "insect_wing",
+    "name": "Insect wing",
+    "worldObject": "insect_wing",
+    "biome": "meadow",
+    "features": [
+      {
+        "id": "wing_veins",
+        "name": "Wing veins",
+        "sizeUm": 80,
+        "contrast": 0.6,
+        "drawing": "veins",
+        "blurb": "Veins stiffen the thin wing like the spokes of an umbrella. They also carry fluid and air tubes to keep the wing alive."
+      },
+      {
+        "id": "wing_scales",
+        "name": "Wing scales",
+        "sizeUm": 20,
+        "contrast": 0.4,
+        "drawing": "scales",
+        "blurb": "A butterfly's colors come from thousands of overlapping scales, like roof tiles. Each scale is only about twenty micrometres wide."
+      }
+    ]
+  },
+  {
+    "id": "quartz_grain",
+    "name": "Quartz grain",
+    "worldObject": "quartz_grain",
+    "biome": "meadow",
+    "features": [
+      {
+        "id": "quartz_facets",
+        "name": "Quartz facets",
+        "sizeUm": 120,
+        "contrast": 0.6,
+        "drawing": "grains",
+        "blurb": "Quartz grains are clear and have sharp, glassy faces. That purity makes quartz sand the best raw material for lenses."
+      },
+      {
+        "id": "quartz_pits",
+        "name": "Surface pits",
+        "sizeUm": 0.8,
+        "contrast": 0.35,
+        "drawing": "lattice",
+        "blurb": "Wind and water slowly pit the surface of sand grains as they tumble. Pits this small only show up under an oil-immersion lens.",
+        "onTop": true
+      }
+    ]
   }
 ]

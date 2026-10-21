@@ -14,9 +14,12 @@ const PX_PER_APPARENT_UM = 0.04;
 /** Gaussian sigma = FWHM / 2.355. Simplification: treat d_eff as the FWHM of the point-spread function. */
 const FWHM_TO_SIGMA = 1 / 2.355;
 const BACKGROUND = '#16361a';
-/** Specimen point at the middle of the field. Placeholder: sits on a secondary leaf vein so a magnified view
- *  shows a vein network rather than only the midrib. Becomes per-sample data when panning is added. */
-const CENTER = { x: 475, y: -700 };
+const SNAPSHOT_PX = 160;
+/** A Microdex picture must show the feature between these on-screen sizes (px), so it is neither a speck nor a wall. */
+const SNAPSHOT_FEATURE_PX = { min: 8, max: 300 };
+/** Field centre as a multiple of the sample's biggest feature size. Placeholder: this spot lands on a secondary
+ *  vein for vein samples and inside the pattern for the rest. Becomes real per-sample data when panning is added. */
+const CENTER_IN_SIZES = { x: 15.6, y: -17.5 };
 /** Focus: slider position runs -1..1. Defocus blur (µm) = |offset from best focus| × this × NA.
  *  Simplification: geometric blur, linear in NA, so high-NA objectives are fussier like real ones. */
 const FOCUS_BLUR_UM_PER_NA = 8;
@@ -95,6 +98,15 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
     }
   };
 
+  /** Centre crop of the field as a small JPEG, kept for the Microdex card (the HUD sits at the edges). */
+  const snapshot = () => {
+    const side = Math.min(canvas.width, canvas.height) * 0.55;
+    const t = document.createElement('canvas');
+    t.width = t.height = SNAPSHOT_PX;
+    t.getContext('2d')?.drawImage(canvas, (canvas.width - side) / 2, (canvas.height - side) / 2, side, side, 0, 0, SNAPSHOT_PX, SNAPSHOT_PX);
+    return t.toDataURL('image/jpeg', 0.8);
+  };
+
   const render = () => {
     const sample = sampleId ? ctx.data.samples[sampleId] : undefined;
     const g = canvas.getContext('2d');
@@ -105,20 +117,22 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
     const { scope: baseScope } = ctx.state;
     const { scope, defocusUm } = effectiveScope(baseScope);
     const pxPerUm = scope.magnification * PX_PER_APPARENT_UM;
+    const biggest = Math.max(...sample.features.map((f) => f.sizeUm));
+    const center = { x: CENTER_IN_SIZES.x * biggest, y: CENTER_IN_SIZES.y * biggest };
     const view: View = {
-      x0: CENTER.x - w / 2 / pxPerUm, x1: CENTER.x + w / 2 / pxPerUm,
-      y0: CENTER.y - h / 2 / pxPerUm, y1: CENTER.y + h / 2 / pxPerUm,
+      x0: center.x - w / 2 / pxPerUm, x1: center.x + w / 2 / pxPerUm,
+      y0: center.y - h / 2 / pxPerUm, y1: center.y + h / 2 / pxPerUm,
       pxPerUm,
     };
 
-    // Specimen layer: smaller features first so the bigger structure sits on top. Alpha = contrast.
+    // Specimen layer: smaller features first so the bigger structure sits on top; onTop textures go last. Alpha = contrast.
     sg.fillStyle = BACKGROUND;
     sg.fillRect(0, 0, w, h);
     sg.save();
     sg.translate(w / 2, h / 2);
     sg.scale(pxPerUm, pxPerUm);
-    sg.translate(-CENTER.x, -CENTER.y);
-    for (const f of [...sample.features].sort((a, b) => a.sizeUm - b.sizeUm)) {
+    sg.translate(-center.x, -center.y);
+    for (const f of [...sample.features].sort((a, b) => +a.onTop - +b.onTop || a.sizeUm - b.sizeUm)) {
       sg.globalAlpha = Math.min(1, f.contrast * scope.contrastBoost * 2);
       DRAWERS[f.drawing](sg, f, view);
     }
@@ -145,7 +159,13 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
       const v = visibility(f, scope);
       g.fillStyle = v.visible ? '#9be59b' : '#ffb27a';
       g.fillText(`${v.visible ? '✓' : '✗'} ${f.name} (${fmtUm(f.sizeUm)}): ${v.visible ? 'visible' : v.reason}`, 20, 54 + i * 22);
-      if (v.visible) discover(ctx, f.id);
+      if (v.visible) {
+        const px = f.sizeUm * pxPerUm;
+        const good = px >= SNAPSHOT_FEATURE_PX.min && px <= SNAPSHOT_FEATURE_PX.max;
+        const quality = f.sizeUm / dEffUm;
+        const better = quality > (ctx.state.snapshots[f.id]?.quality ?? 0);
+        discover(ctx, f.id, good && better ? { image: snapshot(), quality } : undefined);
+      }
     });
     const bar = niceBarUm(pxPerUm);
     g.fillStyle = '#fff';

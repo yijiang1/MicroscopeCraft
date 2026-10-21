@@ -8,7 +8,7 @@ TypeScript + Vite. Three.js for the 3D world, a plain 2D canvas for the microsco
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173 (click the world, WASD, E gather, F eyepiece)
+npm run dev      # http://localhost:5173 (click the world, WASD, E gather, F eyepiece, M Microdex)
 npm run check    # typecheck + lint + tests; must pass before every PR
 ```
 
@@ -33,6 +33,7 @@ Every module depends on `src/shared`; **no module imports another** (ESLint enfo
 - **State**: `ctx.state` is read-only for renderers. Change it only with the actions in `src/shared/state.ts` (`gather`, `craft`, `discover`).
 - **Events** (`src/shared/events.ts`): `openEyepiece({sampleId})`, `closeEyepiece`, `itemGathered`, `itemCrafted`, `discoveryUnlocked`, `tierChanged`, `guideAsked`, `guideReplied`.
 - **Zoom**: a microscope recipe lists `steps` (label, magnification, NA). `setZoom(ctx, i)` picks one; `state.scope` always holds the current step.
+- **Microdex**: `microdex(data, state)` (`src/shared/microdex.ts`) groups one card per feature by biome. The eyepiece keeps the best picture of each discovery in `state.snapshots`. A sample is a `data/samples.json` entry; `npm test` checks every blurb is two sentences and every feature is reachable by some microscope.
 - **Sim**: `visibility(feature, scope)` in `src/shared/sim/optics.ts` returns whether a feature shows and the reason it does not (`unresolved`, `empty-magnification`, `too-small-to-see`, `low-contrast`). `explainWall()` in `src/shared/sim/walls.ts` turns that into the plain-language "hit a wall" message. The scope banner and the guide both use it.
 
 Each module runs from day one. The world has gatherable cubes and a leaf, the eyepiece blurs a procedural specimen by the scope's effective resolution, the guide gives canned replies keyed on the sim's reason code, and `data/worlds/default.json` is the fixed world spec. Replace internals inside your own folder; keep the exported `mount*` signature.

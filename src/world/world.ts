@@ -18,7 +18,7 @@ interface Spot {
 }
 
 const sand = (x: number, z: number): Spot => ({ color: '#e8d9a0', x, z, aim: { gather: 'beach_sand', sample: 'sand_grain' } });
-const quartz = (x: number, z: number): Spot => ({ color: '#f4f1ea', x, z, aim: { gather: 'quartz_sand', sample: 'sand_grain' } });
+const quartz = (x: number, z: number): Spot => ({ color: '#f4f1ea', x, z, aim: { gather: 'quartz_sand', sample: 'quartz_grain' } });
 const iron = (x: number, z: number): Spot => ({ color: '#8a5a44', x, z, aim: { gather: 'iron_ore' } });
 const copper = (x: number, z: number): Spot => ({ color: '#c27d4a', x, z, aim: { gather: 'copper_ore' } });
 const oil = (x: number, z: number): Spot => ({ color: '#d9c84a', x, z, aim: { gather: 'plant_oil' } });
@@ -27,7 +27,7 @@ const block = (x0: number, x1: number, z0: number, z1: number, make: (x: number,
   for (let x = x0; x <= x1; x++) for (let z = z0; z <= z1; z++) out.push(make(x, z));
   return out;
 };
-// Leaf and pond are samples only: looking never uses them up.
+// Leaf, flower, wing and pond are samples only: looking never uses them up.
 const SPOTS: Spot[] = [
   ...block(3, 5, -6, -4, sand),
   ...block(8, 9, -6, -4, quartz),
@@ -35,6 +35,8 @@ const SPOTS: Spot[] = [
   ...block(-4, -3, -7, -7, copper),
   ...block(0, 1, -9, -9, oil),
   { color: '#2e8b3a', x: 0, z: -5, aim: { sample: 'leaf' } },
+  { color: '#d95fa8', x: -1, z: -7, aim: { sample: 'flower' } },
+  { color: '#e89a3c', x: 2, z: -8, aim: { sample: 'insect_wing' } },
   { color: '#3d7fd6', x: -8, z: -10, aim: { sample: 'pond_water' } },
 ];
 const REACH = 6;

@@ -12,7 +12,7 @@ export interface GameContext {
 }
 
 export function createGame(data: GameData, bus: Bus = createBus()): GameContext {
-  const state: GameState = { inventory: {}, discoveries: [], currentSampleId: null, scope: NAKED_EYE };
+  const state: GameState = { inventory: {}, discoveries: [], snapshots: {}, currentSampleId: null, scope: NAKED_EYE };
   const ctx = { data, state, bus };
   bus.on('openEyepiece', ({ sampleId }) => (state.currentSampleId = sampleId));
   bus.on('closeEyepiece', () => (state.currentSampleId = null));
@@ -56,9 +56,11 @@ export function craft(ctx: GameContext, recipeId: string): boolean {
   return true;
 }
 
-/** Idempotent: emits discoveryUnlocked only the first time. */
-export function discover(ctx: GameContext, featureId: string) {
-  if (ctx.state.discoveries.includes(featureId)) return;
-  ctx.state.discoveries.push(featureId);
+/** Emits discoveryUnlocked only the first time. A snapshot is kept for the Microdex card if it beats the stored one. */
+export function discover(ctx: GameContext, featureId: string, snapshot?: { image: string; quality: number }) {
+  const { discoveries, snapshots } = ctx.state;
+  if (snapshot && snapshot.quality > (snapshots[featureId]?.quality ?? 0)) snapshots[featureId] = snapshot;
+  if (discoveries.includes(featureId)) return;
+  discoveries.push(featureId);
   ctx.bus.emit('discoveryUnlocked', { id: featureId });
 }

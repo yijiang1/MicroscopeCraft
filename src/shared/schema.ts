@@ -13,7 +13,7 @@ const Id = z.string().regex(/^[a-z0-9_]+$/, 'ids are lower_snake_case');
 const Color = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'color is #rrggbb');
 
 /** How the 2D scope renderer draws a feature or catalog type. Add a value here when Person B adds a drawing. */
-export const DrawingSchema = z.enum(['veins', 'grains', 'hair', 'cells', 'pollen', 'rods', 'algae', 'lattice']);
+export const DrawingSchema = z.enum(['veins', 'grains', 'hair', 'cells', 'pollen', 'rods', 'algae', 'scales', 'lattice']);
 export type Drawing = z.infer<typeof DrawingSchema>;
 
 export const MaterialSchema = z.object({
@@ -66,17 +66,22 @@ export const FeatureSchema = z.object({
   /** 0..1, set by sample type (stains/imaging method multiply it via ScopeParams.contrastBoost). */
   contrast: z.number().min(0).max(1),
   drawing: DrawingSchema,
+  /** Surface texture drawn over the larger features instead of under them (default: smaller features sit underneath). */
+  onTop: z.boolean().default(false),
   /** Microdex card text: two sentences. */
   blurb: z.string(),
 });
 export type Feature = z.infer<typeof FeatureSchema>;
+
+export const BiomeSchema = z.enum(['meadow', 'pond', 'mine', 'lab']);
+export type Biome = z.infer<typeof BiomeSchema>;
 
 export const SampleSchema = z.object({
   id: Id,
   name: z.string(),
   /** Id of the object in the world that this sample sits on (e.g. the leaf cube). */
   worldObject: Id,
-  biome: z.enum(['meadow', 'pond', 'mine', 'lab']),
+  biome: BiomeSchema,
   features: z.array(FeatureSchema).min(1),
 });
 export type Sample = z.infer<typeof SampleSchema>;
@@ -133,6 +138,9 @@ export interface ScopeParams {
 export interface GameState {
   inventory: Record<string, number>;
   discoveries: string[];
+  /** The best picture the player has had of each discovery (small image data URL), by feature id.
+   *  quality = feature size ÷ d_eff at capture; a sharper later view replaces an earlier one. */
+  snapshots: Record<string, { image: string; quality: number }>;
   /** Sample currently under the eyepiece; null when the eyepiece is closed. */
   currentSampleId: string | null;
   scope: ScopeParams;
