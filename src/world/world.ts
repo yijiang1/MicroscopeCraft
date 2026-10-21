@@ -158,7 +158,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const player = buildPlayer();
   scene.add(player.root);
   const viewCamera = camera.clone();
-  let thirdPerson = false;
+  let thirdPerson = true;
   const viewDirection = new THREE.Vector3();
   const shoulder = new THREE.Vector3();
   const boom = new THREE.Vector3();
@@ -193,7 +193,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const css = 'position:fixed;color:#fff;text-shadow:0 0 3px #000;pointer-events:none';
   const hint = document.createElement('div');
   hint.style.cssText = `${css};left:12px;bottom:12px`;
-  hint.textContent = 'Click to look · WASD move · Shift run · Space jump · E gather · F look closer · C craft · T tech tree · I inventory · Tab menu · G guide · M Microdex · V camera';
+  hint.textContent = 'Click to look · WASD move · Shift run · Space jump · E gather · F look closer · C craft · T tech tree · I inventory · Tab menu · G guide · M Microdex · V view';
   const prompt = document.createElement('div');
   prompt.style.cssText = `${css};left:calc(50% - 150px);width:300px;text-align:center;top:calc(50% + 18px)`;
   const trackHud = document.createElement('div');

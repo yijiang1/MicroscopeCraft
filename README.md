@@ -51,7 +51,7 @@ Simplified physics is labelled in comments next to the formula.
 | --- | --- |
 | Click, WASD, mouse | Look and walk (Esc frees the mouse) |
 | Shift, Space | Run, jump |
-| V | Switch first/third-person camera to see your blue-shirted explorer |
+| V | Switch between the over-the-shoulder view (the default) and first-person |
 | E | Gather the item you are aiming at (a ring and a prompt show what it is) |
 | C | Craft the next ready step of your goal (no mouse needed) |
 | Tab | Menu: inventory, all recipes, guide, sound (G jumps straight to the guide box) |
