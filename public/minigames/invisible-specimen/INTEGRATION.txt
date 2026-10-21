@@ -1,0 +1,82 @@
+The Invisible Specimen — version 2: Across Scales
+
+Open index.html directly, or run npm run dev from the repository root and visit
+/minigames/invisible-specimen/index.html on the local Vite server.
+One self-contained HTML file; no dependencies or required network requests.
+
+Ten assignments:
+1. Transparent swimmer (60 μm), phase contrast.
+2. Pigmented alga (18 μm), bright field.
+3. Salt microcrystal (120 μm), low-magnification shape identification.
+4. Glass fiber (200 μm), dark-field edges.
+5. Rod bacterium (3 μm), high-NA optical imaging.
+6. Diatom shell (30 μm) with 270 nm detail; blue versus red light.
+7. Metal nanoprism (60 nm), prepared electron grid.
+8. Prepared virus-like particle (120 nm), electron imaging.
+9. Crystal lattice patch (4 nm) with a 220 pm periodic feature.
+10. Defective lattice patch (5 nm) with a missing image feature.
+
+Controls: pointer / arrow keys aim; 1–3 optical contrast mode; [ ] focus;
+Click a specimen to lock it as the zoom target (dashed outline). Magnification
+changes center on its current world position, independently of pointer movement
+to the dropdown. Without an explicit lock, the last hovered specimen is retained.
+With no candidate, zoom preserves the view center. Click empty space to release
+the lock. C centers the selected specimen, or the crosshair if no specimen is known. Find slide resets stage and overview magnification.
+Space / photograph captures. Assignments can be selected in any order.
+
+Optical magnifications: 100×, 400×, 1000×, 2000× digital enlargement.
+Electron magnifications: 10,000× to 4,000,000×.
+Illumination: white (550 nm reference), red 650 nm, blue 450 nm,
+TEM 100 kV (3.70 pm wavelength), HRTEM 200 kV (2.51 pm wavelength).
+
+Model:
+Lengths in μm. FOV diameter = 80,000 / magnification (μm).
+Optical resolution = 0.61 × wavelength / NA. NA is 0.25, 0.65, or 1.2,
+with NA unchanged for the 2000× digital enlargement.
+Electron resolution is a separate illustrative instrument limit:
+100 kV preset: 0.35 nm; 200 kV HRTEM preset: 0.18 nm.
+The preset difference represents different instrument capabilities, not a
+universal rule that higher accelerating voltage always resolves smaller detail.
+Rendering, blur and contrast are qualitative, not a wave-optical simulation.
+Live/optical slides cannot be sent to the electron instrument. Electron missions
+load a prepared, static sample; optical contrast controls are disabled there.
+Decoy sizes vary. Larger specimens require lower magnification to frame fully.
+
+Progress:
+Journal photos/settings saved under localStorage key invisible-specimen-v2.
+Storage errors fall back to session-only operation. Reset journal asks for
+confirmation. Version 1 progress is not migrated. Reload begins on assignment 1;
+recorded entries remain marked and may be replayed.
+
+MicroscopeCraft integration:
+The game is located at public/minigames/invisible-specimen/index.html. Show it
+in a same-origin iframe. Pause world movement and unlock its pointer controls.
+After the iframe loads, listen on iframe.contentWindow for CustomEvent:
+  invisible-specimen:complete
+Detail:
+{ game: 'invisible-specimen', version: 2, completed: true,
+  reward: 'across-scales', specimens: [ten specimen IDs], shots: number }
+
+Completion fires after a capture fills all ten journal entries, once per page
+session unless the journal is reset. Grant host rewards idempotently.
+The standalone game does not mutate MicroscopeCraft inventory.
+API: iframe.contentWindow.invisibleSpecimen.getState() and .restart().
+restart() restarts the lab on assignment 1 and preserves the saved journal.
+Remove the iframe to release its animation, listeners and observer.
+
+Verification:
+JavaScript syntax; all ten assignments solvable at desktop and small-screen
+sizes using suitable magnifications; resolution, optical wavelength, overzoom,
+and live-slide preparation gates. Browser-tested salt and atomic-lattice
+capture, centering/zoom, saved progress after reload, and red/blue resolution
+feedback. Original version's movement, pause and optical mode playthrough was
+also tested before expansion.
+
+References:
+https://www.jeol.com/products/science/em.php
+https://www.jeol.com/words/emterms/20121023.071258.php
+https://histology.leeds.ac.uk/home/what-is-histology/the_light_microscope/
+
+Zoom regression: pointer exit, hover retention, moving target anchoring, empty-view
+zoom, and overview reset checked. Repeated 200,000× ↔ 4,000,000× zoom verified
+in the browser with the selected lattice patch remaining centered.

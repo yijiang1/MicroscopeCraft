@@ -132,3 +132,9 @@ Pitch points: the instrument is earned by building it; every upgrade has a numer
 **Data-driven**: new recipe, material, sample or catalog type = one JSON entry in `data/`. `npm test` validates it against the schema and checks cross-references.
 
 **The LLM never generates pixels or free-form content.** It outputs a world-spec JSON that `validateWorldSpec` accepts or rejects.
+
+## The Invisible Specimen minigame
+
+Run `npm run dev`, then open `/minigames/invisible-specimen/index.html` on the local server. The standalone game includes ten assignments, optical and electron imaging, magnification, specimen-locked zoom, and a saved discovery journal. You can also open its HTML file directly without a server.
+
+See [integration notes](public/minigames/invisible-specimen/INTEGRATION.txt) for the completion event and iframe setup. Building entry points and inventory rewards are not wired into the main world yet.
