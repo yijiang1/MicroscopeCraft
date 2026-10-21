@@ -7,6 +7,7 @@ import { gather, type GameContext } from '../shared/state';
 import { buildDecor, buildSky, FOG_COLOR, SUN_DIRECTION, type Blocker } from './decor';
 import type { WorldHandle } from './index';
 import { buildModel } from './models';
+import { buildPlayer } from './player';
 import { AIMS, PLACEMENTS, RADIUS, type Aim, type Kind } from './placements';
 import { buildTerrain, buildWater, heightAt, LAB, POND, WATER_LEVEL, WORLD_RADIUS } from './terrain';
 
@@ -138,13 +139,36 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const camera = new THREE.PerspectiveCamera(70, 1, 0.1, 1500);
   camera.position.set(0, heightAt(0, 3) + EYE_HEIGHT, 3);
   const controls = new PointerLockControls(camera, renderer.domElement);
+  const player = buildPlayer();
+  scene.add(player.root);
+  const viewCamera = camera.clone();
+  let thirdPerson = false;
+  const viewDirection = new THREE.Vector3();
+  const shoulder = new THREE.Vector3();
+  const updateView = () => {
+    player.root.position.copy(camera.position);
+    player.root.position.y -= EYE_HEIGHT;
+    player.root.rotation.y = camera.rotation.y;
+    player.root.visible = thirdPerson;
+    viewCamera.position.copy(camera.position);
+    viewCamera.quaternion.copy(camera.quaternion);
+    if (thirdPerson) {
+      camera.getWorldDirection(viewDirection);
+      shoulder.set(1, 0, 0).applyQuaternion(camera.quaternion);
+      viewCamera.position.addScaledVector(viewDirection, -3.2).addScaledVector(shoulder, 0.7);
+      viewCamera.position.y = Math.max(viewCamera.position.y, heightAt(viewCamera.position.x, viewCamera.position.z) + 0.3);
+      viewCamera.lookAt(camera.position.clone().addScaledVector(viewDirection, REACH));
+    }
+    viewCamera.updateMatrixWorld();
+  };
+  updateView();
   let vy = 0;
   let paused = false;
 
   const css = 'position:fixed;color:#fff;text-shadow:0 0 3px #000;pointer-events:none';
   const hint = document.createElement('div');
   hint.style.cssText = `${css};left:12px;bottom:12px`;
-  hint.textContent = 'Click to look · WASD move · Shift run · Space jump · E gather · F look closer · C craft · Tab menu · M Microdex';
+  hint.textContent = 'Click to look · WASD move · Shift run · Space jump · E gather · F look closer · C craft · Tab menu · M Microdex · V camera';
   const prompt = document.createElement('div');
   prompt.style.cssText = `${css};left:calc(50% - 150px);width:300px;text-align:center;top:calc(50% + 18px)`;
   const trackHud = document.createElement('div');
@@ -162,23 +186,25 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const dir = new THREE.Vector3();
   /** The node under the crosshair: the nearest aim sphere the view line passes through, or the pond surface. */
   const aimed = (): Node | null => {
-    camera.getWorldDirection(dir);
+    viewCamera.getWorldDirection(dir);
     let best: Node | null = null;
     let bestT = Infinity;
     for (const n of nodes) {
       if (!n.alive) continue;
-      const v = n.center.clone().sub(camera.position);
+      if (n.center.distanceTo(camera.position) > REACH + n.aimRadius) continue;
+      const v = n.center.clone().sub(viewCamera.position);
       const t = v.dot(dir);
-      if (t < 0 || t > REACH + n.aimRadius || t >= bestT) continue;
+      if (t < 0 || t > REACH + 4 + n.aimRadius || t >= bestT) continue;
       if (v.addScaledVector(dir, -t).length() <= n.aimRadius) {
         best = n;
         bestT = t;
       }
     }
-    ray.set(camera.position, dir);
+    ray.far = thirdPerson ? REACH + 4 : REACH;
+    ray.set(viewCamera.position, dir);
     const hit = ray.intersectObject(water)[0];
     // the water plane extends under the banks, so only count it where the ground is really below the surface
-    if (hit && hit.distance < bestT && heightAt(hit.point.x, hit.point.z) < WATER_LEVEL - 0.02) {
+    if (hit && hit.point.distanceTo(camera.position) <= REACH && hit.distance < bestT && heightAt(hit.point.x, hit.point.z) < WATER_LEVEL - 0.02) {
       hitPoint = hit.point;
       return pondNode;
     }
@@ -222,6 +248,11 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       if (controls.isLocked) e.preventDefault();
     }
     if (!down || paused || !controls.isLocked) return;
+    if (k === 'v' && !e.repeat) {
+      thirdPerson = !thirdPerson;
+      updateView();
+      return;
+    }
     const n = aimed();
     if (!n) return;
     if (k === 'e' && n.aim.gather) {
@@ -246,6 +277,8 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     renderer.setSize(el.clientWidth, el.clientHeight);
     camera.aspect = el.clientWidth / Math.max(1, el.clientHeight);
     camera.updateProjectionMatrix();
+    viewCamera.aspect = camera.aspect;
+    viewCamera.updateProjectionMatrix();
   };
   const ro = new ResizeObserver(resize);
   ro.observe(el);
@@ -290,6 +323,8 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     raf = requestAnimationFrame(frame);
     const dt = Math.min(clock.getDelta(), 0.05);
     const t = performance.now();
+    const previousX = camera.position.x;
+    const previousZ = camera.position.z;
 
     if (controls.isLocked && !paused) {
       const p = camera.position;
@@ -314,6 +349,9 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     } else {
       camera.position.y = Math.max(camera.position.y, heightAt(camera.position.x, camera.position.z) + EYE_HEIGHT);
     }
+
+    player.update(Math.hypot(camera.position.x - previousX, camera.position.z - previousZ), dt);
+    updateView();
 
     // sun and its shadow follow the player
     sun.position.copy(camera.position).addScaledVector(SUN_DIRECTION, 90);
@@ -367,7 +405,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       trackHud.textContent = `${arrow} ${ctx.data.items[tracked!]?.name ?? tracked} · ${Math.hypot(dx, dz).toFixed(0)} m`;
     }
     compass.textContent = `${heading()} · ${camera.position.x.toFixed(0)}, ${camera.position.z.toFixed(0)}`;
-    renderer.render(scene, camera);
+    renderer.render(scene, viewCamera);
   });
 
   if (import.meta.env.DEV) {
@@ -401,6 +439,8 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       offDiscovery();
       removeEventListener('keydown', onDown);
       removeEventListener('keyup', onUp);
+      player.dispose();
+      controls.dispose();
       renderer.dispose();
       el.replaceChildren();
     },
