@@ -12,6 +12,8 @@ export interface GameEvents {
   tierChanged: { tier: Tier };
   /** Player picked another zoom step on the current microscope. */
   zoomChanged: { step: number };
+  /** Player switched to another owned microscope in the eyepiece. */
+  scopeChanged: { tier: Tier };
   /** ui → world: point the player at the nearest source of this item (null = stop). */
   trackItem: { itemId: string | null };
   /** ui → guide: the player asked the guide a question. */

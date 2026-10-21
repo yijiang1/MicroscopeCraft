@@ -71,7 +71,7 @@ To build a microscope above the first, the player needs a material that is only 
 
 The sizes are chosen so each gate really is out of reach of the tier before it: copper veins (50 µm) need the hand lens's 30 µm resolution, seed oil droplets (8 µm) need the compound microscope's 1.5 µm, tungsten grains (0.8 µm) need the high-quality microscope's 0.2 µm. The goal card shows an "Identify" row ahead of the gather rows, with what to look at and which microscope to use.
 
-Tiers 0 to 3 and 5 are playable. Higher-tier microscopes replace lower ones: the best instrument you own is the one you look through, and the high-quality microscope consumes the compound microscope you built before it.
+Tiers 0 to 3 and 5 are playable. Higher-tier microscopes do not replace lower ones: a new microscope becomes the one you look through, but every microscope you own stays in the inventory (the high-quality microscope needs the compound microscope you built first, yet does not use it up). Inside the eyepiece an instrument picker (keys 1, 2, 3 or the buttons) switches between them, so the same sample can be compared at tier 1, 2, 3 and 5; zoom steps and focus follow the chosen instrument. The goal card always follows the best microscope owned, not the one picked.
 
 ## Materials and crafting
 
@@ -219,12 +219,12 @@ The code is split into four owned modules around one shared core, so four people
 | 3D world | src/world | Person A | Terrain, procedural models, scenery, player movement, gathering, aiming, opening the eyepiece |
 | Microscope view | src/scope | Person B | 2D canvas view with zoom, focus, beam damage and drawings by feature type; also owns the simulation rules and their tests |
 | AI and backend | src/guide, server | Person C | Guide (offline today), world-spec validator; planner, world cache and endpoints are deferred |
-| Content and UI | src/ui, data | Person D | Crafting and inventory panel, Microdex, toasts, sound, guide box, recipe, material and sample JSON |
+| Content and UI | src/ui, data | Person D | Goal card, inventory box, crafting menu, Microdex, toasts, sound, guide box, recipe, material and sample JSON |
 
 **The shared contract** was written first, and every module builds on it:
 
 - Types and JSON schemas for recipes, materials, samples, game state and the world spec live in src/shared (Zod) and are checked by tests.
-- A small event layer connects the modules: openEyepiece(sampleId), closeEyepiece(), itemGathered, itemCrafted(itemId), discoveryUnlocked(id), tierChanged, zoomChanged, guideAsked and guideReplied.
+- A small event layer connects the modules: openEyepiece(sampleId), closeEyepiece(), itemGathered, itemCrafted(itemId), discoveryUnlocked(id), tierChanged, zoomChanged, scopeChanged (player picked another owned microscope), guideAsked and guideReplied.
 - src/shared imports nothing from Three.js or the DOM, so the simulation runs in tests and in the backend.
 - A change to a shared type is announced to the team before it is merged (see the README's Contributing section).
 
@@ -250,7 +250,7 @@ The team has four people and the build window is not fixed yet (see open questio
 
 ## Build status
 
-Built and tested (50 automated tests, plus manual checks in the browser): the shared contract; tiers 0, 1, 2, 3 and 5 with zoom steps, focus and beam damage; the wall messages; 18 recipes; 17 discoveries in the Microdex; the offline guide (including where-to-find and what-next answers); the discovery gates; a keyboard-first goal card (the next action in one line, a checklist, C to craft, an arrow to the nearest source), a Tab menu and toasts; the open world with procedural models; synthesised sounds; a demo mode (`?demo`, press K to restock materials).
+Built and tested (51 automated tests, plus manual checks in the browser): the shared contract; tiers 0, 1, 2, 3 and 5 with zoom steps, focus and beam damage; the wall messages; 18 recipes; 17 discoveries in the Microdex; the offline guide (including where-to-find and what-next answers); the discovery gates; a keyboard-first goal card (the next action in one line, a checklist, C to craft, an arrow to the nearest source), an always-visible inventory box (materials, parts, microscopes with the one in use marked; I toggles it), an in-eyepiece instrument picker for comparing microscopes, a Tab menu and toasts; the open world with procedural models; synthesised sounds; a demo mode (`?demo`, press K to restock materials).
 
 Not built: the LLM planner and guide calls, the server and world cache, tiers 4 and 6, stain and contrast methods, stations as places in the world, saving progress between sessions, music and a tutorial.
 

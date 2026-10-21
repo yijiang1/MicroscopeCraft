@@ -24,7 +24,7 @@ const MARK = { done: '✓', now: '▶', todo: '○', locked: '🔒' } as const;
 
 export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void): GoalHandle {
   const card = div(
-    'position:fixed;top:8px;right:calc(var(--panel-w, 0px) + 8px);z-index:15;width:min(310px,calc(100vw - 16px));max-height:82vh;overflow:auto;box-sizing:border-box;padding:8px 10px;border-radius:10px;background:#000c;color:#eee;font:13px system-ui',
+    'position:fixed;top:8px;right:calc(var(--panel-w, 0px) + 8px);z-index:15;width:min(310px,calc(100vw - 16px));max-height:56vh;overflow:auto;box-sizing:border-box;padding:8px 10px;border-radius:10px;background:#000c;color:#eee;font:13px system-ui',
   );
   document.body.append(card);
   let pinned: string | null = null;
@@ -75,7 +75,7 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void):
     }
 
     if (said) card.append(div('margin-top:8px;padding:6px 8px;border-radius:6px;background:#1c3a1f;color:#fff', said));
-    card.append(div('margin-top:6px;font-size:11px;color:#789', 'C craft next · F look · Tab menu · G ask guide · M Microdex'));
+    card.append(div('margin-top:6px;font-size:11px;color:#789', 'C craft next · F look · I inventory · Tab menu · G guide · M Microdex'));
   };
 
   const checklist = (p: Plan, tracked: string | null): HTMLElement[] => {

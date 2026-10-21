@@ -1,8 +1,10 @@
 // Game state lives here, not in any renderer. Only the actions below mutate it,
 // and each emits its event after mutating. Renderers read ctx.state and call actions.
 import { createBus, type Bus } from './events';
-import type { GameData, GameState } from './schema';
-import { NAKED_EYE, scopeFromInventory } from './sim/scope';
+import type { GameData, GameState, Tier } from './schema';
+import { NAKED_EYE, ownedScopes, scopeFromInventory } from './sim/scope';
+
+export { ownedScopes }; // microscopes in the inventory, lowest tier first (UI modules may not import sim/scope)
 
 /** Handed to every module's mount function. */
 export interface GameContext {
@@ -12,7 +14,7 @@ export interface GameContext {
 }
 
 export function createGame(data: GameData, bus: Bus = createBus()): GameContext {
-  const state: GameState = { inventory: {}, discoveries: [], snapshots: {}, currentSampleId: null, scope: NAKED_EYE };
+  const state: GameState = { inventory: {}, discoveries: [], snapshots: {}, currentSampleId: null, scopeChoice: null, scope: NAKED_EYE };
   const ctx = { data, state, bus };
   bus.on('openEyepiece', ({ sampleId }) => (state.currentSampleId = sampleId));
   bus.on('closeEyepiece', () => (state.currentSampleId = null));
@@ -22,16 +24,26 @@ export function createGame(data: GameData, bus: Bus = createBus()): GameContext 
 function refreshScope({ data, state, bus }: GameContext) {
   const before = state.scope.tier;
   // A new best microscope starts at its lowest zoom step.
-  state.scope = scopeFromInventory(state.inventory, data, 0);
+  state.scope = scopeFromInventory(state.inventory, data, 0, state.scopeChoice);
   if (state.scope.tier !== before) bus.emit('tierChanged', { tier: state.scope.tier });
 }
 
 /** Switch the current microscope to another zoom step (clamped to the steps it has). */
 export function setZoom(ctx: GameContext, step: number) {
-  const next = scopeFromInventory(ctx.state.inventory, ctx.data, step);
+  const next = scopeFromInventory(ctx.state.inventory, ctx.data, step, ctx.state.scopeChoice);
   if (next.step === ctx.state.scope.step) return;
   ctx.state.scope = next;
   ctx.bus.emit('zoomChanged', { step: next.step });
+}
+
+/** Look through another microscope you own (by tier), e.g. to compare. Returns false if you don't own it. */
+export function selectScope(ctx: GameContext, tier: number): boolean {
+  if (!ownedScopes(ctx.state.inventory, ctx.data).some((r) => r.scope.tier === tier)) return false;
+  if (ctx.state.scope.tier === tier) return true;
+  ctx.state.scopeChoice = tier as Tier;
+  ctx.state.scope = scopeFromInventory(ctx.state.inventory, ctx.data, 0, tier);
+  ctx.bus.emit('scopeChanged', { tier: ctx.state.scope.tier });
+  return true;
 }
 
 export function gather(ctx: GameContext, itemId: string, count = 1) {
@@ -49,8 +61,9 @@ export function craft(ctx: GameContext, recipeId: string): boolean {
   const recipe = ctx.data.recipes.find((r) => r.id === recipeId);
   if (!recipe || !canCraft(ctx, recipeId)) return false;
   const inv = ctx.state.inventory;
-  for (const i of recipe.inputs) inv[i.itemId] = (inv[i.itemId] ?? 0) - i.count;
+  for (const i of recipe.inputs) if (!i.keep) inv[i.itemId] = (inv[i.itemId] ?? 0) - i.count;
   inv[recipe.output.itemId] = (inv[recipe.output.itemId] ?? 0) + recipe.output.count;
+  if (recipe.scope) ctx.state.scopeChoice = null; // a newly built microscope is the one you look through
   refreshScope(ctx); // before the event, so listeners of itemCrafted already see the new microscope
   ctx.bus.emit('itemCrafted', { itemId: recipe.output.itemId });
   return true;

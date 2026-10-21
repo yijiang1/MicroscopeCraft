@@ -2,7 +2,7 @@
 // Pure, from the recipes, the inventory and the discoveries. Used by the goal panel and the guide. Owner: Person D.
 import type { Feature, GameData, GameState, Recipe, Sample } from './schema';
 import { visibility } from './sim/optics';
-import { scopeParamsFromSpec } from './sim/scope';
+import { scopeFromInventory, scopeParamsFromSpec } from './sim/scope';
 
 export interface PlanStep {
   recipe: Recipe;
@@ -68,10 +68,11 @@ export function lockedBy(itemId: string, data: Pick<GameData, 'materials'>, disc
 }
 
 /** Next microscope above the one the player has, or null when the tree is done. */
-export function nextGoalRecipe(data: Pick<GameData, 'recipes'>, state: Pick<GameState, 'scope'>): Recipe | null {
+export function nextGoalRecipe(data: Pick<GameData, 'recipes'>, state: Pick<GameState, 'inventory'>): Recipe | null {
+  const best = scopeFromInventory(state.inventory, data).tier; // best owned, not the one picked in the eyepiece
   return (
     data.recipes
-      .filter((r) => r.scope && r.scope.tier > state.scope.tier)
+      .filter((r) => r.scope && r.scope.tier > best)
       .sort((a, b) => a.scope!.tier - b.scope!.tier)[0] ?? null
   );
 }

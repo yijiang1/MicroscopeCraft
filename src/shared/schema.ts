@@ -54,7 +54,8 @@ export const RecipeSchema = z.object({
   id: Id,
   name: z.string(),
   station: z.enum(['hand', 'furnace', 'bench']),
-  inputs: z.array(z.object({ itemId: Id, count: z.number().int().positive() })).min(1),
+  /** keep = needed to craft but not used up (a scope you build on stays in your inventory so you can compare). */
+  inputs: z.array(z.object({ itemId: Id, count: z.number().int().positive(), keep: z.boolean().optional() })).min(1),
   output: z.object({ itemId: Id, count: z.number().int().positive() }),
   /** Set when the output is a microscope. */
   scope: ScopeSpecSchema.optional(),
@@ -150,6 +151,8 @@ export interface GameState {
   snapshots: Record<string, { image: string; quality: number }>;
   /** Sample currently under the eyepiece; null when the eyepiece is closed. */
   currentSampleId: string | null;
+  /** Tier of the microscope the player picked in the eyepiece; null = the best one owned. */
+  scopeChoice: Tier | null;
   scope: ScopeParams;
 }
 

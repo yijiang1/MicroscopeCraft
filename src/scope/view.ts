@@ -4,7 +4,7 @@
 import { DRAWERS, type View } from './draw';
 import { dose, scopeResolutionUm, survivingSignal, visibility } from '../shared/sim/optics';
 import { explainWall, fmtUm, nearestWall, resolutionLabel } from '../shared/sim/walls';
-import { discover, setZoom, type GameContext } from '../shared/state';
+import { discover, ownedScopes, selectScope, setZoom, type GameContext } from '../shared/state';
 import type { ScopeParams } from '../shared/schema';
 import type { ScopeHandle } from './index';
 
@@ -67,7 +67,10 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
   const scene = document.createElement('canvas');
 
   const controls = document.createElement('div');
-  controls.style.cssText = 'position:absolute;left:50%;bottom:90px;transform:translateX(-50%);display:flex;gap:8px;align-items:center;color:#fff;font:14px system-ui';
+  controls.style.cssText = 'position:absolute;left:50%;bottom:90px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;align-items:center;max-width:calc(100% - 16px);color:#fff;font:14px system-ui';
+  const scopeBox = document.createElement('div');
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;flex-wrap:wrap;justify-content:center;gap:8px;align-items:center';
   const zoomBox = document.createElement('div');
   const slider = document.createElement('input');
   slider.type = 'range';
@@ -78,7 +81,8 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
   slider.style.width = '220px';
   const focusLabel = document.createElement('label');
   focusLabel.append('Focus ', slider);
-  controls.append(zoomBox, focusLabel);
+  row.append(zoomBox, focusLabel);
+  controls.append(scopeBox, row);
   el.append(canvas, controls);
 
   let sampleId: string | null = null;
@@ -97,8 +101,21 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
   const syncControls = () => {
     const { scope } = ctx.state;
     focusLabel.style.display = scope.tier >= 2 ? '' : 'none';
+    // Instrument picker: every microscope owned, keys 1-9. Only shown when there is a choice.
+    const owned = ownedScopes(ctx.state.inventory, ctx.data);
+    scopeBox.replaceChildren();
+    scopeBox.style.cssText = `display:${owned.length > 1 ? 'flex' : 'none'};flex-wrap:wrap;justify-content:center;gap:4px;align-items:center`;
+    scopeBox.append('Instrument:');
+    owned.forEach((r, i) => {
+      const b = document.createElement('button');
+      b.textContent = `${i + 1} ${r.name}`;
+      b.disabled = r.scope.tier === scope.tier;
+      b.style.cssText = b.disabled ? 'background:#3d7fd6;color:#fff;font-weight:600' : '';
+      b.onclick = () => selectScope(ctx, r.scope.tier); // scopeChanged triggers the redraw
+      scopeBox.append(b);
+    });
     zoomBox.replaceChildren();
-    zoomBox.style.cssText = 'display:flex;gap:4px;white-space:nowrap';
+    zoomBox.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px';
     if (scope.steps.length > 1) {
       scope.steps.forEach((s, i) => {
         const b = document.createElement('button');
@@ -216,20 +233,30 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
     }
   };
 
+  /** The beam only runs (and burns the sample) while an electron microscope is selected. */
+  const syncBeam = () => {
+    clearInterval(doseTimer);
+    if (ctx.state.scope.tier < 5) return;
+    doseTimer = window.setInterval(() => {
+      const area = fieldAreaNm2(canvas.width, canvas.height, ctx.state.scope.magnification);
+      doseENm2 += dose(BEAM_ELECTRONS_PER_S, DOSE_TICK_MS / 1000, area);
+      render();
+    }, DOSE_TICK_MS);
+  };
+
   const open = (id: string) => {
     sampleId = id;
     openedAt = performance.now();
     doseENm2 = 0;
     el.style.display = 'block';
     slider.value = '0';
-    clearInterval(doseTimer);
-    if (ctx.state.scope.tier >= 5) {
-      doseTimer = window.setInterval(() => {
-        const area = fieldAreaNm2(canvas.width, canvas.height, ctx.state.scope.magnification);
-        doseENm2 += dose(BEAM_ELECTRONS_PER_S, DOSE_TICK_MS / 1000, area);
-        render();
-      }, DOSE_TICK_MS);
-    }
+    syncBeam();
+    syncControls();
+    render();
+  };
+
+  const redraw = () => {
+    if (el.style.display !== 'block') return;
     syncControls();
     render();
   };
@@ -238,9 +265,10 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
   let openedAt = 0;
   const onKey = (e: KeyboardEvent) => {
     if (e.repeat || performance.now() - openedAt < 200) return;
-    if (el.style.display === 'block' && (e.key === 'Escape' || e.key.toLowerCase() === 'f')) {
-      ctx.bus.emit('closeEyepiece', {});
-    }
+    if (el.style.display !== 'block') return;
+    if (e.key === 'Escape' || e.key.toLowerCase() === 'f') ctx.bus.emit('closeEyepiece', {});
+    const pick = ownedScopes(ctx.state.inventory, ctx.data)[+e.key - 1];
+    if (pick) selectScope(ctx, pick.scope.tier);
   };
   const onWheel = (e: WheelEvent) => {
     slider.value = String(Math.min(1, Math.max(-1, +slider.value + e.deltaY * 0.0005)));
@@ -255,11 +283,10 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
       el.style.display = 'none';
       clearInterval(doseTimer);
     }),
-    ctx.bus.on('zoomChanged', () => {
-      if (el.style.display === 'block') {
-        syncControls();
-        render();
-      }
+    ctx.bus.on('zoomChanged', redraw),
+    ctx.bus.on('scopeChanged', () => {
+      if (el.style.display === 'block') syncBeam();
+      redraw();
     }),
   ];
 

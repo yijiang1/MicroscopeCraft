@@ -79,7 +79,7 @@
   {
     "id": "hq_microscope", "name": "High-quality microscope", "station": "bench", "color": "#3a6fc0",
     "inputs": [
-      { "itemId": "compound_microscope", "count": 1 },
+      { "itemId": "compound_microscope", "count": 1, "keep": true },
       { "itemId": "precision_lens", "count": 2 },
       { "itemId": "condenser", "count": 1 },
       { "itemId": "immersion_oil", "count": 1 }

@@ -22,8 +22,7 @@ describe('guide replies', () => {
     ctx.bus.emit('guideAsked', { question: 'what next' });
     expect(text).toMatch(/Press C to craft Glass/);
     // compound goal: copper must be identified with the hand lens before it can be gathered
-    ctx.state.scope = { ...ctx.state.scope, tier: 1 };
-    ctx.state.inventory = { beach_sand: 6, iron_ore: 2 };
+    ctx.state.inventory = { beach_sand: 6, iron_ore: 2, hand_lens: 1 };
     ctx.bus.emit('guideAsked', { question: 'what next' });
     expect(text).toMatch(/Next goal: Compound microscope\. Look \(F\) at a Grey rock with your Hand lens to spot Copper veins/);
   });

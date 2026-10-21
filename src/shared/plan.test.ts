@@ -32,20 +32,20 @@ describe('goal plan', () => {
 
   it('later goals list the raw totals from the README table', () => {
     const ctx = createGame(data);
-    ctx.state.scope = { ...ctx.state.scope, tier: 1 };
+    ctx.state.inventory = { hand_lens: 1 }; // owning it is what counts
     const compound = planFor(nextGoalRecipe(data, ctx.state)!, data, {});
     expect(totals(compound)).toEqual({ beach_sand: 6, iron_ore: 2, copper_ore: 1 });
     expect(compound.steps.find((s) => s.recipe.id === 'glass')?.times).toBe(3);
 
-    ctx.state.scope = { ...ctx.state.scope, tier: 2 };
+    ctx.state.inventory = { compound_microscope: 1 }; // owning it is what counts
     const hq = planFor(nextGoalRecipe(data, ctx.state)!, data, { compound_microscope: 1 });
     expect(totals(hq)).toEqual({ quartz_sand: 6, copper_ore: 1, plant_oil: 1 });
 
-    ctx.state.scope = { ...ctx.state.scope, tier: 3 };
+    ctx.state.inventory = { hq_microscope: 1 }; // owning it is what counts
     const em = planFor(nextGoalRecipe(data, ctx.state)!, data, {});
     expect(totals(em)).toEqual({ tungsten_ore: 1, resin: 2, iron_ore: 4, copper_ore: 4 });
 
-    ctx.state.scope = { ...ctx.state.scope, tier: 5 };
+    ctx.state.inventory = { electron_microscope: 1 }; // owning it is what counts
     expect(nextGoalRecipe(data, ctx.state)).toBeNull();
   });
 });
@@ -100,5 +100,12 @@ describe('where to find things', () => {
     expect(itemsMentioned('where do i find glass lens?', data)).toEqual(['lens']);
     expect(itemsMentioned('how do I get glass', data)).toEqual(['glass']);
     expect(itemsMentioned('why is it blurry?', data)).toEqual([]);
+  });
+
+  it('the goal follows the best microscope owned, not the one picked in the eyepiece', () => {
+    const ctx = createGame(data);
+    ctx.state.inventory = { hand_lens: 1, compound_microscope: 1 };
+    ctx.state.scopeChoice = 1;
+    expect(nextGoalRecipe(data, ctx.state)?.id).toBe('hq_microscope');
   });
 });

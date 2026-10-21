@@ -3,6 +3,7 @@
 import { canCraft, craft, type GameContext } from '../shared/state';
 import { fmtUm } from '../shared/sim/walls';
 import { mountGoal } from './goal';
+import { mountInventory } from './inventory';
 import { mountMicrodex } from './microdex';
 import { mountSound } from './sound';
 import { createToast } from './toast';
@@ -15,6 +16,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   const toast = createToast();
   const microdex = mountMicrodex(document.body, ctx);
   const sound = mountSound(ctx);
+  const inventory = mountInventory(ctx);
 
   // --- menu panel (hidden until Tab): inventory, every recipe, microdex button, sound, guide
   el.style.cssText += ';background:#000d;padding:8px;box-sizing:border-box;display:none';
@@ -62,10 +64,8 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   const goal = mountGoal(ctx, toast, () => setMenu(!menuOpen));
 
   const render = () => {
-    const { state, data } = ctx;
+    const { data } = ctx;
     inv.replaceChildren();
-    const have = Object.entries(state.inventory).filter(([, n]) => n > 0);
-    inv.append(Object.assign(document.createElement('div'), { textContent: have.length ? `You have: ${have.map(([id, n]) => `${data.items[id]?.name ?? id} ×${n}`).join(', ')}` : 'You have nothing yet.' }));
     const all = document.createElement('details');
     const sum = document.createElement('summary');
     sum.textContent = 'All recipes';
@@ -124,6 +124,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
       offs.forEach((off) => off());
       removeEventListener('keydown', onKey);
       goal.dispose();
+      inventory.dispose();
       microdex.dispose();
       sound.dispose();
       toast.dispose();

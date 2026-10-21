@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { loadGameData } from './data';
 import type { GameEvents } from './events';
 import { scopeFromInventory } from './sim/scope';
-import { craft, createGame, discover, gather, setZoom } from './state';
+import { craft, createGame, discover, gather, selectScope, setZoom } from './state';
 
 describe('state actions', () => {
   it('sand → glass → lens, iron → frame → hand lens raises the tier and emits events', () => {
@@ -36,7 +36,7 @@ describe('state actions', () => {
 });
 
 describe('tier 2 and 3 crafting', () => {
-  it('upgrading to the high-quality microscope consumes the compound one and unlocks oil immersion', () => {
+  it('upgrading to the high-quality microscope keeps the compound one so the two can be compared', () => {
     const ctx = createGame(loadGameData());
     const have = { beach_sand: 6, iron_ore: 3, copper_ore: 2, quartz_sand: 6, plant_oil: 1 };
     for (const [id, n] of Object.entries(have)) gather(ctx, id, n);
@@ -45,9 +45,17 @@ describe('tier 2 and 3 crafting', () => {
       'quartz_glass', 'quartz_glass', 'quartz_glass', 'precision_lens', 'precision_lens', 'condenser', 'immersion_oil', 'hq_microscope',
     ];
     chain.forEach((id) => expect(craft(ctx, id), id).toBe(true));
-    expect(ctx.state.inventory.compound_microscope).toBe(0);
+    expect(ctx.state.inventory.compound_microscope).toBe(1);
     expect(ctx.state.scope.tier).toBe(3);
     expect(ctx.state.scope.steps).toHaveLength(3);
+    expect(selectScope(ctx, 2)).toBe(true);
+    expect(ctx.state.scope.tier).toBe(2);
+    expect(ctx.state.scope.steps).toHaveLength(ctx.data.recipes.find((r) => r.id === 'compound_microscope')!.scope!.steps.length);
+    setZoom(ctx, 1);
+    expect(ctx.state.scope.tier).toBe(2); // zooming stays on the chosen scope
+    expect(selectScope(ctx, 5)).toBe(false); // not owned
+    expect(selectScope(ctx, 3)).toBe(true);
+    expect(ctx.state.scope.tier).toBe(3);
   });
 
   it('setZoom picks a step, clamps it, and emits only on change', () => {

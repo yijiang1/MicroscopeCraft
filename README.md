@@ -52,7 +52,9 @@ Simplified physics is labelled in comments next to the formula.
 | E | Gather the item you are aiming at (a ring and a prompt show what it is) |
 | C | Craft the next ready step of your goal (no mouse needed) |
 | Tab | Menu: inventory, all recipes, guide, sound (G jumps straight to the guide box) |
-| F | Look at the aimed sample through your best instrument (F or Esc to leave) |
+| F | Look at the aimed sample through your newest instrument (F or Esc to leave) |
+| 1, 2, 3… | In the eyepiece: switch to another microscope you own, to compare (or click its button) |
+| I | Show or hide the inventory box (bottom right: materials, parts, microscopes) |
 | Wheel or slider | Focus (compound microscope and up) |
 | M | Microdex |
 | K | Restock every raw material, skipping the identifications (only when the URL ends in `?demo`) |
