@@ -99,6 +99,16 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   ring.visible = false;
   scene.add(ring);
 
+  // --- tracking: a golden beam and an arrow to the nearest source of the item the goal panel asks for
+  let tracked: string | null = null;
+  const beam = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.1, 0.1, 80, 12, 1, true),
+    new THREE.MeshBasicMaterial({ color: '#ffd24a', transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }),
+  );
+  beam.visible = false;
+  scene.add(beam);
+  const offTrack = ctx.bus.on('trackItem', ({ itemId }) => (tracked = itemId));
+
   // --- player
   const camera = new THREE.PerspectiveCamera(70, 1, 0.1, 1500);
   camera.position.set(0, heightAt(0, 3) + EYE_HEIGHT, 3);
@@ -112,11 +122,13 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   hint.textContent = 'Click to look · WASD move · Shift run · Space jump · E gather · F look through your instrument · M Microdex';
   const prompt = document.createElement('div');
   prompt.style.cssText = `${css};left:calc(50% - 150px);width:300px;text-align:center;top:calc(50% + 18px)`;
+  const trackHud = document.createElement('div');
+  trackHud.style.cssText = `${css};left:50%;transform:translateX(-50%);top:14px;font-size:18px;font-weight:600;color:#ffd24a`;
   const compass = document.createElement('div');
   compass.style.cssText = `${css};left:12px;top:12px;font-size:13px`;
   const cross = document.createElement('div');
   cross.style.cssText = 'position:fixed;left:50%;top:50%;width:6px;height:6px;margin:-3px;background:#fff;mix-blend-mode:difference;pointer-events:none';
-  el.append(hint, prompt, compass, cross);
+  el.append(hint, prompt, compass, trackHud, cross);
 
   const keys = new Set<string>();
   const ray = new THREE.Raycaster();
@@ -290,6 +302,29 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       ring.position.set(rx, n.radius > 0 ? heightAt(rx, rz) + 0.05 : WATER_LEVEL + 0.03, rz);
       ring.scale.setScalar(radius * (1 + 0.04 * Math.sin(t * 0.006)));
     }
+    // nearest live source of the tracked item
+    let target: Node | null = null;
+    if (tracked) {
+      let best = Infinity;
+      for (const n of nodes) {
+        const d = Math.hypot(n.x - camera.position.x, n.z - camera.position.z);
+        if (n.alive && n.aim.gather === tracked && d < best) {
+          best = d;
+          target = n;
+        }
+      }
+    }
+    beam.visible = !!target;
+    trackHud.textContent = '';
+    if (target) {
+      beam.position.set(target.x, heightAt(target.x, target.z) + 38, target.z);
+      const dx = target.x - camera.position.x;
+      const dz = target.z - camera.position.z;
+      camera.getWorldDirection(dir);
+      const angle = (Math.atan2(-dir.z * dx + dir.x * dz, dir.x * dx + dir.z * dz) * 180) / Math.PI; // 0 = straight ahead, 90 = right
+      const arrow = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'][((Math.round(angle / 45) % 8) + 8) % 8]!;
+      trackHud.textContent = `${arrow} ${ctx.data.items[tracked!]?.name ?? tracked} · ${Math.hypot(dx, dz).toFixed(0)} m`;
+    }
     compass.textContent = `${heading()} · ${camera.position.x.toFixed(0)}, ${camera.position.z.toFixed(0)}`;
     renderer.render(scene, camera);
   });
@@ -321,6 +356,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       ro.disconnect();
       offOpen();
       offClose();
+      offTrack();
       removeEventListener('keydown', onDown);
       removeEventListener('keyup', onUp);
       renderer.dispose();

@@ -55,6 +55,12 @@ Simplified physics is labelled in comments next to the formula.
 | M | Microdex |
 | K | Restock every raw material (only when the URL ends in `?demo`) |
 
+## Finding your way
+
+The top of the side panel always shows the **next goal** (the next microscope), the raw materials you still need and where each one is, and the crafts in order. The next button to press is green. Glass and lenses are crafted, not found: they appear in the craft list, not in the world.
+
+The nearest source of the material you need is marked by a **golden beam** in the world, with an arrow and distance at the top of the screen. Click "Show me" on another material to track it instead. You can also ask the guide: "where do I find quartz sand?", "how do I make glass?" or "what next?".
+
 ## The world
 
 A walkable landscape, about 150 m across, in four areas. Everything is procedural: terrain, models and textures are generated in code, with no asset files.
@@ -83,7 +89,7 @@ The top-left corner shows a compass heading and your x, z position.
 Open `http://localhost:5173/?demo`. The LLM prompt-to-world step of the full pitch is not built yet; see DESIGN.md.
 
 1. **Blurry world (0:00).** Walk to a leafy plant (a few steps north-west of the spawn), aim at it and press F with no instrument. The side veins are fuzzy and the fine veins are gone. Say: "Everything we can see is limited by the eye." Press F or Esc to leave.
-2. **Build a hand lens (0:45).** Gather 2 sand mounds (by the pond, west) and 1 iron rock (the rocky highlands, east) with E. In the side panel craft Glass, Glass lens, Iron frame, Hand lens. Look at the leaf again: the vein network is sharp and the Microdex toast appears. Read the banner: the hand lens resolves about 30 µm, so the leaf cells are still blurred.
+2. **Build a hand lens (0:45).** Gather 2 sand mounds (by the pond, west) and 1 iron rock (the rocky highlands, east) with E. Follow the goal panel (it shows the beam to the nearest sand and iron): craft Glass, Glass lens, Iron frame, Hand lens. Look at the leaf again: the vein network is sharp and the Microdex toast appears. Read the banner: the hand lens resolves about 30 µm, so the leaf cells are still blurred.
 3. **Hit the wall, then upgrade (1:45).** Press K to restock. Craft the compound microscope (see table). Look at the pond water (aim at the surface from the shore) at 100×: alga threads. Switch to 800×: the banner says more magnification only makes a bigger blur. Ask the guide "why is it blurry?" (the guide box stays usable while you look).
 4. **High-quality optics (3:00).** Craft the high-quality microscope. Look at the pond at 1000× with oil immersion: bacteria rods appear. Virus particles stay blurred; the banner explains the diffraction limit and points to electrons.
 5. **Electron showpiece (3:45).** Craft the electron microscope. Look at the pond at 150,000×: a virus, then watch the beam damage warning as the dose builds (zoom out or close the eyepiece to reset). Walk far north to the lab pad and look at the glowing crystal at 500,000×: grains, then 2,000,000×: the atomic lattice. Press M to show the Microdex.

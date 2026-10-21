@@ -35,7 +35,7 @@ Success is checked in playtests before the demo: a new player builds a second-ti
 
 Every session repeats one loop, at smaller and smaller scales:
 
-1. **Explore and gather.** Walk the landscape and collect sand, ore, plant oil, resin and other raw materials.
+1. **Explore and gather.** Walk the landscape and collect sand, ore, plant oil, resin and other raw materials. The game never leaves the player lost: a goal panel names the next microscope, lists what is still needed and where it is found, and a golden beam and arrow point to the nearest source.
 2. **Craft parts.** Smelt sand into glass, grind lenses, forge frames and tubes.
 3. **Assemble.** Craft the microscope from its parts in the crafting panel.
 4. **Look.** Aim at a sample, press a key to look through the instrument, and focus; the view shows only what the instrument can resolve.
@@ -75,7 +75,7 @@ Material choice is the main decision in the game: the properties of what you gat
 | Glass slides and cover slips (not built) | Sample holders | Thickness, flatness | Thin, flat samples are easier to focus |
 | Natural dyes (not built) | Stains | Which structures they bind | Raise contrast for chosen features |
 
-Crafting happens in the crafting panel, which labels each recipe with its station (furnace or bench). Stations are not yet places in the world, so any recipe can be crafted from the panel. Recipes are data (JSON): there are 18 now, and adding a part means adding one entry. The raw materials for the whole tree are: 8 beach sand, 6 quartz sand, 7 iron, 6 copper, 1 plant oil, 1 tungsten and 2 resin. Materials grow back 15 seconds after they are gathered.
+The goal panel lists the crafts in order and highlights the next one; the full recipe list is a click away. The guide answers "where do I find X?", "how do I make X?" and "what next?" from the same data (each raw material carries a where-to-find hint in its JSON). Crafting happens in the crafting panel, which labels each recipe with its station (furnace or bench). Stations are not yet places in the world, so any recipe can be crafted from the panel. Recipes are data (JSON): there are 18 now, and adding a part means adding one entry. The raw materials for the whole tree are: 8 beach sand, 6 quartz sand, 7 iron, 6 copper, 1 plant oil, 1 tungsten and 2 resin. Materials grow back 15 seconds after they are gathered.
 
 ## World and scale content
 
@@ -236,7 +236,7 @@ The team has four people and the build window is not fixed yet (see open questio
 
 ## Build status
 
-Built and tested (41 automated tests, plus manual checks in the browser): the shared contract; tiers 0, 1, 2, 3 and 5 with zoom steps, focus and beam damage; the wall messages; 18 recipes; 14 discoveries in the Microdex; the offline guide; the open world with procedural models; synthesised sounds; a demo mode (`?demo`, press K to restock materials).
+Built and tested (47 automated tests, plus manual checks in the browser): the shared contract; tiers 0, 1, 2, 3 and 5 with zoom steps, focus and beam damage; the wall messages; 18 recipes; 14 discoveries in the Microdex; the offline guide (including where-to-find and what-next answers); the goal panel with a world beacon; the open world with procedural models; synthesised sounds; a demo mode (`?demo`, press K to restock materials).
 
 Not built: the LLM planner and guide calls, the server and world cache, tiers 4 and 6, stain and contrast methods, stations as places in the world, saving progress between sessions, music and a tutorial.
 

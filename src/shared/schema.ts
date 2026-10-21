@@ -20,6 +20,8 @@ export const MaterialSchema = z.object({
   id: Id,
   name: z.string(),
   color: Color,
+  /** Where to find it in the world, in plain words (shown in the goal panel and by the guide). */
+  where: z.string().optional(),
   /** Numeric properties that feed the simulation, e.g. { purity: 0.7 }. Free-form on purpose. */
   properties: z.record(z.string(), z.number()).default({}),
 });
