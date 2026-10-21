@@ -166,12 +166,12 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const updateView = () => {
     player.root.position.copy(camera.position);
     player.root.position.y -= EYE_HEIGHT;
-    player.root.rotation.y = camera.rotation.y;
+    camera.getWorldDirection(viewDirection);
+    player.root.rotation.y = Math.atan2(-viewDirection.x, -viewDirection.z); // yaw only: camera.rotation is XYZ order, not YXZ
     player.root.visible = thirdPerson;
     viewCamera.position.copy(camera.position);
     viewCamera.quaternion.copy(camera.quaternion);
     if (thirdPerson) {
-      camera.getWorldDirection(viewDirection);
       shoulder.set(1, 0, 0).applyQuaternion(camera.quaternion);
       // pull the camera in front of any wall, ceiling or statue between it and the player's eyes
       boom.copy(viewDirection).multiplyScalar(-3.2).addScaledVector(shoulder, 0.7);
