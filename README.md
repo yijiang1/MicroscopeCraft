@@ -12,6 +12,8 @@ npm run dev      # http://localhost:5173 (click the world, WASD, E gather, F eye
 npm run check    # typecheck + lint + tests; must pass before every PR
 ```
 
+Sounds are synthesised in the browser (`src/ui/sound.ts`); the side panel has a mute button.
+
 Other scripts: `npm run build`, `npm test`, `npm run typecheck`, `npm run lint`.
 In dev, `window.game` exposes the game context (`game.state`, `game.bus`) for poking from the console.
 
@@ -40,6 +42,38 @@ Each module runs from day one. The world has gatherable cubes and a leaf, the ey
 
 Units: lengths are micrometres (µm) everywhere, spelled in field names (`sizeUm`, `dLensUm`).
 Simplified physics is labelled in comments next to the formula.
+
+## Controls
+
+| Key | Action |
+| --- | --- |
+| Click, WASD, mouse | Look and walk (Esc frees the mouse) |
+| E | Gather the cube you are aiming at |
+| F | Look at the aimed sample through your best instrument (F or Esc to leave) |
+| Wheel or slider | Focus (compound microscope and up) |
+| M | Microdex |
+| K | Restock every raw material (only when the URL ends in `?demo`) |
+
+## What to build (from `data/recipes.json`)
+
+| Instrument | Raw materials in total | Steps |
+| --- | --- | --- |
+| Hand lens (tier 1) | 2 beach sand, 1 iron | Glass → Glass lens; Iron frame; Hand lens |
+| Compound microscope (tier 2) | 6 beach sand, 2 iron, 1 copper | 2 Glass lens, Iron tube, Focus knob, Lamp (copper + glass) |
+| High-quality microscope (tier 3) | 6 quartz sand, 1 copper, 1 plant oil, plus the compound microscope | 3 Quartz glass → 2 Precision lens; Condenser; Immersion oil |
+| Electron microscope (tier 5) | 1 tungsten, 2 resin, 4 iron, 4 copper | Tungsten filament; Vacuum seal → Vacuum chamber; 2 Magnetic lens |
+
+## Demo script (about 5 minutes)
+
+Open `http://localhost:5173/?demo`. The LLM prompt-to-world step of the full pitch is not built yet; see DESIGN.md.
+
+1. **Blurry world (0:00).** Walk to the green leaf cube, press F with no instrument. The side veins are fuzzy and the fine veins are gone. Say: "Everything we can see is limited by the eye." Press F or Esc to leave.
+2. **Build a hand lens (0:45).** Gather 2 sand cubes and 1 iron cube with E. In the side panel craft Glass, Glass lens, Iron frame, Hand lens. Look at the leaf again: the vein network is sharp and the Microdex toast appears. Read the banner: the hand lens resolves about 30 µm, so the leaf cells are still blurred.
+3. **Hit the wall, then upgrade (1:45).** Press K to restock. Craft the compound microscope (see table). Look at the pond cube at 100×: alga threads. Switch to 800×: the banner says more magnification only makes a bigger blur. Ask the guide "why is it blurry?" (the guide box stays usable while you look).
+4. **High-quality optics (3:00).** Craft the high-quality microscope. Look at the pond at 1000× with oil immersion: bacteria rods appear. Virus particles stay blurred; the banner explains the diffraction limit and points to electrons.
+5. **Electron showpiece (3:45).** Craft the electron microscope. Look at the pond at 150,000×: a virus, then watch the beam damage warning as the dose builds (zoom out or close the eyepiece to reset). Look at the crystal cube at 500,000×: grains, then 2,000,000×: the atomic lattice. Press M to show the Microdex.
+
+Pitch points: the instrument is earned by building it; every upgrade has a numeric reason (shown in the HUD: resolution, NA, dose); all content is JSON in `data/`.
 
 ## Contributing
 

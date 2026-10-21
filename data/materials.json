@@ -1,8 +1,10 @@
 [
-  { "id": "beach_sand", "name": "Beach sand", "color": "#e8d9a0", "properties": { "purity": 0.6 } },
-  { "id": "quartz_sand", "name": "Quartz sand", "color": "#f4f1ea", "properties": { "purity": 0.95 } },
-  { "id": "iron_ore", "name": "Iron ore", "color": "#8a5a44", "properties": { "strength": 0.7 } },
-  { "id": "copper_ore", "name": "Copper ore", "color": "#c27d4a", "properties": { "conductivity": 0.9 } },
-  { "id": "plant_oil", "name": "Plant oil", "color": "#d9c84a", "properties": { "refractiveIndex": 1.47 } },
-  { "id": "leaf_fiber", "name": "Leaf fiber", "color": "#5fa05a", "properties": {} }
+  {"id": "beach_sand", "name": "Beach sand", "color": "#e8d9a0", "properties": {"purity": 0.6}},
+  {"id": "quartz_sand", "name": "Quartz sand", "color": "#f4f1ea", "properties": {"purity": 0.95}},
+  {"id": "iron_ore", "name": "Iron ore", "color": "#8a5a44", "properties": {"strength": 0.7}},
+  {"id": "copper_ore", "name": "Copper ore", "color": "#c27d4a", "properties": {"conductivity": 0.9}},
+  {"id": "plant_oil", "name": "Plant oil", "color": "#d9c84a", "properties": {"refractiveIndex": 1.47}},
+  {"id": "leaf_fiber", "name": "Leaf fiber", "color": "#5fa05a", "properties": {}},
+  {"id": "tungsten_ore", "name": "Tungsten ore", "color": "#4a4f57", "properties": {"meltingPointC": 3422}},
+  {"id": "resin", "name": "Resin", "color": "#c8742a", "properties": {"leakRate": 0.1}}
 ]

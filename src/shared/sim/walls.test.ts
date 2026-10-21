@@ -37,8 +37,16 @@ describe('the three walls of the tech tree', () => {
     expect(nearestWall(pond, scope)?.f.id).toBe('pond_virus');
   });
 
+  it('tier 5: the electron microscope shows viruses, and its wall is lens error, not wavelength', () => {
+    const em = scopeAt('electron_microscope', 0);
+    expect(visibility(feature('pond_virus'), em).visible).toBe(true);
+    const msg = explainWall({ name: 'Single atom', sizeUm: 0.0001, contrast: 0.5 }, scopeAt('electron_microscope', 3))!;
+    expect(msg).toMatch(/lens errors.*aberration correctors/);
+    expect(msg).toMatch(/0\.24 nm/);
+  });
+
   it('visible features have no wall; fmtUm picks sensible units', () => {
     expect(explainWall(feature('pond_alga'), scopeAt('hq_microscope', 1))).toBeNull();
-    expect([fmtUm(0.21), fmtUm(30), fmtUm(1400)]).toEqual(['210 nm', '30 µm', '1.4 mm']);
+    expect([fmtUm(0.21), fmtUm(30), fmtUm(1400), fmtUm(0.00024)]).toEqual(['210 nm', '30 µm', '1.4 mm', '0.24 nm']);
   });
 });

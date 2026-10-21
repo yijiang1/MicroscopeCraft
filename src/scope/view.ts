@@ -2,7 +2,7 @@
 // effective resolution d_eff, so unresolved detail really disappears instead of being faked per layer.
 // Compound microscopes add a zoom step picker and a focus slider (mouse wheel works too).
 import { DRAWERS, type View } from './draw';
-import { scopeResolutionUm, visibility } from '../shared/sim/optics';
+import { dose, scopeResolutionUm, survivingSignal, visibility } from '../shared/sim/optics';
 import { explainWall, fmtUm, nearestWall, resolutionLabel } from '../shared/sim/walls';
 import { discover, setZoom, type GameContext } from '../shared/state';
 import type { ScopeParams } from '../shared/schema';
@@ -17,13 +17,23 @@ const BACKGROUND = '#16361a';
 const SNAPSHOT_PX = 160;
 /** A Microdex picture must show the feature between these on-screen sizes (px), so it is neither a speck nor a wall. */
 const SNAPSHOT_FEATURE_PX = { min: 8, max: 300 };
-/** Field centre as a multiple of the sample's biggest feature size. Placeholder: this spot lands on a secondary
- *  vein for vein samples and inside the pattern for the rest. Becomes real per-sample data when panning is added. */
-const CENTER_IN_SIZES = { x: 15.6, y: -17.5 };
-/** Focus: slider position runs -1..1. Defocus blur (µm) = |offset from best focus| × this × NA.
+/** A feature much bigger than the field is just background: drawing it would hide everything smaller
+ *  (a 25 µm alga at 150,000× would fill the screen over the viruses), so layers past this many screens are skipped. */
+const MAX_FEATURE_SCREENS = 3;
+
+/** Focus: slider position runs -1..1. Defocus blur (µm) = |offset from best focus| × range × NA.
  *  Simplification: geometric blur, linear in NA, so high-NA objectives are fussier like real ones. */
 const FOCUS_BLUR_UM_PER_NA = 8;
+/** Focus range in µm of defocus: a light scope's stage moves by microns, an electron lens by about 0.2 µm. */
+const focusRangeUm = (tier: number) => (tier >= 5 ? 0.2 : FOCUS_BLUR_UM_PER_NA);
+/** Electron beam current, electrons per second (about 16 pA). Game value: dose rate = I / imaged area, so zooming in burns faster. */
+const BEAM_ELECTRONS_PER_S = 1e8;
+const DOSE_TICK_MS = 250;
+const DAMAGE_WARN = 0.5; // warn when this fraction of a fragile sample's signal is gone
 const FOCUS_TIP_THRESHOLD = 0.5; // show the focus tip when defocus blur exceeds this fraction of d_eff
+
+/** Specimen area in the field of view, nm². */
+const fieldAreaNm2 = (w: number, h: number, magnification: number) => (w * h) / (magnification * PX_PER_APPARENT_UM) ** 2 * 1e6;
 
 /** Round scale-bar length (1, 2 or 5 × 10^n µm) closest to 120 px. */
 function niceBarUm(pxPerUm: number) {
@@ -72,12 +82,15 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
   el.append(canvas, controls);
 
   let sampleId: string | null = null;
+  /** Electrons per nm² delivered to the sample since the eyepiece opened (tier 5 only). Resets on open. */
+  let doseENm2 = 0;
+  let doseTimer = 0;
 
   /** Scope as the eye sees it: defocus adds to the lens blur, so visibility() and the picture agree. */
   const effectiveScope = (scope: ScopeParams): { scope: ScopeParams; defocusUm: number } => {
     if (scope.tier < 2 || !sampleId) return { scope, defocusUm: 0 };
     const off = Math.abs(+slider.value - bestFocus(sampleId, scope.step));
-    const defocusUm = off * FOCUS_BLUR_UM_PER_NA * scope.NA;
+    const defocusUm = off * focusRangeUm(scope.tier) * scope.NA;
     return { scope: { ...scope, dLensUm: Math.hypot(scope.dLensUm, defocusUm) }, defocusUm };
   };
 
@@ -111,19 +124,15 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
     const sample = sampleId ? ctx.data.samples[sampleId] : undefined;
     const g = canvas.getContext('2d');
     const sg = scene.getContext('2d');
-    if (!sample || !g || !sg) return;
+    if (!sample || !g || !sg || !el.clientWidth || !el.clientHeight) return; // hidden or zero-sized pane
     const w = (canvas.width = scene.width = el.clientWidth);
     const h = (canvas.height = scene.height = el.clientHeight);
     const { scope: baseScope } = ctx.state;
     const { scope, defocusUm } = effectiveScope(baseScope);
     const pxPerUm = scope.magnification * PX_PER_APPARENT_UM;
-    const biggest = Math.max(...sample.features.map((f) => f.sizeUm));
-    const center = { x: CENTER_IN_SIZES.x * biggest, y: CENTER_IN_SIZES.y * biggest };
-    const view: View = {
-      x0: center.x - w / 2 / pxPerUm, x1: center.x + w / 2 / pxPerUm,
-      y0: center.y - h / 2 / pxPerUm, y1: center.y + h / 2 / pxPerUm,
-      pxPerUm,
-    };
+    const areaNm2 = fieldAreaNm2(w, h, scope.magnification);
+    // The field is centred on the specimen origin, a node of every drawer's grid.
+    const view: View = { x0: -w / 2 / pxPerUm, x1: w / 2 / pxPerUm, y0: -h / 2 / pxPerUm, y1: h / 2 / pxPerUm, pxPerUm };
 
     // Specimen layer: smaller features first so the bigger structure sits on top; onTop textures go last. Alpha = contrast.
     sg.fillStyle = BACKGROUND;
@@ -131,10 +140,17 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
     sg.save();
     sg.translate(w / 2, h / 2);
     sg.scale(pxPerUm, pxPerUm);
-    sg.translate(-center.x, -center.y);
-    for (const f of [...sample.features].sort((a, b) => +a.onTop - +b.onTop || a.sizeUm - b.sizeUm)) {
+    // Beam damage fades fragile features: contrast × surviving signal.
+    const features = sample.features.map((f) => ({
+      ...f,
+      contrast: f.contrast * (f.criticalDoseENm2 ? survivingSignal(doseENm2, f.criticalDoseENm2) : 1),
+    }));
+    for (const f of [...features].sort((a, b) => +a.onTop - +b.onTop || a.sizeUm - b.sizeUm)) {
+      if (f.sizeUm * pxPerUm > MAX_FEATURE_SCREENS * Math.max(w, h)) continue;
       sg.globalAlpha = Math.min(1, f.contrast * scope.contrastBoost * 2);
+      sg.save(); // drawers may move the origin
       DRAWERS[f.drawing](sg, f, view);
+      sg.restore();
     }
     sg.restore();
 
@@ -147,15 +163,15 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
     g.beginPath();
     g.arc(w / 2, h / 2, Math.min(w, h) * 0.46, 0, Math.PI * 2);
     g.clip();
-    g.filter = `blur(${sigmaPx.toFixed(2)}px)`;
+    g.filter = `${scope.tier >= 5 ? 'grayscale(1) ' : ''}blur(${sigmaPx.toFixed(2)}px)`; // electron images are grey
     g.drawImage(scene, 0, 0);
     g.restore();
 
     // HUD: what each feature does under this scope, plus a scale bar.
     g.font = '15px system-ui';
     g.fillStyle = '#fff';
-    g.fillText(`${sample.name} · ${scope.magnification}× · NA ${scope.NA} · ${resolutionLabel(scope)}`, 20, 28);
-    sample.features.forEach((f, i) => {
+    g.fillText(`${sample.name} · ${scope.magnification.toLocaleString("en-US")}× · NA ${scope.NA} · ${resolutionLabel(scope)}`, 20, 28);
+    features.forEach((f, i) => {
       const v = visibility(f, scope);
       g.fillStyle = v.visible ? '#9be59b' : '#ffb27a';
       g.fillText(`${v.visible ? '✓' : '✗'} ${f.name} (${fmtUm(f.sizeUm)}): ${v.visible ? 'visible' : v.reason}`, 20, 54 + i * 22);
@@ -167,6 +183,15 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
         discover(ctx, f.id, good && better ? { image: snapshot(), quality } : undefined);
       }
     });
+    if (scope.tier >= 5) {
+      const perAng2 = 100; // 1 nm² = 100 Å²
+      g.fillStyle = '#ffe08a';
+      g.fillText(
+        `Beam ${(dose(BEAM_ELECTRONS_PER_S, 1, areaNm2) / perAng2).toPrecision(2)} e⁻/Å²/s · total dose ${(doseENm2 / perAng2).toPrecision(2)} e⁻/Å²`,
+        20,
+        54 + features.length * 22,
+      );
+    }
     const bar = niceBarUm(pxPerUm);
     g.fillStyle = '#fff';
     g.fillRect(20, h - 40, bar * pxPerUm, 4);
@@ -176,8 +201,11 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
 
     // Wall banner: the nearest thing this view can't show, in plain words. Out-of-focus comes first.
     const focusBlurry = defocusUm > FOCUS_TIP_THRESHOLD * scopeResolutionUm(baseScope);
-    const wall = nearestWall(sample, scope);
-    const banner = focusBlurry
+    const wall = nearestWall({ features }, scope);
+    const damaged = features.find((f, i) => f.criticalDoseENm2 && f.contrast < sample.features[i]!.contrast * DAMAGE_WARN);
+    const banner = damaged
+      ? `Beam damage! The electrons are destroying ${damaged.name}. Zoom out to lower the dose rate, or close the eyepiece to reset the sample.`
+      : focusBlurry
       ? 'Out of focus: turn the focus knob (slider or mouse wheel) until the image is sharpest.'
       : wall && explainWall(wall.f, scope, wall.v);
     if (banner) {
@@ -190,8 +218,17 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
 
   const open = (id: string) => {
     sampleId = id;
+    doseENm2 = 0;
     el.style.display = 'block';
     slider.value = '0';
+    clearInterval(doseTimer);
+    if (ctx.state.scope.tier >= 5) {
+      doseTimer = window.setInterval(() => {
+        const area = fieldAreaNm2(canvas.width, canvas.height, ctx.state.scope.magnification);
+        doseENm2 += dose(BEAM_ELECTRONS_PER_S, DOSE_TICK_MS / 1000, area);
+        render();
+      }, DOSE_TICK_MS);
+    }
     syncControls();
     render();
   };
@@ -210,7 +247,10 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
   addEventListener('keydown', onKey);
   const offs = [
     ctx.bus.on('openEyepiece', ({ sampleId: id }) => open(id)),
-    ctx.bus.on('closeEyepiece', () => (el.style.display = 'none')),
+    ctx.bus.on('closeEyepiece', () => {
+      el.style.display = 'none';
+      clearInterval(doseTimer);
+    }),
     ctx.bus.on('zoomChanged', () => {
       if (el.style.display === 'block') {
         syncControls();
@@ -221,6 +261,7 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
 
   return {
     dispose() {
+      clearInterval(doseTimer);
       removeEventListener('keydown', onKey);
       offs.forEach((off) => off());
       el.replaceChildren();

@@ -64,3 +64,28 @@ describe('tier 2 and 3 crafting', () => {
     expect(n).toBe(2);
   });
 });
+
+describe('event order', () => {
+  it('itemCrafted listeners already see the new microscope tier', () => {
+    const ctx = createGame(loadGameData());
+    gather(ctx, 'beach_sand', 2);
+    gather(ctx, 'iron_ore');
+    let tierSeen = -1;
+    ctx.bus.on('itemCrafted', ({ itemId }) => itemId === 'hand_lens' && (tierSeen = ctx.state.scope.tier));
+    for (const id of ['glass', 'lens', 'frame', 'hand_lens']) craft(ctx, id);
+    expect(tierSeen).toBe(1);
+  });
+});
+
+describe('tier 5 crafting', () => {
+  it('tungsten, resin, iron and copper make an electron microscope at tier 5', () => {
+    const ctx = createGame(loadGameData());
+    const have = { tungsten_ore: 1, resin: 2, iron_ore: 4, copper_ore: 4 };
+    for (const [id, n] of Object.entries(have)) gather(ctx, id, n);
+    for (const id of ['filament', 'vacuum_seal', 'vacuum_chamber', 'magnetic_lens', 'magnetic_lens', 'electron_microscope']) {
+      expect(craft(ctx, id), id).toBe(true);
+    }
+    expect(ctx.state.scope.tier).toBe(5);
+    expect(ctx.state.scope.steps.map((s) => s.magnification)).toEqual([50_000, 150_000, 500_000, 2_000_000]);
+  });
+});

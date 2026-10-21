@@ -13,7 +13,7 @@ const Id = z.string().regex(/^[a-z0-9_]+$/, 'ids are lower_snake_case');
 const Color = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'color is #rrggbb');
 
 /** How the 2D scope renderer draws a feature or catalog type. Add a value here when Person B adds a drawing. */
-export const DrawingSchema = z.enum(['veins', 'grains', 'hair', 'cells', 'pollen', 'rods', 'algae', 'scales', 'lattice']);
+export const DrawingSchema = z.enum(['veins', 'grains', 'hair', 'cells', 'pollen', 'rods', 'algae', 'scales', 'virus', 'lattice']);
 export type Drawing = z.infer<typeof DrawingSchema>;
 
 export const MaterialSchema = z.object({
@@ -66,6 +66,8 @@ export const FeatureSchema = z.object({
   /** 0..1, set by sample type (stains/imaging method multiply it via ScopeParams.contrastBoost). */
   contrast: z.number().min(0).max(1),
   drawing: DrawingSchema,
+  /** Electron-beam damage: dose (electrons/nm²) that destroys most of the signal. Absent = beam-proof. */
+  criticalDoseENm2: z.number().positive().optional(),
   /** Surface texture drawn over the larger features instead of under them (default: smaller features sit underneath). */
   onTop: z.boolean().default(false),
   /** Microdex card text: two sentences. */

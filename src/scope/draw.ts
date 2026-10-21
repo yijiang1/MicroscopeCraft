@@ -29,6 +29,9 @@ function noise(a: number, b: number, seed: number) {
 const veins: Drawer = (g, f) => {
   const seed = seedOf(f.id);
   const k = f.sizeUm / 40;
+  // The field is centred on the specimen origin, so shift the pattern to put that spot just off a secondary vein
+  // (on the midrib a magnified view would show only one thick band).
+  g.translate(-15.6 * f.sizeUm, 17.5 * f.sizeUm);
   g.strokeStyle = '#a8e6a1';
   g.lineCap = 'round';
   const line = (x0: number, y0: number, x1: number, y1: number, w: number) => {
@@ -59,13 +62,13 @@ const veins: Drawer = (g, f) => {
 };
 
 /** Walk the grid cells that overlap the view; skip the whole layer if there would be too many. */
-function forGrid(v: View, step: number, fn: (i: number, j: number, cx: number, cy: number) => void, stepY = step) {
+function forGrid(v: View, step: number, fn: (i: number, j: number, cx: number, cy: number) => void, stepY = step, stagger = true) {
   const i0 = Math.floor(v.x0 / step);
   const i1 = Math.ceil(v.x1 / step);
   const j0 = Math.floor(v.y0 / stepY);
   const j1 = Math.ceil(v.y1 / stepY);
   if ((i1 - i0) * (j1 - j0) > MAX_ITEMS) return;
-  for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) fn(i, j, (i + (j % 2 ? 0.5 : 0)) * step, j * stepY);
+  for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) fn(i, j, (i + (stagger && j % 2 ? 0.5 : 0)) * step, j * stepY);
 }
 
 const cells: Drawer = (g, f, v) => {
@@ -173,7 +176,40 @@ const scales: Drawer = (g, f, v) => {
   }, w * 0.7);
 };
 
-/** Stand-in for rods and lattices until someone draws them properly. */
+/** Virus: a round capsid with a ring of spikes. sizeUm is the capsid diameter. */
+const virus: Drawer = (g, f, v) => {
+  const seed = seedOf(f.id);
+  const r = f.sizeUm / 2;
+  g.strokeStyle = '#e39be0';
+  g.lineWidth = r * 0.15;
+  forGrid(v, f.sizeUm * 3, (i, j, cx, cy) => {
+    const a0 = noise(i, j, seed) * Math.PI;
+    g.fillStyle = '#c45fc0';
+    g.beginPath();
+    g.arc(cx, cy, r, 0, Math.PI * 2);
+    g.fill();
+    for (let k = 0; k < 12; k++) {
+      const a = a0 + (k / 12) * Math.PI * 2;
+      g.moveTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+      g.lineTo(cx + Math.cos(a) * r * 1.35, cy + Math.sin(a) * r * 1.35);
+    }
+    g.stroke();
+  });
+};
+
+/** Crystal lattice: a square grid of atom columns, two species in a checkerboard. sizeUm is the lattice spacing.
+ *  Simplification: atoms are drawn as discs, not computed from a wave-optics model. */
+const lattice: Drawer = (g, f, v) => {
+  forGrid(v, f.sizeUm, (i, j, cx, cy) => {
+    const heavy = (i + j) % 2 === 0;
+    g.fillStyle = heavy ? '#f2f8ff' : '#7fa6cc';
+    g.beginPath();
+    g.arc(cx, cy, f.sizeUm * (heavy ? 0.24 : 0.16), 0, Math.PI * 2);
+    g.fill();
+  }, f.sizeUm, false);
+};
+
+/** Stand-in for rods until someone draws them properly. */
 const dots: Drawer = (g, f, v) => {
   const seed = seedOf(f.id);
   g.fillStyle = '#a8e6a1';
@@ -185,5 +221,5 @@ const dots: Drawer = (g, f, v) => {
 };
 
 export const DRAWERS: Record<Drawing, Drawer> = {
-  veins, cells, grains, pollen, rods: dots, algae, hair, scales, lattice: dots,
+  veins, cells, grains, pollen, rods: dots, algae, hair, scales, virus, lattice,
 };

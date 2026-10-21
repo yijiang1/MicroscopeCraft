@@ -2,6 +2,7 @@
 import { canCraft, craft, type GameContext } from '../shared/state';
 import { fmtUm } from '../shared/sim/walls';
 import { mountMicrodex } from './microdex';
+import { mountSound } from './sound';
 
 export interface UIHandle {
   dispose(): void;
@@ -16,6 +17,15 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   document.body.append(toast);
   let toastTimer = 0;
   const microdex = mountMicrodex(document.body, ctx);
+  const sound = mountSound(ctx);
+  const mute = document.createElement('button');
+  mute.style.cssText = 'display:block;width:100%;margin:2px 0';
+  const syncMute = () => (mute.textContent = sound.muted() ? 'Sound: off' : 'Sound: on');
+  mute.onclick = () => {
+    sound.toggleMute();
+    syncMute();
+  };
+  syncMute();
   dex.style.cssText = 'display:block;width:100%;margin:8px 0';
   dex.onclick = () => microdex.toggle();
   const guide = document.createElement('div');
@@ -31,7 +41,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
     }
   });
   guide.append(input, reply);
-  el.append(inv, dex, guide);
+  el.append(inv, dex, mute, guide);
 
   const render = () => {
     const { state, data } = ctx;
@@ -73,6 +83,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
     dispose() {
       offs.forEach((off) => off());
       microdex.dispose();
+      sound.dispose();
       toast.remove();
       el.replaceChildren();
     },

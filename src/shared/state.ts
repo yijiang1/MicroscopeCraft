@@ -51,8 +51,8 @@ export function craft(ctx: GameContext, recipeId: string): boolean {
   const inv = ctx.state.inventory;
   for (const i of recipe.inputs) inv[i.itemId] = (inv[i.itemId] ?? 0) - i.count;
   inv[recipe.output.itemId] = (inv[recipe.output.itemId] ?? 0) + recipe.output.count;
+  refreshScope(ctx); // before the event, so listeners of itemCrafted already see the new microscope
   ctx.bus.emit('itemCrafted', { itemId: recipe.output.itemId });
-  refreshScope(ctx);
   return true;
 }
 

@@ -29,8 +29,14 @@ export const effectiveResolutionUm = (dDiffUm: number, dLensUm: number) => Math.
 export const dose = (electronsPerSecond: number, seconds: number, areaNm2: number) =>
   (electronsPerSecond * seconds) / areaNm2;
 
-/** Classic "useful magnification" ceiling, M ≤ 1000·NA; beyond it the view only enlarges blur. */
-export const usefulMagnificationMax = (NA: number) => 1000 * NA;
+/** Classic "useful magnification" ceiling for light, M ≤ 1000·NA; beyond it the view only enlarges blur.
+ *  Simplification: electron images are recorded digitally and zoomed freely, so tier 5 has no ceiling. */
+export const usefulMagnificationMax = (scope: Pick<ScopeParams, 'NA' | 'tier'>) =>
+  scope.tier >= 5 ? Infinity : 1000 * scope.NA;
+
+/** Fraction of an electron-sensitive sample's signal left after `doseENm2` (electrons/nm²):
+ *  exp(−D/D_critical). Simplification: a single exponential, no dose-rate or temperature effects. */
+export const survivingSignal = (doseENm2: number, criticalDoseENm2: number) => Math.exp(-doseENm2 / criticalDoseENm2);
 
 /** d_eff of a whole scope, µm. */
 export const scopeResolutionUm = (scope: ScopeParams) =>
@@ -62,7 +68,7 @@ export function visibility(feature: Pick<Feature, 'sizeUm' | 'contrast'>, scope:
   const result = (reason: VisibilityReason): Visibility => ({ visible: reason === 'ok', reason, dEffUm, apparentUm });
 
   if (feature.sizeUm < dEffUm) {
-    return result(scope.magnification > usefulMagnificationMax(scope.NA) ? 'empty-magnification' : 'unresolved');
+    return result(scope.magnification > usefulMagnificationMax(scope) ? 'empty-magnification' : 'unresolved');
   }
   if (apparentUm < EYE_LIMIT_UM) return result('too-small-to-see');
   if (feature.contrast * scope.contrastBoost < CONTRAST_THRESHOLD) return result('low-contrast');

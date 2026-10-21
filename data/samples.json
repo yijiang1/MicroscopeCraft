@@ -66,8 +66,9 @@
         "name": "Virus particles",
         "sizeUm": 0.1,
         "contrast": 0.5,
-        "drawing": "lattice",
-        "blurb": "Viruses are a hundred times smaller than a pond alga cell. Visible light is too coarse to resolve them, so you need electrons."
+        "drawing": "virus",
+        "blurb": "Viruses are hundreds of times smaller than a pond alga cell. Visible light is too coarse to resolve them, so you need electrons.",
+        "criticalDoseENm2": 50000
       }
     ]
   },
@@ -141,6 +142,31 @@
         "drawing": "lattice",
         "blurb": "Wind and water slowly pit the surface of sand grains as they tumble. Pits this small only show up under an oil-immersion lens.",
         "onTop": true
+      }
+    ]
+  },
+  {
+    "id": "crystal_sample",
+    "name": "Crystal",
+    "worldObject": "crystal",
+    "biome": "lab",
+    "features": [
+      {
+        "id": "crystal_grains",
+        "name": "Crystal grains",
+        "sizeUm": 0.05,
+        "contrast": 0.5,
+        "drawing": "grains",
+        "blurb": "A solid crystal is often many tiny grains packed together. Where two grains meet, their rows of atoms point in different directions."
+      },
+      {
+        "id": "crystal_lattice",
+        "name": "Atomic lattice",
+        "sizeUm": 0.0004,
+        "contrast": 0.5,
+        "drawing": "lattice",
+        "onTop": true,
+        "blurb": "Each dot is a column of atoms in an orderly grid. The spacing between the dots, about 0.4 nanometres, is a fingerprint of the material."
       }
     ]
   }

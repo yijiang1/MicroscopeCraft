@@ -38,11 +38,15 @@ describe('content rules', () => {
     for (const f of features) expect(f.blurb.match(/[.!?](\s|$)/g)?.length, f.id).toBe(2);
   });
 
-  it('every feature can be seen by some microscope step (perfect focus), except the electron showpieces', () => {
+  it('every feature can be seen by some microscope step (perfect focus, no beam damage)', () => {
     const scopes = [NAKED_EYE, ...data.recipes.flatMap((r) => (r.scope ? r.scope.steps.map((_, i) => scopeParamsFromSpec(r.scope!, i)) : []))];
-    const showpieces = ['pond_virus']; // needs the tier 5 electron microscope, built in phase 6
-    for (const f of features.filter((x) => !showpieces.includes(x.id))) {
-      expect(scopes.some((s) => visibility(f, s).visible), f.id).toBe(true);
-    }
+    for (const f of features) expect(scopes.some((s) => visibility(f, s).visible), f.id).toBe(true);
+  });
+
+  it('the first discovery needs the right tier: veins at tier 1, bacteria at 3, atoms only at 5', () => {
+    const minTier = (id: string) =>
+      Math.min(...[NAKED_EYE, ...data.recipes.flatMap((r) => (r.scope ? r.scope.steps.map((_, i) => scopeParamsFromSpec(r.scope!, i)) : []))]
+        .filter((s) => visibility(features.find((f) => f.id === id)!, s).visible).map((s) => s.tier));
+    expect([minTier('leaf_veins'), minTier('leaf_cells'), minTier('pond_bacteria'), minTier('crystal_lattice')]).toEqual([1, 2, 3, 5]);
   });
 });

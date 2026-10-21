@@ -93,5 +93,44 @@
         { "label": "1000× (100× oil immersion)", "magnification": 1000, "NA": 1.3 }
       ]
     }
+  },
+
+  {
+    "id": "filament", "name": "Tungsten filament", "station": "furnace", "color": "#9aa3b0",
+    "inputs": [{ "itemId": "tungsten_ore", "count": 1 }],
+    "output": { "itemId": "filament", "count": 1 }
+  },
+  {
+    "id": "vacuum_seal", "name": "Vacuum seal", "station": "bench", "color": "#d98a3d",
+    "inputs": [{ "itemId": "resin", "count": 2 }],
+    "output": { "itemId": "vacuum_seal", "count": 1 }
+  },
+  {
+    "id": "vacuum_chamber", "name": "Vacuum chamber", "station": "bench", "color": "#8a8f99",
+    "inputs": [{ "itemId": "iron_ore", "count": 2 }, { "itemId": "vacuum_seal", "count": 1 }],
+    "output": { "itemId": "vacuum_chamber", "count": 1 }
+  },
+  {
+    "id": "magnetic_lens", "name": "Magnetic lens", "station": "bench", "color": "#b8754a",
+    "inputs": [{ "itemId": "copper_ore", "count": 2 }, { "itemId": "iron_ore", "count": 1 }],
+    "output": { "itemId": "magnetic_lens", "count": 1 }
+  },
+  {
+    "id": "electron_microscope", "name": "Electron microscope", "station": "bench", "color": "#e8eef8",
+    "inputs": [
+      { "itemId": "filament", "count": 1 },
+      { "itemId": "vacuum_chamber", "count": 1 },
+      { "itemId": "magnetic_lens", "count": 2 }
+    ],
+    "output": { "itemId": "electron_microscope", "count": 1 },
+    "scope": {
+      "tier": 5, "dLensUm": 0.0002, "voltageV": 200000,
+      "steps": [
+        { "label": "50,000×", "magnification": 50000, "NA": 0.01 },
+        { "label": "150,000×", "magnification": 150000, "NA": 0.01 },
+        { "label": "500,000×", "magnification": 500000, "NA": 0.01 },
+        { "label": "2,000,000×", "magnification": 2000000, "NA": 0.01 }
+      ]
+    }
   }
 ]

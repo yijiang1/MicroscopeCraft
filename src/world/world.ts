@@ -21,23 +21,28 @@ const sand = (x: number, z: number): Spot => ({ color: '#e8d9a0', x, z, aim: { g
 const quartz = (x: number, z: number): Spot => ({ color: '#f4f1ea', x, z, aim: { gather: 'quartz_sand', sample: 'quartz_grain' } });
 const iron = (x: number, z: number): Spot => ({ color: '#8a5a44', x, z, aim: { gather: 'iron_ore' } });
 const copper = (x: number, z: number): Spot => ({ color: '#c27d4a', x, z, aim: { gather: 'copper_ore' } });
+const tungsten = (x: number, z: number): Spot => ({ color: '#4a4f57', x, z, aim: { gather: 'tungsten_ore' } });
+const resin = (x: number, z: number): Spot => ({ color: '#c8742a', x, z, aim: { gather: 'resin' } });
 const oil = (x: number, z: number): Spot => ({ color: '#d9c84a', x, z, aim: { gather: 'plant_oil' } });
 const block = (x0: number, x1: number, z0: number, z1: number, make: (x: number, z: number) => Spot): Spot[] => {
   const out: Spot[] = [];
   for (let x = x0; x <= x1; x++) for (let z = z0; z <= z1; z++) out.push(make(x, z));
   return out;
 };
-// Leaf, flower, wing and pond are samples only: looking never uses them up.
+// Leaf, flower, wing, pond and crystal are samples only: looking never uses them up.
 const SPOTS: Spot[] = [
   ...block(3, 5, -6, -4, sand),
   ...block(8, 9, -6, -4, quartz),
-  ...block(-5, -3, -4, -4, iron),
-  ...block(-4, -3, -7, -7, copper),
+  ...block(-5, -3, -4, -3, iron),
+  ...block(-5, -3, -7, -6, copper),
+  ...block(-8, -8, -5, -4, tungsten),
+  ...block(5, 6, -9, -9, resin),
   ...block(0, 1, -9, -9, oil),
   { color: '#2e8b3a', x: 0, z: -5, aim: { sample: 'leaf' } },
   { color: '#d95fa8', x: -1, z: -7, aim: { sample: 'flower' } },
   { color: '#e89a3c', x: 2, z: -8, aim: { sample: 'insect_wing' } },
   { color: '#3d7fd6', x: -8, z: -10, aim: { sample: 'pond_water' } },
+  { color: '#b9c4ff', x: 8, z: -10, aim: { sample: 'crystal_sample' } },
 ];
 const REACH = 6;
 const RESPAWN_MS = 15_000; // no scarcity: gathered cubes grow back

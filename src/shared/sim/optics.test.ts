@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-  abbeLimitUm, dose, effectiveResolutionUm, electronWavelengthNm, handLensMagnification, magnification, visibility,
+  abbeLimitUm, dose, effectiveResolutionUm, electronWavelengthNm, handLensMagnification, magnification, scopeResolutionUm,
+  survivingSignal, usefulMagnificationMax, visibility,
 } from './optics';
 import { NAKED_EYE, scopeFromInventory } from './scope';
 import { loadGameData } from '../data';
@@ -17,6 +18,24 @@ describe('formulas', () => {
     near(electronWavelengthNm(200_000), 0.002742, 1e-5));
   it('d_eff adds in quadrature', () => expect(effectiveResolutionUm(3, 4)).toBe(5));
   it('dose = I·t/A', () => expect(dose(1e6, 2, 100)).toBe(20_000));
+});
+
+describe('electron tier', () => {
+  it('beam damage: signal decays exponentially with dose', () => {
+    expect(survivingSignal(0, 5e4)).toBe(1);
+    near(survivingSignal(5e4, 5e4), Math.exp(-1), 1e-9);
+  });
+  it('light has a useful-magnification ceiling, electrons do not', () => {
+    expect(usefulMagnificationMax({ NA: 0.55, tier: 2 })).toBe(550);
+    expect(usefulMagnificationMax({ NA: 0.01, tier: 5 })).toBe(Infinity);
+  });
+  it('the 200 kV scope resolves about 0.24 nm, so the 0.4 nm lattice is visible at 2,000,000×', () => {
+    const data = loadGameData();
+    const em = scopeFromInventory({ electron_microscope: 1 }, data, 3);
+    near(scopeResolutionUm(em) * 1000, 0.24, 0.01);
+    expect(visibility({ sizeUm: 0.0004, contrast: 0.5 }, em).visible).toBe(true);
+    expect(visibility({ sizeUm: 0.0004, contrast: 0.5 }, { ...em, magnification: 50_000 }).reason).toBe('too-small-to-see');
+  });
 });
 
 describe('visibility walls', () => {
