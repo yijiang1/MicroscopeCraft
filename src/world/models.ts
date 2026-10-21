@@ -73,7 +73,7 @@ function rock(name: string, seed: number, radius: number): THREE.Mesh {
 }
 
 /** An outcrop: one big boulder with two smaller rocks tucked against it. */
-function oreNode(name: 'iron' | 'copper' | 'tungsten', rng: () => number): THREE.Group {
+function oreNode(name: 'iron' | 'copper' | 'tungsten' | 'stone', rng: () => number): THREE.Group {
   const g = new THREE.Group();
   const seed = 1 + Math.floor(rng() * 4);
   const big = rock(name, seed, 0.5);
@@ -365,14 +365,16 @@ function wingOnStone(rng: () => number): THREE.Group {
 
 // ---------------------------------------------------------------- entry point
 
-/** Build the model for a placed thing. `seed` makes each instance a little different but repeatable. */
-export function buildModel(kind: Kind, seed: number): THREE.Group {
+/** Build the model for a placed thing. `seed` makes each instance a little different but repeatable.
+ *  `revealed` false builds the plain-looking version of ores that can only be recognised under a microscope. */
+export function buildModel(kind: Kind, seed: number, revealed = true): THREE.Group {
   const rng = mulberry32(seed * 7919 + 13);
   let g: THREE.Group;
   switch (kind) {
     case 'sand': g = sandNode(rng); break;
     case 'quartz': g = crystalCluster(rng, { colors: ['#eef2f7', '#f7eef0', '#e3ecf5'], glow: 0.08, count: 7, height: 0.8, radius: 0.09 }); break;
-    case 'iron': case 'copper': case 'tungsten': g = oreNode(kind, rng); break;
+    case 'iron': g = oreNode('iron', rng); break;
+    case 'copper': case 'tungsten': g = oreNode(revealed ? kind : 'stone', rng); break;
     case 'sunflower': g = sunflower(rng); break;
     case 'resin': g = resinStump(rng); break;
     case 'leaf': g = leafPlant(rng); break;

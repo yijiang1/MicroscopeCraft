@@ -169,5 +169,53 @@
         "blurb": "Each dot is a column of atoms in an orderly grid. The spacing between the dots, about 0.4 nanometres, is a fingerprint of the material."
       }
     ]
+  },
+  {
+    "id": "copper_rock",
+    "name": "Grey rock",
+    "worldObject": "copper_rock",
+    "biome": "mine",
+    "features": [
+      {
+        "id": "copper_veins",
+        "name": "Copper veins",
+        "sizeUm": 50,
+        "contrast": 0.5,
+        "drawing": "veins",
+        "blurb": "Green streaks run through this rock: they are a copper mineral. Copper carries electricity and heat well, so it makes good lamp parts and coils."
+      }
+    ]
+  },
+  {
+    "id": "sunflower_seed",
+    "name": "Sunflower seed",
+    "worldObject": "sunflower_seed",
+    "biome": "meadow",
+    "features": [
+      {
+        "id": "seed_oil",
+        "name": "Seed oil droplets",
+        "sizeUm": 8,
+        "contrast": 0.4,
+        "drawing": "droplets",
+        "blurb": "Every cell of a seed stores energy as tiny droplets of oil. Squeezed out, that oil bends light just right to help a microscope see finer detail."
+      }
+    ]
+  },
+  {
+    "id": "tungsten_rock",
+    "name": "Heavy rock",
+    "worldObject": "tungsten_rock",
+    "biome": "mine",
+    "features": [
+      {
+        "id": "tungsten_grains",
+        "name": "Tungsten grains",
+        "sizeUm": 0.8,
+        "contrast": 0.5,
+        "drawing": "grains",
+        "blurb": "Tiny dark grains of tungsten mineral hide inside this plain-looking rock. Tungsten melts above 3,400 degrees, which is why it makes a steady electron-source filament."
+      }
+    ]
   }
 ]

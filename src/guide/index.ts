@@ -3,7 +3,7 @@
 //   - "what next / what should I build"    → the current goal and the next step
 //   - anything else, while looking at something → the nearest wall, via explainWall
 // Later: fetch('/api/guide') with the same snapshot, falling back to this on failure.
-import { howToGet, itemsMentioned, nextGoalRecipe, planFor } from '../shared/plan';
+import { actionText, currentAction, howToGet, itemsMentioned, nextGoalRecipe, planFor } from '../shared/plan';
 import { explainWall, nearestWall } from '../shared/sim/walls';
 import type { GameContext } from '../shared/state';
 
@@ -16,20 +16,17 @@ export function mountGuide(ctx: GameContext): () => void {
 
     const items = itemsMentioned(question, data);
     if (items.length) {
-      reply(items.slice(0, 2).map((id) => howToGet(id, data)).filter(Boolean).join(' '));
+      reply(items.slice(0, 2).map((id) => howToGet(id, data, state.discoveries)).filter(Boolean).join(' '));
       return;
     }
 
     if (NEXT.test(question)) {
       const goal = nextGoalRecipe(data, state);
       if (!goal) return reply('You have built every microscope. Explore, look at everything, and fill the Microdex.');
-      const plan = planFor(goal, data, state.inventory);
-      const first = plan.missing[0];
-      reply(
-        first
-          ? `Next goal: ${goal.name}. Gather ${plan.missing.map((m) => `${m.count} ${data.items[m.itemId]?.name}`).join(', ')}. ${data.items[first.itemId]?.name}: ${data.materials[first.itemId]?.where ?? 'look around'}.`
-          : `Next goal: ${goal.name}. You have the materials: press "${plan.nextStep?.recipe.name ?? goal.name}" in the goal panel.`,
-      );
+      const plan = planFor(goal, data, state.inventory, state.discoveries);
+      const action = currentAction(plan);
+      const where = action && action.kind !== 'craft' ? data.materials[action.raw.itemId]?.where : undefined;
+      reply(`Next goal: ${goal.name}. ${action ? actionText(action, data) : 'Look around.'}.${where ? ` ${where}.` : ''}`);
       return;
     }
 

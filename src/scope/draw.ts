@@ -209,6 +209,23 @@ const lattice: Drawer = (g, f, v) => {
   }, f.sizeUm, false);
 };
 
+/** Oil droplets: glossy golden spheres of varying size with a small highlight. sizeUm is the typical diameter. */
+const droplets: Drawer = (g, f, v) => {
+  const seed = seedOf(f.id);
+  forGrid(v, f.sizeUm * 1.5, (i, j, cx, cy) => {
+    const r = f.sizeUm * (0.25 + 0.3 * noise(i, j, seed));
+    const x = cx + (noise(j, i, seed) - 0.5) * f.sizeUm * 0.5;
+    const y = cy + (noise(i, i + j, seed) - 0.5) * f.sizeUm * 0.5;
+    const grad = g.createRadialGradient(x - r * 0.3, y - r * 0.3, r * 0.1, x, y, r);
+    grad.addColorStop(0, '#fff3b0');
+    grad.addColorStop(1, '#d9a21c');
+    g.fillStyle = grad;
+    g.beginPath();
+    g.arc(x, y, r, 0, Math.PI * 2);
+    g.fill();
+  });
+};
+
 /** Stand-in for rods until someone draws them properly. */
 const dots: Drawer = (g, f, v) => {
   const seed = seedOf(f.id);
@@ -221,5 +238,5 @@ const dots: Drawer = (g, f, v) => {
 };
 
 export const DRAWERS: Record<Drawing, Drawer> = {
-  veins, cells, grains, pollen, rods: dots, algae, hair, scales, virus, lattice,
+  veins, cells, grains, pollen, rods: dots, algae, hair, scales, virus, droplets, lattice,
 };

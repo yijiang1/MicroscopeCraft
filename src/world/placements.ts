@@ -16,9 +16,10 @@ export const AIMS: Record<Kind, Aim> = {
   sand: { gather: 'beach_sand', sample: 'sand_grain' },
   quartz: { gather: 'quartz_sand', sample: 'quartz_grain' },
   iron: { gather: 'iron_ore' },
-  copper: { gather: 'copper_ore' },
-  tungsten: { gather: 'tungsten_ore' },
-  sunflower: { gather: 'plant_oil' },
+  // gathering these is locked until the Microdex discovery named by the material's unlockedBy
+  copper: { gather: 'copper_ore', sample: 'copper_rock' },
+  tungsten: { gather: 'tungsten_ore', sample: 'tungsten_rock' },
+  sunflower: { gather: 'plant_oil', sample: 'sunflower_seed' },
   resin: { gather: 'resin' },
   leaf: { sample: 'leaf' },
   flower: { sample: 'flower' },

@@ -1,6 +1,8 @@
-// "What do I build next, what do I need, and where do I get it?" Pure, from the recipes and the inventory.
-// Used by the goal panel and the guide. Owner: Person D.
-import type { GameData, GameState, Recipe } from './schema';
+// "What do I build next, what do I need, where do I get it, and what must I identify first?"
+// Pure, from the recipes, the inventory and the discoveries. Used by the goal panel and the guide. Owner: Person D.
+import type { Feature, GameData, GameState, Recipe, Sample } from './schema';
+import { visibility } from './sim/optics';
+import { scopeParamsFromSpec } from './sim/scope';
 
 export interface PlanStep {
   recipe: Recipe;
@@ -8,18 +10,62 @@ export interface PlanStep {
   times: number;
 }
 
+/** A material that is only recognisable under a microscope: it can't be gathered until the feature is discovered. */
+export interface Identify {
+  feature: Feature;
+  sample: Sample;
+  /** The simplest microscope that can show the feature. */
+  scope: Recipe | null;
+  done: boolean;
+}
+
+export interface PlanRaw {
+  itemId: string;
+  /** Total the goal needs from scratch. */
+  total: number;
+  /** Still to gather (0 when satisfied by the inventory or by parts already crafted). */
+  missing: number;
+  identify?: Identify;
+}
+
 export interface Plan {
   /** The microscope recipe being worked toward. */
   goal: Recipe;
-  /** Raw materials still to gather (not yet in the inventory), most urgent first. */
+  /** Every raw material the goal needs, in the order they come up. */
+  raw: PlanRaw[];
+  /** Raw materials still to gather. */
   missing: { itemId: string; count: number }[];
-  /** Crafts still to do, in an order where each step's inputs come from earlier steps. */
+  /** All crafts from scratch, in order, and the ones still left. */
+  allSteps: PlanStep[];
   steps: PlanStep[];
-  /** The first step whose inputs are all in the inventory right now. */
+  /** The first remaining step whose inputs are all in the inventory right now. */
   nextStep: PlanStep | null;
 }
 
 const producerOf = (data: Pick<GameData, 'recipes'>, itemId: string) => data.recipes.find((r) => r.output.itemId === itemId);
+
+export function findFeature(data: Pick<GameData, 'samples'>, featureId: string): { feature: Feature; sample: Sample } | null {
+  for (const sample of Object.values(data.samples)) {
+    const feature = sample.features.find((f) => f.id === featureId);
+    if (feature) return { feature, sample };
+  }
+  return null;
+}
+
+/** Lowest-tier microscope recipe that shows the feature (at its best zoom step, in focus). */
+export function scopeThatSees(feature: Feature, data: Pick<GameData, 'recipes'>): Recipe | null {
+  return (
+    data.recipes
+      .filter((r) => r.scope && r.scope.steps.some((_, i) => visibility(feature, scopeParamsFromSpec(r.scope!, i)).visible))
+      .sort((a, b) => a.scope!.tier - b.scope!.tier)[0] ?? null
+  );
+}
+
+/** The feature the player must discover before this item can be gathered, or null if it is free to gather. */
+export function lockedBy(itemId: string, data: Pick<GameData, 'materials'>, discoveries: readonly string[]): string | null {
+  const f = data.materials[itemId]?.unlockedBy;
+  return f && !discoveries.includes(f) ? f : null;
+}
 
 /** Next microscope above the one the player has, or null when the tree is done. */
 export function nextGoalRecipe(data: Pick<GameData, 'recipes'>, state: Pick<GameState, 'scope'>): Recipe | null {
@@ -30,45 +76,102 @@ export function nextGoalRecipe(data: Pick<GameData, 'recipes'>, state: Pick<Game
   );
 }
 
-export function planFor(goal: Recipe, data: Pick<GameData, 'recipes'>, inventory: Record<string, number>): Plan {
-  const inv = { ...inventory };
-  const missing = new Map<string, number>();
-  const steps = new Map<string, PlanStep>();
-
-  const need = (itemId: string, count: number) => {
-    const used = Math.min(inv[itemId] ?? 0, count);
-    inv[itemId] = (inv[itemId] ?? 0) - used;
-    const rest = count - used;
-    if (rest <= 0) return;
-    const recipe = producerOf(data, itemId);
-    if (!recipe) {
-      missing.set(itemId, (missing.get(itemId) ?? 0) + rest);
-      return;
-    }
-    const times = Math.ceil(rest / recipe.output.count);
-    for (const input of recipe.inputs) need(input.itemId, input.count * times);
-    const prev = steps.get(recipe.id);
-    steps.set(recipe.id, { recipe, times: (prev?.times ?? 0) + times });
+export function planFor(
+  goal: Recipe,
+  data: Pick<GameData, 'recipes' | 'materials' | 'samples'>,
+  inventory: Record<string, number>,
+  discoveries: readonly string[] = [],
+): Plan {
+  /** Expand the goal against an inventory: what raw material is missing and which crafts are needed. */
+  const expand = (have: Record<string, number>) => {
+    const inv = { ...have };
+    const missing = new Map<string, number>();
+    const steps = new Map<string, PlanStep>();
+    const need = (itemId: string, count: number) => {
+      const used = Math.min(inv[itemId] ?? 0, count);
+      inv[itemId] = (inv[itemId] ?? 0) - used;
+      const rest = count - used;
+      if (rest <= 0) return;
+      const recipe = producerOf(data, itemId);
+      if (!recipe) {
+        missing.set(itemId, (missing.get(itemId) ?? 0) + rest);
+        return;
+      }
+      const times = Math.ceil(rest / recipe.output.count);
+      for (const input of recipe.inputs) need(input.itemId, input.count * times);
+      steps.set(recipe.id, { recipe, times: (steps.get(recipe.id)?.times ?? 0) + times });
+    };
+    for (const input of goal.inputs) need(input.itemId, input.count);
+    steps.set(goal.id, { recipe: goal, times: 1 });
+    return { missing, steps: [...steps.values()] };
   };
-  for (const input of goal.inputs) need(input.itemId, input.count);
-  steps.set(goal.id, { recipe: goal, times: 1 });
 
-  const list = [...steps.values()];
+  const full = expand({});
+  const now = expand(inventory);
+  const raw: PlanRaw[] = [...full.missing].map(([itemId, total]) => {
+    const found = lockedBy(itemId, data, []) ? findFeature(data, data.materials[itemId]!.unlockedBy!) : null;
+    return {
+      itemId,
+      total,
+      missing: now.missing.get(itemId) ?? 0,
+      identify: found
+        ? { ...found, scope: scopeThatSees(found.feature, data), done: discoveries.includes(found.feature.id) }
+        : undefined,
+    };
+  });
+  // Materials that must be identified under a microscope first come first: they are the new thing to learn.
+  raw.sort((a, b) => Number(!!b.identify && !b.identify.done) - Number(!!a.identify && !a.identify.done));
   const has = (r: Recipe) => r.inputs.every((i) => (inventory[i.itemId] ?? 0) >= i.count);
   return {
     goal,
-    missing: [...missing].map(([itemId, count]) => ({ itemId, count })),
-    steps: list,
-    nextStep: list.find((s) => has(s.recipe)) ?? null,
+    raw,
+    missing: [...now.missing].map(([itemId, count]) => ({ itemId, count })),
+    allSteps: full.steps,
+    steps: now.steps,
+    nextStep: now.steps.find((s) => has(s.recipe)) ?? null,
   };
 }
 
+export type Action =
+  | { kind: 'identify'; raw: PlanRaw; identify: Identify }
+  | { kind: 'gather'; raw: PlanRaw }
+  | { kind: 'craft'; step: PlanStep };
+
+/** The one thing to do right now: identify or gather the first material still missing, else craft the next ready step. */
+export function currentAction(plan: Plan): Action | null {
+  const raw = plan.raw.find((r) => r.missing > 0);
+  if (raw) return raw.identify && !raw.identify.done ? { kind: 'identify', raw, identify: raw.identify } : { kind: 'gather', raw };
+  return plan.nextStep ? { kind: 'craft', step: plan.nextStep } : null;
+}
+
+export function actionText(action: Action, data: Pick<GameData, 'items'>): string {
+  switch (action.kind) {
+    case 'identify':
+      return `Look (F) at a ${action.identify.sample.name} with your ${action.identify.scope?.name ?? 'microscope'} to spot ${action.identify.feature.name}`;
+    case 'gather':
+      return `Gather ${action.raw.missing} ${data.items[action.raw.itemId]?.name ?? action.raw.itemId} (aim and press E)`;
+    case 'craft':
+      return `Press C to craft ${action.step.recipe.name}`;
+  }
+}
+
 /** Plain-words answer to "how do I get this item?", for the guide. */
-export function howToGet(itemId: string, data: Pick<GameData, 'recipes' | 'materials' | 'items'>): string | null {
+export function howToGet(
+  itemId: string,
+  data: Pick<GameData, 'recipes' | 'materials' | 'items' | 'samples'>,
+  discoveries: readonly string[] = [],
+): string | null {
   const name = data.items[itemId]?.name;
   if (!name) return null;
   const recipe = producerOf(data, itemId);
-  if (!recipe) return data.materials[itemId]?.where ? `${name}: ${data.materials[itemId]!.where}. Aim at it and press E.` : null;
+  if (!recipe) {
+    const where = data.materials[itemId]?.where;
+    if (!where) return null;
+    const locked = lockedBy(itemId, data, discoveries);
+    const found = locked ? findFeature(data, locked) : null;
+    const scope = found ? scopeThatSees(found.feature, data) : null;
+    return `${name}: ${where}.${locked && scope ? ` You can only gather it after you have looked at it with a ${scope.name} and spotted ${found!.feature.name}.` : ' Aim at it and press E.'}`;
+  }
   const parts = recipe.inputs.map((i) => `${i.count} ${data.items[i.itemId]?.name ?? i.itemId}`);
   return `${name} is crafted, not found in the world. Make it in the crafting panel from ${parts.join(' and ')}.`;
 }

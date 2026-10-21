@@ -14,6 +14,7 @@ Five design pillars guide every decision:
 - **Real physics, simple rules.** Material and optics choices change what you can see, and the rules are directionally correct.
 - **Wonder before jargon.** The first zoom happens within minutes, and terms appear only when a player needs them.
 - **Every upgrade has a reason.** Each microscope hits a visible limit that the next tier solves.
+- **Discovery gates progress.** A better microscope needs a material that only the previous microscope could recognise, so the instrument you built is what lets you build the next one.
 - **Worlds from a prompt.** An LLM turns a sentence such as "a drop of pond water" into a playable, scale-layered world. (Designed and validated, not built yet; see "Build status".)
 
 The game is built for the [4th Annual Open Scientific Intelligence Hackathon](https://luma.com/ku88xh92), a hybrid event focused on LLMs, agents and multimodal models for materials science, chemistry, physics and math.
@@ -36,8 +37,8 @@ Success is checked in playtests before the demo: a new player builds a second-ti
 Every session repeats one loop, at smaller and smaller scales:
 
 1. **Explore and gather.** Walk the landscape and collect sand, ore, plant oil, resin and other raw materials. The game never leaves the player lost: a goal panel names the next microscope, lists what is still needed and where it is found, and an arrow with the distance points to the nearest source, and a small marker floats over it when the player is close.
-2. **Craft parts.** Smelt sand into glass, grind lenses, forge frames and tubes.
-3. **Assemble.** Craft the microscope from its parts in the crafting panel.
+2. **Identify.** Some materials look like plain rock or seeds until you look at them through the microscope you already have. Spotting what is inside unlocks gathering them (see "Discovery gates").
+3. **Craft and assemble.** Smelt sand into glass, grind lenses, forge frames and tubes, then craft the microscope from its parts. The goal card lists the steps and the C key crafts the next ready one.
 4. **Look.** Aim at a sample, press a key to look through the instrument, and focus; the view shows only what the instrument can resolve.
 5. **Hit a wall.** The view is blurry, empty or too dark, and the game explains the limit in plain words, using the simulation's own numbers.
 6. **Upgrade.** Gather better materials, craft better parts and return to step 3.
@@ -58,6 +59,18 @@ The tree follows the real history of microscopy in six tiers. Each tier ends at 
 | 5. Electron microscope | Tungsten filament, vacuum chamber, magnetic lenses | Wavelength versus resolution, vacuum, beam damage | Lens errors and sample damage cap the detail |
 | 6. Aberration-corrected STEM (not built) | Correctors and a stable stage | Imaging individual atoms | End of the tree |
 
+### Discovery gates
+
+To build a microscope above the first, the player needs a material that is only recognisable through the microscope below it. Until the player has seen it (and its Microdex card unlocks), the material cannot be gathered: the rocks are plain grey, the seeds are just seeds, and pressing E says "not identified yet". After the discovery the rocks show their ore and E works. The rule is data: a material lists `unlockedBy`, the id of a discovery. A test fails if any tier above the first lacks such a gate, or if the gate is not visible with the previous tier.
+
+| To build | Material that is gated | Discovered with | What the player sees |
+| --- | --- | --- | --- |
+| Compound microscope | Copper ore (lamp) | Hand lens | Green copper veins in a plain grey rock |
+| High-quality microscope | Plant oil (immersion oil) | Compound microscope | Oil droplets inside a sunflower seed |
+| Electron microscope | Tungsten ore (filament) | High-quality microscope | Dark tungsten grains inside a heavy grey rock |
+
+The sizes are chosen so each gate really is out of reach of the tier before it: copper veins (50 µm) need the hand lens's 30 µm resolution, seed oil droplets (8 µm) need the compound microscope's 1.5 µm, tungsten grains (0.8 µm) need the high-quality microscope's 0.2 µm. The goal card shows an "Identify" row ahead of the gather rows, with what to look at and which microscope to use.
+
 Tiers 0 to 3 and 5 are playable. Higher-tier microscopes replace lower ones: the best instrument you own is the one you look through, and the high-quality microscope consumes the compound microscope you built before it.
 
 ## Materials and crafting
@@ -68,14 +81,15 @@ Material choice is the main decision in the game: the properties of what you gat
 | --- | --- | --- | --- |
 | Beach sand | Basic glass lens | Impurity level | Impure glass blurs the image (lens blur of 30 µm in a hand lens, 1 µm in the compound microscope) |
 | Quartz sand | High-quality lens | Purity, low dispersion | Much smaller lens blur (0.05 µm) |
-| Iron and copper ore | Frame, tube, focus knob, lamp, condenser, coils | Strength, conductivity | Needed to assemble the instrument |
-| Plant oil | Immersion oil | Refractive index | Raises numerical aperture, so finer detail resolves (up to NA 1.3) |
-| Tungsten ore | Electron-source filament | Melting point | Needed to emit a steady electron beam |
+| Iron ore | Frame, tube, focus knob, coils | Strength | Needed to assemble the instrument |
+| Copper ore (identify with the hand lens) | Lamp, condenser, coils | Conductivity | Needed for the light source and the magnetic lenses |
+| Plant oil (identify with the compound microscope) | Immersion oil | Refractive index | Raises numerical aperture, so finer detail resolves (up to NA 1.3) |
+| Tungsten ore (identify with the high-quality microscope) | Electron-source filament | Melting point | Needed to emit a steady electron beam |
 | Resin | Vacuum seals | Leak rate | Needed for the vacuum chamber |
 | Glass slides and cover slips (not built) | Sample holders | Thickness, flatness | Thin, flat samples are easier to focus |
 | Natural dyes (not built) | Stains | Which structures they bind | Raise contrast for chosen features |
 
-The goal panel lists the crafts in order and highlights the next one; the full recipe list is a click away. The guide answers "where do I find X?", "how do I make X?" and "what next?" from the same data (each raw material carries a where-to-find hint in its JSON). Crafting happens in the crafting panel, which labels each recipe with its station (furnace or bench). Stations are not yet places in the world, so any recipe can be crafted from the panel. Recipes are data (JSON): there are 18 now, and adding a part means adding one entry. The raw materials for the whole tree are: 8 beach sand, 6 quartz sand, 7 iron, 6 copper, 1 plant oil, 1 tungsten and 2 resin. Materials grow back 15 seconds after they are gathered.
+The goal panel lists the crafts in order and highlights the next one; the full recipe list is a click away. The guide answers "where do I find X?", "how do I make X?" and "what next?" from the same data (each raw material carries a where-to-find hint in its JSON). Crafting happens in the crafting panel, which labels each recipe with its station (furnace or bench). Stations are not yet places in the world, so any recipe can be crafted from the panel. Recipes are data (JSON): there are 18 now, and adding a part means adding one entry. The raw materials for the whole tree are: 8 beach sand, 6 quartz sand, 7 iron, 6 copper, 1 plant oil, 1 tungsten and 2 resin. Each material carries a where-to-find hint, which the goal card and the guide show. Materials grow back 15 seconds after they are gathered.
 
 ## World and scale content
 
@@ -83,9 +97,9 @@ The world is a small open 3D landscape, about 150 m across, that the player walk
 
 | Area | Where | What the player finds |
 | --- | --- | --- |
-| Meadow | Centre (spawn) | Leafy plants, flowers, a butterfly wing, sunflowers, grass and oaks |
+| Meadow | Centre (spawn) | Leafy plants, flowers, a butterfly wing, sunflowers (look at a seed under the compound microscope), grass and oaks |
 | Pond | West | Pond water to sample, sand along the shore |
-| Highlands (the mine) | East | Iron, copper and tungsten rocks, quartz crystals, boulders |
+| Highlands (the mine) | East | Iron rocks, quartz crystals, and plain grey and heavy grey rocks that hide copper and tungsten, boulders |
 | Pine grove | North-east | Resin stumps among pines |
 | Workshop lab | Far north | A flat pad with lamp posts and a glowing crystal |
 
@@ -93,14 +107,14 @@ Every sample has a hidden layer at each smaller scale, and a layer appears only 
 
 | Tier | Typical feature size | What the player can discover |
 | --- | --- | --- |
-| 1 | About 0.1 mm and below | Leaf veins, sand grain facets, wing veins, petal hairs |
-| 2 | About 10 to 100 µm | Leaf cells, pollen, wing scales, pond algae |
-| 3 | About 1 µm | Bacteria in pond water, tiny pits on a quartz grain |
+| 1 | About 0.1 mm and below | Leaf veins, sand grain facets, wing veins, petal hairs, copper veins |
+| 2 | About 10 to 100 µm | Leaf cells, pollen, wing scales, pond algae, seed oil droplets |
+| 3 | About 1 µm | Bacteria in pond water, tiny pits on a quartz grain, tungsten grains |
 | 4 | About 1 µm, with contrast | Transparent cells, stained or labeled structures (not built) |
 | 5 | About 10 to 100 nm | Viruses, crystal grains, the atomic lattice |
 | 6 | About 0.1 to 0.4 nm | Single atomic columns (not built) |
 
-The Microdex is a collection log with one card per discovery: a picture of what the player actually saw (kept as their sharpest view), its size, and a two-sentence explanation. Cards are grouped by biome with progress and a completion mark, and biomes with no samples yet (the mine) show as locked. The build has 14 discoveries across 7 hand-authored samples. A discovery toast appears the first time something is seen.
+The Microdex is a collection log with one card per discovery: a picture of what the player actually saw (kept as their sharpest view), its size, and a two-sentence explanation. Cards are grouped by biome with progress and a completion mark, and a biome with no samples yet would show as locked (all four have samples now). The build has 17 discoveries across 10 hand-authored samples; three of them (copper veins, seed oil, tungsten grains) unlock materials. A discovery toast appears the first time something is seen.
 
 ## Simulation model
 
@@ -176,7 +190,7 @@ The MVP is one complete play loop that can be demoed in about five minutes: gath
 | World | One small open 3D map with a meadow and a pond | Other biomes shown as locked areas | Mine and workshop biomes | Built, and larger than planned: meadow, pond, highlands, pine grove and lab |
 | Crafting | About eight recipes: glass, lens, frame, tube, light source, immersion oil | Recipe values tuned by hand | Full materials property system | 18 recipes, values tuned by hand |
 | Microscopes | Tiers 1 to 3, working end to end | Tier 5 as a scripted showpiece view | Tiers 4 and 6 | Tiers 0 to 3 and 5 built; tier 5 is a computed view with beam damage, not scripted |
-| Samples | About ten hand-authored discoveries in the Microdex | Atomic view drawn from a prepared image | Samples generated from a prompt | 14 discoveries; the atomic lattice is drawn procedurally |
+| Samples | About ten hand-authored discoveries in the Microdex | Atomic view drawn from a prepared image | Samples generated from a prompt | 17 discoveries; the atomic lattice is drawn procedurally |
 | AI | Guide grounded in the simulation's numbers | Prompt-to-world limited to three or four templates | Materials Project lookup, abTEM images, agent benchmark | Offline guide only; LLM features deferred |
 | Polish | Simple art, readable UI, one sound per action | Placeholder music | Tutorial and teacher mode | Procedural 3D art, synthesised sounds, demo script; no music or tutorial |
 
@@ -236,11 +250,11 @@ The team has four people and the build window is not fixed yet (see open questio
 
 ## Build status
 
-Built and tested (47 automated tests, plus manual checks in the browser): the shared contract; tiers 0, 1, 2, 3 and 5 with zoom steps, focus and beam damage; the wall messages; 18 recipes; 14 discoveries in the Microdex; the offline guide (including where-to-find and what-next answers); the goal panel with a world beacon; the open world with procedural models; synthesised sounds; a demo mode (`?demo`, press K to restock materials).
+Built and tested (50 automated tests, plus manual checks in the browser): the shared contract; tiers 0, 1, 2, 3 and 5 with zoom steps, focus and beam damage; the wall messages; 18 recipes; 17 discoveries in the Microdex; the offline guide (including where-to-find and what-next answers); the discovery gates; a keyboard-first goal card (the next action in one line, a checklist, C to craft, an arrow to the nearest source), a Tab menu and toasts; the open world with procedural models; synthesised sounds; a demo mode (`?demo`, press K to restock materials).
 
 Not built: the LLM planner and guide calls, the server and world cache, tiers 4 and 6, stain and contrast methods, stations as places in the world, saving progress between sessions, music and a tutorial.
 
-Not yet checked: a playtest with someone outside the team, review of the physics numbers and the wall wording by a microscopy expert, and play with real mouse and keyboard on more than one browser.
+Not yet checked: whether the discovery gates feel like discovery or like busywork in a playtest; a playtest with someone outside the team, review of the physics numbers and the wall wording by a microscopy expert, and play with real mouse and keyboard on more than one browser.
 
 ## Risks and mitigations
 
@@ -263,9 +277,9 @@ The demo shows the whole idea in about five minutes: a player builds a tool and 
 
 1. **Start with a blurry world.** The player holds nothing and looks at a leaf: the fine veins are blurred away.
 2. **Build a hand lens.** Gather sand and iron, smelt glass, craft the lens, then aim at a leaf and press a key to look through it and see leaf veins.
-3. **Hit the wall, then upgrade.** The compound microscope shows cells and pond algae, and the guide explains why more magnification alone stopped helping.
-4. **Reach the diffraction limit.** The high-quality microscope with oil immersion shows bacteria, and the banner explains why viruses stay out of reach.
-5. **Show the electron microscope.** It shows a virus (which the beam slowly destroys) and the atomic lattice of a crystal in the lab, and the guide explains why electrons see smaller than light.
+3. **Discover to unlock, then upgrade.** The hand lens reveals copper in a plain rock, which unlocks the lamp and the compound microscope. It shows cells and pond algae, and the guide explains why more magnification alone stopped helping.
+4. **Reach the diffraction limit.** Oil found in a sunflower seed under the compound microscope unlocks the high-quality microscope. With oil immersion it shows bacteria, and the banner explains why viruses stay out of reach.
+5. **Show the electron microscope.** Tungsten spotted under the high-quality microscope unlocks it. It shows a virus (which the beam slowly destroys) and the atomic lattice of a crystal in the lab, and the guide explains why electrons see smaller than light.
 6. **Type a prompt (when built).** The presenter enters a sentence and a new world appears with its own hidden scales. This step needs the LLM work and is skipped in the current demo.
 
 For judges, the pitch has four points:
@@ -284,5 +298,6 @@ For judges, the pitch has four points:
 - [ ] Which age group do we target first: middle school, high school or early undergraduate?
 - [ ] Which LLM and API will power the planner and the guide? Deferred with the LLM features.
 - [ ] What are the hackathon's tracks, judging criteria and submission format? The event page does not list them.
+- [ ] Do the discovery gates feel rewarding? Option if they feel like busywork: make the plain rocks and seeds also glimmer faintly so players know to look, or add a hint from the guide after a minute without progress.
 - [ ] Should crafting stations (furnace, bench) become places in the world, or stay a panel?
 - [ ] Should the electron wavelength use the relativistic formula? It would be about 10% more accurate at 200 kV.

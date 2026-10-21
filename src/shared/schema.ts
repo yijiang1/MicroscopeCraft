@@ -13,7 +13,7 @@ const Id = z.string().regex(/^[a-z0-9_]+$/, 'ids are lower_snake_case');
 const Color = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'color is #rrggbb');
 
 /** How the 2D scope renderer draws a feature or catalog type. Add a value here when Person B adds a drawing. */
-export const DrawingSchema = z.enum(['veins', 'grains', 'hair', 'cells', 'pollen', 'rods', 'algae', 'scales', 'virus', 'lattice']);
+export const DrawingSchema = z.enum(['veins', 'grains', 'hair', 'cells', 'pollen', 'rods', 'algae', 'scales', 'virus', 'droplets', 'lattice']);
 export type Drawing = z.infer<typeof DrawingSchema>;
 
 export const MaterialSchema = z.object({
@@ -22,6 +22,9 @@ export const MaterialSchema = z.object({
   color: Color,
   /** Where to find it in the world, in plain words (shown in the goal panel and by the guide). */
   where: z.string().optional(),
+  /** Feature id (a Microdex discovery) the player must have seen before this can be gathered:
+   *  the material is only recognisable under a microscope. Absent = gatherable from the start. */
+  unlockedBy: z.string().optional(),
   /** Numeric properties that feed the simulation, e.g. { purity: 0.7 }. Free-form on purpose. */
   properties: z.record(z.string(), z.number()).default({}),
 });

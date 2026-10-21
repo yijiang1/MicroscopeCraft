@@ -50,16 +50,28 @@ Simplified physics is labelled in comments next to the formula.
 | Click, WASD, mouse | Look and walk (Esc frees the mouse) |
 | Shift, Space | Run, jump |
 | E | Gather the item you are aiming at (a ring and a prompt show what it is) |
+| C | Craft the next ready step of your goal (no mouse needed) |
+| Tab | Menu: inventory, all recipes, guide, sound (G jumps straight to the guide box) |
 | F | Look at the aimed sample through your best instrument (F or Esc to leave) |
 | Wheel or slider | Focus (compound microscope and up) |
 | M | Microdex |
-| K | Restock every raw material (only when the URL ends in `?demo`) |
+| K | Restock every raw material, skipping the identifications (only when the URL ends in `?demo`) |
 
 ## Finding your way
 
-The top of the side panel always shows the **next goal** (the next microscope), the raw materials you still need and where each one is, and the crafts in order. The next button to press is green. Glass and lenses are crafted, not found: they appear in the craft list, not in the world.
+The goal card at the top right is always on screen. Its bold line is the one thing to do right now ("Gather 2 Beach sand", "Press C to craft Glass", "Look (F) at a Grey rock with your Hand lens"). Press the ▸ button to see the whole checklist for the next microscope: what to identify, what to gather and where, and the crafts in order, with ✓ for done. Everything works from the keyboard: **E** gathers, **C** crafts the next ready step, **F** looks, and you never need to free the mouse.
 
-The nearest source of the material you need is shown by an **arrow and distance** at the top of the screen, and a small floating marker over it once you are within about 30 m. Click "Show me" on another material to track it instead. You can also ask the guide: "where do I find quartz sand?", "how do I make glass?" or "what next?".
+The nearest source of the material you need is shown by an **arrow and distance** at the top of the screen, and a small floating marker over it once you are within about 30 m. Click a row in the checklist to track another material. Glass and lenses are crafted, not found.
+
+**Some materials must be identified first.** Copper, plant oil and tungsten are only recognisable through a microscope: until you have looked at them (F) and spotted what is inside, the rocks are plain grey, the seeds are just seeds, and E is locked. Each is found with the *previous* microscope, so every upgrade needs something the last one discovered:
+
+| To build | You need | Identify it with | Look (F) at |
+| --- | --- | --- | --- |
+| Compound microscope | Copper (for the lamp) | Hand lens: copper veins | A plain grey rock in the highlands |
+| High-quality microscope | Plant oil (immersion oil) | Compound microscope: oil droplets | A sunflower seed |
+| Electron microscope | Tungsten (the filament) | High-quality microscope: tungsten grains | A heavy grey rock at the far end of the highlands |
+
+Ask the guide with **G**: "where do I find quartz sand?", "how do I make glass?" or "what next?".
 
 ## The world
 
@@ -80,19 +92,19 @@ The top-left corner shows a compass heading and your x, z position.
 | Instrument | Raw materials in total | Steps |
 | --- | --- | --- |
 | Hand lens (tier 1) | 2 beach sand, 1 iron | Glass → Glass lens; Iron frame; Hand lens |
-| Compound microscope (tier 2) | 6 beach sand, 2 iron, 1 copper | 2 Glass lens, Iron tube, Focus knob, Lamp (copper + glass) |
-| High-quality microscope (tier 3) | 6 quartz sand, 1 copper, 1 plant oil, plus the compound microscope | 3 Quartz glass → 2 Precision lens; Condenser; Immersion oil |
-| Electron microscope (tier 5) | 1 tungsten, 2 resin, 4 iron, 4 copper | Tungsten filament; Vacuum seal → Vacuum chamber; 2 Magnetic lens |
+| Compound microscope (tier 2) | 6 beach sand, 2 iron, 1 copper (identify first) | 2 Glass lens, Iron tube, Focus knob, Lamp (copper + glass) |
+| High-quality microscope (tier 3) | 6 quartz sand, 1 copper, 1 plant oil (identify first), plus the compound microscope | 3 Quartz glass → 2 Precision lens; Condenser; Immersion oil |
+| Electron microscope (tier 5) | 1 tungsten (identify first), 2 resin, 4 iron, 4 copper | Tungsten filament; Vacuum seal → Vacuum chamber; 2 Magnetic lens |
 
 ## Demo script (about 5 minutes)
 
 Open `http://localhost:5173/?demo`. The LLM prompt-to-world step of the full pitch is not built yet; see DESIGN.md.
 
 1. **Blurry world (0:00).** Walk to a leafy plant (a few steps north-west of the spawn), aim at it and press F with no instrument. The side veins are fuzzy and the fine veins are gone. Say: "Everything we can see is limited by the eye." Press F or Esc to leave.
-2. **Build a hand lens (0:45).** Gather 2 sand mounds (by the pond, west) and 1 iron rock (the rocky highlands, east) with E. Follow the goal panel (it shows the beam to the nearest sand and iron): craft Glass, Glass lens, Iron frame, Hand lens. Look at the leaf again: the vein network is sharp and the Microdex toast appears. Read the banner: the hand lens resolves about 30 µm, so the leaf cells are still blurred.
-3. **Hit the wall, then upgrade (1:45).** Press K to restock. Craft the compound microscope (see table). Look at the pond water (aim at the surface from the shore) at 100×: alga threads. Switch to 800×: the banner says more magnification only makes a bigger blur. Ask the guide "why is it blurry?" (the guide box stays usable while you look).
-4. **High-quality optics (3:00).** Craft the high-quality microscope. Look at the pond at 1000× with oil immersion: bacteria rods appear. Virus particles stay blurred; the banner explains the diffraction limit and points to electrons.
-5. **Electron showpiece (3:45).** Craft the electron microscope. Look at the pond at 150,000×: a virus, then watch the beam damage warning as the dose builds (zoom out or close the eyepiece to reset). Walk far north to the lab pad and look at the glowing crystal at 500,000×: grains, then 2,000,000×: the atomic lattice. Press M to show the Microdex.
+2. **Build a hand lens (0:45).** Follow the goal card: gather 2 sand mounds (by the pond, west) and 1 iron rock (the highlands, east) with E, then press C four times. Look at the leaf again: the vein network is sharp and the Microdex toast appears. The banner says the hand lens resolves about 30 µm, so the leaf cells are still blurred.
+3. **Discover something to unlock the next tier (1:45).** The goal card now says to identify copper. Walk east to a plain grey rock and press F: the hand lens shows green copper veins, the rocks turn into copper ore and E works. Say: "A better instrument needs something only the last one could see." Press K to restock the rest, press C through the compound microscope's crafts, then look at the pond water at 100× (alga threads) and 800× (the banner: more magnification only makes a bigger blur). Ask the guide "why is it blurry?" (press G).
+4. **High-quality optics (3:00).** Look at a sunflower seed with the compound microscope to spot the oil droplets (this unlocks plant oil), then craft the high-quality microscope. Look at the pond at 1000× with oil immersion: bacteria rods appear. Virus particles stay blurred; the banner explains the diffraction limit and points to electrons.
+5. **Electron showpiece (3:45).** Look at a heavy grey rock with the high-quality microscope to spot tungsten grains, then craft the electron microscope. Look at the pond at 150,000×: a virus, then watch the beam damage warning as the dose builds (zoom out or close the eyepiece to reset). Walk far north to the lab pad and look at the glowing crystal at 500,000×: grains, then 2,000,000×: the atomic lattice. Press M to show the Microdex.
 
 Pitch points: the instrument is earned by building it; every upgrade has a numeric reason (shown in the HUD: resolution, NA, dose); all content is JSON in `data/`.
 

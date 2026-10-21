@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameData } from './data';
-import { howToGet, itemsMentioned, nextGoalRecipe, planFor } from './plan';
+import { howToGet, itemsMentioned, lockedBy, nextGoalRecipe, planFor, scopeThatSees } from './plan';
 import { craft, createGame, gather } from './state';
 
 const data = loadGameData();
@@ -50,6 +50,41 @@ describe('goal plan', () => {
   });
 });
 
+describe('hidden materials: each tier needs something found with the tier below', () => {
+  const goals = data.recipes.filter((r) => r.scope).sort((a, b) => a.scope!.tier - b.scope!.tier);
+
+  it('copper needs the hand lens, plant oil the compound microscope, tungsten the high-quality microscope', () => {
+    const scopeOf = (item: string) => {
+      const feature = data.materials[item]!.unlockedBy!;
+      const f = Object.values(data.samples).flatMap((s) => s.features).find((x) => x.id === feature)!;
+      return scopeThatSees(f, data)!.id;
+    };
+    expect(scopeOf('copper_ore')).toBe('hand_lens');
+    expect(scopeOf('plant_oil')).toBe('compound_microscope');
+    expect(scopeOf('tungsten_ore')).toBe('hq_microscope');
+  });
+
+  it('every microscope after the first needs a material that is only identifiable with the previous tier', () => {
+    goals.slice(1).forEach((goal, i) => {
+      const previousTier = goals[i]!.scope!.tier;
+      const plan = planFor(goal, data, {});
+      const gates = plan.raw.filter((r) => r.identify).map((r) => r.identify!.scope!.scope!.tier);
+      expect(gates, goal.id).toContain(previousTier);
+    });
+  });
+
+  it('the plan lists what to identify, and gathering is locked until it is discovered', () => {
+    const compound = goals.find((g) => g.id === 'compound_microscope')!;
+    const before = planFor(compound, data, {}, []);
+    const copper = before.raw.find((r) => r.itemId === 'copper_ore')!;
+    expect(copper.identify).toMatchObject({ done: false, feature: { id: 'copper_veins' }, sample: { id: 'copper_rock' } });
+    expect(lockedBy('copper_ore', data, [])).toBe('copper_veins');
+    expect(lockedBy('copper_ore', data, ['copper_veins'])).toBeNull();
+    expect(lockedBy('iron_ore', data, [])).toBeNull();
+    expect(planFor(compound, data, {}, ['copper_veins']).raw.find((r) => r.itemId === 'copper_ore')!.identify!.done).toBe(true);
+  });
+});
+
 describe('where to find things', () => {
   it('every raw material that recipes use has a where-to-find hint', () => {
     const crafted = new Set(data.recipes.map((r) => r.output.itemId));
@@ -60,6 +95,8 @@ describe('where to find things', () => {
   it('answers for raw and crafted items; matches the longest name', () => {
     expect(howToGet('beach_sand', data)).toMatch(/pond shore/);
     expect(howToGet('glass', data)).toMatch(/crafted.*2 Beach sand/);
+    expect(howToGet('copper_ore', data)).toMatch(/only gather it after you have looked at it with a Hand lens and spotted Copper veins/);
+    expect(howToGet('copper_ore', data, ['copper_veins'])).toMatch(/press E/);
     expect(itemsMentioned('where do i find glass lens?', data)).toEqual(['lens']);
     expect(itemsMentioned('how do I get glass', data)).toEqual(['glass']);
     expect(itemsMentioned('why is it blurry?', data)).toEqual([]);

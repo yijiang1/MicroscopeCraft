@@ -2,6 +2,7 @@
 // Click to lock the mouse; WASD move, Shift run, Space jump, E gather the aimed item, F look at the aimed sample.
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+import { lockedBy } from '../shared/plan';
 import { gather, type GameContext } from '../shared/state';
 import { buildDecor, buildSky, FOG_COLOR, SUN_DIRECTION, type Blocker } from './decor';
 import type { WorldHandle } from './index';
@@ -18,6 +19,7 @@ const JUMP = 6.2;
 const REACH = 6;
 const RESPAWN_MS = 15_000; // no scarcity: gathered things grow back
 const ANIM_MS = 260;
+const LOCKED_TEXT = 'Not identified yet: look at it first (F) through a microscope';
 const MARKER_RANGE = 30; // the floating marker only shows when you are this close; the arrow always shows
 
 interface Node {
@@ -61,8 +63,13 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
 
   // --- things to gather or look at
   const nodes: Node[] = [];
+  /** Ores that can only be recognised under a microscope look like plain rock until the player has discovered them. */
+  const isRevealed = (kind: Kind) => {
+    const item = AIMS[kind].gather;
+    return !item || !lockedBy(item, ctx.data, ctx.state.discoveries);
+  };
   const spawnNode = (kind: Kind, x: number, z: number, index: number) => {
-    const root = buildModel(kind, index);
+    const root = buildModel(kind, index, isRevealed(kind));
     root.position.set(x, heightAt(x, z), z);
     root.updateMatrixWorld(true);
     const box = new THREE.Box3().setFromObject(root);
@@ -81,6 +88,23 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     kind: 'pond', aim: AIMS.pond, root: water, x: POND.x, z: POND.z, radius: 0, alive: true, index: -1,
     center: water.position.clone(), aimRadius: 0,
   };
+
+  const offDiscovery = ctx.bus.on('discoveryUnlocked', ({ id }) => {
+    for (const n of nodes) {
+      const item = n.aim.gather;
+      if (!item || ctx.data.materials[item]?.unlockedBy !== id) continue;
+      const old = n.root;
+      const fresh = buildModel(n.kind, n.index, true);
+      fresh.position.copy(old.position);
+      fresh.scale.copy(old.scale);
+      fresh.userData.node = n;
+      if (old.parent) {
+        scene.remove(old);
+        scene.add(fresh);
+      }
+      n.root = fresh;
+    }
+  });
 
   const crystal = nodes.find((n) => n.kind === 'crystal');
   const crystalLight = new THREE.PointLight('#8a7bff', 14, 18, 2);
@@ -120,7 +144,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const css = 'position:fixed;color:#fff;text-shadow:0 0 3px #000;pointer-events:none';
   const hint = document.createElement('div');
   hint.style.cssText = `${css};left:12px;bottom:12px`;
-  hint.textContent = 'Click to look · WASD move · Shift run · Space jump · E gather · F look through your instrument · M Microdex';
+  hint.textContent = 'Click to look · WASD move · Shift run · Space jump · E gather · F look closer · C craft · Tab menu · M Microdex';
   const prompt = document.createElement('div');
   prompt.style.cssText = `${css};left:calc(50% - 150px);width:300px;text-align:center;top:calc(50% + 18px)`;
   const trackHud = document.createElement('div');
@@ -181,6 +205,13 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     );
   };
 
+  let flashText = '';
+  let flashUntil = 0;
+  const flash = (text: string) => {
+    flashText = text;
+    flashUntil = performance.now() + 2500;
+  };
+
   const onKey = (e: KeyboardEvent, down: boolean) => {
     const k = e.key.toLowerCase();
     if (down) keys.add(k);
@@ -193,7 +224,10 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     if (!down || paused || !controls.isLocked) return;
     const n = aimed();
     if (!n) return;
-    if (k === 'e' && n.aim.gather) gatherNode(n);
+    if (k === 'e' && n.aim.gather) {
+      if (lockedBy(n.aim.gather, ctx.data, ctx.state.discoveries)) flash(LOCKED_TEXT);
+      else gatherNode(n);
+    }
     if (k === 'f' && n.aim.sample) {
       controls.unlock();
       ctx.bus.emit('openEyepiece', { sampleId: n.aim.sample });
@@ -220,7 +254,10 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const describe = (n: Node | null) => {
     if (!n) return '';
     const parts: string[] = [];
-    if (n.aim.gather) parts.push(`E gather ${ctx.data.items[n.aim.gather]?.name ?? n.aim.gather}`);
+    if (n.aim.gather) {
+      const locked = lockedBy(n.aim.gather, ctx.data, ctx.state.discoveries);
+      parts.push(locked ? 'E locked until identified' : `E gather ${ctx.data.items[n.aim.gather]?.name ?? n.aim.gather}`);
+    }
     if (n.aim.sample) parts.push(`F look at ${ctx.data.samples[n.aim.sample]?.name ?? n.aim.sample}`);
     return parts.join(' · ');
   };
@@ -294,7 +331,9 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     if (crystal) crystalLight.intensity = 12 + 4 * Math.sin(t * 0.0021);
 
     const n = controls.isLocked && !paused ? aimed() : null;
-    prompt.textContent = describe(n);
+    const flashing = performance.now() < flashUntil;
+    prompt.textContent = flashing ? flashText : describe(n);
+    prompt.style.color = flashing ? '#ffb27a' : '#fff';
     ring.visible = !!n;
     if (n) {
       const radius = n.radius > 0 ? n.radius + 0.2 : 0.8;
@@ -359,6 +398,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       offOpen();
       offClose();
       offTrack();
+      offDiscovery();
       removeEventListener('keydown', onDown);
       removeEventListener('keyup', onUp);
       renderer.dispose();

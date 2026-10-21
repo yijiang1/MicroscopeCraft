@@ -11,7 +11,8 @@ describe('microdex', () => {
     const meadow = dex.find((b) => b.biome === 'meadow')!;
     expect(meadow.found).toBe(1);
     expect(meadow.cards.find((c) => c.feature.id === 'leaf_veins')).toMatchObject({ found: true, snapshot: 'data:image/jpeg;base64,xx' });
-    expect(dex.filter((b) => b.locked).map((b) => b.biome)).toEqual(['mine']);
+    expect(dex.filter((b) => b.locked)).toEqual([]); // every biome has samples now
+    expect(microdex({ samples: {} }, ctx.state).every((b) => b.locked)).toBe(true);
     expect(meadow.complete).toBe(false);
   });
   it('a sharper later snapshot replaces an earlier one; a worse one does not', () => {

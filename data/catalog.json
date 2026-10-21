@@ -9,5 +9,8 @@
   "pond_water": {"label": "Pond water", "drawing": "algae", "minSizeUm": 0.05, "maxSizeUm": 100, "tiers": [2, 3]},
   "flower": {"label": "Flower", "drawing": "pollen", "minSizeUm": 20, "maxSizeUm": 500, "tiers": [1, 2, 3]},
   "insect_wing": {"label": "Insect wing", "drawing": "veins", "minSizeUm": 5, "maxSizeUm": 500, "tiers": [1, 2, 3]},
-  "quartz_grain": {"label": "Quartz grain", "drawing": "grains", "minSizeUm": 0.5, "maxSizeUm": 500, "tiers": [1, 2, 3]}
+  "quartz_grain": {"label": "Quartz grain", "drawing": "grains", "minSizeUm": 0.5, "maxSizeUm": 500, "tiers": [1, 2, 3]},
+  "copper_rock": {"label": "Grey rock", "drawing": "veins", "minSizeUm": 20, "maxSizeUm": 500, "tiers": [1, 2, 3]},
+  "sunflower_seed": {"label": "Sunflower seed", "drawing": "droplets", "minSizeUm": 2, "maxSizeUm": 50, "tiers": [2, 3]},
+  "tungsten_rock": {"label": "Heavy rock", "drawing": "grains", "minSizeUm": 0.3, "maxSizeUm": 50, "tiers": [3]}
 }
