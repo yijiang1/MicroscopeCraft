@@ -1,6 +1,6 @@
 // Talking to a scientist (E): who they were, what they ask for, and a Show button for every request you can do now,
 // with your own Microdex picture of what they asked to see, and a chat box (Gemini, player's own key). Owner: Person D.
-import { askNpc, GEMINI_KEY, type ChatTurn } from './npcChat';
+import { askNpc, getGeminiKey, type ChatTurn } from './npcChat';
 import { conditionMet } from '../shared/achievements';
 import { completeQuest, type GameContext } from '../shared/state';
 import { questTarget } from './journal';
@@ -19,51 +19,16 @@ export function mountDialog(ctx: GameContext, toast: Toast): () => void {
   let npcId: string | null = null;
   let said = '';
   const chats: Record<string, ChatTurn[]> = {}; // per scientist, this visit only
-  const storedKey = () => {
-    try {
-      return localStorage.getItem(GEMINI_KEY) ?? '';
-    } catch {
-      return '';
-    }
-  };
-  const storeKey = (key: string | null) => {
-    try {
-      if (key) localStorage.setItem(GEMINI_KEY, key);
-      else localStorage.removeItem(GEMINI_KEY);
-    } catch {
-      /* storage blocked: the key lasts until reload */
-    }
-    sessionKey = key ?? '';
-  };
-  let sessionKey = storedKey();
 
   // Built once per conversation so typing survives re-renders after a quest is shown.
   const chatBox = (npc: NonNullable<typeof ctx.data.npcs[string]>) => {
     const wrap = styled('div', 'margin:0 0 14px;padding-bottom:12px;border-bottom:1px solid #ffffff1f');
     const first = npc.name.split(' ')[0];
-    if (!sessionKey) {
-      wrap.append(styled('div', 'font-weight:600;margin-bottom:4px', `💬 Chat with ${first}`));
-      const note = styled('div', 'font-size:12px;color:#99a;line-height:1.4;margin-bottom:6px', 'Ask about their science in your own words. Chat uses Google Gemini with your own API key, which stays in this browser. ');
-      const link = Object.assign(document.createElement('a'), { href: 'https://aistudio.google.com/apikey', target: '_blank', rel: 'noopener', textContent: 'Get a free key' });
-      link.style.color = '#8fc8f0';
-      note.append(link);
-      const row = styled('div', 'display:flex;gap:6px');
-      const key = Object.assign(document.createElement('input'), { type: 'password', placeholder: 'Paste your Gemini API key', autocomplete: 'off' });
-      key.style.cssText = 'flex:1;min-width:0';
-      const save = styled('button', '', 'Save');
-      const done = () => {
-        if (!key.value.trim()) return;
-        storeKey(key.value.trim());
-        chat = chatBox(npc);
-        render();
-      };
-      save.onclick = done;
-      key.addEventListener('keydown', (e) => {
-        e.stopPropagation();
-        if (e.key === 'Enter') done();
-      });
-      row.append(key, save);
-      wrap.append(note, row);
+    if (!getGeminiKey()) {
+      wrap.append(
+        styled('div', 'font-weight:600;margin-bottom:4px', `💬 Chat with ${first}`),
+        styled('div', 'font-size:12px;color:#99a;line-height:1.4', 'To ask about their science in your own words, add a Google Gemini API key in the menu: Tab → Settings.'),
+      );
       return wrap;
     }
     const turns = (chats[npc.id] ??= []);
@@ -86,7 +51,7 @@ export function mountDialog(ctx: GameContext, toast: Toast): () => void {
       log.scrollTop = log.scrollHeight;
       send.disabled = true;
       try {
-        turns.push({ role: 'model', text: await askNpc(npc, turns, sessionKey) });
+        turns.push({ role: 'model', text: await askNpc(npc, turns, getGeminiKey()) });
         thinking.remove();
         bubble(turns.at(-1)!);
       } catch (err) {
@@ -102,14 +67,8 @@ export function mountDialog(ctx: GameContext, toast: Toast): () => void {
       e.stopPropagation(); // typing must not trigger world hotkeys
       if (e.key === 'Enter') void ask();
     });
-    const forget = styled('button', 'font-size:11px;background:none;border:none;color:#778;cursor:pointer;padding:4px 0 0', 'Forget my Gemini key');
-    forget.onclick = () => {
-      storeKey(null);
-      chat = chatBox(npc);
-      render();
-    };
     row.append(input, send);
-    wrap.append(styled('div', 'font-weight:600;margin-bottom:6px', `💬 Chat with ${first}`), log, row, forget);
+    wrap.append(styled('div', 'font-weight:600;margin-bottom:6px', `💬 Chat with ${first}`), log, row);
     queueMicrotask(() => (log.scrollTop = log.scrollHeight));
     return wrap;
   };

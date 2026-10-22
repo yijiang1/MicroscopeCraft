@@ -2,10 +2,30 @@
 // (stored only in their browser, so no key ships with the game). Each scientist stays in character and in their field.
 import type { Npc } from '../shared/schema';
 
-export const GEMINI_KEY = 'microscopecraft.geminiKey';
+const GEMINI_KEY = 'microscopecraft.geminiKey';
 const MODEL = 'gemini-3.8-flash';
 const MAX_INPUT = 400;
 const MAX_TURNS = 16;
+
+let memoryKey = ''; // fallback when browser storage is blocked: lasts until reload
+
+export function getGeminiKey(): string {
+  try {
+    return localStorage.getItem(GEMINI_KEY) ?? memoryKey;
+  } catch {
+    return memoryKey;
+  }
+}
+
+export function setGeminiKey(key: string | null): void {
+  memoryKey = key ?? '';
+  try {
+    if (key) localStorage.setItem(GEMINI_KEY, key);
+    else localStorage.removeItem(GEMINI_KEY);
+  } catch {
+    /* storage blocked */
+  }
+}
 
 export interface ChatTurn {
   role: 'user' | 'model';
