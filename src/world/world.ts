@@ -8,13 +8,14 @@ import { PointerLockControls } from 'three/addons/controls/PointerLockControls.j
 import { conditionMet } from '../shared/achievements';
 import { lockedBy, SITE_NAMES } from '../shared/plan';
 import type { Site } from '../shared/schema';
-import { gather, ownedScopes, selectScope, setSite, visit, type GameContext } from '../shared/state';
+import { carrySample, gather, ownedScopes, selectScope, setPlayerLocation, setSite, visit, type GameContext } from '../shared/state';
 import { BEAM_SPOT, buildCampus, CRYSTAL_SPOT, EM_SPOT, inChess, inGreenhouse, inLab, SCIENCE, WILSON, type Box } from './campus';
 import { buildDecor, buildSky, FOG_COLOR, SUN_DIRECTION, type Blocker } from './decor';
 import type { WorldHandle } from './index';
 import { buildModel } from './models';
 import { buildNpc, type NpcFigure } from './npc';
 import { buildPlayer } from './player';
+import { createFrameLoop } from './loop';
 import { AIMS, PLACEMENTS, RADIUS, samplesOf, SPAWN, type Aim, type Kind, type Placement } from './placements';
 import { buildTerrain, buildWater, FALLS_X, gorgeZ, heightAt, LAKE, waterLevelAt, WATER_LEVEL, WORLD_RADIUS } from './terrain';
 
@@ -29,7 +30,6 @@ const RESPAWN_MS = 15_000; // no scarcity: gathered things grow back
 const ANIM_MS = 260;
 const LOCKED_TEXT = 'Not identified yet: look at it first (F) through a microscope';
 const MARKER_RANGE = 30; // the floating marker only shows when you are this close; the arrow always shows
-const BAG_SIZE = 8; // samples you can carry to the fixed instruments at once
 
 interface Node {
   /** 'em': the electron microscopes in the lab; 'beam': the CHESS beamline's desk; 'npc': a scientist. */
@@ -150,13 +150,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   };
   showModels();
   /** Samples the player has taken along for the fixed instruments, newest first. */
-  const bag: string[] = [];
-  const carry = (sampleId: string) => {
-    const i = bag.indexOf(sampleId);
-    if (i >= 0) bag.splice(i, 1);
-    bag.unshift(sampleId);
-    bag.length = Math.min(bag.length, BAG_SIZE);
-  };
+  const bag = ctx.state.carriedSamples;
 
   const offDiscovery = ctx.bus.on('discoveryUnlocked', ({ id }) => {
     for (const n of nodes) {
@@ -222,12 +216,23 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
 
   // --- player
   const camera = new THREE.PerspectiveCamera(70, 1, 0.1, 1500);
-  camera.position.set(SPAWN.x, heightAt(SPAWN.x, SPAWN.z) + EYE_HEIGHT, SPAWN.z);
+  const saved = ctx.state.playerLocation;
+  const start = saved && Math.hypot(saved.x, saved.z) <= WORLD_RADIUS - 2 ? saved : null;
+  const { x: startX, z: startZ } = start ?? SPAWN;
+  camera.position.set(startX, heightAt(startX, startZ) + EYE_HEIGHT, startZ);
+  if (start) camera.rotation.set(start.pitch, start.yaw, 0, 'YXZ');
   const controls = new PointerLockControls(camera, renderer.domElement);
   const player = buildPlayer();
   scene.add(player.root);
   const viewCamera = camera.clone();
-  let thirdPerson = true;
+  let thirdPerson = start?.thirdPerson ?? true;
+  const facing = new THREE.Euler();
+  const rememberPlayer = () => {
+    facing.setFromQuaternion(camera.quaternion, 'YXZ');
+    setPlayerLocation(ctx, { x: camera.position.x, z: camera.position.z, yaw: facing.y, pitch: facing.x, thirdPerson });
+  };
+  addEventListener('pagehide', rememberPlayer);
+  document.addEventListener('visibilitychange', rememberPlayer);
   const viewDirection = new THREE.Vector3();
   const shoulder = new THREE.Vector3();
   const boom = new THREE.Vector3();
@@ -347,8 +352,12 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   // --- gathering: shrink away, grow back later
   const anims: { obj: THREE.Object3D; from: number; to: number; start: number; done?: () => void }[] = [];
   const timers = new Set<number>();
-  const animate = (obj: THREE.Object3D, from: number, to: number, done?: () => void) =>
-    anims.push({ obj, from, to, start: performance.now(), done });
+  const animate = (obj: THREE.Object3D, from: number, to: number, done?: () => void) => {
+    if (paused) {
+      obj.scale.setScalar(to);
+      done?.();
+    } else anims.push({ obj, from, to, start: performance.now(), done });
+  };
 
   const gatherNode = (n: Node) => {
     gather(ctx, n.aim.gather!);
@@ -378,7 +387,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   };
   /** F at a sample: take a bit along if you own a fixed instrument, and look through your best portable microscope. */
   const lookAt = (sampleId: string) => {
-    if (ownsFixed()) carry(sampleId);
+    if (ownsFixed()) carrySample(ctx, sampleId);
     const portable = ownedScopes(ctx.state.inventory, ctx.data, null).at(-1);
     if (ctx.state.scope.site && portable) selectScope(ctx, portable.scope.tier);
     look(sampleId);
@@ -439,8 +448,22 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   addEventListener('keydown', onDown);
   addEventListener('keyup', onUp);
   renderer.domElement.addEventListener('click', onClick);
-  const offOpen = ctx.bus.on('openEyepiece', () => (paused = true));
-  const offClose = ctx.bus.on('closeEyepiece', () => (paused = false));
+  const offOpen = ctx.bus.on('openEyepiece', () => {
+    rememberPlayer();
+    paused = true;
+    keys.clear();
+    loop.stop();
+    // Finish pending gathering animations before a hidden respawn can replace them.
+    for (const a of anims.splice(0)) {
+      a.obj.scale.setScalar(a.to);
+      a.done?.();
+    }
+  });
+  const offClose = ctx.bus.on('closeEyepiece', () => {
+    paused = false;
+    keys.clear();
+    loop.start();
+  });
 
   const resize = () => {
     renderer.setSize(el.clientWidth, el.clientHeight);
@@ -500,9 +523,10 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       const dz = p.z - z;
       const d = Math.hypot(dx, dz);
       const min = r + PLAYER_RADIUS;
-      if (d < min && d > 1e-4) {
-        p.x = x + (dx / d) * min;
-        p.z = z + (dz / d) * min;
+      if (d < min) {
+        // A save can sit exactly where a harvested rock regenerates on reload.
+        p.x = x + (d > 1e-4 ? dx / d : 1) * min;
+        p.z = z + (d > 1e-4 ? dz / d : 0) * min;
       }
     };
     blockers.forEach((b: Blocker) => push(b.x, b.z, b.r));
@@ -561,11 +585,14 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   };
   const doors: Record<Site, { x: number; z: number }> = { lab: { x: SCIENCE.x0 - 1, z: EM_SPOT.z }, chess: { x: WILSON.x0 - 1, z: -4 } };
 
-  const clock = new THREE.Clock();
-  let raf = requestAnimationFrame(function frame() {
-    raf = requestAnimationFrame(frame);
-    const dt = Math.min(clock.getDelta(), 0.05);
-    const t = performance.now();
+  // Regenerated rocks/scenery may now occupy the saved spot; restore on walkable ground.
+  collide(camera.position);
+  camera.position.y = heightAt(camera.position.x, camera.position.z) + EYE_HEIGHT;
+  setSite(ctx, inLab(camera.position.x, camera.position.z) ? 'lab' : inChess(camera.position.x, camera.position.z) ? 'chess' : null);
+  rememberPlayer();
+  updateView();
+
+  const loop = createFrameLoop((dt, t) => {
     const previousX = camera.position.x;
     const previousZ = camera.position.z;
 
@@ -594,6 +621,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     }
 
     const { x: px, z: pz } = camera.position;
+    rememberPlayer();
     setSite(ctx, inLab(px, pz) ? 'lab' : inChess(px, pz) ? 'chess' : null);
     if (t > areaCheck) {
       areaCheck = t + 500;
@@ -656,6 +684,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     compass.textContent = `${heading()} · ${px.toFixed(0)}, ${pz.toFixed(0)}`;
     renderer.render(scene, viewCamera);
   });
+  loop.start();
 
   if (import.meta.env.DEV) {
     // Dev only: jump around for screenshots, e.g. __world.lookAtKind('iron').
@@ -669,6 +698,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       teleport,
       nodes: nodes.map((n) => ({ kind: n.kind, x: n.x, z: n.z, npc: n.npcId })),
       bag,
+      get renderFrames() { return renderer.info.render.frame; },
       /** Stand `dist` m south of the first node of a kind (or a scientist's id), looking at it. */
       lookAtKind(kind: string, dist = 2.5) {
         const n = nodes.find((m) => m.kind === kind || m.npcId === kind);
@@ -680,12 +710,14 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
 
   return {
     dispose() {
-      cancelAnimationFrame(raf);
+      loop.stop();
       timers.forEach((id) => clearTimeout(id));
       ro.disconnect();
       [offOpen, offClose, offTrack, offTarget, offCrafted, offQuest, offScore, offDiscovery].forEach((off) => off());
       removeEventListener('keydown', onDown);
       removeEventListener('keyup', onUp);
+      removeEventListener('pagehide', rememberPlayer);
+      document.removeEventListener('visibilitychange', rememberPlayer);
       player.dispose();
       controls.dispose();
       renderer.dispose();

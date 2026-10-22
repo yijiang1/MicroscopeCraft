@@ -68,7 +68,10 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   saveBtn.textContent = 'Save game';
   restart.textContent = 'Restart game';
   let resetting = false;
+  let travelSave = 0;
   const save = (): boolean => {
+    clearTimeout(travelSave);
+    travelSave = 0;
     if (resetting) return false;
     try {
       localStorage.setItem(SAVE_KEY, JSON.stringify(toSave(ctx.state)));
@@ -95,6 +98,8 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
     location.reload();
   };
   addEventListener('pagehide', save);
+  const saveWhenHidden = () => { if (document.hidden) save(); };
+  document.addEventListener('visibilitychange', saveWhenHidden);
   input.placeholder = 'Ask the guide (try "where do I find sand?")';
   input.style.cssText = 'width:100%;box-sizing:border-box';
   input.addEventListener('keydown', (e) => {
@@ -144,6 +149,10 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
 
   const name = (id: string) => ctx.data.items[id]?.name ?? id;
   const offs = [
+    ctx.bus.on('playerMoved', () => {
+      if (!travelSave) travelSave = window.setTimeout(save, 5000);
+    }),
+    ctx.bus.on('carriedSamplesChanged', save),
     ...(['itemGathered', 'itemCrafted', 'discoveryUnlocked', 'scopeChanged', 'questCompleted', 'achievementUnlocked', 'minigameScored', 'areaVisited', 'closeEyepiece'] as const).map((t) => ctx.bus.on(t, save)),
     ctx.bus.on('itemGathered',({ itemId, count }) => {
       render();
@@ -182,6 +191,8 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
       offs.forEach((off) => off());
       removeEventListener('keydown', onKey);
       removeEventListener('pagehide', save);
+      document.removeEventListener('visibilitychange', saveWhenHidden);
+      clearTimeout(travelSave);
       goal.dispose();
       journal.dispose();
       closeDialog();

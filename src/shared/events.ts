@@ -6,6 +6,9 @@ export interface GameEvents {
   openEyepiece: { sampleId: string };
   /** scope → world: eyepiece dismissed. */
   closeEyepiece: Record<string, never>;
+  carriedSamplesChanged: Record<string, never>;
+  /** World position/view changed; autosaving is throttled by the UI. */
+  playerMoved: Record<string, never>;
   /** scope → guide: advice from the rendered image, including focus, alignment, stains and damage. */
   eyepieceStatus: { sampleId: string; text: string };
   itemGathered: { itemId: string; count: number };

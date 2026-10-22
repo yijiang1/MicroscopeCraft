@@ -277,7 +277,19 @@ export interface ScopeParams {
   site?: Site;
 }
 
+/** Ground position and view; vertical jump motion is deliberately not restored. */
+export const PlayerLocationSchema = z.object({
+  x: z.number().finite(),
+  z: z.number().finite(),
+  yaw: z.number().finite(),
+  pitch: z.number().min(-Math.PI / 2).max(Math.PI / 2),
+  thirdPerson: z.boolean(),
+});
+export type PlayerLocation = z.infer<typeof PlayerLocationSchema>;
+
 export interface GameState {
+  carriedSamples: string[];
+  playerLocation: PlayerLocation | null;
   inventory: Record<string, number>;
   discoveries: string[];
   /** The best picture the player has had of each discovery (small image data URL), by feature id.

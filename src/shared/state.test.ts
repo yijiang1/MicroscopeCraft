@@ -3,7 +3,7 @@ import { loadGameData } from './data';
 import type { GameEvents } from './events';
 import { scopeFromInventory } from './sim/scope';
 import {
-  completeQuest, craft, createGame, discover, gather, parseSave, recordScore, selectScope, setSite, setZoom, toSave, visit,
+  carrySample, completeQuest, craft, createGame, discover, gather, parseSave, recordScore, SAMPLE_BAG_SIZE, selectScope, setPlayerLocation, setSite, setZoom, toSave, visit,
 } from './state';
 
 const gatherAll = (ctx: ReturnType<typeof createGame>, have: Record<string, number>) => {
@@ -187,5 +187,67 @@ describe('achievements and requests', () => {
     recordScore(ctx, 'koehler', 0.4);
     expect(ctx.state.best.koehler).toBe(0.9);
     expect(completeQuest(ctx, 'abbe', 'ab_koehler')).toBe(true);
+  });
+});
+
+describe('saved journey', () => {
+  it('round-trips the ordered sample bag, location, facing and camera view', () => {
+    const data = loadGameData();
+    const ctx = createGame(data);
+    carrySample(ctx, 'leaf');
+    carrySample(ctx, 'gold_grid');
+    const pose = { x: 40, z: 20, yaw: 1.2, pitch: -0.3, thirdPerson: false };
+    setPlayerLocation(ctx, pose);
+    const restored = createGame(data, undefined, parseSave(JSON.stringify(toSave(ctx.state))));
+    expect(restored.state.carriedSamples).toEqual(['gold_grid', 'leaf']);
+    expect(restored.state.playerLocation).toEqual(pose);
+    expect(restored.state.currentSampleId).toBeNull();
+    // The renderer supplies the site's current geometry after restoring the position.
+    expect(restored.state.site).toBeNull();
+  });
+
+  it('keeps the newest eight distinct valid samples and emits after updating the bag', () => {
+    const ctx = createGame(loadGameData());
+    const ids = Object.keys(ctx.data.samples).slice(0, SAMPLE_BAG_SIZE + 1);
+    const seen: string[][] = [];
+    ctx.bus.on('carriedSamplesChanged', () => seen.push([...ctx.state.carriedSamples]));
+    for (const id of ids) carrySample(ctx, id);
+    expect(ctx.state.carriedSamples).toEqual(ids.slice(1).reverse());
+    expect(seen.at(-1)).toEqual(ctx.state.carriedSamples);
+    const repeated = ids[2]!;
+    carrySample(ctx, repeated);
+    expect(ctx.state.carriedSamples[0]).toBe(repeated);
+    expect(new Set(ctx.state.carriedSamples).size).toBe(SAMPLE_BAG_SIZE);
+    const count = seen.length;
+    carrySample(ctx, repeated);
+    carrySample(ctx, 'missing-sample');
+    expect(seen).toHaveLength(count);
+  });
+
+  it('loads old saves and ignores damaged journey fields without losing progress', () => {
+    const old = { inventory: { hand_lens: 1 }, discoveries: ['leaf_veins'], snapshots: {}, scopeChoice: null };
+    expect(parseSave(JSON.stringify(old))).toMatchObject({ carriedSamples: [], playerLocation: null });
+    const saved = parseSave(JSON.stringify({ ...old, carriedSamples: 123, playerLocation: { x: 'bad' } }));
+    expect(saved).toMatchObject({ inventory: old.inventory, discoveries: old.discoveries, carriedSamples: [], playerLocation: null });
+    const data = loadGameData();
+    const ids = Object.keys(data.samples).slice(0, 10);
+    const bag = ['missing-sample', ids[0], ids[0], ...ids.slice(1)];
+    const restored = createGame(data, undefined, parseSave(JSON.stringify({ ...old, carriedSamples: bag })));
+    expect(restored.state.carriedSamples).toEqual(ids.slice(0, SAMPLE_BAG_SIZE));
+  });
+
+  it('only requests a travel save when the player moves, looks, or changes view', () => {
+    const ctx = createGame(loadGameData());
+    let changes = 0;
+    ctx.bus.on('playerMoved', () => changes++);
+    const pose = { x: 38, z: -38, yaw: 0, pitch: 0, thirdPerson: true };
+    setPlayerLocation(ctx, pose);
+    setPlayerLocation(ctx, { ...pose });
+    expect(changes).toBe(1);
+    setPlayerLocation(ctx, { ...pose, yaw: 0.5 });
+    setPlayerLocation(ctx, { ...pose, yaw: 0.5, thirdPerson: false });
+    expect(changes).toBe(3);
+    pose.x = 100;
+    expect(ctx.state.playerLocation!.x).toBe(38);
   });
 });
