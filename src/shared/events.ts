@@ -36,6 +36,8 @@ export interface GameEvents {
   minigameScored: { game: string; score: number; best: boolean };
   /** The player reached an area of the campus for the first time. */
   areaVisited: { area: string };
+  /** world → sound: the clock tower rang a quarter (1–3), or struck the hour (quarter 0), `distance` m from the player. */
+  towerBell: { quarter: number; hour: number; distance: number };
 }
 
 export type Bus = ReturnType<typeof createBus>;

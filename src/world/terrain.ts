@@ -14,8 +14,12 @@ export const FALLS_X = LAKE.x - LAKE.r - 3;
 const SLOPE_X = -44; // the slope starts falling west of here...
 const SLOPE_DROP = 8; // ...by this much over 30 m
 const GORGE = { bed: 3, top: 10 }; // half-widths of the creek bed and of the gorge at its rim
-/** Flat building pads off the hilltop: Wilson Lab, east of the campus, and the engineering quad to the south. */
-const PADS = [{ x0: 47, x1: 74, z0: -17, z1: 9 }, { x0: -46, x1: 50, z0: 40, z1: 110 }];
+/** Flat building pads off the hilltop: Wilson Lab, east of the campus, the engineering quad to the south, the chemistry
+ *  building, the athletic fields further east, and the residence halls north of the gorge. */
+const PADS = [
+  { x0: 47, x1: 74, z0: -17, z1: 9 }, { x0: -46, x1: 50, z0: 40, z1: 110 }, { x0: 50, x1: 70, z0: 14, z1: 32 },
+  { x0: 78, x1: 120, z0: -34, z1: 52 }, { x0: -12, x1: 42, z0: -110, z1: -86 },
+];
 
 /** Centre line of the gorge (a z) at x: a gentle meander that starts at the falls. */
 export const gorgeZ = (x: number) => LAKE.z + 3 * Math.sin((x - FALLS_X) * 0.06);
@@ -34,6 +38,10 @@ const PATHS: [number, number, number, number][] = [
   [-29, 76, 31, 76], // the engineering quad's cross path, between the geology hall and the east hall
   [0, 62, -8, 56], [0, 62, 19, 58], // to the materials hall and the atrium door
   [0, 94, 33, 98], // to the materials yard
+  [47, -4, 47, 23], [47, 23, 52, 23], // past the science building to the chemistry building's door
+  [36, -20, 80, -20], [80, -20, 80, 30], [80, 30, 90, 30], [90, 30, 90, 34], // east to the athletic fields and the field house
+  [22, -36, 26, -55], // to the suspension bridge, and from its north end to the residence halls
+  [26, -79, 26, -94], [-1, -88, 26, -88], [-1, -92, -1, -88],
 ];
 
 const perlin = new ImprovedNoise();

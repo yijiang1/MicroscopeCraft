@@ -1,6 +1,6 @@
 // Walking around, as plain geometry on the ground plane (x east, z south): keeping the player out of solid things,
 // naming the part of campus they are in, and the compass and arrow texts. No rendering, so it is tested directly.
-import { inChess, inGreenhouse, inLab, type Box } from './campus';
+import { inChess, inGreenhouse, inLab, onDeck, type Box } from './campus';
 import { FALLS_X, gorgeZ, heightAt, LAKE } from './terrain';
 
 export const PLAYER_RADIUS = 0.35;
@@ -51,6 +51,7 @@ export function areaAt(x: number, z: number): string | null {
   if (inLab(x, z)) return 'lab';
   if (inChess(x, z)) return 'chess';
   if (inGreenhouse(x, z)) return 'garden';
+  if (onDeck(x, z)) return 'bridge';
   if (Math.hypot(x + 38, z + 1) < 7) return 'tower';
   if (x < FALLS_X && Math.abs(z - gorgeZ(x)) < 7 && heightAt(x, z) < -5) return 'gorge';
   if (Math.hypot(x - LAKE.x, z - LAKE.z) < LAKE.r + 9) return 'lake';
@@ -58,6 +59,7 @@ export function areaAt(x: number, z: number): string | null {
   if (x < -46) return 'slope';
   if (x > -23 && x < 23 && z > -38 && z < 1) return 'quad';
   if (x > -46 && x < 50 && z > 40 && z < 110) return 'engquad';
+  if (x > 76 && x < 122 && z > -36 && z < 54) return 'fields';
   return null;
 }
 

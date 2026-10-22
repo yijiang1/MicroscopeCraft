@@ -54,7 +54,7 @@ export const PLACEMENTS: Placement[] = [
   { kind: 'feather', x: 41, z: -44 },
   // Rocky rim of the gorge: iron near the waterfall (west of the spawn), quartz farther west behind the halls,
   // galena east of the iron, fluorite west of the quartz
-  ...cluster('iron', 24, -49, 8, 4.5, 5),
+  ...cluster('iron', 23, -46.5, 8, 3.5, 5),
   ...cluster('galena', 14, -53, 4, 2.5, 21, 1.2),
   ...cluster('quartz', -26, -48, 10, 4.5, 6, 1.5),
   ...cluster('fluorite', -40, -50, 4, 2.5, 22),

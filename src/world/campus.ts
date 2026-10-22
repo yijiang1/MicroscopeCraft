@@ -1,9 +1,11 @@
 // Campus buildings on the hilltop: the halls and statues around the quad, a clock tower with a working clock,
 // the science building with the electron microscopy lab on its glass ground floor, and the waterfall; to the south,
-// the engineering quad (after Cornell's): the materials, geology, east and south halls and a glass atrium.
+// the engineering quad (after Cornell's): the materials, geology, east and south halls and a glass atrium. Every hall
+// has a door and a ground-floor room. East are the athletic fields over the storage ring and the chemistry building;
+// north, over the gorge, a suspension footbridge leads to the residence halls.
 // Boxes, prisms and canvas textures only. Walls are axis-aligned boxes the player collides with.
 import * as THREE from 'three';
-import { facadeTexture, labelTexture, waterfallTexture } from './textures';
+import { booksTexture, facadeTexture, fieldTexture, labelTexture, meshTexture, waterfallTexture } from './textures';
 import { creekY, FALLS_X, gorgeZ, heightAt, WATER_LEVEL } from './terrain';
 
 /** An axis-aligned footprint, x0 < x1, z0 < z1 (north is -z). */
@@ -45,28 +47,52 @@ const AT_DOOR = { x0: 17, x1: 21 };
 const AT_H = 6;
 
 const FLOOR_H = 3.6;
+/** Thickness of a hall's ground-floor walls, and the width of its door. */
+const WALL_T = 0.3;
+const DOOR_W = 2.4;
 interface Hall {
   box: Box;
   floors: number;
   wall: string;
   flat?: boolean;
+  /** The door: which wall, and where along it (an x on the north or south wall, a z on the east or west wall). */
+  door: { side: 'n' | 's' | 'e' | 'w'; at: number };
+  /** The ground-floor room: bookshelves, a lab bench with glassware, or a blackboard over a long table, on the wall facing the door. */
+  room: 'books' | 'lab' | 'class';
 }
 const HALLS: Hall[] = [
-  { box: box(-18, 18, -48, -40), floors: 3, wall: '#a39a88' }, // domed hall (dome below), north end of the quad
-  { box: box(-34, -26, -36, -26), floors: 3, wall: '#8f8a80' }, // west row of halls
-  { box: box(-34, -26, -23, -13), floors: 3, wall: '#968f82' }, 
-  { box: box(-34, -26, -10, -2), floors: 3, wall: '#8a8478' }, 
-  { box: box(26, 36, -32, -8), floors: 3, wall: '#d8cdb4' }, // columned hall (portico below), east side
-  { box: box(-44, -34, 4, 14), floors: 2, wall: '#8f8a80' }, // library, by the tower at the top of the west slope
-  { box: box(-20, -6, 12, 22), floors: 3, wall: '#c9c1b0', flat: true }, // south library
+  { box: box(-18, 18, -48, -40), floors: 3, wall: '#a39a88', door: { side: 's', at: 0 }, room: 'class' }, // domed hall (dome below), north end of the quad
+  { box: box(-34, -26, -36, -26), floors: 3, wall: '#8f8a80', door: { side: 'e', at: -31 }, room: 'lab' }, // west row of halls
+  { box: box(-34, -26, -23, -13), floors: 3, wall: '#968f82', door: { side: 'e', at: -18 }, room: 'lab' },
+  { box: box(-34, -26, -10, -2), floors: 3, wall: '#8a8478', door: { side: 'e', at: -6 }, room: 'class' },
+  { box: box(26, 36, -32, -8), floors: 3, wall: '#d8cdb4', door: { side: 'w', at: -20 }, room: 'class' }, // columned hall (portico below), east side
+  { box: box(-44, -34, 4, 14), floors: 2, wall: '#8f8a80', door: { side: 'e', at: 6.5 }, room: 'books' }, // library, by the tower at the top of the west slope
+  { box: box(-20, -6, 12, 22), floors: 3, wall: '#c9c1b0', flat: true, door: { side: 'n', at: -13 }, room: 'books' }, // south library
   // the engineering quad
-  { box: box(-30, -6, 46, 56), floors: 3, wall: '#b3a58f' }, // materials science hall (Bard), north side
-  { box: box(-42, -30, 62, 88), floors: 3, wall: '#9a8b78' }, // geology hall (Snee), west side, its rock garden in front
-  { box: box(34, 46, 62, 88), floors: 4, wall: '#a8a49a', flat: true }, // east hall (Upson)
-  { box: box(-26, 22, 98, 108), floors: 3, wall: '#c2b8a4' }, // south hall (Phillips)
+  { box: box(-30, -6, 46, 56), floors: 3, wall: '#b3a58f', door: { side: 's', at: -9 }, room: 'lab' }, // materials science hall (Bard), north side
+  { box: box(-42, -30, 62, 88), floors: 3, wall: '#9a8b78', door: { side: 'e', at: 76 }, room: 'lab' }, // geology hall (Snee), west side, its rock garden in front
+  { box: box(34, 46, 62, 88), floors: 4, wall: '#a8a49a', flat: true, door: { side: 'w', at: 76 }, room: 'class' }, // east hall (Upson)
+  { box: box(-26, 22, 98, 108), floors: 3, wall: '#c2b8a4', door: { side: 'n', at: 0 }, room: 'class' }, // south hall (Phillips)
+  // east of the science building: the chemistry building (after Baker Lab)
+  { box: box(52, 68, 16, 30), floors: 3, wall: '#b8a48a', door: { side: 'w', at: 23 }, room: 'lab' },
+  // by the athletic fields: the field house (after Barton Hall)
+  { box: box(80, 100, 34, 48), floors: 2, wall: '#8c8070', door: { side: 'n', at: 90 }, room: 'class' },
+  // north campus, over the gorge: two residence halls
+  { box: box(14, 38, -104, -94), floors: 4, wall: '#b9ad9a', flat: true, door: { side: 's', at: 26 }, room: 'books' },
+  { box: box(-8, 6, -108, -92), floors: 3, wall: '#a69c8c', door: { side: 's', at: -1 }, room: 'books' },
 ];
-const TOWER = { x: -38, z: -1, half: 2.5 }; // the clock tower
+/** The clock tower, where the bells hang. */
+export const TOWER = { x: -38, z: -1, half: 2.5 };
 const PORTICO = box(23.6, 26, -27, -13);
+const PORTICO_COLUMNS = Array.from({ length: 6 }, (_, i) => ({ x: PORTICO.x0 + 0.6, z: PORTICO.z0 + 0.8 + i * 2.48 }));
+/** The athletic fields east of campus, over the storage ring's tunnel: a gridiron with stands, and a practice field. */
+const GRIDIRON = box(84, 118, -26, -8);
+const STANDS = box(86, 116, -33, -28);
+const PRACTICE = box(84, 118, 2, 24);
+/** The suspension footbridge over the gorge just below the falls (after the Fall Creek suspension bridge): its deck
+ *  runs north–south between the towers on the two rims. */
+const BRIDGE = { x: 26, z0: -80, z1: -54.5, half: 1, y: 0.75 };
+const BRIDGE_TOWERS = [-78.5, -56] as const;
 /** Two pioneers of microscopy face each other across the quad: light on the west side, electrons on the east. */
 const STATUES = [
   { x: -15, z: -19, facing: Math.PI / 2, who: 'leeuwenhoek', plaque: 'Antonie van Leeuwenhoek  1632–1723' },
@@ -81,15 +107,42 @@ export const FOOTPRINTS: Box[] = [
   SCIENCE,
   ...STATUES.map((s) => box(s.x - 0.7, s.x + 0.7, s.z - 0.7, s.z + 0.7)),
 ];
+/** Inside a building, or on a structure where no scenery grows: the sports fields and their stands, the bridge. */
 export const insideBuilding = (x: number, z: number, margin = 0) =>
-  [...FOOTPRINTS, GREENHOUSE, WILSON, ATRIUM].some((b) => x > b.x0 - margin && x < b.x1 + margin && z > b.z0 - margin && z < b.z1 + margin);
+  [...FOOTPRINTS, GREENHOUSE, WILSON, ATRIUM, box(GRIDIRON.x0 - 2, GRIDIRON.x1 + 2, STANDS.z0, PRACTICE.z1 + 2), box(BRIDGE.x - 2, BRIDGE.x + 2, BRIDGE.z0 - 2, BRIDGE.z1 + 2)].some(
+    (b) => x > b.x0 - margin && x < b.x1 + margin && z > b.z0 - margin && z < b.z1 + margin,
+  );
 const inside = (b: Box, x: number, z: number) => x > b.x0 && x < b.x1 && z > b.z0 && z < b.z1;
 export const inLab = (x: number, z: number) => inside(SCIENCE, x, z);
 export const inChess = (x: number, z: number) => inside(WILSON, x, z);
 export const inGreenhouse = (x: number, z: number) => inside(GREENHOUSE, x, z);
 export const inAtrium = (x: number, z: number) => inside(ATRIUM, x, z);
+/** Inside any building's walls: the lab, Wilson Lab, the greenhouse, the atrium or a hall's ground-floor room. */
+export const indoors = (x: number, z: number) =>
+  inLab(x, z) || inChess(x, z) || inGreenhouse(x, z) || inAtrium(x, z) || HALLS.some((h) => inside(h.box, x, z));
+/** Up on the bridge deck, rather than down in the gorge under it, with the feet at `feet`. */
+export const onDeck = (x: number, z: number, feet = Infinity) =>
+  Math.abs(x - BRIDGE.x) < BRIDGE.half && z > BRIDGE.z0 && z < BRIDGE.z1 && feet > BRIDGE.y - 1;
+/** Where the feet rest: the deck for someone on the bridge, else the ground. */
+export const groundAt = (x: number, z: number, feet = Infinity) => (onDeck(x, z, feet) ? Math.max(heightAt(x, z), BRIDGE.y) : heightAt(x, z));
+/** The bridge's side screens, solid only to someone on the deck. */
+export const BRIDGE_RAILS: Box[] = [-1, 1].map((s) => box(BRIDGE.x + s * BRIDGE.half - 0.05, BRIDGE.x + s * BRIDGE.half + 0.05, BRIDGE.z0, BRIDGE.z1));
+
+/** A hall's furniture: one long piece along the wall facing the door, a metre short of each corner. */
+function furnitureOf(h: Hall): Box {
+  const { x0, x1, z0, z1 } = h.box;
+  const depth = h.room === 'books' ? 0.5 : 0.85;
+  const i = WALL_T + 0.05;
+  switch (h.door.side) {
+    case 's': return box(x0 + 1, x1 - 1, z0 + i, z0 + i + depth);
+    case 'n': return box(x0 + 1, x1 - 1, z1 - i - depth, z1 - i);
+    case 'e': return box(x0 + i, x0 + i + depth, z0 + 1, z1 - 1);
+    case 'w': return box(x1 - i - depth, x1 - i, z0 + 1, z1 - 1);
+  }
+}
+const FURNITURE = HALLS.map(furnitureOf);
 /** Solid inside a building, where nothing may be placed: walls, the ring wall, the hutch, the beam pipe, benches. */
-export const INDOOR_SOLIDS: Box[] = [box(RING_WALL_X, WILSON.x1, WILSON.z0, WILSON.z1), HUTCH, box(60, RING_WALL_X, BEAM_Z - 0.6, BEAM_Z + 0.6)];
+export const INDOOR_SOLIDS: Box[] = [box(RING_WALL_X, WILSON.x1, WILSON.z0, WILSON.z1), HUTCH, box(60, RING_WALL_X, BEAM_Z - 0.6, BEAM_Z + 0.6), ...FURNITURE];
 
 const mat = (color: string, roughness = 0.85, metalness = 0) => new THREE.MeshStandardMaterial({ color, roughness, metalness });
 const SLATE = mat('#4a4e55', 0.8);
@@ -114,14 +167,48 @@ function facadeBox(w: number, h: number, d: number, floors: number, tex: THREE.T
   return mesh;
 }
 
-function hall(h: Hall, group: THREE.Group) {
+const CEILING = new THREE.MeshStandardMaterial({ color: '#e8e4dc', emissive: '#6f6b64', roughness: 0.9 });
+const WOOD = mat('#6b4a2e', 0.8);
+const BENCH = mat('#cfd5db', 0.5);
+
+/** A hall: a ground-floor room walled in on all four sides but for the door, under the solid upper floors. */
+function hall(h: Hall, group: THREE.Group, walls: Box[]) {
   const { x0, x1, z0, z1 } = h.box;
   const [w, d, cx, cz] = [x1 - x0, z1 - z0, (x0 + x1) / 2, (z0 + z1) / 2];
-  const g = heightAt(cx, cz) - 0.5; // sunk a little so no edge floats
+  const ground = heightAt(cx, cz);
+  const g = ground - 0.5; // sunk a little so no edge floats
   const height = h.floors * FLOOR_H + 0.5;
-  const body = facadeBox(w, height, d, h.floors, facadeTexture(h.wall, '#33404d'), SLATE);
-  body.position.set(cx, g + height / 2, cz);
-  group.add(body);
+  const tex = facadeTexture(h.wall, '#33404d');
+  // the north and south walls run the full width; the east and west walls fit between them, so no faces overlap
+  const T = WALL_T;
+  const sides: Record<Hall['door']['side'], Box> = {
+    n: box(x0, x1, z0, z0 + T), s: box(x0, x1, z1 - T, z1), w: box(x0, x0 + T, z0 + T, z1 - T), e: box(x1 - T, x1, z0 + T, z1 - T),
+  };
+  const { side, at } = h.door;
+  for (const [key, b] of Object.entries(sides)) {
+    const alongX = key === 'n' || key === 's';
+    const segments = key !== side ? [b]
+      : alongX ? [box(b.x0, at - DOOR_W / 2, b.z0, b.z1), box(at + DOOR_W / 2, b.x1, b.z0, b.z1)]
+      : [box(b.x0, b.x1, b.z0, at - DOOR_W / 2), box(b.x0, b.x1, at + DOOR_W / 2, b.z1)];
+    for (const seg of segments) {
+      const wall = facadeBox(seg.x1 - seg.x0, FLOOR_H + 0.5, seg.z1 - seg.z0, 1, tex, SLATE);
+      wall.position.set((seg.x0 + seg.x1) / 2, g + (FLOOR_H + 0.5) / 2, (seg.z0 + seg.z1) / 2);
+      group.add(wall);
+      walls.push(seg);
+    }
+    if (key === side) {
+      const lintel = new THREE.Mesh(new THREE.BoxGeometry(alongX ? DOOR_W : T, 0.9, alongX ? T : DOOR_W), mat(h.wall, 0.9));
+      lintel.position.set(alongX ? at : (b.x0 + b.x1) / 2, ground + FLOOR_H - 0.45, alongX ? (b.z0 + b.z1) / 2 : at);
+      group.add(lintel);
+    }
+  }
+  const upper = facadeBox(w, height - FLOOR_H - 0.5, d, h.floors - 1, tex, SLATE, CEILING);
+  upper.position.set(cx, ground + FLOOR_H + (height - FLOOR_H - 0.5) / 2, cz);
+  const floor = new THREE.Mesh(new THREE.BoxGeometry(w - 2 * T, 0.06, d - 2 * T), mat('#9c8f7c', 0.7));
+  floor.position.set(cx, ground + 0.03, cz);
+  floor.receiveShadow = true;
+  group.add(upper, floor);
+  room(h, ground, group, walls);
   if (h.flat) return;
   const alongX = w >= d;
   const span = (alongX ? d : w) + 0.6;
@@ -130,6 +217,55 @@ function hall(h: Hall, group: THREE.Group) {
   roof.position.set(cx, g + height, cz);
   roof.castShadow = true;
   group.add(roof);
+}
+
+/** The furniture along the wall facing the door: bookshelves, a lab bench with glassware, or a table under a blackboard. */
+function room(h: Hall, ground: number, group: THREE.Group, walls: Box[]) {
+  const f = furnitureOf(h);
+  walls.push(f);
+  const [fw, fd, fx, fz] = [f.x1 - f.x0, f.z1 - f.z0, (f.x0 + f.x1) / 2, (f.z0 + f.z1) / 2];
+  const alongX = fw > fd;
+  const piece = (height: number, m: THREE.Material | THREE.Material[]) => {
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(fw, height, fd), m);
+    mesh.position.set(fx, ground + height / 2, fz);
+    mesh.castShadow = mesh.receiveShadow = true;
+    group.add(mesh);
+  };
+  // the side facing into the room, as a BoxGeometry material index: +x, -x, +y, -y, +z, -z
+  const face = { s: 4, n: 5, e: 0, w: 1 }[h.door.side];
+  if (h.room === 'books') {
+    const t = booksTexture();
+    t.wrapS = THREE.RepeatWrapping;
+    t.repeat.set(Math.round(Math.max(fw, fd) / 1.5), 1);
+    const spines = new THREE.MeshStandardMaterial({ map: t, roughness: 0.9 });
+    piece(2.2, Array.from({ length: 6 }, (_, i) => (i === face ? spines : WOOD)));
+    return;
+  }
+  if (h.room === 'class') {
+    piece(0.75, WOOD);
+    const board = new THREE.Mesh(new THREE.PlaneGeometry(Math.min(Math.max(fw, fd) - 1, 8), 1.3), mat('#24392c', 0.95));
+    const into = { s: [0, 1], n: [0, -1], e: [1, 0], w: [-1, 0] }[h.door.side]; // from the back wall toward the door
+    const depth = Math.min(fw, fd);
+    board.position.set(fx - into[0]! * (depth / 2 + 0.03), ground + 1.9, fz - into[1]! * (depth / 2 + 0.03));
+    board.rotation.y = Math.atan2(into[0]!, into[1]!);
+    group.add(board);
+    return;
+  }
+  piece(0.95, BENCH);
+  // glassware along the bench: flasks and beakers of coloured solutions
+  const liquids = ['#3a7bd5', '#e0b400', '#d0453a', '#3aa76d', '#9b59b6'];
+  const glass = new THREE.MeshPhysicalMaterial({ color: '#e8f4f8', transparent: true, opacity: 0.35, roughness: 0.05, depthWrite: false });
+  const len = Math.max(fw, fd);
+  for (let i = 0, s = -len / 2 + 0.8; s < len / 2 - 0.5; s += 1.6, i++) {
+    const [x, z] = alongX ? [fx + s, fz] : [fx, fz + s];
+    const flask = i % 2
+      ? new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.2, 12), glass)
+      : new THREE.Mesh(new THREE.ConeGeometry(0.11, 0.24, 12), glass);
+    flask.position.set(x, ground + 1.07, z);
+    const liquid = new THREE.Mesh(new THREE.CylinderGeometry(i % 2 ? 0.06 : 0.07, i % 2 ? 0.06 : 0.09, 0.08, 12), mat(liquids[i % liquids.length]!, 0.3));
+    liquid.position.set(x, ground + 0.995, z);
+    group.add(flask, liquid);
+  }
 }
 
 /** The clock tower: a square stone shaft, belfry, octagonal lantern and spire, with a clock on every side. */
@@ -641,6 +777,127 @@ function wilsonLab(group: THREE.Group, walls: Box[]): BeamlineModel {
   };
 }
 
+/** The athletic fields: a gridiron with goalposts and stands, and a practice field with goals. */
+function fields(group: THREE.Group, walls: Box[]) {
+  const turf = (b: Box, gridiron: boolean) => {
+    const mesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(b.x1 - b.x0, b.z1 - b.z0).rotateX(-Math.PI / 2),
+      new THREE.MeshStandardMaterial({ map: fieldTexture(gridiron), roughness: 0.95 }),
+    );
+    mesh.position.set((b.x0 + b.x1) / 2, heightAt((b.x0 + b.x1) / 2, (b.z0 + b.z1) / 2) + 0.03, (b.z0 + b.z1) / 2);
+    mesh.receiveShadow = true;
+    group.add(mesh);
+  };
+  turf(GRIDIRON, true);
+  turf(PRACTICE, false);
+  const g = heightAt(100, -17);
+  const yellow = mat('#f2c230', 0.5, 0.3);
+  const white = mat('#f4f4f0', 0.5);
+  const bar = (m: THREE.Material, w: number, h: number, d: number, x: number, y: number, z: number) => {
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m);
+    mesh.position.set(x, y, z);
+    mesh.castShadow = true;
+    group.add(mesh);
+  };
+  // goalposts on the end lines: one post, a crossbar 3 m up and two uprights
+  const mid = (GRIDIRON.z0 + GRIDIRON.z1) / 2;
+  for (const x of [GRIDIRON.x0 + 0.3, GRIDIRON.x1 - 0.3]) {
+    bar(yellow, 0.16, 3, 0.16, x, g + 1.5, mid);
+    bar(yellow, 0.12, 0.12, 5.6, x, g + 3, mid);
+    for (const dz of [-2.8, 2.8]) bar(yellow, 0.1, 6, 0.1, x, g + 6, mid + dz);
+  }
+  walls.push(...[GRIDIRON.x0 + 0.3, GRIDIRON.x1 - 0.3].map((x) => box(x - 0.15, x + 0.15, mid - 0.15, mid + 0.15)));
+  // goals on the practice field: a white frame with a net behind
+  const pmid = (PRACTICE.z0 + PRACTICE.z1) / 2;
+  const netTex = meshTexture();
+  netTex.repeat.set(5 / 0.2, 2 / 0.2);
+  const net = new THREE.MeshStandardMaterial({ map: netTex, transparent: true, alphaTest: 0.3, side: THREE.DoubleSide });
+  for (const [x, back] of [[PRACTICE.x0 + 0.3, -1], [PRACTICE.x1 - 0.3, 1]] as const) {
+    for (const dz of [-2.5, 2.5]) bar(white, 0.12, 2, 0.12, x, g + 1, pmid + dz);
+    bar(white, 0.12, 0.12, 5.1, x, g + 2, pmid);
+    const n = new THREE.Mesh(new THREE.PlaneGeometry(5, 2), net);
+    n.rotation.y = Math.PI / 2;
+    n.position.set(x + back * 1, g + 1, pmid);
+    group.add(n);
+    walls.push(box(Math.min(x, x + back * 1.1), Math.max(x, x + back * 1.1), pmid - 2.6, pmid + 2.6));
+  }
+  // the stands along the north side: concrete steps under rows of aluminium benches
+  const concrete = mat('#a9a69e', 0.95);
+  const alu = mat('#c8ccd0', 0.4, 0.6);
+  const steps = 5;
+  const depth = (STANDS.z1 - STANDS.z0) / steps;
+  for (let i = 0; i < steps; i++) {
+    const z = STANDS.z1 - (i + 0.5) * depth;
+    bar(concrete, STANDS.x1 - STANDS.x0, 0.5 * (i + 1), depth, (STANDS.x0 + STANDS.x1) / 2, g + 0.25 * (i + 1), z);
+    bar(alu, STANDS.x1 - STANDS.x0 - 0.4, 0.06, 0.35, (STANDS.x0 + STANDS.x1) / 2, g + 0.5 * (i + 1) + 0.42, z);
+  }
+  walls.push(STANDS);
+}
+
+/** The suspension footbridge: steel portal towers on each rim, two main cables sagging between them with hangers down to
+ *  the deck, and a mesh screen along both sides; the cables run on past the towers down to concrete anchor blocks. */
+function bridge(group: THREE.Group, walls: Box[]) {
+  const { x, z0, z1, half, y } = BRIDGE;
+  const steel = mat('#3f4a46', 0.5, 0.6);
+  const cableMat = mat('#2a2e30', 0.4, 0.7);
+  const add = (mesh: THREE.Mesh) => {
+    mesh.castShadow = true;
+    group.add(mesh);
+    return mesh;
+  };
+  // the deck: steel stringers under a plank walkway
+  const len = z1 - z0;
+  add(new THREE.Mesh(new THREE.BoxGeometry(half * 2, 0.08, len), mat('#8a7458', 0.85))).position.set(x, y - 0.04, (z0 + z1) / 2);
+  for (const s of [-1, 1]) add(new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.35, len), steel)).position.set(x + s * (half - 0.06), y - 0.25, (z0 + z1) / 2);
+  const towerH = 5.5;
+  const [ta, tb] = BRIDGE_TOWERS;
+  for (const tz of BRIDGE_TOWERS) {
+    for (const s of [-1, 1]) add(new THREE.Mesh(new THREE.BoxGeometry(0.22, towerH + 1, 0.22), steel)).position.set(x + s * (half + 0.15), y + towerH / 2 - 0.5, tz);
+    add(new THREE.Mesh(new THREE.BoxGeometry(half * 2 + 0.6, 0.25, 0.25), steel)).position.set(x, y + towerH, tz);
+  }
+  // main cables: a parabola from tower top to tower top, lowest (1.1 m above the deck) at mid-span; then down to the anchors
+  const top = y + towerH - 0.1;
+  const low = y + 1.1;
+  const cableY = (z: number) => low + (top - low) * ((z - (ta + tb) / 2) / ((tb - ta) / 2)) ** 2;
+  const anchors = [z0 - 3, z1 + 3];
+  for (const s of [-1, 1]) {
+    const cx = x + s * (half + 0.15);
+    const pts: THREE.Vector3[] = [new THREE.Vector3(cx, heightAt(cx, anchors[0]!) + 0.6, anchors[0]!)];
+    for (let i = 0; i <= 24; i++) {
+      const z = ta + ((tb - ta) * i) / 24;
+      pts.push(new THREE.Vector3(cx, cableY(z), z));
+    }
+    pts.push(new THREE.Vector3(cx, heightAt(cx, anchors[1]!) + 0.6, anchors[1]!));
+    add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, false, 'catmullrom', 0.1), 80, 0.05, 6), cableMat));
+    // hangers every 1.25 m
+    for (let z = ta + 1.25; z < tb - 0.6; z += 1.25) {
+      const h = cableY(z) - y;
+      add(new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, h, 4), cableMat)).position.set(cx, y + h / 2, z);
+    }
+  }
+  // an anchor block under each cable end, either side of the walkway
+  const concrete = mat('#a9a69e', 0.95);
+  for (const az of anchors) {
+    for (const s of [-1, 1]) {
+      const ax = x + s * (half + 0.15);
+      add(new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.2, 1.4), concrete)).position.set(ax, heightAt(ax, az) + 0.3, az);
+      walls.push(box(ax - 0.35, ax + 0.35, az - 0.7, az + 0.7));
+    }
+  }
+  for (const tz of BRIDGE_TOWERS) for (const s of [-1, 1]) walls.push(box(x + s * (half + 0.15) - 0.11, x + s * (half + 0.15) + 0.11, tz - 0.11, tz + 0.11));
+  // the side screens: wire mesh to shoulder height on a top rail
+  const t = meshTexture();
+  t.repeat.set(len / 0.35, 1.5 / 0.35);
+  const screen = new THREE.MeshStandardMaterial({ map: t, transparent: true, alphaTest: 0.3, side: THREE.DoubleSide, roughness: 0.6, metalness: 0.4 });
+  for (const s of [-1, 1]) {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(len, 1.5), screen);
+    m.rotation.y = Math.PI / 2;
+    m.position.set(x + s * half, y + 0.75, (z0 + z1) / 2);
+    group.add(m);
+    add(new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, len), steel)).position.set(x + s * half, y + 1.5, (z0 + z1) / 2);
+  }
+}
+
 export interface Campus {
   group: THREE.Group;
   /** Solid footprints the player cannot walk through. */
@@ -656,8 +913,10 @@ export interface Campus {
 export function buildCampus(): Campus {
   const group = new THREE.Group();
   const walls: Box[] = [];
-  HALLS.forEach((h) => hall(h, group));
-  walls.push(...FOOTPRINTS.filter((b) => b !== SCIENCE));
+  HALLS.forEach((h) => hall(h, group, walls));
+  // solid outside: the tower, the statues and the portico's columns (the halls and the lab build their own walls)
+  walls.push(...FOOTPRINTS.filter((b) => b !== SCIENCE && b !== PORTICO && !HALLS.some((h) => h.box === b)));
+  walls.push(...PORTICO_COLUMNS.map((c) => box(c.x - 0.35, c.x + 0.35, c.z - 0.35, c.z + 0.35)));
 
   // the domed hall's dome
   const sibley = HALLS[0]!.box;
@@ -675,9 +934,9 @@ export function buildCampus(): Campus {
   const stone = mat('#e3dac6', 0.8);
   const gy = heightAt(PORTICO.x0, -20);
   const colH = 3 * FLOOR_H - 1.6;
-  for (let i = 0; i < 6; i++) {
+  for (const c of PORTICO_COLUMNS) {
     const col = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.38, colH, 14), stone);
-    col.position.set(PORTICO.x0 + 0.6, gy + colH / 2, PORTICO.z0 + 0.8 + i * 2.48);
+    col.position.set(c.x, gy + colH / 2, c.z);
     col.castShadow = true;
     group.add(col);
   }
@@ -695,6 +954,8 @@ export function buildCampus(): Campus {
   greenhouse(group, walls);
   const beamline = wilsonLab(group, walls);
   atrium(group, walls);
+  fields(group, walls);
+  bridge(group, walls);
   const hallSign = (i: number, text: string, side: 'south' | 'east') => {
     const b = HALLS[i]!.box;
     const y = heightAt((b.x0 + b.x1) / 2, (b.z0 + b.z1) / 2) + FLOOR_H + 0.6;
@@ -702,6 +963,8 @@ export function buildCampus(): Campus {
   };
   hallSign(7, 'Materials Science', 'south');
   hallSign(8, 'Geology · Rock Garden', 'east');
+  const chem = HALLS[11]!.box;
+  group.add(sign('Chemistry', 6, chem.x0 - 0.05, heightAt(chem.x0, 23) + FLOOR_H + 0.6, (chem.z0 + chem.z1) / 2, -Math.PI / 2));
 
   // The waterfall: a sheet of scrolling water where the lake spills into the gorge, foam at the foot
   const fallTex = waterfallTexture();

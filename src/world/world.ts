@@ -9,7 +9,7 @@ import { conditionMet } from '../shared/achievements';
 import { lockedBy, SITE_NAMES } from '../shared/plan';
 import type { Site } from '../shared/schema';
 import { carrySample, gather, ownedScopes, selectScope, setPlayerLocation, setSite, visit, type GameContext } from '../shared/state';
-import { BEAM_SPOT, buildCampus, CRYSTAL_SPOT, EM_SPOT, inChess, inLab, SCIENCE, WILSON } from './campus';
+import { BEAM_SPOT, BRIDGE_RAILS, buildCampus, CRYSTAL_SPOT, EM_SPOT, groundAt, inChess, inLab, onDeck, SCIENCE, TOWER, WILSON } from './campus';
 import { buildDecor, buildSky, FOG_COLOR, SUN_DIRECTION } from './decor';
 import { createHud, createPicker } from './hud';
 import type { WorldHandle } from './index';
@@ -230,7 +230,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const saved = ctx.state.playerLocation;
   const start = saved && Math.hypot(saved.x, saved.z) <= WORLD_RADIUS - 2 ? saved : null;
   const { x: startX, z: startZ } = start ?? SPAWN;
-  camera.position.set(startX, heightAt(startX, startZ) + EYE_HEIGHT, startZ);
+  camera.position.set(startX, groundAt(startX, startZ) + EYE_HEIGHT, startZ);
   if (start) camera.rotation.set(start.pitch, start.yaw, 0, 'YXZ');
   const controls = new PointerLockControls(camera, renderer.domElement);
   const player = buildPlayer();
@@ -460,6 +460,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   /** Everything round and solid: scenery, and the nodes (a gathered one is walkable until it grows back). */
   const solids: Solid[] = [...blockers.map((b) => ({ x: b.x, z: b.z, radius: b.r })), ...nodes];
   let areaCheck = 0;
+  let lastQuarter = -1;
   /** The arrow and distance from the player to (x, z), relative to where they look. */
   const pointTo = (x: number, z: number) => {
     camera.getWorldDirection(dir);
@@ -487,7 +488,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
 
   // Regenerated rocks/scenery may now occupy the saved spot; restore on walkable ground.
   collide(camera.position, campus.walls, solids);
-  camera.position.y = heightAt(camera.position.x, camera.position.z) + EYE_HEIGHT;
+  camera.position.y = groundAt(camera.position.x, camera.position.z) + EYE_HEIGHT;
   setSite(ctx, inLab(camera.position.x, camera.position.z) ? 'lab' : inChess(camera.position.x, camera.position.z) ? 'chess' : null);
   rememberPlayer();
   updateView();
@@ -508,10 +509,11 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       const speed = ((keys.has('shift') ? RUN : WALK) * (wading ? 0.55 : 1) * dt) / (Math.hypot(fwd, right) || 1);
       controls.moveForward(fwd * speed);
       controls.moveRight(right * speed);
-      collide(p, campus.walls, solids);
+      // up on the bridge its side screens are walls too; down in the gorge you walk under it
+      collide(p, onDeck(p.x, p.z, p.y - EYE_HEIGHT) ? [...campus.walls, ...BRIDGE_RAILS] : campus.walls, solids);
       const r = Math.hypot(p.x, p.z);
       if (r > WORLD_RADIUS - 2) p.multiplyScalar((WORLD_RADIUS - 2) / r); // keeps x, z; y is reset below
-      const feet = heightAt(p.x, p.z);
+      const feet = groundAt(p.x, p.z, p.y - EYE_HEIGHT);
       const eye = feet + EYE_HEIGHT;
       const onGround = p.y <= eye + 0.02;
       if (onGround && keys.has(' ')) vy = JUMP;
@@ -522,7 +524,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
         vy = 0;
       }
     } else {
-      camera.position.y = Math.max(camera.position.y, heightAt(camera.position.x, camera.position.z) + EYE_HEIGHT);
+      camera.position.y = Math.max(camera.position.y, groundAt(camera.position.x, camera.position.z, camera.position.y - EYE_HEIGHT) + EYE_HEIGHT);
     }
 
     const { x: px, z: pz } = camera.position;
@@ -534,6 +536,15 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       if (area) visit(ctx, area);
     }
     campus.update(t);
+    // the tower bells, by the real clock: a chime each quarter hour, and the hour struck on the big bell
+    const now = new Date();
+    const quarter = Math.floor(now.getMinutes() / 15);
+    if (quarter !== lastQuarter) {
+      if (lastQuarter >= 0 && now.getMinutes() % 15 === 0) {
+        ctx.bus.emit('towerBell', { quarter, hour: now.getHours() % 12 || 12, distance: Math.hypot(px - TOWER.x, pz - TOWER.z) });
+      }
+      lastQuarter = quarter;
+    }
     player.update(Math.hypot(px - previousX, pz - previousZ), dt);
     figures.forEach((f) => f.update(t));
     updateView();
@@ -598,7 +609,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   if (import.meta.env.DEV) {
     // Dev only: jump around for screenshots, e.g. __world.lookAtKind('iron').
     const teleport = (x: number, z: number, yawDeg = 0, pitchDeg = 0) => {
-      camera.position.set(x, heightAt(x, z) + EYE_HEIGHT, z);
+      camera.position.set(x, groundAt(x, z) + EYE_HEIGHT, z);
       camera.rotation.set(THREE.MathUtils.degToRad(pitchDeg), THREE.MathUtils.degToRad(yawDeg), 0, 'YXZ');
     };
     (window as unknown as { __world: unknown }).__world = {

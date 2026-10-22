@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { BRIDGE_RAILS, groundAt } from './campus';
 import { areaAt, arrowTo, collide, heading, PLAYER_RADIUS } from './navigation';
 import { LAKE } from './terrain';
 
@@ -30,5 +31,14 @@ describe('walking around', () => {
     expect(heading(1, 0)).toBe('E');
     expect(arrowTo(0, -10, 0, -1)).toBe('↑ 10 m'); // looking north, target to the north
     expect(arrowTo(10, 0, 0, -1)).toBe('→ 10 m'); // looking north, target to the east
+  });
+
+  it('the bridge deck carries you over the gorge, its screens keep you on it, and you can walk under it', () => {
+    expect(groundAt(26, -67, 0.75)).toBeCloseTo(0.75);
+    expect(groundAt(26, -67, -9)).toBeLessThan(-8);
+    expect(areaAt(26, -67)).toBe('bridge');
+    const p = { x: 26.8, z: -67 };
+    collide(p, BRIDGE_RAILS, []);
+    expect(p.x).toBeLessThan(26.61);
   });
 });

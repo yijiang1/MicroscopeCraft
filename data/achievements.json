@@ -60,7 +60,7 @@
   { "id": "stained", "name": "Colour it in", "description": "Stain samples 5 times.", "when": { "stats": { "stained": 5 } } },
 
   { "id": "visit_gorge", "name": "Down to the creek", "description": "Climb down to the creek at the bottom of the gorge.", "when": { "visited": ["gorge"] } },
-  { "id": "visit_all", "name": "Campus explorer", "description": "Visit the lake, the quad, the gorge, the west slope, the pine grove, the greenhouse, the science lab, Wilson Lab, the clock tower and the engineering quad.", "when": { "visited": ["lake", "quad", "gorge", "slope", "forest", "garden", "lab", "chess", "tower", "engquad"] } },
+  { "id": "visit_all", "name": "Campus explorer", "description": "Visit the lake, the quad, the gorge, the west slope, the pine grove, the greenhouse, the science lab, Wilson Lab, the clock tower, the engineering quad, the athletic fields and the suspension bridge.", "when": { "visited": ["lake", "quad", "gorge", "slope", "forest", "garden", "lab", "chess", "tower", "engquad", "fields", "bridge"] } },
 
   { "id": "quests_10", "name": "Helpful", "description": "Do 10 requests for the scientists.", "when": { "quests": 10 } },
   { "id": "quests_25", "name": "Lab assistant", "description": "Do 25 requests for the scientists.", "when": { "quests": 25 } },

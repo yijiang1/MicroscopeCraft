@@ -85,18 +85,19 @@ The goal card at the top right is always on screen. Its bold line is the one thi
 
 ## The world
 
-A university campus about 300 m across (north is up the quad, -z), laid out after Cornell's. Everything is procedural: terrain, buildings, models and textures are generated in code, with no asset files.
+A university campus about 300 m across (north is up the quad, -z), laid out after Cornell's. Everything is procedural: terrain, buildings, models and textures are generated in code, with no asset files. Every hall has a door and a ground-floor room (bookshelves, a lab bench with glassware, or a blackboard), and many scientists work inside. The clock shows your computer's time, and the tower bells ring it: a chime each quarter hour, and the hour struck on the big bell, louder the closer you are.
 
 | Where | What is there |
 | --- | --- |
-| Quad (centre) | Lawn, halls, bronze statues of Leeuwenhoek and Ruska, a spare bronze chime bell beside the clock tower. Leafy plants, flowers with a honeybee, a butterfly wing, sunflowers, a picnic table (salt, notebook paper). Santiago Ramón y Cajal stands on the steps of the south library |
+| Quad (centre) | Lawn, halls, bronze statues of Leeuwenhoek and Ruska, a spare bronze chime bell beside the clock tower. Leafy plants, flowers with a honeybee, a butterfly wing, sunflowers, a picnic table (salt, notebook paper). Inside the halls: Röntgen in the domed hall, Zernike and Gram in the west row, Abbe behind the portico, Robert Hooke in the library by the tower, Cajal in the south library |
 | Lake (north-east, where you start) | Lake water, mud and an algae mat at the edge, a duck feather, sand. Antonie van Leeuwenhoek waits on the shore |
-| Gorge (north) | Iron, galena, quartz and fluorite on the rim; down by the creek, pale willemite rocks, dark monazite sand and a slab of fossil shale |
-| West slope and pine grove | Copper and iron rocks, heavy tungsten rocks and beryl crystals at the foot, mica schist; among the pines, resin stumps, a pine branch, a fallen oak log, mushrooms, moss, lichen, a spider web, ferns and an old bone. Robert Hooke stands by the log |
+| Gorge (north) | Iron, galena, quartz and fluorite on the rim; down by the creek, pale willemite rocks, dark monazite sand and a slab of fossil shale. Just below the falls, a suspension footbridge (after Cornell's Fall Creek suspension bridge) crosses to two residence halls on the north side |
+| West slope and pine grove | Copper and iron rocks, heavy tungsten rocks and beryl crystals at the foot, mica schist; among the pines, resin stumps, a pine branch, a fallen oak log, mushrooms, moss, lichen, a spider web, ferns and an old bone. |
 | Greenhouse (south of the quad) | Onion, potato, orchid, stinging nettle and cotton. Robert Brown works here |
-| Science building (south-east) | The glass-walled lab: stains on the shelf by the door, a slide cabinet and a materials cabinet, the electron microscope bay (each part you craft appears in place). Ernst Abbe stands outside; Zernike, Gram, Ruska, June Almeida and Albert Crewe inside |
-| Wilson Lab (east) | The CHESS hall beside the CESR ring: the beamline from the ring wall to the hutch, a sample rack, and Röntgen (at the door), Batterman, Bragg, Franklin and Hodgkin |
-| Engineering quad (south, down the path past the greenhouse) | Halls after Bard, Snee, Upson and Phillips. The geology hall's rock garden: granite, basalt, obsidian, marble, chalk, pyrite, malachite, lodestone and garnet schist. A materials yard: concrete blocks, a rusty steel beam, bricks, a solar panel and a catalytic converter. A glass atrium (after Duffield) with display cases of quantum dots, carbon nanotubes, a zeolite, a metal-organic framework, a superconductor pellet and a blue LED. Henry Clifton Sorby stands in the rock garden, Mildred Dresselhaus in the atrium |
+| Science building (south-east) | The glass-walled lab: stains on the shelf by the door, a slide cabinet and a materials cabinet, the electron microscope bay (each part you craft appears in place). Ruska, June Almeida and Albert Crewe work here. Next door to the east, the chemistry building (after Baker Lab), where Dorothy Hodgkin works |
+| Wilson Lab (east) | The CHESS hall beside the CESR ring: the beamline from the ring wall to the hutch, a sample rack, and Batterman and Bragg |
+| Athletic fields (far east) | Over the storage ring's tunnel: a gridiron with goalposts and stands, a practice field, and the field house (after Barton Hall) |
+| Engineering quad (south, down the path past the greenhouse) | Halls after Bard, Snee, Upson and Phillips. The geology hall's rock garden: granite, basalt, obsidian, marble, chalk, pyrite, malachite, lodestone and garnet schist. A materials yard: concrete blocks, a rusty steel beam, bricks, a solar panel and a catalytic converter. A glass atrium (after Duffield) with display cases of quantum dots, carbon nanotubes, a zeolite, a metal-organic framework, a superconductor pellet and a blue LED. Henry Clifton Sorby works in the geology hall, Rosalind Franklin in the materials hall, Mildred Dresselhaus in the atrium |
 
 **Fixed instruments stay where they are built**: the electron microscopes in the science lab, the beamline in Wilson Lab. Look (F) at a sample anywhere and you take a bit along (up to 8); the HUD shows where to carry them. Light microscopes work anywhere.
 
@@ -131,7 +132,7 @@ Seven mini-games, each scored 0-100%, change what the eyepiece shows:
 
 ## Scientists and achievements
 
-Seventeen scientists who made discoveries with microscopes or X-rays stand around campus: Leeuwenhoek, Hooke, Robert Brown, Abbe, Zernike, Cajal, Gram, Ruska, June Almeida, Albert Crewe, Röntgen, W. L. Bragg, Rosalind Franklin, Dorothy Hodgkin, Boris Batterman (CHESS's first director), Henry Clifton Sorby (rocks and steel, in the rock garden) and Mildred Dresselhaus (carbon nanotubes, in the atrium). Press E to talk: each has two to five requests (59 in all), mostly "show me what you found", and every request done is an achievement. A gold **!** over a scientist means you can show them something now; **?** means they are still waiting. With 62 more achievements for discoveries, instruments, areas, mini-games and milestones, there are 121.
+Seventeen scientists who made discoveries with microscopes or X-rays stand around campus: Leeuwenhoek, Hooke, Robert Brown, Abbe, Zernike, Cajal, Gram, Ruska, June Almeida, Albert Crewe, Röntgen, W. L. Bragg, Rosalind Franklin, Dorothy Hodgkin, Boris Batterman (CHESS's first director), Henry Clifton Sorby (rocks and steel, in the geology hall) and Mildred Dresselhaus (carbon nanotubes, in the atrium). Press E to talk: each has two to five requests (59 in all), mostly "show me what you found", and every request done is an achievement. A gold **!** over a scientist means you can show them something now; **?** means they are still waiting. With 62 more achievements for discoveries, instruments, areas, mini-games and milestones, there are 121.
 
 The Microdex holds 170 discoveries in 45 samples across seven areas.
 
