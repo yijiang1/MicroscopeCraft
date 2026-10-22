@@ -41,6 +41,8 @@ const MARKER_RANGE = 30; // the floating marker only shows when you are this clo
 const FRAME_MS = 1000 / 60; // walking: 60 fps is plenty, and a 120 Hz display would otherwise double the work
 const IDLE_FRAME_MS = 1000 / 20; // mouse free (a menu, a dialog, the journal): only water and markers move
 const SHADOW_SETTLE_FRAMES = 20; // keep redrawing shadows this long after a change, while limbs swing to rest
+const NPC_SHADOW_RANGE = 45; // the sun's shadow box is 76 m across, centred on the player
+const NPC_SHADOW_MS = 200; // a strolling scientist's shadow catches up five times a second
 
 interface Node {
   /** 'em': the electron microscopes in the lab; 'beam': the CHESS beamline's desk; 'npc': a scientist. */
@@ -552,6 +554,8 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   dress();
   const offDress = ctx.bus.on('economyChanged', dress);
   const footsteps = createFootstepTracker();
+  let npcShadowAt = 0;
+  const wasMoving = new Map<string, boolean>();
   const loop = createFrameLoop((dt, t) => {
     const previousX = camera.position.x;
     const previousY = camera.position.y;
@@ -637,8 +641,12 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       n.root.rotation.y = w.yaw;
       f.update(t, w.moving);
       f.setSpeaking(!!w.speech && Math.hypot(w.x - px, w.z - pz) < 18);
-
-      if (w.moving) redrawShadows();
+      // A walker inside the shadow map's reach redraws it a few times a second, not every frame; stopping settles it.
+      if (Math.hypot(w.x - px, w.z - pz) < NPC_SHADOW_RANGE) {
+        if (w.moving && t >= npcShadowAt) { renderer.shadowMap.needsUpdate = true; npcShadowAt = t + NPC_SHADOW_MS; }
+        if (w.moving !== wasMoving.get(w.id)) redrawShadows();
+      }
+      wasMoving.set(w.id, w.moving);
     }
     updateDecor(t);
     updateView();

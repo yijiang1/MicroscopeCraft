@@ -4,7 +4,8 @@ import { recordScore, type GameContext } from '../shared/state';
 import type { Toast } from './toast';
 
 const text = (tag: string, content: string) => Object.assign(document.createElement(tag), { textContent: content });
-export type TrainingGames = Record<string, (host: HTMLElement, done: () => void) => () => void>;
+/** A training console: why it is still locked (null once the player has its instrument), and how to open it. */
+export type TrainingGames = Record<string, { locked: () => string | null; open: (host: HTMLElement, done: () => void) => () => void }>;
 export function mountCampusActivities(ctx: GameContext, toast: Toast, training: TrainingGames) {
   const modal = document.createElement('dialog');
   modal.setAttribute('aria-label', 'Campus activities');
@@ -74,12 +75,16 @@ export function mountCampusActivities(ctx: GameContext, toast: Toast, training: 
   };
   const games = (location: 'lab' | 'chess') => {
     clear(); title.textContent = location === 'lab' ? 'Science Building · Field Lab' : 'Wilson Lab · CHESS Challenges';
-    content.append(text('p', 'Earn 10 coins at each new 20% score milestone, plus 1 voucher at 80%. Each milestone pays once per game. Replays let you improve your score. Training consoles are available here without crafting an instrument.'));
-    const launch = (name: string, run: () => (() => void)) => content.append(button(name, () => {
-      clear(); title.textContent = name; content.append(button('← Activities', () => games(location)));
-      const help = text('p', 'Submit your result using Record / Finish. New score milestones award coins automatically.'); content.append(help);
-      cleanup = run();
-    }));
+    content.append(text('p', 'Earn 10 coins at each new 20% score milestone, plus 1 voucher at 80%. Each milestone pays once per game. Replays let you improve your score. Each console opens once you have built the instrument it trains on.'));
+    const launch = (name: string, run: () => (() => void), locked: string | null = null) => {
+      const b = button(locked ? `${name} · ${locked}` : name, () => {
+        clear(); title.textContent = name; content.append(button('← Activities', () => games(location)));
+        const help = text('p', 'Submit your result using Record / Finish. New score milestones award coins automatically.'); content.append(help);
+        cleanup = run();
+      });
+      b.disabled = !!locked; content.append(b);
+    };
+    const trainer = (name: string, id: string) => launch(name, () => training[id]!.open(content, () => games(location)), training[id]!.locked());
     if (location === 'lab') {
       launch('The Invisible Specimen', () => {
         content.replaceChildren();
@@ -88,15 +93,15 @@ export function mountCampusActivities(ctx: GameContext, toast: Toast, training: 
         content.append(iframe);
         return () => iframe?.remove();
       });
-      launch('Köhler illumination', () => training.koehler!(content, () => games(location)));
-      launch('Gram staining', () => training.gram!(content, () => games(location)));
-      launch('Stain timing', () => training.soak!(content, () => games(location)));
-      launch('TEM alignment', () => training.tem!(content, () => games(location)));
-      launch('Aberration correction', () => training.corrector!(content, () => games(location)));
-      launch('Electron ptychography', () => training.ptycho!(content, () => games(location)));
+      trainer('Köhler illumination', 'koehler');
+      trainer('Gram staining', 'gram');
+      trainer('Stain timing', 'soak');
+      trainer('TEM alignment', 'tem');
+      trainer('Aberration correction', 'corrector');
+      trainer('Electron ptychography', 'ptycho');
     } else {
-      launch('Beam tuning', () => training.beam!(content, () => games(location)));
-      launch('Tomography', () => training.tomo!(content, () => games(location)));
+      trainer('Beam tuning', 'beam');
+      trainer('Tomography', 'tomo');
     }
   };
   const open = (where: 'store' | 'lab' | 'chess') => {
