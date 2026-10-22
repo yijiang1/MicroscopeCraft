@@ -144,11 +144,13 @@ export type Action =
   | { kind: 'gather'; raw: PlanRaw }
   | { kind: 'craft'; step: PlanStep };
 
-/** The one thing to do right now: identify or gather the first material still missing, else craft the next ready step. */
+/** The one thing to do right now: craft as soon as a step is ready (so the player sees materials turn into parts),
+ * else identify or gather the first material still missing. */
 export function currentAction(plan: Plan): Action | null {
+  if (plan.nextStep) return { kind: 'craft', step: plan.nextStep };
   const raw = plan.raw.find((r) => r.missing > 0);
-  if (raw) return raw.identify && !raw.identify.done ? { kind: 'identify', raw, identify: raw.identify } : { kind: 'gather', raw };
-  return plan.nextStep ? { kind: 'craft', step: plan.nextStep } : null;
+  if (!raw) return null;
+  return raw.identify && !raw.identify.done ? { kind: 'identify', raw, identify: raw.identify } : { kind: 'gather', raw };
 }
 
 export function actionText(action: Action, data: Pick<GameData, 'items'>): string {

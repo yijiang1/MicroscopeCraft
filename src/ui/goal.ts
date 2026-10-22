@@ -2,7 +2,9 @@
 // microscope (click a material to track it). Works without the mouse: C crafts the next ready step. It also tells the world which material to
 // point at (trackItem). Owner: Person D.
 import { actionText, currentAction, nextGoalRecipe, planFor, type Plan } from '../shared/plan';
-import { craft, type GameContext } from '../shared/state';
+import type { Recipe } from '../shared/schema';
+import { canCraft, craft, type GameContext } from '../shared/state';
+import { itemIcon } from './icons';
 import { drawTree, goalLayout } from './techtree';
 import type { Toast } from './toast';
 
@@ -72,6 +74,8 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void):
       const p = plan;
       const where = action?.kind === 'gather' && trackedRaw ? data.materials[trackedRaw.itemId]?.where : undefined;
       if (where) card.append(div('font-size:11px;color:#b8c8b8;margin-top:2px', where));
+      const step = p.nextStep ?? p.steps[0];
+      if (step) card.append(recipeStrip(step.recipe));
       if (expanded) {
         const left = (id: string) => p.steps.find((x) => x.recipe.output.itemId === id)?.times ?? 0;
         const raw = (id: string) => p.raw.find((r) => r.itemId === id);
@@ -92,6 +96,37 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void):
     }
 
     if (said) card.append(div('margin-top:8px;padding:6px 8px;border-radius:6px;background:#1c3a1f;color:#fff', said));
+  };
+
+  /** The next craft as a formula: [2 sand] + … → [glass], with a button that lights up once it can be made. */
+  const recipeStrip = (recipe: Recipe) => {
+    const { data, state } = ctx;
+    const ready = canCraft(ctx, recipe.id);
+    const box = div(`margin-top:8px;padding:6px 8px;border-radius:8px;background:#ffffff10;border:1px solid ${ready ? '#ffd35a' : '#ffffff22'}`);
+    box.append(div('font-size:11px;color:#9ab;margin-bottom:4px', 'NEXT CRAFT'));
+    const line = div('display:flex;align-items:center;gap:6px;flex-wrap:wrap');
+    const short: string[] = [];
+    for (const [k, i] of recipe.inputs.entries()) {
+      const have = state.inventory[i.itemId] ?? 0;
+      const name = data.items[i.itemId]?.name ?? i.itemId;
+      if (have < i.count) short.push(`${i.count - have} more ${name}`);
+      const chip = div('display:inline-flex;align-items:center;gap:3px');
+      chip.title = name;
+      chip.append(itemIcon(i.itemId, data, 22), div(`font-weight:600;color:${have >= i.count ? '#9be07f' : '#ff8a7a'}`, `${Math.min(have, i.count)}/${i.count}`));
+      line.append(...(k ? [div('color:#9ab', '+')] : []), chip);
+    }
+    const out = div('display:inline-flex;align-items:center;gap:3px;font-weight:600');
+    out.append(itemIcon(recipe.output.itemId, data, 22), `${data.items[recipe.output.itemId]?.name ?? recipe.output.itemId}`);
+    line.append(div('color:#9ab;font-size:16px', '→'), out);
+    const btn = document.createElement('button');
+    btn.textContent = 'Craft (C)';
+    btn.disabled = !ready;
+    btn.style.cssText = `margin-left:auto;padding:3px 10px;border-radius:6px;border:0;font-weight:700;${ready ? 'background:#ffd35a;color:#222;cursor:pointer;box-shadow:0 0 8px #ffd35a88' : 'background:#444;color:#999'}`;
+    btn.onclick = () => doCraft(recipe.id);
+    line.append(btn);
+    box.append(line);
+    if (short.length) box.append(div('font-size:11px;color:#ff8a7a;margin-top:4px', `Need ${short.join(' and ')} first.`));
+    return box;
   };
 
   const doCraft = (recipeId: string) => {

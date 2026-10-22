@@ -100,6 +100,15 @@ describe('hidden materials: each tier needs something found with the tier below'
   });
 });
 
+describe('current action', () => {
+  it('says to craft as soon as a step is ready, before gathering the rest', () => {
+    const goal = nextGoalRecipe(data, { inventory: {} })!;
+    const action = currentAction(planFor(goal, data, { beach_sand: 2 }))!;
+    expect(action.kind === 'craft' && action.step.recipe.id).toBe('glass');
+    expect(currentAction(planFor(goal, data, {}))!.kind).toBe('gather');
+  });
+});
+
 describe('where to find things', () => {
   it('every raw material that recipes use has a where-to-find hint', () => {
     const crafted = new Set(data.recipes.map((r) => r.output.itemId));
