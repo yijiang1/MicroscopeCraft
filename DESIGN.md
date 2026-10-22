@@ -100,17 +100,18 @@ Material choice is the main decision in the game: the properties of what you gat
 There are 70 recipes. Complex instruments are built from components, each with its own recipe (the TEM from six, the STEM from five, the beamline from nine), and the fixed instruments show each component in place as it is built. Add-ons (phase contrast kit, dark-field condenser) unlock extra steps on the fluorescence microscope. Materials grow back 15 seconds after they are gathered, and the world holds enough of each to build any one instrument without waiting.
 
 ## World and scale content
-The world is a small open 3D campus, about 190 m across, built entirely from procedural models and textures: a quad lined with halls, a clock tower, a west slope with a pine grove, a gorge with a waterfall and a creek, a lake, a glass greenhouse, the science building with its lab, and Wilson Laboratory with the CHESS hall beside the CESR storage ring (768 m around, 6 GeV positrons at 200 mA after the CHESS-U upgrade; the hall's shield wall curves with the ring's radius). Cabinets in the lab and a rack at the beamline hold prepared slides and materials samples; F, then a number, picks one.
+The world is an open 3D campus, about 300 m across and laid out after Cornell's, built entirely from procedural models and textures: a quad lined with halls, a clock tower, a west slope with a pine grove, a gorge with a waterfall and a creek, a lake, a glass greenhouse, the science building with its lab, an engineering quad to the south (a rock garden, a materials yard and a glass atrium of nanomaterials and devices), and Wilson Laboratory with the CHESS hall beside the CESR storage ring (768 m around, 6 GeV positrons at 200 mA after the CHESS-U upgrade; the hall's shield wall curves with the ring's radius). Cabinets in the lab and a rack at the beamline hold prepared slides and materials samples; F, then a number, picks one.
 
 | Area | What the player finds | Discoveries |
 | --- | --- | --- |
-| Quad | Leaves, flowers, a honeybee, a butterfly wing, sunflowers, a picnic table (salt, paper) | 25 |
+| Quad | Leaves, flowers, a honeybee, a butterfly wing, sunflowers, a picnic table (salt, paper), a bronze chime bell | 29 |
 | Lake | Lake water, an algae mat, mud, a duck feather | 16 |
 | Pine grove | Pine needles and pollen, oak bark, mushrooms, moss, lichen, a spider web, ferns, an old bone | 25 |
 | Greenhouse | Onion, potato, orchid, stinging nettle, cotton | 12 |
 | Gorge and slope rocks | Quartz, copper, tungsten, fluorite, willemite, monazite sand, beryl, fossil shale, mica, iron, galena | 29 |
 | Science lab | The crystal, seven prepared slides, eight materials samples | 44 |
 | Wilson Lab | Lysozyme, vitamin B12, a DNA fibre, steel, a battery cathode, an insect in amber, an iron meteorite, a silicon crystal | 19 |
+| Engineering quad | Rock garden (granite, basalt, obsidian, marble, chalk, pyrite, malachite, lodestone, garnet schist); materials yard (concrete, rusty steel, brick, a solar panel, a catalytic converter); atrium cases (quantum dots, carbon nanotubes, zeolite, a MOF, a superconductor, a blue LED) | 64 |
 
 Every sample has hidden layers that appear only when an instrument (and the right mode, stain or alignment) can reveal them. Sizes below are approximate.
 
@@ -200,7 +201,7 @@ The MVP was one complete play loop that can be demoed in about five minutes: gat
 
 | Area | Must ship | Stretch | Status |
 | --- | --- | --- | --- |
-| World | One small open 3D map | More biomes | A campus with a quad, lake, gorge, pine grove, greenhouse, science lab and Wilson Lab |
+| World | One small open 3D map | More biomes | A campus with a quad, lake, gorge, pine grove, greenhouse, science lab, Wilson Lab and an engineering quad |
 | Crafting | About eight recipes | Full materials property system | 70 recipes, components for every complex instrument, add-ons |
 | Microscopes | Tiers 1 to 3 end to end | Tiers 4 and 6 | Tiers 0 to 7 built, including a CHESS beamline |
 | Samples | About ten discoveries | Samples from a prompt | 170 discoveries in 45 samples |

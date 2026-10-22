@@ -527,6 +527,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     if (Math.hypot(x + 58, z - 22) < 15) return 'forest';
     if (x < -46) return 'slope';
     if (x > -23 && x < 23 && z > -38 && z < 1) return 'quad';
+    if (x > -46 && x < 50 && z > 40 && z < 110) return 'engquad';
     return null;
   };
   let areaCheck = 0;

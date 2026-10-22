@@ -38,6 +38,15 @@ const PALETTES: Record<string, Palette> = {
   mica: { base: ['#6a6660', '#7c7770'], fleck: ['#e0e4ea', '#c8ccd4', '#f4f4f8'], fleckAt: 0.05, metalness: 0.5, roughness: 0.35 },
   lichen: { base: ['#7a766e', '#8a857c'], fleck: ['#c8c86a', '#9ab070', '#d8a050'], fleckAt: 0.0 },
   shale: { base: ['#3e3c3a', '#4c4946'], fleck: ['#5a5652', '#2e2c2a'], fleckAt: 0.3 },
+  // the rock garden
+  granite: { base: ['#b9aaa2', '#d0c2b8'], fleck: ['#e6a8a0', '#2a2624', '#f2ece6', '#8a8a8e'], fleckAt: -0.05 }, // pink feldspar, black mica, grey quartz
+  basalt: { base: ['#2e2f31', '#3a3b3e'], fleck: ['#1e1f20', '#6a7a3a'], fleckAt: 0.35 },
+  obsidian: { base: ['#0e0e12', '#1c1c24'], fleck: ['#2a2a36'], fleckAt: 0.4, metalness: 0.1, roughness: 0.12 },
+  marble: { base: ['#e8e6e0', '#f6f4ef'], fleck: ['#b8bcc0', '#d0d4d8'], fleckAt: 0.32 }, // grey veins
+  chalk: { base: ['#ecebe4', '#f8f7f2'], fleck: ['#d8d6cc'], fleckAt: 0.3, roughness: 1 },
+  malachite: { base: ['#1f7a4a', '#3aa86a'], fleck: ['#0f4a2a', '#6ad09a'], fleckAt: -0.1, roughness: 0.5 }, // banded greens
+  magnetite: { base: ['#25262a', '#33353a'], fleck: ['#5a5c62', '#1a1a1c'], fleckAt: 0.25, metalness: 0.45, roughness: 0.45 },
+  garnet: { base: ['#7a7670', '#8e8a82'], fleck: ['#8a1f2e', '#a02838', '#d8dce0'], fleckAt: 0.28 }, // red garnets in silvery schist
 };
 
 /** A noise-displaced icosphere with faceted normals and speckled vertex colours. */
@@ -652,10 +661,10 @@ function shaleSlab(rng: () => number): THREE.Group {
   return g;
 }
 
-/** A cluster of silver-grey galena cubes. */
-function galenaCubes(rng: () => number): THREE.Group {
+/** A cluster of metallic cubes: silver-grey galena, or brassy pyrite. */
+function galenaCubes(rng: () => number, color = '#8c939c'): THREE.Group {
   const g = new THREE.Group();
-  const metal = std('#8c939c', 0.3, 0.85);
+  const metal = std(color, 0.3, 0.85);
   for (let i = 0; i < 6; i++) {
     const s = 0.08 + rng() * 0.12;
     g.add(mesh(box(s, s, s), metal, (rng() - 0.5) * 0.4, s / 2, (rng() - 0.5) * 0.4, 0, rng() * 1.5, 0));
@@ -716,12 +725,114 @@ function sampleRack(): THREE.Group {
   return g;
 }
 
+// ---------------------------------------------------------------- engineering materials
+
+/** Two concrete blocks, one leaning on the other. */
+function concreteBlocks(): THREE.Group {
+  const g = new THREE.Group();
+  const grey = std('#9c9890', 0.95);
+  g.add(mesh(box(0.8, 0.4, 0.4), grey, 0, 0.2, 0), mesh(box(0.8, 0.4, 0.4), grey, 0.1, 0.6, 0.02, 0, 0.15, 0));
+  for (const x of [-0.2, 0.2]) g.add(mesh(box(0.26, 0.02, 0.26), std('#4a4844', 1), x, 0.811, 0.02, 0, 0.15, 0)); // the hollow cores, seen from above
+  return g;
+}
+
+/** A rusty steel I-beam lying on two timbers. */
+function rustyBeam(): THREE.Group {
+  const g = new THREE.Group();
+  const rust = std('#8a4a2a', 0.9, 0.3);
+  const wood = std('#7a6248', 0.95);
+  for (const x of [-1, 1]) g.add(mesh(box(0.15, 0.12, 0.5), wood, x, 0.06, 0));
+  g.add(mesh(box(3, 0.025, 0.2), rust, 0, 0.133, 0), mesh(box(3, 0.025, 0.2), rust, 0, 0.427, 0), mesh(box(3, 0.27, 0.02), std('#6e3a22', 0.9, 0.3), 0, 0.28, 0));
+  return g;
+}
+
+/** Red bricks stacked on a pallet. */
+function brickStack(): THREE.Group {
+  const g = new THREE.Group();
+  g.add(mesh(box(0.9, 0.12, 0.9), std('#8a7050', 0.95), 0, 0.06, 0));
+  const reds = ['#9a3a2a', '#a8442e', '#8c3424'].map((c) => std(c, 0.95));
+  for (let layer = 0; layer < 5; layer++) {
+    for (let i = 0; i < 4; i++) {
+      const along = layer % 2 === 0;
+      const b = mesh(box(0.8, 0.065, 0.19), reds[(layer + i) % 3]!, along ? 0 : -0.3 + i * 0.2, 0.155 + layer * 0.07, along ? -0.3 + i * 0.2 : 0, 0, along ? 0 : Math.PI / 2, 0);
+      g.add(b);
+    }
+  }
+  return g;
+}
+
+/** A solar panel tilted on a frame: dark cells, silver grid lines, an aluminium rim. */
+function solarPanel(): THREE.Group {
+  const g = new THREE.Group();
+  const alu = std('#c8ccd0', 0.35, 0.8);
+  const panel = new THREE.Group();
+  panel.add(mesh(box(1.7, 0.04, 1.0), alu), mesh(box(1.62, 0.045, 0.92), std('#1a2238', 0.25, 0.3)));
+  for (let i = 1; i < 6; i++) panel.add(mesh(box(0.008, 0.05, 0.92), alu, -0.81 + i * 0.27, 0, 0));
+  for (let i = 1; i < 3; i++) panel.add(mesh(box(1.62, 0.05, 0.008), alu, 0, 0, -0.46 + i * 0.307));
+  panel.rotation.x = -0.6;
+  panel.position.set(0, 0.85, 0);
+  g.add(panel);
+  for (const x of [-0.7, 0.7]) g.add(mesh(box(0.05, 1.1, 0.05), alu, x, 0.55, -0.25), mesh(box(0.05, 0.55, 0.05), alu, x, 0.27, 0.3));
+  return g;
+}
+
+/** A car's catalytic converter, its pipes cut off, with a spare ceramic honeycomb brick beside it. */
+function catalyticConverter(): THREE.Group {
+  const g = new THREE.Group();
+  const steel = std('#a8adb2', 0.35, 0.8);
+  const can = mesh(cyl(0.16, 0.16, 0.5, 20), steel, 0, 0.18, 0, 0, 0, Math.PI / 2);
+  can.scale.set(1, 1, 0.7);
+  g.add(can);
+  for (const s of [-1, 1]) g.add(mesh(cyl(0.12, 0.05, 0.12, 16), steel, s * 0.31, 0.18, 0, 0, 0, Math.PI / 2), mesh(cyl(0.045, 0.045, 0.25, 12), std('#7a6a5a', 0.7, 0.5), s * 0.48, 0.18, 0, 0, 0, Math.PI / 2));
+  const brick = mesh(cyl(0.11, 0.11, 0.15, 24), std('#ddd4c2', 0.95), 0.05, 0.075, 0.42);
+  g.add(brick, mesh(memo('catface', () => new THREE.CircleGeometry(0.11, 24)), std('#b8ae9a', 1), 0.05, 0.151, 0.42, -Math.PI / 2));
+  return g;
+}
+
+/** A bronze chime bell hung in a small oak frame. */
+function chimeBell(): THREE.Group {
+  const g = new THREE.Group();
+  const oak = std('#6a5038', 0.9);
+  for (const x of [-0.7, 0.7]) g.add(mesh(box(0.14, 1.9, 0.14), oak, x, 0.95, 0), mesh(box(0.14, 0.1, 0.7), oak, x, 0.05, 0));
+  g.add(mesh(box(1.6, 0.14, 0.16), oak, 0, 1.9, 0));
+  const profile = [[0.0, 0.0], [0.46, 0.0], [0.47, 0.05], [0.4, 0.2], [0.33, 0.45], [0.3, 0.7], [0.24, 0.82], [0.0, 0.85]].map(([r, y]) => new THREE.Vector2(r, y));
+  const bell = mesh(memo('bell', () => new THREE.LatheGeometry(profile, 28)), std('#9a7a3a', 0.4, 0.85, { side: THREE.DoubleSide }), 0, 0.92, 0);
+  const patina = mesh(memo('bellband', () => new THREE.TorusGeometry(0.335, 0.025, 6, 28)), std('#4a9a7a', 0.8, 0.2), 0, 1.33, 0, Math.PI / 2);
+  g.add(bell, patina, mesh(box(0.08, 0.12, 0.08), std('#3a3a3a', 0.6, 0.6), 0, 1.8, 0));
+  return g;
+}
+
+/** A display case: a cabinet with a glass box on top, holding what `contents` adds. */
+function displayCase(contents: (g: THREE.Group) => void): THREE.Group {
+  const g = labCabinet('#2a2e34');
+  g.add(mesh(box(1.4, 0.5, 0.55), std('#dff0ff', 0.05, 0, { transparent: true, opacity: 0.18, depthWrite: false }), 0, 1.29, 0));
+  contents(g);
+  return g;
+}
+
+/** Nanomaterials: a vial of glowing quantum dots, black nanotube powder, zeolite and MOF crystals in dishes. */
+const nanoCase = () =>
+  displayCase((g) => {
+    g.add(mesh(cyl(0.035, 0.035, 0.14, 12), std('#ff7a3a', 0.2, 0, { emissive: '#ff6a2a', emissiveIntensity: 0.9, transparent: true, opacity: 0.9 }), -0.45, 1.11, 0));
+    [['#1a1a1a', -0.15], ['#f4f4f8', 0.15], ['#dfe8ff', 0.45]].forEach(([c, x]) => {
+      g.add(mesh(cyl(0.09, 0.08, 0.025, 16), std('#e8f4ff', 0.1, 0, { transparent: true, opacity: 0.5 }), x as number, 1.055, 0));
+      g.add(mesh(cyl(0.07, 0.07, 0.02, 14), std(c as string, 0.8), x as number, 1.06, 0));
+    });
+  });
+
+/** Devices: a superconductor pellet with a magnet floating above it, and a blue LED chip that glows. */
+const deviceCase = () =>
+  displayCase((g) => {
+    g.add(mesh(cyl(0.1, 0.1, 0.03, 20), std('#1e1e22', 0.7), -0.3, 1.055, 0), mesh(box(0.06, 0.03, 0.06), std('#b8bcc4', 0.3, 0.9), -0.3, 1.14, 0));
+    g.add(mesh(box(0.14, 0.02, 0.14), std('#e0d8b0', 0.4, 0.6), 0.3, 1.05, 0), mesh(box(0.05, 0.02, 0.05), std('#6a7aff', 0.2, 0, { emissive: '#4a5aff', emissiveIntensity: 1.6 }), 0.3, 1.07, 0));
+  });
+
 // ---------------------------------------------------------------- entry point
 
 /** Build the model for a placed thing. `seed` makes each instance a little different but repeatable.
  *  `revealed` false builds the plain-looking version of ores that can only be recognised under a microscope. */
 /** Furniture that stands against a wall keeps the orientation the placement gives it. */
-const FIXED_YAW = new Set<Kind>(['slides', 'materials', 'iodine', 'methylene', 'gramkit', 'rack', 'picnic', 'web', 'log']);
+const FIXED_YAW = new Set<Kind>(['slides', 'materials', 'iodine', 'methylene', 'gramkit', 'rack', 'picnic', 'web', 'log', 'nanocase', 'devicecase', 'bell', 'ibeam', 'solar']);
 
 export function buildModel(kind: Kind, seed: number, revealed = true): THREE.Group {
   const rng = mulberry32(seed * 7919 + 13);
@@ -769,6 +880,16 @@ export function buildModel(kind: Kind, seed: number, revealed = true): THREE.Gro
     case 'flower': g = flowerPatch(rng); break;
     case 'wing': g = wingOnStone(rng); break;
     case 'crystal': g = crystalCluster(rng, { colors: ['#7b6cff', '#5aa9ff', '#b07bff'], glow: 0.7, count: 12, height: 3.4, radius: 0.28 }); break;
+    case 'granite': case 'basalt': case 'obsidian': case 'marble': case 'chalk': case 'malachite': case 'magnetite': case 'garnet': g = oreNode(kind, rng); g.scale.setScalar(1.25); break;
+    case 'pyrite': g = galenaCubes(rng, '#c9a63e'); break;
+    case 'concrete': g = concreteBlocks(); break;
+    case 'ibeam': g = rustyBeam(); break;
+    case 'brick': g = brickStack(); break;
+    case 'solar': g = solarPanel(); break;
+    case 'catconv': g = catalyticConverter(); break;
+    case 'bell': g = chimeBell(); break;
+    case 'nanocase': g = nanoCase(); break;
+    case 'devicecase': g = deviceCase(); break;
     case 'pond': throw new Error('the pond is built by terrain.buildWater');
   }
   if (!FIXED_YAW.has(kind)) g.rotation.y = rng() * 6.28;

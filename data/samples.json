@@ -643,5 +643,246 @@
       { "id": "si_111", "name": "Silicon (111) reflection", "sizeUm": 0.000314, "contrast": 0, "contrastIn": { "xrd": 0.7, "ediff": 0.5 }, "drawing": "spots",
         "blurb": "Planes of silicon atoms 0.314 nanometres apart reflect X-rays only at the exact angle Bragg's law allows. Perfect silicon crystals like this one pick out a single colour of X-rays in a monochromator." }
     ]
+  },
+  {
+    "id": "granite", "name": "Granite boulder", "worldObject": "granite", "biome": "eng",
+    "features": [
+      { "id": "granite_minerals", "name": "Three minerals", "sizeUm": 1500, "contrast": 0.6, "drawing": "mosaic", "tint": "#d9c3b8",
+        "blurb": "Granite is a patchwork of three minerals that grew together as molten rock cooled slowly deep underground. The glassy grey grains are quartz, the pink and white ones feldspar, and the black flakes mica." },
+      { "id": "feldspar_twins", "name": "Feldspar twins", "sizeUm": 30, "contrast": 0.35, "drawing": "lines", "tint": "#f0e0d8",
+        "blurb": "Inside the feldspar, thin parallel stripes mark twins, slabs of crystal mirrored across a shared plane. Geologists use the pattern of stripes to tell one kind of feldspar from another." },
+      { "id": "zircon_crystals", "name": "Zircon crystals", "sizeUm": 60, "contrast": 0.3, "drawing": "prisms", "tint": "#e8c8a0",
+        "blurb": "Tiny zircon crystals hide among the larger grains, and they lock in uranium as they grow. Measuring how much of that uranium has decayed to lead dates the granite, often to hundreds of millions of years." },
+      { "id": "potassium_map", "name": "Potassium map", "sizeUm": 300, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 3.608, "drawing": "map", "tint": "#ff9ad0",
+        "blurb": "Above potassium's absorption edge at 3.61 keV, the pink feldspar grains light up, because they are rich in potassium. A little of that potassium is radioactive, which is why granite buildings have slightly more background radiation." }
+    ]
+  },
+  {
+    "id": "basalt", "name": "Black basalt", "worldObject": "basalt", "biome": "eng",
+    "features": [
+      { "id": "plagioclase_laths", "name": "Plagioclase laths", "sizeUm": 150, "contrast": 0.45, "drawing": "needles", "tint": "#e8e4dc",
+        "blurb": "Basalt is lava that cooled quickly at the surface, so its crystals stayed small. The pale needles are plagioclase feldspar, often jumbled like spilled matchsticks." },
+      { "id": "olivine_crystals", "name": "Olivine crystals", "sizeUm": 400, "contrast": 0.5, "drawing": "facets", "tint": "#9aae4a",
+        "blurb": "The bottle-green crystals are olivine, a magnesium iron silicate and the most common mineral in Earth's upper mantle. Gem-quality olivine is called peridot." },
+      { "id": "basalt_vesicles", "name": "Gas bubbles", "sizeUm": 800, "contrast": 0.4, "drawing": "droplets", "tint": "#2a2a2a",
+        "blurb": "Round holes called vesicles were gas bubbles in the lava, frozen in place as it set. Lava full of bubbles becomes scoria, light enough to lift a big lump with one hand." }
+    ]
+  },
+  {
+    "id": "obsidian", "name": "Obsidian", "worldObject": "obsidian", "biome": "eng",
+    "features": [
+      { "id": "obsidian_bands", "name": "Flow bands", "sizeUm": 60, "contrast": 0.3, "drawing": "lines", "tint": "#4a4a52",
+        "blurb": "Obsidian is volcanic glass, lava that cooled too fast for crystals to form. Faint bands show how the sticky melt flowed and stretched before it froze." },
+      { "id": "obsidian_microlites", "name": "Microlites", "sizeUm": 3, "contrast": 0.4, "drawing": "needles", "tint": "#c8c8d0",
+        "blurb": "A few hair-thin crystals, called microlites, managed to start growing before the glass froze. Their sizes record how fast the lava cooled." },
+      { "id": "obsidian_halo", "name": "Glassy halo", "sizeUm": 0.00042, "contrast": 0, "contrastIn": { "ediff": 0.45, "xrd": 0.45 }, "drawing": "rings",
+        "blurb": "A glass has no repeating lattice, so instead of sharp rings it gives one broad, fuzzy halo. Its width says the atoms are ordered only out to their nearest few neighbours." }
+    ]
+  },
+  {
+    "id": "marble", "name": "White marble", "worldObject": "marble", "biome": "eng",
+    "features": [
+      { "id": "marble_grains", "name": "Calcite grains", "sizeUm": 500, "contrast": 0.45, "drawing": "mosaic", "tint": "#f0ece4",
+        "blurb": "Marble is limestone that was buried, squeezed and heated until its grains regrew into an interlocking mosaic of calcite. The grains catch light on their flat cleavage faces, which makes marble sparkle." },
+      { "id": "calcite_twin_lamellae", "name": "Twin lamellae", "sizeUm": 15, "contrast": 0.35, "drawing": "lines", "tint": "#ddd8cc",
+        "blurb": "Fine parallel stripes cross many grains: twins pressed into the calcite as the rock was squeezed. Geologists count them to estimate how hard the rock was pushed." },
+      { "id": "calcite_rings", "name": "Calcite rings", "sizeUm": 0.000304, "contrast": 0, "contrastIn": { "xrd": 0.6, "ediff": 0.5 }, "drawing": "rings",
+        "blurb": "Calcite's strongest diffraction ring comes from atomic planes 0.304 nanometres apart. Every crystalline mineral has its own set of rings, so the pattern identifies it like a fingerprint." }
+    ]
+  },
+  {
+    "id": "chalk", "name": "Chalk", "worldObject": "chalk", "biome": "eng",
+    "features": [
+      { "id": "coccoliths", "name": "Coccoliths", "sizeUm": 6, "contrast": 0.5, "drawing": "discs", "tint": "#f4f2ea",
+        "blurb": "Chalk is made almost entirely of coccoliths, tiny shields of calcite shed by single-celled algae in ancient seas. The white cliffs of Dover are countless trillions of them, piled up over millions of years." },
+      { "id": "coccolith_plates", "name": "Calcite elements", "sizeUm": 0.4, "contrast": 0.45, "drawing": "prisms", "tint": "#ffffff", "onTop": true,
+        "blurb": "Each coccolith is built from a ring of interlocking calcite crystals, each smaller than a micrometre. The algae grow them inside the cell and push them out to the surface, a feat materials chemists still try to copy." },
+      { "id": "forams", "name": "Foraminifera", "sizeUm": 80, "contrast": 0.4, "drawing": "rings", "tint": "#e8e0d0",
+        "blurb": "Larger chambered shells belong to foraminifera, single-celled creatures that build spiral homes of calcite. The chemistry of their shells records the temperature of the sea they lived in." }
+    ]
+  },
+  {
+    "id": "pyrite", "name": "Fool's gold", "worldObject": "pyrite", "biome": "eng",
+    "features": [
+      { "id": "pyrite_cubes", "name": "Pyrite cubes", "sizeUm": 400, "contrast": 0.6, "drawing": "cubes", "tint": "#d4b44a",
+        "blurb": "Pyrite, iron sulfide, grows in near-perfect brassy cubes and fooled many gold prospectors. Unlike gold, it is hard and brittle and leaves a black streak." },
+      { "id": "pyrite_framboids", "name": "Framboids", "sizeUm": 10, "contrast": 0.45, "drawing": "cluster", "tint": "#c8a840",
+        "blurb": "Some pyrite grows as framboids, raspberry-shaped balls of thousands of tiny crystals. They form in mud without oxygen, where bacteria release sulfide, so they mark ancient seafloors." },
+      { "id": "pyrite_iron", "name": "Iron map", "sizeUm": 50, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 7.112, "drawing": "map", "tint": "#ff7a4a",
+        "blurb": "Above iron's absorption edge at 7.11 keV, every pyrite grain lights up. When pyrite weathers it makes sulfuric acid, a major cause of acid water draining from old mines." }
+    ]
+  },
+  {
+    "id": "malachite", "name": "Green-banded stone", "worldObject": "malachite", "biome": "eng",
+    "features": [
+      { "id": "malachite_bands", "name": "Growth bands", "sizeUm": 300, "contrast": 0.5, "drawing": "rings", "tint": "#3a9a62",
+        "blurb": "Malachite, a copper carbonate, grows in layers like tree rings, light and dark green. Each band records a change in the water that deposited it." },
+      { "id": "malachite_fibres", "name": "Radiating fibres", "sizeUm": 2, "contrast": 0.4, "drawing": "needles", "tint": "#5ac088",
+        "blurb": "Under a microscope the bands are made of thin fibres that fan outward from a centre. The fibres grew side by side, crowding each other into the same direction." },
+      { "id": "malachite_copper", "name": "Copper map", "sizeUm": 100, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 8.979, "drawing": "map", "tint": "#f08a3a",
+        "blurb": "Above copper's absorption edge at 8.98 keV, the whole stone lights up, because more than half its weight is copper. Malachite was once ground up as green paint and is still an ore of copper." }
+    ]
+  },
+  {
+    "id": "magnetite", "name": "Lodestone", "worldObject": "magnetite", "biome": "eng",
+    "features": [
+      { "id": "magnetite_octahedra", "name": "Magnetite octahedra", "sizeUm": 300, "contrast": 0.55, "drawing": "facets", "tint": "#3a3c42",
+        "blurb": "Magnetite, an iron oxide, grows as small black eight-sided crystals. It is the most magnetic natural mineral, and pieces called lodestones made the first compasses." },
+      { "id": "ilmenite_lamellae", "name": "Ilmenite lamellae", "sizeUm": 4, "contrast": 0.35, "drawing": "lines", "tint": "#8a8a90",
+        "blurb": "Thin plates of ilmenite cross the grains in three directions. They separated out of the magnetite as it cooled, the way frost grows on a window." },
+      { "id": "magnetite_fringes", "name": "Spinel lattice", "sizeUm": 0.000297, "contrast": 0.4, "drawing": "lattice", "tint": "#e0e0e8", "onTop": true,
+        "blurb": "Magnetite is a spinel, with iron atoms in two kinds of sites between closely packed oxygens. These fringes are planes of atoms 0.297 nanometres apart." }
+    ]
+  },
+  {
+    "id": "garnet_schist", "name": "Garnet schist", "worldObject": "garnet", "biome": "eng",
+    "features": [
+      { "id": "garnet_crystals", "name": "Garnet crystals", "sizeUm": 2000, "contrast": 0.6, "drawing": "facets", "tint": "#8a2433",
+        "blurb": "The red balls are garnets that grew inside the rock while it was cooked and squeezed deep in a mountain belt. Their twelve-sided shapes push the surrounding layers aside." },
+      { "id": "schist_foliation", "name": "Mica layers", "sizeUm": 40, "contrast": 0.35, "drawing": "lines", "tint": "#c8c4b8",
+        "blurb": "Flakes of mica lie flat in parallel layers, which is why schist splits into sheets. The layers lie at right angles to the squeeze that made them." }
+    ]
+  },
+  {
+    "id": "concrete", "name": "Concrete block", "worldObject": "concrete", "biome": "eng",
+    "features": [
+      { "id": "concrete_aggregate", "name": "Sand and gravel", "sizeUm": 1000, "contrast": 0.5, "drawing": "grains", "tint": "#b8b0a4",
+        "blurb": "Concrete is mostly sand and gravel, glued together by a paste of cement and water. The stones carry the load, and the paste fills the gaps between them." },
+      { "id": "portlandite_plates", "name": "Portlandite plates", "sizeUm": 8, "contrast": 0.4, "drawing": "prisms", "tint": "#e8e8e0",
+        "blurb": "As cement reacts with water it grows six-sided plates of portlandite, calcium hydroxide. They make concrete strongly alkaline, which protects the steel bars inside from rusting." },
+      { "id": "ettringite_needles", "name": "Ettringite needles", "sizeUm": 0.6, "contrast": 0.4, "drawing": "needles", "tint": "#f0f0f0",
+        "blurb": "Fine needles of ettringite grow in the first hours after mixing. They help the paste stiffen, but if they form late in hardened concrete they can crack it apart." },
+      { "id": "csh_gel", "name": "Cement gel", "sizeUm": 0.005, "contrast": 0.35, "drawing": "cluster", "tint": "#c8c8c8",
+        "blurb": "The real glue is calcium silicate hydrate, a gel of sheets only a few nanometres across with no regular lattice. It is what holds together concrete, the most used material on Earth after water." }
+    ]
+  },
+  {
+    "id": "rusty_steel", "name": "Rusty steel beam", "worldObject": "ibeam", "biome": "eng",
+    "features": [
+      { "id": "rust_layers", "name": "Rust layers", "sizeUm": 30, "contrast": 0.45, "drawing": "lines", "tint": "#a0522d",
+        "blurb": "Rust is not one substance but layers of iron oxides and hydroxides that grow outward from the steel. Water and oxygen seep through cracks between the layers, so rust keeps eating in." },
+      { "id": "pearlite", "name": "Pearlite", "sizeUm": 0.4, "contrast": 0.45, "drawing": "lines", "tint": "#c0c8d0",
+        "blurb": "Polished and etched, the steel shows pearlite, thin alternating plates of soft iron and hard iron carbide. The finer the plates, the stronger the steel." },
+      { "id": "lepidocrocite", "name": "Rust crystals", "sizeUm": 0.08, "contrast": 0.4, "drawing": "needles", "tint": "#d07a3a",
+        "blurb": "At high magnification the rust is a felt of tiny orange crystals, mostly lepidocrocite and goethite. Their shapes tell corrosion scientists how wet the steel has been." }
+    ]
+  },
+  {
+    "id": "brick", "name": "Red brick", "worldObject": "brick", "biome": "eng",
+    "features": [
+      { "id": "brick_quartz", "name": "Quartz grains", "sizeUm": 150, "contrast": 0.4, "drawing": "grains", "tint": "#e0d0c0",
+        "blurb": "A brick is clay mixed with sand and fired in a kiln at around a thousand degrees Celsius. The sand grains survive the firing and act like the gravel in concrete." },
+      { "id": "brick_pores", "name": "Pores", "sizeUm": 30, "contrast": 0.4, "drawing": "droplets", "tint": "#3a2a22",
+        "blurb": "Water and burned-off plant matter leave pores behind, which make bricks lighter and better insulators. The pores also soak up rain, so frost can crack a brick from inside." },
+      { "id": "mullite_needles", "name": "Mullite needles", "sizeUm": 0.3, "contrast": 0.35, "drawing": "needles", "tint": "#f0e0d0",
+        "blurb": "In the hottest part of the kiln, clay turns into needles of mullite, an aluminium silicate. A tangle of these needles is what makes fired brick and porcelain so hard." },
+      { "id": "brick_hematite", "name": "Hematite specks", "sizeUm": 0.05, "contrast": 0.4, "drawing": "spots", "tint": "#c0302a",
+        "blurb": "Bricks are red because of tiny specks of hematite, iron oxide, formed from iron in the clay. Fire the same clay with little air and the iron forms a different oxide, so the brick comes out dark." }
+    ]
+  },
+  {
+    "id": "solar_cell", "name": "Solar panel", "worldObject": "solar", "biome": "eng",
+    "features": [
+      { "id": "silver_fingers", "name": "Silver fingers", "sizeUm": 50, "contrast": 0.55, "drawing": "lines", "tint": "#e8e8e8",
+        "blurb": "The thin silver lines printed across the cell collect the current, each about as wide as a hair. They are kept thin to shade as little of the silicon as possible." },
+      { "id": "solar_pyramids", "name": "Light-trapping pyramids", "sizeUm": 4, "contrast": 0.45, "drawing": "facets", "tint": "#2a3a6a",
+        "blurb": "The silicon surface is etched into tiny pyramids, so light that bounces off one face hits another. Trapping light this way, together with a blue coating, makes the cell look nearly black." },
+      { "id": "sinx_coating", "name": "Antireflection coating", "sizeUm": 0.075, "contrast": 0.35, "drawing": "lines", "tint": "#4a6ab0", "onTop": true,
+        "blurb": "A layer of silicon nitride about 75 nanometres thick coats the pyramids. Its thickness is tuned so that reflected light cancels itself out, the same trick used on camera lenses." },
+      { "id": "silver_map", "name": "Silver map", "sizeUm": 50, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 3.351, "drawing": "map", "tint": "#d0d8ff",
+        "blurb": "Above silver's absorption edge at 3.35 keV, the printed fingers light up. Solar panels use about a tenth of the world's silver, so engineers are working to replace it with copper." }
+    ]
+  },
+  {
+    "id": "catalytic_converter", "name": "Catalytic converter", "worldObject": "catconv", "biome": "eng",
+    "features": [
+      { "id": "converter_cells", "name": "Honeycomb channels", "sizeUm": 1000, "contrast": 0.55, "drawing": "honeycomb", "tint": "#d8d0c0",
+        "blurb": "Inside a car's catalytic converter, exhaust flows through a ceramic honeycomb with hundreds of tiny channels. The thin walls pack a large surface into a small box." },
+      { "id": "washcoat", "name": "Alumina washcoat", "sizeUm": 15, "contrast": 0.4, "drawing": "cluster", "tint": "#e8e0d4",
+        "blurb": "The channel walls are coated with a porous layer of alumina and ceria. Its pores give the gases a surface the size of several football fields to touch." },
+      { "id": "platinum_particles", "name": "Platinum nanoparticles", "sizeUm": 0.002, "contrast": 0.1, "contrastIn": { "tem": 0.25, "haadf": 0.8 }, "drawing": "droplets", "tint": "#ffffff", "onTop": true,
+        "blurb": "Scattered over the coating are platinum and palladium particles only a couple of nanometres across. They turn carbon monoxide and unburned fuel into carbon dioxide and water, and annular dark field makes the heavy metal atoms shine." },
+      { "id": "platinum_map", "name": "Platinum map", "sizeUm": 50, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 11.564, "drawing": "map", "tint": "#e0e0ff",
+        "blurb": "Above platinum's L edge at 11.56 keV, the map shows where the precious metal sits along the channels. Converters lose activity as the particles clump together, and maps like this show where it happens first." }
+    ]
+  },
+  {
+    "id": "bell_bronze", "name": "Bronze chime bell", "worldObject": "bell", "biome": "meadow",
+    "features": [
+      { "id": "bronze_dendrites", "name": "Cast dendrites", "sizeUm": 200, "contrast": 0.45, "drawing": "veins", "tint": "#c89a4a",
+        "blurb": "Bell bronze is about four parts copper to one part tin, poured molten into a mould. As it cooled, copper-rich crystals grew in branching tree shapes called dendrites." },
+      { "id": "bronze_delta", "name": "Tin-rich phase", "sizeUm": 8, "contrast": 0.4, "drawing": "cluster", "tint": "#e8d8b0",
+        "blurb": "Between the dendrites, the last metal to freeze is rich in tin and forms a hard, brittle phase. That phase helps a bell ring clearly, but it also means a bell can crack if struck too hard." },
+      { "id": "bronze_patina", "name": "Green patina", "sizeUm": 3, "contrast": 0.45, "drawing": "droplets", "tint": "#4aa082",
+        "blurb": "Outdoors, the bronze slowly grows a green skin of copper sulfates and carbonates. The patina protects the metal underneath, so old bells and statues last for centuries." },
+      { "id": "tin_map", "name": "Tin map", "sizeUm": 200, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 3.929, "drawing": "map", "tint": "#a0e0ff",
+        "blurb": "Above tin's L edge at 3.93 keV, the map shows tin piled up between the dendrites. Bell founders cool their bells slowly and evenly, because unevenly spread tin can spoil the tone." }
+    ]
+  },
+  {
+    "id": "quantum_dots", "name": "Quantum dots", "worldObject": "qdots", "biome": "eng",
+    "features": [
+      { "id": "qd_glow", "name": "Orange glow", "sizeUm": 20, "contrast": 0, "contrastIn": { "fluorescence": 0.7 }, "drawing": "glow", "tint": "#ff7a3a",
+        "blurb": "A vial of quantum dots glows a pure colour set by the size of the particles, not by what they are made of. Smaller dots glow bluer and larger ones redder, which is why they are used in bright television screens." },
+      { "id": "qd_particles", "name": "Nanocrystals", "sizeUm": 0.005, "contrast": 0.45, "drawing": "droplets", "tint": "#e0e0d8",
+        "blurb": "Each dot is a crystal of cadmium selenide only about 5 nanometres across, a few thousand atoms. In so small a crystal the electrons are squeezed so tightly that the size sets the energy of the light." },
+      { "id": "qd_lattice", "name": "Dot lattice", "sizeUm": 0.00035, "contrast": 0.3, "contrastIn": { "haadf": 0.6 }, "drawing": "lattice", "tint": "#ffffff", "onTop": true,
+        "blurb": "Rows of atoms 0.35 nanometres apart run straight across each dot, so every dot is a single perfect crystal. A thin shell of zinc sulfide grown on top keeps the glow bright." }
+    ]
+  },
+  {
+    "id": "nanotubes", "name": "Carbon nanotubes", "worldObject": "nanotubes", "biome": "eng",
+    "features": [
+      { "id": "cnt_bundles", "name": "Nanotube bundles", "sizeUm": 0.02, "contrast": 0.4, "drawing": "fibers", "tint": "#5a5a5a",
+        "blurb": "This black powder is a tangle of carbon nanotubes, stuck together side by side in ropes about 20 nanometres thick. Weight for weight, a single tube is many times stronger than steel." },
+      { "id": "cnt_walls", "name": "Tube walls", "sizeUm": 0.00034, "contrast": 0.4, "drawing": "lines", "tint": "#e0e0e0", "onTop": true,
+        "blurb": "Seen from the side, each tube shows its walls as dark lines 0.34 nanometres apart. Tubes can have one wall or many nested inside each other like the rings of a tree." },
+      { "id": "cnt_honeycomb", "name": "Rolled honeycomb", "sizeUm": 0.000142, "contrast": 0.2, "contrastIn": { "haadf": 0.45 }, "drawing": "honeycomb", "tint": "#e0e8f0", "onTop": true,
+        "blurb": "A nanotube is a sheet of graphene rolled into a seamless cylinder. The angle at which the honeycomb is rolled decides whether the tube conducts like a metal or a semiconductor." }
+    ]
+  },
+  {
+    "id": "zeolite", "name": "Zeolite crystals", "worldObject": "zeolite", "biome": "eng",
+    "features": [
+      { "id": "zeolite_cubes", "name": "Zeolite cubes", "sizeUm": 2, "contrast": 0.45, "drawing": "cubes", "tint": "#f0f0f4",
+        "blurb": "Zeolites are aluminium silicate crystals riddled with channels just wide enough for small molecules. These cubes are zeolite A, the kind put in laundry detergent to soften water." },
+      { "id": "zeolite_pores", "name": "Molecular pores", "sizeUm": 0.0004, "contrast": 0.1, "contrastIn": { "ptycho": 0.55, "haadf": 0.25 }, "drawing": "honeycomb", "tint": "#a0c8ff", "onTop": true,
+        "blurb": "Ptychography shows the open rings of the framework, each pore about 0.4 nanometres wide. Zeolites like this one sort molecules by shape, and related zeolites turn crude oil into petrol." }
+    ]
+  },
+  {
+    "id": "mof", "name": "Metal-organic framework", "worldObject": "mof", "biome": "eng",
+    "features": [
+      { "id": "mof_crystals", "name": "MOF crystals", "sizeUm": 50, "contrast": 0.45, "drawing": "cubes", "tint": "#e8f0ff",
+        "blurb": "Metal-organic frameworks are crystals built from metal clusters joined by organic struts, like a molecular climbing frame. One gram of some of them has an inner surface bigger than a football field." },
+      { "id": "mof_spots", "name": "Framework spots", "sizeUm": 0.0013, "contrast": 0, "contrastIn": { "xrd": 0.6 }, "drawing": "spots",
+        "blurb": "The framework repeats every 1.3 nanometres, far wider than an ordinary crystal, so its diffraction spots crowd close to the centre. Metal-organic frameworks earned the 2025 Nobel Prize in Chemistry, and diffraction is how chemists check they built the framework they designed." }
+    ]
+  },
+  {
+    "id": "superconductor", "name": "Superconductor pellet", "worldObject": "ybco", "biome": "eng",
+    "features": [
+      { "id": "ybco_grains", "name": "Superconductor grains", "sizeUm": 20, "contrast": 0.4, "drawing": "mosaic", "tint": "#4a4a54",
+        "blurb": "This black pellet is yttrium barium copper oxide, which carries electricity with zero resistance when cooled with liquid nitrogen. Below that temperature it pushes magnetic fields out, so a magnet floats above it." },
+      { "id": "ybco_twins", "name": "Twin domains", "sizeUm": 0.2, "contrast": 0.3, "drawing": "lines", "tint": "#5a5a68",
+        "blurb": "Each grain is crossed by fine twins where the crystal's two slightly unequal axes swap direction. The twin boundaries help pin magnetic vortices, which lets the material carry more current." },
+      { "id": "cuo_planes", "name": "Copper-oxide layers", "sizeUm": 0.00117, "contrast": 0.4, "drawing": "lattice", "tint": "#e0e0f0", "onTop": true,
+        "blurb": "The crystal is a stack of layers that repeats every 1.17 nanometres. Electrons pair up and flow freely in its copper-oxide planes, and exactly how they do it is still debated." },
+      { "id": "ybco_columns", "name": "Heavy-atom columns", "sizeUm": 0.00039, "contrast": 0.05, "contrastIn": { "haadf": 0.7 }, "drawing": "atoms", "tint": "#ffffff", "onTop": true,
+        "blurb": "In annular dark field the barium and yttrium columns glow brightest because they are heaviest. Missing oxygen between them, invisible here, decides whether the crystal superconducts at all." }
+    ]
+  },
+  {
+    "id": "blue_led", "name": "Blue LED chip", "worldObject": "led", "biome": "eng",
+    "features": [
+      { "id": "led_glow", "name": "Blue glow", "sizeUm": 20, "contrast": 0, "contrastIn": { "fluorescence": 0.7 }, "drawing": "glow", "tint": "#5a6aff",
+        "blurb": "Shine ultraviolet light on the chip and it glows blue, the same light it makes when current flows. The 2014 Nobel Prize in Physics went to the inventors of the efficient blue LED, which made white LED lighting possible." },
+      { "id": "quantum_wells", "name": "Quantum wells", "sizeUm": 0.003, "contrast": 0.1, "contrastIn": { "tem": 0.35, "haadf": 0.7 }, "drawing": "lines", "tint": "#e8e8ff",
+        "blurb": "The light comes from layers of indium gallium nitride only about 3 nanometres thick, sandwiched in gallium nitride. Indium is heavier than gallium, so in annular dark field the wells show as bright stripes." },
+      { "id": "threading_dislocations", "name": "Threading dislocations", "sizeUm": 0.02, "contrast": 0.35, "drawing": "needles", "tint": "#c0c0d0",
+        "blurb": "Gallium nitride grown on sapphire is full of dislocations, lines of misfit atoms running up through the layers. Remarkably the LED glows brightly anyway, a puzzle that took years to explain." },
+      { "id": "gallium_map", "name": "Gallium map", "sizeUm": 20, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 10.367, "drawing": "map", "tint": "#8aff8a",
+        "blurb": "Above gallium's absorption edge at 10.37 keV, the chip's whole active area lights up. Gallium also goes into the chips that send signals in phones, so it is counted as a critical material." }
+    ]
   }
 ]

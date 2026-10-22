@@ -1,5 +1,5 @@
 // What stands where in the world. Pure data (plus a seeded scatter), no rendering, so it is easy to test and retune.
-import { CRYSTAL_SPOT, SCIENCE } from './campus';
+import { ATRIUM, CRYSTAL_SPOT, SCIENCE } from './campus';
 import { gorgeZ, LAKE, mulberry32 } from './terrain';
 
 export type Kind =
@@ -8,7 +8,9 @@ export type Kind =
   | 'leaf' | 'flower' | 'wing' | 'pond' | 'crystal' // samples to look at
   | 'bee' | 'picnic' | 'algae_mat' | 'mud' | 'feather' | 'pine_branch' | 'log' | 'mushroom' | 'moss' | 'lichen' | 'web'
   | 'fern' | 'bone' | 'onion' | 'potato' | 'orchid' | 'nettle' | 'cotton' | 'shale' | 'mica'
-  | 'slides' | 'materials' | 'rack'; // cabinets holding several samples
+  | 'granite' | 'basalt' | 'obsidian' | 'marble' | 'chalk' | 'pyrite' | 'malachite' | 'magnetite' | 'garnet' // the rock garden
+  | 'concrete' | 'ibeam' | 'brick' | 'solar' | 'catconv' | 'bell' // engineering materials
+  | 'slides' | 'materials' | 'rack' | 'nanocase' | 'devicecase'; // cabinets holding several samples
 
 export interface Aim {
   /** Item id gathered with E. */
@@ -65,6 +67,23 @@ export const AIMS: Record<Kind, Aim> = {
   slides: { samples: ['cheek_slide', 'blood_slide', 'nerve_slide', 'bacteria_culture', 'yeast_culture', 'diatom_test', 'cell_section'] },
   materials: { samples: ['virus_grid', 'gold_grid', 'graphene_sample', 'soot_sample', 'chip_sample', 'sto_crystal', 'mos2_sample', 'uranium_film'] },
   rack: { samples: ['lysozyme', 'b12_crystals', 'dna_fiber', 'steel_sample', 'battery_cathode', 'amber_insect', 'meteorite_slice', 'silicon_crystal'] },
+  granite: { sample: 'granite' },
+  basalt: { sample: 'basalt' },
+  obsidian: { sample: 'obsidian' },
+  marble: { sample: 'marble' },
+  chalk: { sample: 'chalk' },
+  pyrite: { sample: 'pyrite' },
+  malachite: { sample: 'malachite' },
+  magnetite: { sample: 'magnetite' },
+  garnet: { sample: 'garnet_schist' },
+  concrete: { sample: 'concrete' },
+  ibeam: { sample: 'rusty_steel' },
+  brick: { sample: 'brick' },
+  solar: { sample: 'solar_cell' },
+  catconv: { sample: 'catalytic_converter' },
+  bell: { sample: 'bell_bronze' },
+  nanocase: { samples: ['quantum_dots', 'nanotubes', 'zeolite', 'mof'] },
+  devicecase: { samples: ['superconductor', 'blue_led'] },
 };
 
 /** Every sample a thing shows, one or several. */
@@ -78,10 +97,12 @@ export const RADIUS: Record<Kind, number> = {
   bee: 0.3, picnic: 0.9, algae_mat: 0, mud: 0.6, feather: 0, pine_branch: 0.5, log: 0.7, mushroom: 0.3, moss: 0.45,
   lichen: 0.6, web: 0.2, fern: 0.4, bone: 0.25, onion: 0.2, potato: 0.25, orchid: 0.2, nettle: 0.2, cotton: 0.25,
   shale: 0.6, mica: 0.6, slides: 0.8, materials: 0.8, rack: 0.7,
+  granite: 0.6, basalt: 0.6, obsidian: 0.55, marble: 0.6, chalk: 0.55, pyrite: 0.45, malachite: 0.55, magnetite: 0.55, garnet: 0.6,
+  concrete: 0.6, ibeam: 0.8, brick: 0.5, solar: 0.9, catconv: 0.7, bell: 0.8, nanocase: 0.8, devicecase: 0.8,
 };
 
-/** Things that stand inside buildings (the greenhouse, the lab, the CHESS hall) on purpose. */
-export const INDOORS = new Set<Kind>(['onion', 'potato', 'orchid', 'nettle', 'cotton', 'slides', 'materials', 'iodine', 'methylene', 'gramkit', 'rack']);
+/** Things that stand inside buildings (the greenhouse, the lab, the CHESS hall, the atrium) on purpose. */
+export const INDOORS = new Set<Kind>(['onion', 'potato', 'orchid', 'nettle', 'cotton', 'slides', 'materials', 'iodine', 'methylene', 'gramkit', 'rack', 'nanocase', 'devicecase']);
 
 export interface Placement {
   kind: Kind;
@@ -175,4 +196,25 @@ export const PLACEMENTS: Placement[] = [
   { kind: 'materials', x: SCIENCE.x1 - 0.5, z: 25.4, yaw: -Math.PI / 2 },
   // The CHESS hall in Wilson Lab: the sample rack by the south wall
   { kind: 'rack', x: 52.5, z: 4.2, yaw: Math.PI },
+  // A spare bronze chime bell on a stand beside the clock tower
+  { kind: 'bell', x: -31, z: 2 },
+  // The engineering quad. The geology hall's rock garden, along the lawn in front of its east wall
+  { kind: 'granite', x: -26, z: 65 },
+  { kind: 'basalt', x: -21.5, z: 66.5 },
+  { kind: 'obsidian', x: -26, z: 70 },
+  { kind: 'marble', x: -21.5, z: 71.5 },
+  { kind: 'chalk', x: -26, z: 80.5 },
+  { kind: 'pyrite', x: -21.5, z: 81.5 },
+  { kind: 'malachite', x: -26, z: 85.5 },
+  { kind: 'magnetite', x: -21.5, z: 86.5 },
+  { kind: 'garnet', x: -24, z: 90 },
+  // the materials yard east of the south hall
+  { kind: 'concrete', x: 27, z: 92.5 },
+  { kind: 'brick', x: 38, z: 94.5 },
+  { kind: 'ibeam', x: 33, z: 101.5, yaw: 0.3 },
+  { kind: 'catconv', x: 27.5, z: 104 },
+  { kind: 'solar', x: 38.5, z: 104.5, yaw: Math.PI },
+  // display cases against the atrium's north wall
+  { kind: 'nanocase', x: ATRIUM.x0 + 6, z: ATRIUM.z0 + 0.8 },
+  { kind: 'devicecase', x: ATRIUM.x1 - 6, z: ATRIUM.z0 + 0.8 },
 ];

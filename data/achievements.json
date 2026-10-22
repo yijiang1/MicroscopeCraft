@@ -5,7 +5,8 @@
   { "id": "discover_50", "name": "Naturalist", "description": "Make 50 discoveries.", "when": { "discoveries": 50 } },
   { "id": "discover_100", "name": "Microdex scholar", "description": "Make 100 discoveries.", "when": { "discoveries": 100 } },
   { "id": "discover_150", "name": "Microdex master", "description": "Make 150 discoveries.", "when": { "discoveries": 150 } },
-  { "id": "discover_all", "name": "Everything, seen", "description": "Fill the whole Microdex: all 170 discoveries.", "when": { "discoveries": 170 } },
+  { "id": "discover_200", "name": "Microdex sage", "description": "Make 200 discoveries.", "when": { "discoveries": 200 } },
+  { "id": "discover_all", "name": "Everything, seen", "description": "Fill the whole Microdex: all 238 discoveries.", "when": { "discoveries": 238 } },
   { "id": "naked_eye", "name": "No lens needed", "description": "With your bare eyes, spot salt cubes, a Volvox ball and a Paramecium.", "when": { "discovered": ["salt_cubes", "volvox", "paramecium"] } },
   { "id": "leaf_scales", "name": "A leaf at every scale", "description": "See a leaf's veins, its cells, their chloroplasts and the stacks inside them.", "when": { "discovered": ["leaf_veins", "leaf_cells", "chloroplasts", "grana_stacks"] } },
   { "id": "all_gates", "name": "Hidden in plain sight", "description": "Identify every material that only a microscope can recognise.", "when": { "discovered": ["copper_veins", "seed_oil", "tungsten_grains", "fluorite_cubes", "willemite_glow", "monazite_diffraction", "beryllium_atoms"] } },
@@ -29,6 +30,7 @@
   { "id": "biome_mine", "name": "The gorge, complete", "description": "Make every discovery in the gorge and its rocks.", "when": { "biome": "mine" } },
   { "id": "biome_lab", "name": "The lab, complete", "description": "Make every discovery in the science lab.", "when": { "biome": "lab" } },
   { "id": "biome_chess", "name": "Wilson Lab, complete", "description": "Make every discovery at Wilson Lab.", "when": { "biome": "chess" } },
+  { "id": "biome_eng", "name": "The engineering quad, complete", "description": "Make every discovery in the rock garden, the materials yard and the atrium.", "when": { "biome": "eng" } },
 
   { "id": "koehler_done", "name": "Even light", "description": "Align a condenser (Köhler illumination).", "when": { "best": { "koehler": 0.5 } } },
   { "id": "koehler_master", "name": "Köhler's pupil", "description": "Align a condenser almost perfectly (95% or better).", "when": { "best": { "koehler": 0.95 } } },
@@ -58,7 +60,7 @@
   { "id": "stained", "name": "Colour it in", "description": "Stain samples 5 times.", "when": { "stats": { "stained": 5 } } },
 
   { "id": "visit_gorge", "name": "Down to the creek", "description": "Climb down to the creek at the bottom of the gorge.", "when": { "visited": ["gorge"] } },
-  { "id": "visit_all", "name": "Campus explorer", "description": "Visit the lake, the quad, the gorge, the west slope, the pine grove, the greenhouse, the science lab, Wilson Lab and the clock tower.", "when": { "visited": ["lake", "quad", "gorge", "slope", "forest", "garden", "lab", "chess", "tower"] } },
+  { "id": "visit_all", "name": "Campus explorer", "description": "Visit the lake, the quad, the gorge, the west slope, the pine grove, the greenhouse, the science lab, Wilson Lab, the clock tower and the engineering quad.", "when": { "visited": ["lake", "quad", "gorge", "slope", "forest", "garden", "lab", "chess", "tower", "engquad"] } },
 
   { "id": "quests_10", "name": "Helpful", "description": "Do 10 requests for the scientists.", "when": { "quests": 10 } },
   { "id": "quests_25", "name": "Lab assistant", "description": "Do 25 requests for the scientists.", "when": { "quests": 25 } },

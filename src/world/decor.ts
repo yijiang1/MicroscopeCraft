@@ -93,7 +93,8 @@ export function buildDecor(avoid: { x: number; z: number }[]): { group: THREE.Gr
   };
   /** Lawn: dry, off the paths, out of buildings, not on a gorge wall. */
   const meadow = (x: number, z: number) => dry(x, z) && !insideBuilding(x, z, 0.6) && pathAt(x, z) < 0.05 && !steep(x, z);
-  const quadLawn = (x: number, z: number) => x > -23 && x < 23 && z > -38 && z < 1;
+  const quadLawn = (x: number, z: number) => (x > -23 && x < 23 && z > -38 && z < 1) || (x > -30 && x < 34 && z > 58 && z < 96);
+  const engQuad = (x: number, z: number) => x > -48 && x < 52 && z > 38 && z < 112;
 
   // --- grass tufts: three crossed blades each
   const blade = (angle: number) => {
@@ -105,7 +106,7 @@ export function buildDecor(avoid: { x: number; z: number }[]): { group: THREE.Gr
     return g;
   };
   const tuftGeo = mergeGeometries([blade(0), blade(1.05), blade(2.1)])!;
-  const tufts = points(14000, (x, z) => meadow(x, z) && clear(x, z, 0.5), 0, 0, 88);
+  const tufts = points(32000, (x, z) => meadow(x, z) && clear(x, z, 0.5), 0, 0, WORLD_RADIUS - 8);
   group.add(
     instanced(
       tuftGeo,
@@ -116,7 +117,7 @@ export function buildDecor(avoid: { x: number; z: number }[]): { group: THREE.Gr
   );
 
   // --- wild flowers: stems and coloured heads
-  const flowers = points(1000, (x, z) => meadow(x, z) && !quadLawn(x, z) && clear(x, z, 0.8), 0, 0, 85);
+  const flowers = points(2400, (x, z) => meadow(x, z) && !quadLawn(x, z) && clear(x, z, 0.8), 0, 0, WORLD_RADIUS - 10);
   const stemGeo = new THREE.CylinderGeometry(0.004, 0.005, 0.26, 4);
   stemGeo.translate(0, 0.13, 0);
   group.add(instanced(stemGeo, new THREE.MeshStandardMaterial({ color: '#3f7a2c', roughness: 1 }), flowers.map((p) => placeMatrix(p.x, p.z, 1, 0))));
@@ -146,7 +147,7 @@ export function buildDecor(avoid: { x: number; z: number }[]): { group: THREE.Gr
   const pineGeo = mergeGeometries(pineParts)!;
   const pines = [
     ...points(34, (x, z) => dry(x, z) && offPad(x, z) && clear(x, z, 2.5), -58, 22, 13),
-    ...points(40, (x, z) => dry(x, z) && offPad(x, z) && clear(x, z, 2.5) && (x < -46 || z < -54 || z > 36 || x > 50), 0, 0, WORLD_RADIUS - 8),
+    ...points(130, (x, z) => dry(x, z) && offPad(x, z) && !engQuad(x, z) && clear(x, z, 2.5) && (x < -46 || z < -54 || z > 36 || x > 50), 0, 0, WORLD_RADIUS - 8),
   ];
   group.add(
     instanced(
@@ -183,7 +184,8 @@ export function buildDecor(avoid: { x: number; z: number }[]): { group: THREE.Gr
   // big trees line the quad, a few more stand around campus
   const oaks = [
     ...[-34, -28, -22, -16, -10, -4].flatMap((z) => [{ x: -21, z }, { x: 21, z }]),
-    ...points(26, (x, z) => meadow(x, z) && !quadLawn(x, z) && clear(x, z, 3) && Math.hypot(x, z) > 12, 0, 0, 80),
+    ...[62, 70, 82, 90].flatMap((z) => [{ x: -15, z }, { x: 15, z }]), // and the engineering quad's lawn
+    ...points(70, (x, z) => meadow(x, z) && !quadLawn(x, z) && clear(x, z, 3) && Math.hypot(x, z) > 12, 0, 0, WORLD_RADIUS - 12),
   ];
   const oakMesh = instanced(
     oakGeo,

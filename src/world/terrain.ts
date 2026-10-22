@@ -1,10 +1,11 @@
 // The ground: a university campus on a flat hilltop, with a quad and its paths, a long slope falling away to
-// the west, a lake to the north-east, and a gorge running west from the waterfall at the lake's outlet. North is -z.
+// the west, a lake to the north-east, a gorge running west from the waterfall at the lake's outlet, and an
+// engineering quad on a second flat terrace to the south. North is -z.
 // heightAt() is the single source of truth: the mesh, the player's feet and every placed object read it.
 import * as THREE from 'three';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 
-export const WORLD_RADIUS = 95;
+export const WORLD_RADIUS = 150;
 const CAMPUS_Y = 0.5;
 export const LAKE = { x: 48, z: -66, r: 12 }; 
 export const WATER_LEVEL = -0.9; // the lake surface
@@ -13,8 +14,8 @@ export const FALLS_X = LAKE.x - LAKE.r - 3;
 const SLOPE_X = -44; // the slope starts falling west of here...
 const SLOPE_DROP = 8; // ...by this much over 30 m
 const GORGE = { bed: 3, top: 10 }; // half-widths of the creek bed and of the gorge at its rim
-/** Flat building pads off the hilltop: Wilson Lab, east of the campus. */
-const PADS = [{ x0: 47, x1: 74, z0: -17, z1: 9 }];
+/** Flat building pads off the hilltop: Wilson Lab, east of the campus, and the engineering quad to the south. */
+const PADS = [{ x0: 47, x1: 74, z0: -17, z1: 9 }, { x0: -46, x1: 50, z0: 40, z1: 110 }];
 
 /** Centre line of the gorge (a z) at x: a gentle meander that starts at the falls. */
 export const gorgeZ = (x: number) => LAKE.z + 3 * Math.sin((x - FALLS_X) * 0.06);
@@ -29,6 +30,10 @@ const PATHS: [number, number, number, number][] = [
   [22, -2, 22, 20], [22, 20, 25, 20], // down to the science building door
   [8, 5, 8, 10], // to the greenhouse door
   [36, -20, 47, -4], [47, -4, 50, -4], // east to Wilson Lab's door
+  [0, 5, 0, 94], // south to the engineering quad, and through it
+  [-29, 76, 31, 76], // the engineering quad's cross path, between the geology hall and the east hall
+  [0, 62, -8, 56], [0, 62, 19, 58], // to the materials hall and the atrium door
+  [0, 94, 33, 98], // to the materials yard
 ];
 
 const perlin = new ImprovedNoise();
@@ -125,7 +130,7 @@ export function groundColor(x: number, z: number, h: number, out: THREE.Color): 
 
 export function buildTerrain(): THREE.Mesh {
   const size = (WORLD_RADIUS + 12) * 2;
-  const seg = 260;
+  const seg = 420;
   const geo = new THREE.PlaneGeometry(size, size, seg, seg);
   geo.rotateX(-Math.PI / 2);
   const pos = geo.attributes.position as THREE.BufferAttribute;

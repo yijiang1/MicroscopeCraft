@@ -4,7 +4,7 @@ import { fmtUm } from '../shared/sim/walls';
 import type { GameContext } from '../shared/state';
 
 const BIOME_NAMES = {
-  meadow: 'Quad', pond: 'Lake', forest: 'Pine grove', garden: 'Greenhouse', mine: 'Gorge and slope rocks', lab: 'Science lab', chess: 'Wilson Lab (CHESS)',
+  meadow: 'Quad', pond: 'Lake', forest: 'Pine grove', garden: 'Greenhouse', mine: 'Gorge and slope rocks', lab: 'Science lab', chess: 'Wilson Lab (CHESS)', eng: 'Engineering quad',
 } as const;
 
 export interface MicrodexHandle {

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { loadGameData } from '../shared/data';
 import { nextGoalRecipe, planFor } from '../shared/plan';
 import { AIMS, INDOORS, PLACEMENTS, RADIUS, samplesOf, SPAWN, type Kind } from './placements';
-import { GREENHOUSE, inChess, inGreenhouse, inLab, insideBuilding, INDOOR_SOLIDS, SCIENCE, WILSON } from './campus';
+import { GREENHOUSE, inAtrium, inChess, inGreenhouse, inLab, insideBuilding, INDOOR_SOLIDS, SCIENCE, WILSON } from './campus';
 import { heightAt, LAKE, waterLevelAt, WATER_LEVEL, WORLD_RADIUS } from './terrain';
 
 const data = loadGameData();
@@ -41,7 +41,7 @@ describe('world layout', () => {
     for (const p of PLACEMENTS) {
       const at = `${p.kind} at ${p.x.toFixed(1)},${p.z.toFixed(1)}`;
       expect(Math.hypot(p.x, p.z), `${p.kind} radius`).toBeLessThan(WORLD_RADIUS - 8);
-      if (INDOORS.has(p.kind)) expect(inLab(p.x, p.z) || inChess(p.x, p.z) || inGreenhouse(p.x, p.z), at).toBe(true);
+      if (INDOORS.has(p.kind)) expect(inLab(p.x, p.z) || inChess(p.x, p.z) || inGreenhouse(p.x, p.z) || inAtrium(p.x, p.z), at).toBe(true);
       else expect(insideBuilding(p.x, p.z, 1), at).toBe(false);
       if (p.kind !== 'pond' && p.kind !== 'algae_mat') expect(heightAt(p.x, p.z), at).toBeGreaterThan(waterLevelAt(p.x, p.z) + 0.15);
     }

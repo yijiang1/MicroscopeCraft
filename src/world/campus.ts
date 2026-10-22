@@ -1,5 +1,6 @@
 // Campus buildings on the hilltop: the halls and statues around the quad, a clock tower with a working clock,
-// the science building with the electron microscopy lab on its glass ground floor, and the waterfall.
+// the science building with the electron microscopy lab on its glass ground floor, and the waterfall; to the south,
+// the engineering quad (after Cornell's): the materials, geology, east and south halls and a glass atrium.
 // Boxes, prisms and canvas textures only. Walls are axis-aligned boxes the player collides with.
 import * as THREE from 'three';
 import { facadeTexture, labelTexture, waterfallTexture } from './textures';
@@ -37,6 +38,12 @@ const BEAM_Z = -4.5;
 /** The beamline's control desk, where you put samples in. */
 export const BEAM_SPOT = { x: 56, z: 0.5 };
 
+/** The glass atrium on the engineering quad (after Duffield Hall's), with display cases of nanomaterials and devices.
+ *  Door in the south wall, facing the quad. */
+export const ATRIUM = box(8, 30, 46, 58);
+const AT_DOOR = { x0: 17, x1: 21 };
+const AT_H = 6;
+
 const FLOOR_H = 3.6;
 interface Hall {
   box: Box;
@@ -52,6 +59,11 @@ const HALLS: Hall[] = [
   { box: box(26, 36, -32, -8), floors: 3, wall: '#d8cdb4' }, // columned hall (portico below), east side
   { box: box(-44, -34, 4, 14), floors: 2, wall: '#8f8a80' }, // library, by the tower at the top of the west slope
   { box: box(-20, -6, 12, 22), floors: 3, wall: '#c9c1b0', flat: true }, // south library
+  // the engineering quad
+  { box: box(-30, -6, 46, 56), floors: 3, wall: '#b3a58f' }, // materials science hall (Bard), north side
+  { box: box(-42, -30, 62, 88), floors: 3, wall: '#9a8b78' }, // geology hall (Snee), west side, its rock garden in front
+  { box: box(34, 46, 62, 88), floors: 4, wall: '#a8a49a', flat: true }, // east hall (Upson)
+  { box: box(-26, 22, 98, 108), floors: 3, wall: '#c2b8a4' }, // south hall (Phillips)
 ];
 const TOWER = { x: -38, z: -1, half: 2.5 }; // the clock tower
 const PORTICO = box(23.6, 26, -27, -13);
@@ -70,11 +82,12 @@ export const FOOTPRINTS: Box[] = [
   ...STATUES.map((s) => box(s.x - 0.7, s.x + 0.7, s.z - 0.7, s.z + 0.7)),
 ];
 export const insideBuilding = (x: number, z: number, margin = 0) =>
-  [...FOOTPRINTS, GREENHOUSE, WILSON].some((b) => x > b.x0 - margin && x < b.x1 + margin && z > b.z0 - margin && z < b.z1 + margin);
+  [...FOOTPRINTS, GREENHOUSE, WILSON, ATRIUM].some((b) => x > b.x0 - margin && x < b.x1 + margin && z > b.z0 - margin && z < b.z1 + margin);
 const inside = (b: Box, x: number, z: number) => x > b.x0 && x < b.x1 && z > b.z0 && z < b.z1;
 export const inLab = (x: number, z: number) => inside(SCIENCE, x, z);
 export const inChess = (x: number, z: number) => inside(WILSON, x, z);
 export const inGreenhouse = (x: number, z: number) => inside(GREENHOUSE, x, z);
+export const inAtrium = (x: number, z: number) => inside(ATRIUM, x, z);
 /** Solid inside a building, where nothing may be placed: walls, the ring wall, the hutch, the beam pipe, benches. */
 export const INDOOR_SOLIDS: Box[] = [box(RING_WALL_X, WILSON.x1, WILSON.z0, WILSON.z1), HUTCH, box(60, RING_WALL_X, BEAM_Z - 0.6, BEAM_Z + 0.6)];
 
@@ -442,6 +455,51 @@ function greenhouse(group: THREE.Group, walls: Box[]) {
   group.add(sign('Greenhouse', 3, (x0 + x1) / 2, g + GH_H + 0.35, z0 - 0.1, Math.PI)); // faces north, toward the path
 }
 
+/** The atrium: a tall glass hall on a steel frame with a flat glass roof, open to the quad through its south door. */
+function atrium(group: THREE.Group, walls: Box[]) {
+  const { x0, x1, z0, z1 } = ATRIUM;
+  const g = heightAt((x0 + x1) / 2, (z0 + z1) / 2);
+  const T = 0.14;
+  const panes = [
+    box(x0, x1, z0 - T / 2, z0 + T / 2), box(x0, AT_DOOR.x0, z1 - T / 2, z1 + T / 2), box(AT_DOOR.x1, x1, z1 - T / 2, z1 + T / 2),
+    box(x0 - T / 2, x0 + T / 2, z0, z1), box(x1 - T / 2, x1 + T / 2, z0, z1),
+  ];
+  const glass = new THREE.MeshPhysicalMaterial({ color: '#d6e6f0', transparent: true, opacity: 0.2, roughness: 0.05, depthWrite: false, side: THREE.DoubleSide });
+  const steel = mat('#5b636d', 0.45, 0.6);
+  for (const b of panes) {
+    const pane = new THREE.Mesh(new THREE.BoxGeometry(b.x1 - b.x0, AT_H, b.z1 - b.z0), glass);
+    pane.position.set((b.x0 + b.x1) / 2, g + AT_H / 2, (b.z0 + b.z1) / 2);
+    group.add(pane);
+  }
+  walls.push(...panes);
+  for (let x = x0; x <= x1 + 0.01; x += 2.75) {
+    for (const z of [z0, z1]) {
+      const post = new THREE.Mesh(new THREE.BoxGeometry(0.16, AT_H, 0.16), steel);
+      post.position.set(x, g + AT_H / 2, z);
+      group.add(post);
+    }
+  }
+  for (let z = z0 + 3; z < z1; z += 3) {
+    for (const x of [x0, x1]) {
+      const post = new THREE.Mesh(new THREE.BoxGeometry(0.16, AT_H, 0.16), steel);
+      post.position.set(x, g + AT_H / 2, z);
+      group.add(post);
+    }
+  }
+  const roof = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0 + 0.3, 0.08, z1 - z0 + 0.3), glass);
+  roof.position.set((x0 + x1) / 2, g + AT_H, (z0 + z1) / 2);
+  const floor = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, 0.06, z1 - z0), mat('#d9d4ca', 0.6));
+  floor.position.set((x0 + x1) / 2, g + 0.03, (z0 + z1) / 2);
+  floor.receiveShadow = true;
+  group.add(roof, floor);
+  for (const [w, d, x, z] of [[x1 - x0 + 0.4, 0.3, (x0 + x1) / 2, z0], [x1 - x0 + 0.4, 0.3, (x0 + x1) / 2, z1], [0.3, z1 - z0, x0, (z0 + z1) / 2], [0.3, z1 - z0, x1, (z0 + z1) / 2]] as const) {
+    const beam = new THREE.Mesh(new THREE.BoxGeometry(w, 0.35, d), steel);
+    beam.position.set(x, g + AT_H, z);
+    group.add(beam);
+  }
+  group.add(sign('Nanoscale Science Atrium', 6, (AT_DOOR.x0 + AT_DOOR.x1) / 2, g + AT_H - 0.9, z1 + 0.12, 0));
+}
+
 /** The ring diagram on the shielding wall: CESR, the CHESS-U sector and this beamline, with lamps for the parts in the tunnel. */
 function ringSign(): { mesh: THREE.Mesh; lamps: Record<string, THREE.Mesh> } {
   const c = document.createElement('canvas');
@@ -636,6 +694,14 @@ export function buildCampus(): Campus {
   const em = scienceBuilding(group, walls);
   greenhouse(group, walls);
   const beamline = wilsonLab(group, walls);
+  atrium(group, walls);
+  const hallSign = (i: number, text: string, side: 'south' | 'east') => {
+    const b = HALLS[i]!.box;
+    const y = heightAt((b.x0 + b.x1) / 2, (b.z0 + b.z1) / 2) + FLOOR_H + 0.6;
+    group.add(side === 'south' ? sign(text, 6, (b.x0 + b.x1) / 2, y, b.z1 + 0.05, 0) : sign(text, 6, b.x1 + 0.05, y, (b.z0 + b.z1) / 2, Math.PI / 2));
+  };
+  hallSign(7, 'Materials Science', 'south');
+  hallSign(8, 'Geology · Rock Garden', 'east');
 
   // The waterfall: a sheet of scrolling water where the lake spills into the gorge, foam at the foot
   const fallTex = waterfallTexture();
