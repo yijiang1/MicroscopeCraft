@@ -104,11 +104,13 @@ export function openKoehler(host: HTMLElement, ctx: GameContext, tier: number, d
     }, 'margin:8px 0 0 6px'),
   );
   draw();
+  return () => box.remove();
 }
 
 /** The condenser status panel for the high-quality and fluorescence microscopes in transmitted light. */
 export function koehlerTuning(host: HTMLElement, ctx: GameContext, tier: number, redraw: () => void): Tuning {
   const { box, status } = panel(host, 'Condenser');
+  let closeDialog: (() => void) | null = null;
   const text = el('div', 'font-size:12px;color:#ccd;margin:4px 0');
   const sync = () => {
     const f = illumination(ctx, tier);
@@ -122,7 +124,9 @@ export function koehlerTuning(host: HTMLElement, ctx: GameContext, tier: number,
     text,
     button('Align condenser (Köhler)', () => {
       box.style.display = 'none';
-      openKoehler(host, ctx, tier, () => {
+      closeDialog?.();
+      closeDialog = openKoehler(host, ctx, tier, () => {
+        closeDialog = null;
         box.style.display = '';
         sync();
         redraw();
@@ -132,7 +136,11 @@ export function koehlerTuning(host: HTMLElement, ctx: GameContext, tier: number,
   sync();
   return {
     scope: (s) => (s.mode === 'fluorescence' ? s : { ...s, illuminationNA: s.NA * illumination(ctx, tier) }),
-    dispose: () => box.remove(),
+    dispose: () => {
+      closeDialog?.();
+      closeDialog = null;
+      box.remove();
+    },
   };
 }
 
@@ -190,4 +198,9 @@ export function openGram(host: HTMLElement, ctx: GameContext, done: (result: Gra
       done(null);
     }, 'margin:8px 0 0 6px'),
   );
+  return () => {
+    current = null;
+    cancelAnimationFrame(raf);
+    box.remove();
+  };
 }

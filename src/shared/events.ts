@@ -6,6 +6,8 @@ export interface GameEvents {
   openEyepiece: { sampleId: string };
   /** scope → world: eyepiece dismissed. */
   closeEyepiece: Record<string, never>;
+  /** scope → guide: advice from the rendered image, including focus, alignment, stains and damage. */
+  eyepieceStatus: { sampleId: string; text: string };
   itemGathered: { itemId: string; count: number };
   itemCrafted: { itemId: string };
   discoveryUnlocked: { id: string };

@@ -125,6 +125,9 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
   row.append(zoomBox, focusLabel);
   controls.append(scopeBox, row, stainBox);
   el.append(canvas, controls);
+  const closeButton = button('Close eyepiece (Esc / F)', () => ctx.bus.emit('closeEyepiece', {}),
+    'position:absolute;right:10px;bottom:10px;z-index:4');
+  el.append(closeButton);
 
   let sampleId: string | null = null;
   /** Electrons per nm² delivered to the sample since the eyepiece opened (electron imaging only). Resets on open. */
@@ -132,6 +135,7 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
   let doseTimer = 0;
   let stain: Stain | null = null;
   let gramResult: Gram | null = null;
+  let closeGram: (() => void) | null = null;
   let tuning: Tuning | null = null;
   let tuningKey = '';
   /** A panel draws while it is being built; the eyepiece must not render (and discover things) before it is in place. */
@@ -144,6 +148,8 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
     const { scope } = ctx.state;
     const key = open() && sampleId ? `${scope.tier}:${scope.mode}:${sampleId}` : '';
     if (key === tuningKey) return;
+    closeGram?.();
+    closeGram = null;
     tuning?.dispose();
     tuning = null;
     tuningKey = key;
@@ -228,7 +234,9 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
       stainBox.append(
         button(s.name, () => {
           if (s.id === 'gram') {
-            openGram(el, ctx, (result) => {
+            closeGram?.();
+            closeGram = openGram(el, ctx, (result) => {
+              closeGram = null;
               if (result) {
                 stain = 'gram';
                 gramResult = result;
@@ -372,9 +380,6 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
       g.fillRect(20, h - 40, bar * pxPerUm, 4);
       g.fillText(fmtUm(bar), 20, h - 48);
     }
-    g.fillStyle = '#aaa';
-    g.fillText('Esc or F to close', w - 150, h - 20);
-
     // Banner: the nearest thing this view can't show, in plain words. Damage, then focus, then the instrument's own panel.
     const focusBlurry = defocusUm > FOCUS_TIP_THRESHOLD * scopeResolutionUm(baseScope);
     const wall = nearestWall({ features: shown.map((s) => s.f) }, scope, stain);
@@ -385,6 +390,10 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
       : focusBlurry && scope.tier <= 4
       ? 'Out of focus: turn the focus knob (slider or mouse wheel) until the image is sharpest.'
       : (wall && tuning?.banner?.()) || (wall && explainWall(wall.f, scope, wall.v, stain));
+    ctx.bus.emit('eyepieceStatus', {
+      sampleId: sample.id,
+      text: banner || 'You can see everything on this sample. Find something smaller, or look at another sample.',
+    });
     if (banner) {
       g.font = '15px system-ui';
       g.fillStyle = '#000b';
@@ -411,6 +420,8 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
   };
 
   const openSample = (id: string) => {
+    closeGram?.();
+    closeGram = null;
     sampleId = id;
     openedAt = performance.now();
     doseENm2 = 0;
@@ -438,8 +449,16 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
   let openedAt = 0;
   const onKey = (e: KeyboardEvent) => {
     if (e.repeat || performance.now() - openedAt < 200) return;
-    if (!open() || (e.target as HTMLElement).tagName === 'INPUT') return;
-    if (e.key === 'Escape' || e.key.toLowerCase() === 'f') ctx.bus.emit('closeEyepiece', {});
+    if (!open() || e.ctrlKey || e.metaKey || e.altKey) return;
+    const target = e.target as HTMLElement;
+    const typing = target.isContentEditable || target.tagName === 'TEXTAREA' ||
+      (target instanceof HTMLInputElement && !['range', 'checkbox', 'radio', 'button'].includes(target.type));
+    if (e.key === 'Escape' || (!typing && e.key.toLowerCase() === 'f')) {
+      e.preventDefault();
+      ctx.bus.emit('closeEyepiece', {});
+      return;
+    }
+    if (typing) return;
     const pick = ownedScopes(ctx.state.inventory, ctx.data, ctx.state.site)[+e.key - 1];
     if (pick) selectScope(ctx, pick.scope.tier);
   };
@@ -467,6 +486,8 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
     dispose() {
       clearInterval(doseTimer);
       cancelAnimationFrame(raf);
+      closeGram?.();
+      closeGram = null;
       tuning?.dispose();
       removeEventListener('keydown', onKey);
       offs.forEach((off) => off());

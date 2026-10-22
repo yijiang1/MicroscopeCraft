@@ -132,4 +132,14 @@ describe('where to find things', () => {
     ctx.state.scopeChoice = 1;
     expect(nextGoalRecipe(data, ctx.state)?.id).toBe('hq_microscope');
   });
+
+  it('recognises common material names without confusing specific names or substrings', () => {
+    expect(itemsMentioned('where do I find sand?', data)).toEqual(['beach_sand', 'quartz_sand']);
+    expect(itemsMentioned('Where is QUARTZ SAND?', data)).toEqual(['quartz_sand']);
+    expect(itemsMentioned('beach-sand', data)).toEqual(['beach_sand']);
+    expect(itemsMentioned('where is copper?', data)).toEqual(['copper_ore']);
+    expect(itemsMentioned('where is tungsten?', data)).toEqual(['tungsten_ore']);
+    expect(itemsMentioned('immersion oil', data)).toEqual(['immersion_oil']);
+    expect(itemsMentioned('sandwich in the environment', data)).toEqual([]);
+  });
 });

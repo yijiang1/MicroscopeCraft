@@ -190,19 +190,30 @@ export function howToGet(
   return `${name} is crafted, not found in the world. Make it in the crafting panel from ${parts.join(' and ')}.`;
 }
 
-/** Items whose name appears in the text, longest names first ("glass lens" before "glass"). */
+/** Common material names, including the two different sands rather than silently choosing one. */
+const ITEM_ALIASES: Record<string, string[]> = {
+  sand: ['beach_sand', 'quartz_sand'],
+  quartz: ['quartz_sand'],
+  iron: ['iron_ore'],
+  copper: ['copper_ore'],
+  tungsten: ['tungsten_ore'],
+  oil: ['plant_oil', 'immersion_oil'],
+};
+
+/** Whole words/phrases, longest first ("quartz sand" before "sand", "glass lens" before "glass"). */
 export function itemsMentioned(text: string, data: Pick<GameData, 'items'>): string[] {
-  const t = text.toLowerCase();
-  const hits = Object.entries(data.items)
-    .filter(([, v]) => t.includes(v.name.toLowerCase()))
-    .sort((a, b) => b[1].name.length - a[1].name.length);
+  const words = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  const hits = [
+    ...Object.entries(data.items).map(([id, v]) => ({ name: words(v.name), ids: [id] })),
+    ...Object.entries(ITEM_ALIASES).map(([name, ids]) => ({ name, ids: ids.filter((id) => data.items[id]) })),
+  ].sort((a, b) => b.name.length - a.name.length);
   const out: string[] = [];
-  let rest = t;
-  for (const [id, v] of hits) {
-    const n = v.name.toLowerCase();
-    if (rest.includes(n)) {
-      out.push(id);
-      rest = rest.replace(n, ' ');
+  let rest = ` ${words(text)} `;
+  for (const { name, ids } of hits) {
+    const phrase = ` ${name} `;
+    if (rest.includes(phrase)) {
+      for (const id of ids) if (!out.includes(id)) out.push(id);
+      rest = rest.replaceAll(phrase, ' ');
     }
   }
   return out;

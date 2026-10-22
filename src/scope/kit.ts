@@ -44,7 +44,10 @@ export function slider(label: string, min: number, max: number, step: number, va
     out.textContent = fmt(+input.value);
     onInput(+input.value);
   });
-  input.addEventListener('keydown', (e) => e.stopPropagation()); // arrow keys nudge the slider, not the game
+  input.addEventListener('keydown', (e) => {
+    // Keep native slider navigation local; Escape/F and instrument shortcuts still reach the eyepiece.
+    if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'].includes(e.key)) e.stopPropagation();
+  });
   wrap.append(el('span', 'color:#bcd', label), input, out);
   return { wrap, input, set: (v: number) => ((input.value = `${v}`), (out.textContent = fmt(v))) };
 }
