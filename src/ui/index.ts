@@ -72,7 +72,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext, training: TrainingGam
     setMenu(false);
     tutorial.replay();
   });
-  const benchBtn = row('🛠️', 'Workbench', () => ctx.bus.emit('openWorkbench', { recipeId: null }), 'B');
+  const benchBtn = row('🛠️', 'Workbench', () => ctx.bus.emit('openWorkbench', { recipeId: null }), 'Shift+B');
   benchBtn.set('Workbench', 'Build a microscope by hand');
   const modeRow = row('', 'Mode', () => setAdvanced(ctx, !ctx.state.advanced));
   const syncMode = () => {
@@ -232,7 +232,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext, training: TrainingGam
     ctx.bus.on('tierChanged', ({ tier }) => {
       const built = ctx.data.recipes.find((r) => r.scope?.tier === tier);
       const how = built?.assembly && ctx.state.advanced
-        ? 'You put it together yourself: aim at something and press [F]. [B] takes you back to the workbench to change it.'
+        ? 'You put it together yourself: aim at something and press [F]. [Shift+B] takes you back to the workbench to change it.'
         : built?.scope?.site === 'chess'
         ? 'It is in the CHESS hall of Wilson Lab (east of campus): look [F] at a sample to take some, then carry it there and press [F] at the control desk.'
         : built?.scope?.site

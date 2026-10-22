@@ -37,6 +37,15 @@ describe('campus economy', () => {
     const old = toSave(ctx.state) as Partial<ReturnType<typeof toSave>>; delete old.economy;
     expect(parseSave(JSON.stringify(old))!.economy.coins).toBe(0);
   });
+  it('charges 75 coins for binoculars and saves ownership', () => {
+    const ctx=game();ctx.state.economy.coins=74;
+    expect(purchase(ctx,'binoculars','coins')).toBe(false);
+    ctx.state.economy.coins=75;
+    expect(purchase(ctx,'binoculars','coins')).toBe(true);
+    expect(ctx.state.economy.coins).toBe(0);
+    expect(purchase(ctx,'binoculars','coins')).toBe(false);
+    expect(parseSave(JSON.stringify(toSave(ctx.state)))!.economy.owned).toContain('binoculars');
+  });
   it('sells the premium roadster once and preserves ownership in saves', () => {
     const ctx = game();
     expect(purchase(ctx, 'miata_na', 'coins')).toBe(false);

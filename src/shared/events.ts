@@ -2,6 +2,7 @@
 import type { Tier } from './schema';
 
 export interface GameEvents {
+  toggleBinoculars: Record<string, never>;
   mysteryChanged: Record<string, never>;
   openMysteryNotebook: Record<string, never>;
   driveMiata: { trial: boolean };

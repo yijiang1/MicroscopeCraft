@@ -19,7 +19,7 @@ export interface Hud {
   /** What you carry for the fixed instruments, and where to take it. */
   carry(text: string): void;
   compass(text: string): void;
-  /** Show the [B] workbench hint (advanced mode only). */
+  /** Show the [Shift+B] workbench hint (advanced mode only). */
   workbench(on: boolean): void;
 }
 
@@ -35,13 +35,13 @@ const setText = (e: HTMLElement, text: string) => {
   if (e.dataset.text === text) return;
   e.dataset.text = text;
   e.hidden = !text;
-  e.replaceChildren(...text.split(/\[([^\]\s]{1,6})\]/).map((s, i) => (i % 2 ? Object.assign(document.createElement('kbd'), { textContent: s }) : s)));
+  e.replaceChildren(...text.split(/\[([^\]\s]{1,12})\]/).map((s, i) => (i % 2 ? Object.assign(document.createElement('kbd'), { textContent: s }) : s)));
 };
 
 /** Moving and acting, then the panels: when both do not fit on one line, they break between the groups. */
 const HINTS = [
   ['[Click] look', '[WASD] move', '[Shift] run', '[Space] jump', '[E] gather/talk', '[F] look closer', '[V] view'],
-  ['[C] craft', '[B] workbench', '[T] tree', '[I] inventory', '[J] journal', '[M] Microdex', '[U] map', '[Tab] menu'],
+  ['[C] craft', '[Shift+B] workbench', '[T] tree', '[I] inventory', '[J] journal', '[M] Microdex', '[U] map', '[Tab] menu'],
 ];
 
 export function createHud(el: HTMLElement): Hud {
@@ -52,7 +52,7 @@ export function createHud(el: HTMLElement): Hud {
     g.append(...group.map((h) => {
       const chip = div('white-space:nowrap');
       setText(chip, h);
-      if (h === '[B] workbench') benchHint = chip;
+      if (h === '[Shift+B] workbench') benchHint = chip;
       return chip;
     }));
     return g;

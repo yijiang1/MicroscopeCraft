@@ -1,3 +1,4 @@
+import { binocularFov, mountBinoculars } from './binoculars';
 import { buildFishingRod, type FishingAction } from './fishing-rod';
 import { buildFish, fishingWaterPoint, mountFishing } from './fishing';
 import { blocksRoadster, buildMiata, driveStep, roadsterGradeOK, TEST_DRIVE_MS } from './miata';
@@ -263,6 +264,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   let fishingAction: FishingAction = 'idle';
   let fishingView = true;
   const viewCamera = camera.clone();
+  const binoculars=mountBinoculars(ctx);
   const driver = buildPlayer(); driver.seated(); driver.root.scale.setScalar(0.72); driver.root.position.set(-0.39,0.24,0.4);
   const roadster = buildMiata(); roadster.root.add(driver.root); roadster.root.visible = false; scene.add(roadster.root);
   let driving = false, driveSpeed = 0, driveYaw = 0, driveDeadline = 0;
@@ -286,10 +288,10 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     player.root.position.y -= EYE_HEIGHT;
     camera.getWorldDirection(viewDirection);
     player.root.rotation.y = Math.atan2(-viewDirection.x, -viewDirection.z); // yaw only: camera.rotation is XYZ order, not YXZ
-    player.root.visible = thirdPerson;
+    player.root.visible = thirdPerson && !binoculars.active();
     viewCamera.position.copy(camera.position);
     viewCamera.quaternion.copy(camera.quaternion);
-    if (thirdPerson) {
+    if (thirdPerson && !binoculars.active()) {
       shoulder.set(1, 0, 0).applyQuaternion(camera.quaternion);
       // pull the camera in front of any wall, ceiling or statue between it and the player's eyes
       boom.copy(viewDirection).multiplyScalar(-3.2).addScaledVector(shoulder, 0.7);
@@ -310,6 +312,8 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       viewCamera.position.set(camera.position.x + Math.sin(driveYaw) * 6, camera.position.y + 2.5, camera.position.z + Math.cos(driveYaw) * 6);
       viewCamera.lookAt(camera.position.x - Math.sin(driveYaw) * 4, camera.position.y - 0.3, camera.position.z - Math.cos(driveYaw) * 4);
     }
+    const fov=binoculars.active()?binocularFov(camera.fov):camera.fov;
+    if(viewCamera.fov!==fov){viewCamera.fov=fov;viewCamera.updateProjectionMatrix();}
     viewCamera.updateMatrixWorld();
   };
   updateView();
@@ -419,6 +423,10 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       picker.key(e);
       return;
     }
+    if (k==='b'&&!e.shiftKey&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.repeat) {
+      if (!paused&&!driving&&fishingAction==='idle'&&!document.querySelector('dialog[open]')&&!(e.target instanceof HTMLInputElement)&&!(e.target instanceof HTMLTextAreaElement)&&!(e.target instanceof HTMLSelectElement)&&!(e.target as HTMLElement).isContentEditable) binoculars.toggle();
+      return;
+    }
     if (paused || (!controls.isLocked && !driving)) return;
     if (driving) { if (k === 'e' && !e.repeat) finishDrive(); return; }
     if (k === 'v' && !e.repeat) {
@@ -460,6 +468,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   // The eyepiece and the workbench each cover the world: it stops (no drawing, no movement) while either is open.
   let atBench = false;
   const pauseWorld = () => {
+    binoculars.close();
     rememberPlayer();
     paused = true;
     keys.clear();
@@ -572,7 +581,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   };
   const minimap = mountMinimap(el, life.walkers, open => ctx.bus.emit('campusActivityChanged', { open }));
   const speech = mountSpeechOverlay(el);
-  const offActivity = ctx.bus.on('campusActivityChanged', ({ open }) => { paused = open; keys.clear(); if (open) controls.unlock(); });
+  const offActivity = ctx.bus.on('campusActivityChanged', ({ open }) => { paused = open; keys.clear(); if (open) { binoculars.close(); controls.unlock(); } });
   const dress = () => { player.equip(ctx.state.economy); redrawShadows(); };
   dress();
   const offDress = ctx.bus.on('economyChanged', dress);
@@ -584,9 +593,11 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     camera.rotation.set(0,0,0,'YXZ'); rememberPlayer(); redrawShadows();
     controls.unlock(); ctx.bus.emit('openCampusActivity', { activity: 'store' });
   };
+  const offBinoculars=ctx.bus.on('toggleBinoculars',()=>{if(!paused&&!driving&&fishingAction==='idle')binoculars.toggle();});
+  const lowerBinoculars=()=>binoculars.close();controls.addEventListener('unlock',lowerBinoculars);
   const offDrive = ctx.bus.on('driveMiata', ({ trial }) => {
     if (driving || (!trial && !ctx.state.economy.owned.includes('miata_na'))) return;
-    ridingLift = false; onTerrace = false; paused = false; keys.clear(); vy = 0;
+    binoculars.close(); ridingLift = false; onTerrace = false; paused = false; keys.clear(); vy = 0;
     driver.equip(ctx.state.economy);
     savedThirdPerson = thirdPerson; thirdPerson = true;
     driving = true; driveSpeed = 0; driveYaw = -Math.PI / 2;
@@ -818,6 +829,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       removeEventListener('keyup', onUp);
       removeEventListener('pagehide', rememberPlayer);
       document.removeEventListener('visibilitychange', rememberPlayer);
+      offBinoculars();controls.removeEventListener('unlock',lowerBinoculars);binoculars.dispose();
       fishing.dispose(); fishingRod.dispose(); minimap.dispose();
       speech.dispose(); offActivity(); offDress(); offDrive(); clearTimeout(driveTimer);
       driver.dispose(); player.dispose();

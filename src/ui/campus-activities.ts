@@ -54,7 +54,7 @@ export function mountCampusActivities(ctx: GameContext, toast: Toast, training: 
           clear(); content.append(button('← Store & collection', shop), text('h2', item.name));
           const body = text('p', item.text); body.style.whiteSpace = 'pre-line'; content.append(body);
         }));
-        else if (item.kind === 'tool') card.append(text('p', 'Acquired · Approach water to fish'));
+        else if (item.kind === 'tool') card.append(text('p', item.id === 'binoculars' ? 'Acquired · Press B to use binoculars' : 'Acquired · Approach water to fish'));
         else if (item.kind === 'car') card.append(text('p', 'Owned · Unlimited campus drives'));
         else {
           const e = ctx.state.economy;

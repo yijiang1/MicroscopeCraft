@@ -775,7 +775,7 @@ export function mountWorkbench(el: HTMLElement, ctx: GameContext): WorkbenchHand
     card.append(
       h('p', 'wb-muted', practice
         ? 'This was practice: gather the parts the goal card lists, then build it for real here.'
-        : 'Aim at anything and press [F] to look through it; each objective is a zoom step in the eyepiece. Come back with [B] to change it.'),
+        : 'Aim at anything and press [F] to look through it; each objective is a zoom step in the eyepiece. Come back with [Shift+B] to change it.'),
     );
     const acts = h('div');
     acts.style.cssText = 'display:flex;gap:8px;margin-top:10px';
@@ -831,7 +831,7 @@ export function mountWorkbench(el: HTMLElement, ctx: GameContext): WorkbenchHand
     if (e.key === 'Shift' && holding) fineGrind = false;
   };
   const onOpenKey = (e: KeyboardEvent) => {
-    if (isOpen() || e.repeat || e.ctrlKey || e.metaKey || e.altKey || e.key.toLowerCase() !== 'b') return;
+    if (isOpen() || e.repeat || e.ctrlKey || e.metaKey || e.altKey || e.key.toLowerCase() !== 'b' || !e.shiftKey) return;
     const t = e.target as HTMLElement;
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName) || t.isContentEditable) return; // typing
     ctx.bus.emit('openWorkbench', { recipeId: null });

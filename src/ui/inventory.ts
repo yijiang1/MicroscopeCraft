@@ -55,7 +55,11 @@ export function mountInventory(ctx: GameContext): InventoryHandle {
     head.append(toggle);
     box.append(head);
     if (collapsed) return;
-    if (!have.length) return void box.append(el('div', 'color:#9ab;margin-top:4px', 'Empty. Gather materials with [E].'));
+    if (ctx.state.economy.owned.includes('binoculars')) {
+      const use=el('button','margin:4px 0;padding:7px 10px;border:1px solid #638b95;border-radius:7px;background:#203c47;color:#eef8f4;cursor:pointer','🔭 Binoculars · 4× · [B]');
+      use.onclick=()=>ctx.bus.emit('toggleBinoculars',{});group('FIELD GEAR',[use]);
+    }
+    if (!have.length && !ctx.state.economy.owned.includes('binoculars')) return void box.append(el('div', 'color:#9ab;margin-top:4px', 'Empty. Gather materials with [E].'));
 
     const inUse = ctx.state.scope.tier;
     group('MATERIALS', have.filter(([id]) => ctx.data.materials[id]).map(([id, n]) => chip(id, n)));
@@ -76,6 +80,7 @@ export function mountInventory(ctx: GameContext): InventoryHandle {
   };
   addEventListener('keydown', onKey);
   const offs = [
+    ctx.bus.on('economyChanged', render),
     ctx.bus.on('itemGathered', render),
     ctx.bus.on('itemCrafted', render),
     ctx.bus.on('scopeChanged', render),

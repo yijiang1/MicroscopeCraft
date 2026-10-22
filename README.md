@@ -59,7 +59,7 @@ Simplified physics is labelled in comments next to the formula.
 | E | Gather the item you are aiming at, or talk to the scientist you are aiming at (their dialog has a chat box: ask them about their own field, answered by Google Gemini, OpenAI or Anthropic Claude once you pick one and add your own API key under Tab → Settings; it is kept only in your browser) |
 | F | Look at the aimed sample through your newest portable instrument (F or Esc to leave). At a cabinet or table, pick a sample first (1–9). Once you own a fixed instrument this also takes a bit of the sample along; F at the electron microscope in the science lab, or at the beamline desk in Wilson Lab, puts one in |
 | C | Craft the next ready step of your goal (no mouse needed). In advanced mode, for the compound microscope it opens the workbench |
-| B | Workbench (advanced mode, Tab → Settings → Mode): build the compound microscope by hand. Grind the lenses, put the parts together, focus it, style it. Without the parts it opens in practice mode |
+| Shift+B | Workbench (advanced mode, Tab → Settings → Mode): build the compound microscope by hand. Grind the lenses, put the parts together, focus it, style it. Without the parts it opens in practice mode |
 | 1, 2, 3… | In the eyepiece: switch to another instrument you own, to compare (or click its button) |
 | Wheel or slider | Focus (light microscopes) |
 | T | Tech tree: every part, with add-ons shown by dashed links |
@@ -223,3 +223,7 @@ The tower elevator, support rails and lookout terrace use faint blue transparent
 Claim the **Field fishing rod** for **0 coins** in ScopeCraft Store. Near water at shoreline height, click **Fish** or press **R**. Cast, wait for a bite, then reel with the marker in the green zone: three successful reels land a catch, while three misses let it escape. Perch, bass, salmon, sunfish, trout and carp can be caught; your collection is saved. Select **Prepare scale sample** to consume a catch and add its specimen to the sample bag, then **View sample** to inspect it. The samples use schematic scale surfaces, ridges and fine prepared fibres at different magnifications.
 
 Press **U** to open the full campus map; press **U** or **Esc** to close it. Fishing uses an avatar-held rod with animated casting, reeling, a line and bobber, and a catch reveal. Fish wander randomly within the water.
+
+### Field binoculars
+
+Buy **Field binoculars** for **75 coins** in ScopeCraft Store. Once acquired, they appear in the bottom-right inventory with **B** to raise/lower the 4× view. The shortcut is hidden until purchase. The advanced microscope workbench uses **Shift+B** (or its menu button).
