@@ -40,8 +40,8 @@
     "output": { "itemId": "light_source", "count": 1 }
   },
   {
-    "id": "compound_microscope", "name": "Compound microscope", "station": "bench", "color": "#5b8fd0",
-    "about": "An objective lens makes a magnified image, and the eyepiece magnifies it again.",
+    "id": "compound_microscope", "name": "Compound microscope", "station": "bench", "assembly": "compound", "color": "#5b8fd0",
+    "about": "An objective lens makes a magnified image, and the eyepiece magnifies it again. You put it together by hand at the workbench: the lenses you grind and where you put them decide what it can see.",
     "inputs": [
       { "itemId": "lens", "count": 2 },
       { "itemId": "tube", "count": 1 },

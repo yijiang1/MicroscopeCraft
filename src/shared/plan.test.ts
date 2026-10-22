@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameData } from './data';
 import { actionText, currentAction, howToGet, itemsMentioned, lockedBy, nextGoalRecipe, planFor, scopeThatSees } from './plan';
-import { craft, createGame, gather } from './state';
+import { assemble, craft, createGame, gather } from './state';
 
 const data = loadGameData();
 const totals = (p: ReturnType<typeof planFor>) => Object.fromEntries(p.missing.map((m) => [m.itemId, m.count]));
@@ -141,5 +141,34 @@ describe('where to find things', () => {
     expect(itemsMentioned('where is tungsten?', data)).toEqual(['tungsten_ore']);
     expect(itemsMentioned('immersion oil', data)).toEqual(['immersion_oil']);
     expect(itemsMentioned('sandwich in the environment', data)).toEqual([]);
+  });
+});
+
+describe('microscopes built at the workbench', () => {
+  const parts = { lens: 2, tube: 1, light_source: 1, focus_knob: 1 };
+  it('the compound microscope is built at the workbench, not crafted', () => {
+    const goal = data.recipes.find((r) => r.id === 'compound_microscope')!;
+    const action = currentAction(planFor(goal, data, parts))!;
+    expect(actionText(action, data)).toBe('Press [C] to build the Compound microscope at the workbench');
+    expect(howToGet('compound_microscope', data)).toMatch(/workbench/);
+  });
+  it('if your own build cannot show what unlocks the next tier, the goal says to rebuild it', () => {
+    const ctx = createGame(data);
+    for (const [id, n] of Object.entries(parts)) gather(ctx, id, n);
+    const weak = { objectives: [{ radiusMm: 16 }], eyepiece: { radiusMm: 25 }, tubeMm: 201, style: {}, name: '' };
+    expect(assemble(ctx, 'compound_microscope', weak)).toBe(true);
+    const goal = nextGoalRecipe(data, ctx.state)!;
+    expect(goal.id).toBe('hq_microscope');
+    const plan = planFor(goal, data, ctx.state.inventory, ctx.state.discoveries, ctx.state.builds);
+    const oil = plan.raw.find((r) => r.itemId === 'plant_oil')!.identify!;
+    expect(oil.rebuild?.id).toBe('compound_microscope');
+    expect(actionText({ kind: 'identify', raw: plan.raw[0]!, identify: oil }, data)).toMatch(/^Your Compound microscope can't show Seed oil droplets \(1\.5 µm\) yet: rebuild it/);
+    const strong = { ...weak, objectives: [{ radiusMm: 4 }] };
+    gather(ctx, 'lens', 0);
+    expect(assemble(ctx, 'compound_microscope', strong)).toBe(true);
+    const again = planFor(goal, data, ctx.state.inventory, ctx.state.discoveries, ctx.state.builds);
+    const ok = again.raw.find((r) => r.itemId === 'plant_oil')!.identify!;
+    expect(ok.rebuild).toBeUndefined();
+    expect(ok.step?.label).toBe('430× (4.0 mm objective)');
   });
 });

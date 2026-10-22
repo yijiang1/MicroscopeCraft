@@ -1,5 +1,21 @@
+import { compileBuild } from './assembly';
 import { electronWavelengthNm, EYE_LIMIT_UM, GREEN_LIGHT_UM, xrayWavelengthNm } from './optics';
-import type { GameData, Recipe, ScopeParams, ScopeSpec, Site, ZoomStep } from '../schema';
+import type { CompoundBuild, GameData, Recipe, ScopeParams, ScopeSpec, Site, ZoomStep } from '../schema';
+
+/** Microscopes built by hand at the workbench, by item id. */
+export type Builds = Readonly<Record<string, CompoundBuild>>;
+
+/** A microscope as the player has it: built by hand at the workbench, or as its recipe makes it. */
+export const specOf = (recipe: Recipe & { scope: ScopeSpec }, builds: Builds = {}): ScopeSpec => {
+  const build = recipe.assembly ? builds[recipe.output.itemId] : undefined;
+  return build ? compileBuild(build, recipe.scope) : recipe.scope;
+};
+
+/** The recipes with every hand-built microscope's own steps, for anything that asks "which step shows this?". */
+export const withBuilds = <D extends Pick<GameData, 'recipes'>>(data: D, builds: Builds): D =>
+  Object.keys(builds).length
+    ? { ...data, recipes: data.recipes.map((r) => (r.scope ? { ...r, scope: specOf(r as Recipe & { scope: ScopeSpec }, builds) } : r)) }
+    : data;
 
 /** What the player sees with no instrument: an NA chosen so the Abbe limit is the eye's ~0.1 mm at 25 cm (simplified). */
 const EYE_NA = GREEN_LIGHT_UM / (2 * EYE_LIMIT_UM);
@@ -50,15 +66,17 @@ export function ownedScopes(inventory: Record<string, number>, data: Pick<GameDa
     .sort((a, b) => a.scope.tier - b.scope.tier);
 }
 
-/** The chosen microscope (by tier) if usable here, else the best one usable here, at the given zoom step; or the naked eye. */
+/** The chosen microscope (by tier) if usable here, else the best one usable here, at the given zoom step; or the naked eye.
+ *  A microscope built at the workbench uses the steps of its build. */
 export function scopeFromInventory(
   inventory: Record<string, number>,
   data: Pick<GameData, 'recipes'>,
   step = 0,
   choice: number | null = null,
   site?: Site | null,
+  builds: Builds = {},
 ): ScopeParams {
   const owned = ownedScopes(inventory, data, site);
   const pick = owned.find((r) => r.scope.tier === choice) ?? owned.at(-1);
-  return pick ? scopeParamsFromSpec(pick.scope, step, inventory) : NAKED_EYE;
+  return pick ? scopeParamsFromSpec(specOf(pick, builds), step, inventory) : NAKED_EYE;
 }

@@ -38,6 +38,10 @@ export interface GameEvents {
   areaVisited: { area: string };
   /** world → sound: the clock tower rang a quarter (1–3), or struck the hour (quarter 0), `distance` m from the player. */
   towerBell: { quarter: number; hour: number; distance: number };
+  /** Open the workbench to build a microscope by hand (or rebuild one you own). null = whichever is next. */
+  openWorkbench: { recipeId: string | null };
+  /** workbench → world, ui: the workbench was closed. */
+  closeWorkbench: Record<string, never>;
 }
 
 export type Bus = ReturnType<typeof createBus>;
