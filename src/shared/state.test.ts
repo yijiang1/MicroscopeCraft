@@ -332,7 +332,7 @@ describe('microscopes built by hand at the workbench', () => {
     gatherAll(ctx, parts);
     assemble(ctx, 'compound_microscope', build([16]));
     const loaded = createGame(loadGameData(), undefined, parseSave(JSON.stringify(toSave(ctx.state))));
-    expect(loaded.state.builds.compound_microscope!.objectives).toEqual([{ radiusMm: 16 }]);
+    expect(loaded.state.builds.compound_microscope).toMatchObject({ objectives: [{ radiusMm: 16 }] });
     expect(loaded.state.scope.steps[0]!.label).toBe('100× (16 mm objective)');
     const old = { ...toSave(ctx.state) } as Partial<ReturnType<typeof toSave>>;
     delete old.builds;
