@@ -1,7 +1,7 @@
 // Tutorial: a welcome card with the idea of the game, then a coach panel (top-left) that walks a new player through
 // one loop: move, gather, craft, build the hand lens, look, discover. Each step ticks off when the player does it,
 // and steps already done in a saved game are skipped. Replay from the menu. Owner: Person D.
-import { ownedScopes, type GameContext } from '../shared/state';
+import { ownedScopes, setAdvanced, type GameContext } from '../shared/state';
 import { itemIcon } from './icons';
 import { withKeys } from './keys';
 
@@ -140,6 +140,26 @@ export function mountTutorial(ctx: GameContext): TutorialHandle {
       row.append(itemIcon(icon, ctx.data, 30), text);
       card.append(row);
     }
+    // easy or advanced mode, picked here and switchable later in the menu
+    card.append(div('margin:14px 0 6px;font-weight:700', 'How do you want to play?'));
+    const modes = div('display:flex;gap:8px;flex-wrap:wrap');
+    const pick = (advanced: boolean, title: string, about: string) => {
+      const b = document.createElement('button');
+      b.append(div('font-weight:700;margin-bottom:2px', title), div('font-size:12px;line-height:1.35;opacity:.8', about));
+      b.onclick = () => (setAdvanced(ctx, advanced), sync());
+      return Object.assign(b, { advanced });
+    };
+    const choices = [
+      pick(false, '🌱 Easy', 'Press C to craft each microscope from its parts.'),
+      pick(true, '🛠️ Advanced', 'Also grind the lenses and put the compound microscope together yourself.'),
+    ];
+    const sync = () => choices.forEach((b) => {
+      const on = b.advanced === ctx.state.advanced;
+      b.style.cssText = `flex:1 1 180px;padding:8px 10px;border-radius:8px;text-align:left;cursor:pointer;color:#eee;background:${on ? '#ffd35a26' : '#ffffff0d'};border:1px solid ${on ? '#ffd35a' : '#ffffff22'}`;
+    });
+    sync();
+    modes.append(...choices);
+    card.append(modes, div('margin-top:4px;font-size:11px;opacity:.6', 'You can switch later: Tab → Settings → Mode.'));
     const close = () => (welcome.style.display = 'none');
     const row = div('display:flex;gap:8px;justify-content:flex-end;margin-top:16px');
     row.append(
