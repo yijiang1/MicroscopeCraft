@@ -4,6 +4,8 @@ import { ownedScopes, type GameContext } from '../shared/state';
 import { itemIcon } from './icons';
 
 export interface InventoryHandle {
+  /** The box, so the goal card above can take the height that is left. */
+  el: HTMLElement;
   dispose(): void;
 }
 
@@ -80,6 +82,7 @@ export function mountInventory(ctx: GameContext): InventoryHandle {
     ctx.bus.on('closeEyepiece', () => (box.style.display = '')),
   ];
   return {
+    el: box,
     dispose() {
       offs.forEach((off) => off());
       removeEventListener('keydown', onKey);

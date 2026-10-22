@@ -15,6 +15,8 @@ export interface GoalHandle {
   dispose(): void;
 }
 
+const WIDTH = 'min(310px,calc(100vw - 16px))';
+
 const div = (css = '', text = '') => {
   const d = document.createElement('div');
   d.style.cssText = css;
@@ -22,9 +24,10 @@ const div = (css = '', text = '') => {
   return d;
 };
 
-export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void): GoalHandle {
+/** `below` is the inventory box: the card takes the height above it. */
+export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void, below: HTMLElement): GoalHandle {
   const card = div(
-    'position:fixed;top:8px;right:calc(var(--panel-w, 0px) + 8px);z-index:15;width:min(310px,calc(100vw - 16px));max-height:56vh;overflow:auto;box-sizing:border-box;padding:8px 10px;border-radius:10px;background:#000c;color:#eee;font:13px system-ui',
+    `position:fixed;top:8px;right:calc(var(--panel-w, 0px) + 8px);z-index:15;width:${WIDTH};max-height:56vh;overflow:auto;box-sizing:border-box;padding:8px 10px;border-radius:10px;background:#000c;color:#eee;font:13px system-ui`,
   );
   document.body.append(card);
   let pinned: string | null = null;
@@ -43,6 +46,7 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void):
   const render = () => {
     const { data, state } = ctx;
     card.replaceChildren();
+    let tree: ((size: 'small' | 'tiny') => HTMLElement) | null = null;
     const goal = nextGoalRecipe(data, state);
     plan = goal ? planFor(goal, data, state.inventory, state.discoveries) : null;
     const action = plan ? currentAction(plan) : null;
@@ -79,9 +83,9 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void):
       if (expanded) {
         const left = (id: string) => p.steps.find((x) => x.recipe.output.itemId === id)?.times ?? 0;
         const raw = (id: string) => p.raw.find((r) => r.itemId === id);
-        card.append(
-          drawTree(ctx, goalLayout(p.goal, data), {
-            size: 'small',
+        const layout = goalLayout(p.goal, data);
+        tree = (size: 'small' | 'tiny') => drawTree(ctx, layout, {
+            size,
             done: (id) => (raw(id) ? raw(id)!.missing === 0 : left(id) === 0),
             badge: (id) => {
               const r = raw(id);
@@ -90,12 +94,36 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void):
             },
             hi: action?.kind === 'craft' ? action.step.recipe.output.itemId : trackedRaw?.itemId,
             onPick: (id) => raw(id) && raw(id)!.missing > 0 && ((pinned = id), render()),
-          }),
-        );
+          });
       }
     }
 
+    // The guide's answer goes above the tree, so fit() counts it.
     if (said) card.append(div('margin-top:8px;padding:6px 8px;border-radius:6px;background:#1c3a1f;color:#fff', said));
+    card.style.width = WIDTH;
+    card.style.maxHeight = `${Math.max(innerHeight * 0.4, innerHeight - below.offsetHeight - 24)}px`;
+    if (tree) {
+      // Labelled tiles when they fit at a readable size, else icons only; whatever is still too big is scaled down.
+      let t = tree('small');
+      if (fit(t) < 0.85) {
+        t.remove();
+        fit((t = tree('tiny')));
+      }
+    }
+  };
+
+  /** Widens the card for a wide tree (up to 45vw), then shrinks the tree so the card never scrolls. Returns the scale. */
+  const fit = (t: HTMLElement) => {
+    card.append(t);
+    const pad = 20;
+    const w = parseFloat(t.style.width), h = parseFloat(t.style.height);
+    card.style.width = `min(max(310px, ${w + pad}px), 45vw, calc(100vw - 16px))`;
+    if (!card.clientWidth) return 1; // hidden behind the eyepiece; refit on close
+    const rest = card.scrollHeight - t.offsetHeight;
+    const maxH = parseFloat(getComputedStyle(card).maxHeight);
+    const z = Math.min(1, (card.clientWidth - pad) / w, (maxH - rest - pad) / h);
+    t.style.zoom = `${z}`;
+    return z;
   };
 
   /** The next craft as a formula: [2 sand] + … → [glass], with a button that lights up once it can be made. */
@@ -143,6 +171,9 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void):
     }
   };
   addEventListener('keydown', onKey);
+  addEventListener('resize', render);
+  const belowSize = new ResizeObserver(() => render());
+  belowSize.observe(below);
 
   render();
   const offs = [
@@ -150,7 +181,10 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void):
     ctx.bus.on('itemCrafted', render),
     ctx.bus.on('discoveryUnlocked', render),
     ctx.bus.on('openEyepiece', () => (card.style.display = 'none')), // the eyepiece has its own panels there
-    ctx.bus.on('closeEyepiece', () => (card.style.display = '')),
+    ctx.bus.on('closeEyepiece', () => {
+      card.style.display = '';
+      render();
+    }),
   ];
   return {
     render,
@@ -166,6 +200,8 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void):
     dispose() {
       offs.forEach((off) => off());
       removeEventListener('keydown', onKey);
+      removeEventListener('resize', render);
+      belowSize.disconnect();
       clearTimeout(sayTimer);
       track(null);
       card.remove();

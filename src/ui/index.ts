@@ -111,7 +111,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
     document.documentElement.style.setProperty('--panel-w', open ? 'min(260px, 85vw)' : '0px');
     if (open) document.exitPointerLock?.(); // free the mouse so the menu can be clicked
   };
-  const goal = mountGoal(ctx, toast, () => setMenu(!menuOpen));
+  const goal = mountGoal(ctx, toast, () => setMenu(!menuOpen), inventory.el);
 
   const render = () => {
     dex.textContent = `Microdex (M) · ${microdex.summary()}`;

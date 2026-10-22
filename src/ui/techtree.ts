@@ -72,10 +72,12 @@ export function layoutTree(data: Pick<GameData, 'recipes'>): TreeLayout {
   return { cells, lanes, rows: last + 1 };
 }
 
-/** `big` for the full-screen overlay, `small` for the goal card. */
+/** `big` for the full-screen overlay, `small` and `tiny` for the goal card. */
 const SIZES = {
   big: { col: 84, tile: 46, label: 28, gap: 58, laneGap: 14, pad: 24, top: 44, icon: 30, font: 10, lanes: true },
   small: { col: 64, tile: 32, label: 22, gap: 28, laneGap: 0, pad: 0, top: 2, icon: 22, font: 9, lanes: false },
+  /** Icons only (names on hover), for big trees in the goal card. */
+  tiny: { col: 44, tile: 32, label: 0, gap: 26, laneGap: 0, pad: 0, top: 2, icon: 22, font: 9, lanes: false },
 };
 
 export interface DrawOpts {
@@ -190,7 +192,8 @@ export function drawTree(ctx: GameContext, layout: TreeLayout, o: DrawOpts): HTM
     if (ready) t.onclick = () => craft(ctx, recipe.id);
     else if (o.onPick) t.onclick = () => o.onPick!(id);
     const node = styled('div', `position:absolute;left:${x(c.col, c.lane) - S.col / 2}px;top:${y(c.row)}px;width:${S.col}px`);
-    node.append(t, styled('div', `margin:3px auto 0;width:max-content;max-width:${S.col - 4}px;padding:1px 3px;border-radius:4px;background:#000a;text-align:center;line-height:1.2`, data.items[id]?.name ?? id));
+    node.append(t);
+    if (S.label) node.append(styled('div', `margin:3px auto 0;width:max-content;max-width:${S.col - 4}px;padding:1px 3px;border-radius:4px;background:#000a;text-align:center;line-height:1.2`, data.items[id]?.name ?? id));
     board.append(node);
   }
   return board;
