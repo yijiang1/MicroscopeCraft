@@ -6,6 +6,9 @@ export interface GameEvents {
   openEyepiece: { sampleId: string };
   /** scope → world: eyepiece dismissed. */
   closeEyepiece: Record<string, never>;
+  carriedSamplesChanged: Record<string, never>;
+  /** World position/view changed; autosaving is throttled by the UI. */
+  playerMoved: Record<string, never>;
   /** scope → guide: advice from the rendered image, including focus, alignment, stains and damage. */
   eyepieceStatus: { sampleId: string; text: string };
   /** Grounded player movement; consumed by the shared audio controller. */
@@ -35,6 +38,8 @@ export interface GameEvents {
   minigameScored: { game: string; score: number; best: boolean };
   /** The player reached an area of the campus for the first time. */
   areaVisited: { area: string };
+  /** world → sound: the clock tower rang a quarter (1–3), or struck the hour (quarter 0), `distance` m from the player. */
+  towerBell: { quarter: number; hour: number; distance: number };
 }
 
 export type Bus = ReturnType<typeof createBus>;

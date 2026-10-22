@@ -1,32 +1,34 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameData } from '../shared/data';
 import { nextGoalRecipe, planFor } from '../shared/plan';
-import { AIMS, INDOORS, PLACEMENTS, RADIUS, samplesOf, SPAWN, type Kind } from './placements';
-import { GREENHOUSE, inAtrium, inChess, inGreenhouse, inLab, insideBuilding, INDOOR_SOLIDS, SCIENCE, WILSON } from './campus';
+import { KINDS, samplesOf, type Kind } from './kinds';
+import { PLACEMENTS, SPAWN } from './placements';
+import { GREENHOUSE, indoors, insideBuilding, INDOOR_SOLIDS, SCIENCE, WILSON } from './campus';
 import { heightAt, LAKE, waterLevelAt, WATER_LEVEL, WORLD_RADIUS } from './terrain';
 
 const data = loadGameData();
 
 describe('world layout', () => {
   it('every placed thing gathers a real item and/or shows real samples', () => {
-    for (const kind of Object.keys(AIMS) as Kind[]) {
-      const aim = AIMS[kind];
+    for (const kind of Object.keys(KINDS) as Kind[]) {
+      const { aim, radius, model } = KINDS[kind];
       expect(aim.gather || samplesOf(aim).length, kind).toBeTruthy();
       if (aim.gather) expect(data.items[aim.gather], `${kind} gathers ${aim.gather}`).toBeDefined();
       for (const s of samplesOf(aim)) expect(data.samples[s], `${kind} shows ${s}`).toBeDefined();
-      expect(RADIUS[kind]).toBeGreaterThanOrEqual(0);
+      expect(radius).toBeGreaterThanOrEqual(0);
+      expect(!!model, `${kind} has a model`).toBe(kind !== 'pond');
     }
   });
 
   it('every raw material and every sample is reachable somewhere', () => {
-    const gatherable = new Set(PLACEMENTS.map((p) => AIMS[p.kind].gather).filter(Boolean));
+    const gatherable = new Set(PLACEMENTS.map((p) => KINDS[p.kind].aim.gather).filter(Boolean));
     for (const id of Object.keys(data.materials).filter((m) => m !== 'leaf_fiber')) expect(gatherable.has(id), id).toBe(true);
-    const seen = new Set(PLACEMENTS.flatMap((p) => samplesOf(AIMS[p.kind])));
+    const seen = new Set(PLACEMENTS.flatMap((p) => samplesOf(KINDS[p.kind].aim)));
     for (const id of Object.keys(data.samples)) expect(seen.has(id), id).toBe(true);
   });
 
   it('enough nodes to build any one instrument without waiting for regrowth', () => {
-    const count = (item: string) => PLACEMENTS.filter((p) => AIMS[p.kind].gather === item).length;
+    const count = (item: string) => PLACEMENTS.filter((p) => KINDS[p.kind].aim.gather === item).length;
     const need: Record<string, number> = {};
     const stages: Record<string, number>[] = [{}, { hand_lens: 1 }, { compound_microscope: 1 }, { hq_microscope: 1 }, { fluorescence_microscope: 1 }, { electron_microscope: 1 }, { stem_microscope: 1 }];
     for (const owned of stages) {
@@ -41,7 +43,7 @@ describe('world layout', () => {
     for (const p of PLACEMENTS) {
       const at = `${p.kind} at ${p.x.toFixed(1)},${p.z.toFixed(1)}`;
       expect(Math.hypot(p.x, p.z), `${p.kind} radius`).toBeLessThan(WORLD_RADIUS - 8);
-      if (INDOORS.has(p.kind)) expect(inLab(p.x, p.z) || inChess(p.x, p.z) || inGreenhouse(p.x, p.z) || inAtrium(p.x, p.z), at).toBe(true);
+      if (KINDS[p.kind].indoors) expect(indoors(p.x, p.z), at).toBe(true);
       else expect(insideBuilding(p.x, p.z, 1), at).toBe(false);
       if (p.kind !== 'pond' && p.kind !== 'algae_mat') expect(heightAt(p.x, p.z), at).toBeGreaterThan(waterLevelAt(p.x, p.z) + 0.15);
     }
@@ -52,8 +54,7 @@ describe('world layout', () => {
       const at = `${npc.id} at ${npc.x},${npc.z}`;
       expect(heightAt(npc.x, npc.z), at).toBeGreaterThan(waterLevelAt(npc.x, npc.z) + 0.15);
       expect(Math.hypot(npc.x, npc.z), at).toBeLessThan(WORLD_RADIUS - 8);
-      const indoors = inLab(npc.x, npc.z) || inChess(npc.x, npc.z) || inGreenhouse(npc.x, npc.z);
-      if (!indoors) expect(insideBuilding(npc.x, npc.z, 0.5), at).toBe(false);
+      if (!indoors(npc.x, npc.z)) expect(insideBuilding(npc.x, npc.z, 0.5), at).toBe(false);
       for (const b of INDOOR_SOLIDS) expect(npc.x > b.x0 - 0.5 && npc.x < b.x1 + 0.5 && npc.z > b.z0 - 0.5 && npc.z < b.z1 + 0.5, at).toBe(false);
     }
   });

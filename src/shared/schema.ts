@@ -129,7 +129,7 @@ export const FeatureSchema = z.object({
 });
 export type Feature = z.infer<typeof FeatureSchema>;
 
-export const BiomeSchema = z.enum(['meadow', 'pond', 'forest', 'garden', 'mine', 'lab', 'chess', 'eng']);
+export const BiomeSchema = z.enum(['meadow', 'pond', 'forest', 'garden', 'mine', 'lab', 'chess', 'eng', 'museum']);
 export type Biome = z.infer<typeof BiomeSchema>;
 
 export const SampleSchema = z.object({
@@ -203,6 +203,8 @@ export const NpcSchema = z.object({
   role: z.string(),
   /** Two or three sentences of history, checked against sources. */
   bio: z.string(),
+  /** What they may talk about in chat (their field, work and life); anything else they decline. */
+  expertise: z.string(),
   greeting: z.string(),
   x: z.number(),
   z: z.number(),
@@ -277,7 +279,19 @@ export interface ScopeParams {
   site?: Site;
 }
 
+/** Ground position and view; vertical jump motion is deliberately not restored. */
+export const PlayerLocationSchema = z.object({
+  x: z.number().finite(),
+  z: z.number().finite(),
+  yaw: z.number().finite(),
+  pitch: z.number().min(-Math.PI / 2).max(Math.PI / 2),
+  thirdPerson: z.boolean(),
+});
+export type PlayerLocation = z.infer<typeof PlayerLocationSchema>;
+
 export interface GameState {
+  carriedSamples: string[];
+  playerLocation: PlayerLocation | null;
   inventory: Record<string, number>;
   discoveries: string[];
   /** The best picture the player has had of each discovery (small image data URL), by feature id.

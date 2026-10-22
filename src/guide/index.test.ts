@@ -67,6 +67,6 @@ describe('guide replies', () => {
     // compound goal: copper must be identified with the hand lens before it can be gathered
     ctx.state.inventory = { hand_lens: 1 };
     ctx.bus.emit('guideAsked', { question: 'what next' });
-    expect(text).toMatch(/Next goal: Compound microscope\. Look \(F\) at a Grey rock with your Hand lens to spot Copper veins/);
+    expect(text).toMatch(/Next goal: Compound microscope\. Look \[F\] at a Grey rock with your Hand lens to spot Copper veins/);
   });
 });

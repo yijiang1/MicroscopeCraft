@@ -24,7 +24,7 @@ const byId = <T extends { id: string }>(list: T[]) => Object.fromEntries(list.ma
 /** The mini-games that report scores (recordScore). */
 export const GAMES = ['koehler', 'gram', 'soak', 'tem_align', 'ronchigram', 'ptycho', 'beam_tune', 'tomo_center'] as const;
 /** Areas of the campus the world reports visits to. */
-export const AREAS = ['lake', 'quad', 'gorge', 'slope', 'forest', 'garden', 'lab', 'chess', 'tower', 'engquad'] as const;
+export const AREAS = ['lake', 'quad', 'gorge', 'slope', 'forest', 'garden', 'lab', 'chess', 'tower', 'engquad', 'fields', 'bridge'] as const;
 
 /** Throws one Error listing every problem, so a bad JSON entry is easy to find. */
 export function parseGameData(raw: {

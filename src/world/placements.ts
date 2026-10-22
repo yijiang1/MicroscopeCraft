@@ -1,108 +1,8 @@
 // What stands where in the world. Pure data (plus a seeded scatter), no rendering, so it is easy to test and retune.
-import { ATRIUM, CRYSTAL_SPOT, SCIENCE } from './campus';
+// What each kind of thing is (what it gathers or shows, its model) is in kinds.ts.
+import { ATRIUM, CRYSTAL_SPOT, MUSEUM, SCIENCE } from './campus';
+import type { Kind } from './kinds';
 import { gorgeZ, LAKE, mulberry32 } from './terrain';
-
-export type Kind =
-  | 'sand' | 'quartz' | 'iron' | 'copper' | 'tungsten' | 'sunflower' | 'resin' | 'logwood' // gatherable
-  | 'fluorite' | 'willemite' | 'monazite' | 'beryl' | 'galena' | 'iodine' | 'methylene' | 'gramkit'
-  | 'leaf' | 'flower' | 'wing' | 'pond' | 'crystal' // samples to look at
-  | 'bee' | 'picnic' | 'algae_mat' | 'mud' | 'feather' | 'pine_branch' | 'log' | 'mushroom' | 'moss' | 'lichen' | 'web'
-  | 'fern' | 'bone' | 'onion' | 'potato' | 'orchid' | 'nettle' | 'cotton' | 'shale' | 'mica'
-  | 'granite' | 'basalt' | 'obsidian' | 'marble' | 'chalk' | 'pyrite' | 'malachite' | 'magnetite' | 'garnet' // the rock garden
-  | 'concrete' | 'ibeam' | 'brick' | 'solar' | 'catconv' | 'bell' // engineering materials
-  | 'slides' | 'materials' | 'rack' | 'nanocase' | 'devicecase'; // cabinets holding several samples
-
-export interface Aim {
-  /** Item id gathered with E. */
-  gather?: string;
-  /** Sample id looked at with F. */
-  sample?: string;
-  /** Several samples to choose from with F (a cabinet, a table). */
-  samples?: string[];
-}
-
-export const AIMS: Record<Kind, Aim> = {
-  sand: { gather: 'beach_sand', sample: 'sand_grain' },
-  quartz: { gather: 'quartz_sand', sample: 'quartz_grain' },
-  iron: { gather: 'iron_ore', sample: 'iron_rock' },
-  // gathering these is locked until the Microdex discovery named by the material's unlockedBy
-  copper: { gather: 'copper_ore', sample: 'copper_rock' },
-  tungsten: { gather: 'tungsten_ore', sample: 'tungsten_rock' },
-  sunflower: { gather: 'plant_oil', sample: 'sunflower_seed' },
-  fluorite: { gather: 'fluorite', sample: 'fluorite_rock' },
-  willemite: { gather: 'willemite', sample: 'willemite_rock' },
-  monazite: { gather: 'monazite', sample: 'black_sand' },
-  beryl: { gather: 'beryl', sample: 'beryl_crystal' },
-  galena: { gather: 'galena', sample: 'galena_rock' },
-  resin: { gather: 'resin' },
-  logwood: { gather: 'hematoxylin' },
-  iodine: { gather: 'iodine_stain' },
-  methylene: { gather: 'methylene_blue' },
-  gramkit: { gather: 'gram_kit' },
-  leaf: { sample: 'leaf' },
-  flower: { sample: 'flower' },
-  wing: { sample: 'insect_wing' },
-  pond: { sample: 'pond_water' },
-  crystal: { sample: 'crystal_sample' },
-  bee: { sample: 'bee' },
-  picnic: { samples: ['table_salt', 'paper'] },
-  algae_mat: { sample: 'pond_scum' },
-  mud: { sample: 'lake_mud' },
-  feather: { sample: 'feather' },
-  pine_branch: { samples: ['pine_needle', 'pine_pollen'] },
-  log: { sample: 'bark' },
-  mushroom: { sample: 'mushroom' },
-  moss: { sample: 'moss' },
-  lichen: { sample: 'lichen' },
-  web: { sample: 'spider_web' },
-  fern: { sample: 'fern' },
-  bone: { sample: 'bone' },
-  onion: { sample: 'onion' },
-  potato: { sample: 'potato' },
-  orchid: { sample: 'orchid' },
-  nettle: { sample: 'nettle' },
-  cotton: { sample: 'cotton' },
-  shale: { sample: 'shale' },
-  mica: { sample: 'mica_rock' },
-  slides: { samples: ['cheek_slide', 'blood_slide', 'nerve_slide', 'bacteria_culture', 'yeast_culture', 'diatom_test', 'cell_section'] },
-  materials: { samples: ['virus_grid', 'gold_grid', 'graphene_sample', 'soot_sample', 'chip_sample', 'sto_crystal', 'mos2_sample', 'uranium_film'] },
-  rack: { samples: ['lysozyme', 'b12_crystals', 'dna_fiber', 'steel_sample', 'battery_cathode', 'amber_insect', 'meteorite_slice', 'silicon_crystal'] },
-  granite: { sample: 'granite' },
-  basalt: { sample: 'basalt' },
-  obsidian: { sample: 'obsidian' },
-  marble: { sample: 'marble' },
-  chalk: { sample: 'chalk' },
-  pyrite: { sample: 'pyrite' },
-  malachite: { sample: 'malachite' },
-  magnetite: { sample: 'magnetite' },
-  garnet: { sample: 'garnet_schist' },
-  concrete: { sample: 'concrete' },
-  ibeam: { sample: 'rusty_steel' },
-  brick: { sample: 'brick' },
-  solar: { sample: 'solar_cell' },
-  catconv: { sample: 'catalytic_converter' },
-  bell: { sample: 'bell_bronze' },
-  nanocase: { samples: ['quantum_dots', 'nanotubes', 'zeolite', 'mof'] },
-  devicecase: { samples: ['superconductor', 'blue_led'] },
-};
-
-/** Every sample a thing shows, one or several. */
-export const samplesOf = (aim: Aim) => aim.samples ?? (aim.sample ? [aim.sample] : []);
-
-/** Collision / highlight radius in metres. */
-export const RADIUS: Record<Kind, number> = {
-  sand: 0.8, quartz: 0.7, iron: 0.6, copper: 0.6, tungsten: 0.55, sunflower: 0.3, resin: 0.4, logwood: 0.5,
-  fluorite: 0.6, willemite: 0.6, monazite: 0.6, beryl: 0.5, galena: 0.4, iodine: 0, methylene: 0, gramkit: 0,
-  leaf: 0.55, flower: 0.35, wing: 0.4, pond: 0, crystal: 1.1,
-  bee: 0.3, picnic: 0.9, algae_mat: 0, mud: 0.6, feather: 0, pine_branch: 0.5, log: 0.7, mushroom: 0.3, moss: 0.45,
-  lichen: 0.6, web: 0.2, fern: 0.4, bone: 0.25, onion: 0.2, potato: 0.25, orchid: 0.2, nettle: 0.2, cotton: 0.25,
-  shale: 0.6, mica: 0.6, slides: 0.8, materials: 0.8, rack: 0.7,
-  granite: 0.6, basalt: 0.6, obsidian: 0.55, marble: 0.6, chalk: 0.55, pyrite: 0.45, malachite: 0.55, magnetite: 0.55, garnet: 0.6,
-  concrete: 0.6, ibeam: 0.8, brick: 0.5, solar: 0.9, catconv: 0.7, bell: 0.8, nanocase: 0.8, devicecase: 0.8,
-};
-
-/** Things that stand inside buildings (the greenhouse, the lab, the CHESS hall, the atrium) on purpose. */
-export const INDOORS = new Set<Kind>(['onion', 'potato', 'orchid', 'nettle', 'cotton', 'slides', 'materials', 'iodine', 'methylene', 'gramkit', 'rack', 'nanocase', 'devicecase']);
 
 export interface Placement {
   kind: Kind;
@@ -154,10 +54,10 @@ export const PLACEMENTS: Placement[] = [
   { kind: 'feather', x: 41, z: -44 },
   // Rocky rim of the gorge: iron near the waterfall (west of the spawn), quartz farther west behind the halls,
   // galena east of the iron, fluorite west of the quartz
-  ...cluster('iron', 24, -49, 8, 4.5, 5),
+  ...cluster('iron', 23, -46.5, 8, 3.5, 5),
   ...cluster('galena', 14, -53, 4, 2.5, 21, 1.2),
   ...cluster('quartz', -26, -48, 10, 4.5, 6, 1.5),
-  ...cluster('fluorite', -40, -50, 4, 2.5, 22),
+  ...cluster('fluorite', -40, -48.5, 4, 2.5, 22),
   // Down at the creek: pale willemite rocks and dark heavy sand on the bank, a shale slab full of fossils
   ...creekBank('willemite', [2, 6, 10], 5.6),
   ...creekBank('monazite', [-12, -8, -4], 5.6),
@@ -217,4 +117,10 @@ export const PLACEMENTS: Placement[] = [
   // display cases against the atrium's north wall
   { kind: 'nanocase', x: ATRIUM.x0 + 6, z: ATRIUM.z0 + 0.8 },
   { kind: 'devicecase', x: ATRIUM.x1 - 6, z: ATRIUM.z0 + 0.8 },
+  // The art museum: the two big canvases on the west and north walls, three small ones side by side on the south wall
+  { kind: 'nightwatch', x: MUSEUM.x0 + 0.34, z: -39.5, yaw: Math.PI / 2 },
+  { kind: 'grandejatte', x: -41, z: MUSEUM.z0 + 0.34, yaw: 0 },
+  { kind: 'starry', x: -43.5, z: MUSEUM.z1 - 0.34, yaw: Math.PI },
+  { kind: 'pearlgirl', x: -41.3, z: MUSEUM.z1 - 0.34, yaw: Math.PI },
+  { kind: 'greatwave', x: -39.3, z: MUSEUM.z1 - 0.34, yaw: Math.PI },
 ];

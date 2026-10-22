@@ -3,6 +3,7 @@
 // and steps already done in a saved game are skipped. Replay from the menu. Owner: Person D.
 import { ownedScopes, type GameContext } from '../shared/state';
 import { itemIcon } from './icons';
+import { withKeys } from './keys';
 
 export const TUTORIAL_KEY = 'microscopecraft:tutorial';
 
@@ -23,12 +24,12 @@ const STEPS: Step[] = [
   { title: 'Look and move', text: 'Click the game to take the mouse. Move the mouse to look around; W A S D to walk, Shift to run, Space to jump.' },
   {
     title: 'Gather a material',
-    text: 'The yellow arrow at the top of the screen points to what you need next. Walk up to it, put the white dot on it and press E.',
+    text: 'The yellow arrow at the top of the screen points to what you need next. Walk up to it, put the white dot on it and press [E].',
     done: (ctx) => Object.values(ctx.state.inventory).some((n) => n > 0),
   },
   {
     title: 'Craft a part',
-    text: 'The NEXT CRAFT box on the right shows the recipe. When it lights up gold, press C: raw materials become parts.',
+    text: 'The NEXT CRAFT box on the right shows the recipe. When it lights up gold, press [C]: raw materials become parts.',
     done: (ctx) => Object.keys(ctx.state.inventory).some((id) => !ctx.data.materials[id]),
   },
   {
@@ -36,22 +37,22 @@ const STEPS: Step[] = [
     text: 'Keep gathering and crafting until the Hand lens is done. The tree on the right shows what is left; T opens the full tech tree.',
     done: (ctx) => ownedScopes(ctx.state.inventory, ctx.data).length > 0,
   },
-  { title: 'Look closer', text: 'Aim at something (a leaf, a rock, the sand) and press F to look at it through your microscope.', done: (ctx) => ctx.state.discoveries.length > 0 },
+  { title: 'Look closer', text: 'Aim at something (a leaf, a rock, the sand) and press [F] to look at it through your microscope.', done: (ctx) => ctx.state.discoveries.length > 0 },
   {
     title: 'Focus and discover',
-    text: 'Drag Focus until the picture is sharp. Anything big enough for your microscope to resolve becomes a discovery in the Microdex (M). Esc goes back.',
+    text: 'Drag Focus until the picture is sharp. Anything big enough for your microscope to resolve becomes a discovery in the Microdex [M]. [Esc] goes back.',
     done: (ctx) => ctx.state.discoveries.length > 0,
   },
   {
     title: 'You know the loop',
-    text: 'Each new microscope resolves smaller things. Light microscopes stop at about 0.2 µm, roughly half the wavelength of light; electrons go down to atoms. Scientists around campus ask for help (J), and G asks the guide.',
+    text: 'Each new microscope resolves smaller things. Light microscopes stop at about 0.2 µm, roughly half the wavelength of light; electrons go down to atoms. Scientists around campus ask for help [J],.',
   },
 ];
 
 const div = (css = '', text = '') => {
   const d = document.createElement('div');
   d.style.cssText = css;
-  d.textContent = text;
+  withKeys(d, text);
   return d;
 };
 const button = (text: string, primary: boolean, onclick: () => void) => {

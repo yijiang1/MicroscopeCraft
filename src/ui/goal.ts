@@ -7,6 +7,7 @@ import { canCraft, craft, type GameContext } from '../shared/state';
 import { itemIcon } from './icons';
 import { drawTree, goalLayout } from './techtree';
 import type { Toast } from './toast';
+import { withKeys } from './keys';
 
 export interface GoalHandle {
   render(): void;
@@ -20,7 +21,7 @@ const WIDTH = 'min(310px,calc(100vw - 16px))';
 const div = (css = '', text = '') => {
   const d = document.createElement('div');
   d.style.cssText = css;
-  d.textContent = text;
+  withKeys(d, text);
   return d;
 };
 
@@ -70,7 +71,7 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void, 
 
     if (!plan) {
       track(null);
-      card.append(div('color:#9ab;margin-top:4px', 'Fill the Microdex (M), and help the scientists around campus: J shows what each one asks for.'));
+      card.append(div('color:#9ab;margin-top:4px', 'Fill the Microdex [M], and help the scientists around campus: [J] shows what each one asks for.'));
     } else {
       const trackedRaw = plan.raw.find((r) => r.itemId === pinned && r.missing > 0) ?? plan.raw.find((r) => r.missing > 0);
       if (pinned && trackedRaw?.itemId !== pinned) pinned = null;
@@ -147,7 +148,7 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void, 
     out.append(itemIcon(recipe.output.itemId, data, 22), `${data.items[recipe.output.itemId]?.name ?? recipe.output.itemId}`);
     line.append(div('color:#9ab;font-size:16px', '→'), out);
     const btn = document.createElement('button');
-    btn.textContent = 'Craft (C)';
+    withKeys(btn, 'Craft [C]');
     btn.disabled = !ready;
     btn.style.cssText = `margin-left:auto;padding:3px 10px;border-radius:6px;border:0;font-weight:700;${ready ? 'background:#ffd35a;color:#222;cursor:pointer;box-shadow:0 0 8px #ffd35a88' : 'background:#444;color:#999'}`;
     btn.onclick = () => doCraft(recipe.id);

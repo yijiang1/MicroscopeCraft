@@ -2,12 +2,14 @@
 // where one exists), with a name tag and a marker that shows whether they are waiting for something you can show them.
 import * as THREE from 'three';
 import type { Npc } from '../shared/schema';
+import { mergeByMaterial } from './models';
 
 export interface NpcFigure {
   root: THREE.Group;
   /** '!' gold: you have something to show; '?' grey: they are still waiting; none: every request done. */
   setMarker(kind: 'ready' | 'waiting' | 'done'): void;
-  update(t: number): void;
+  update(t: number, moving?: boolean): void;
+  say(text: string): void;
 }
 
 function tag(text: string, sub: string): THREE.Sprite {
@@ -81,12 +83,16 @@ export function buildNpc(npc: Npc): NpcFigure {
   box([0.5, 0.2, 0.32], [0, 0.78, 0], coat);
   box([0.18, 0.12, 0.18], [0, 1.49, 0], skin);
   box([0.38, 0.4, 0.36], [0, 1.72, 0], skin);
+  const limbs: THREE.Group[] = [];
   for (const side of [-1, 1]) {
+    const arm = new THREE.Group(); arm.position.set(side * 0.38, 1.45, 0);
+    const leg = new THREE.Group(); leg.position.set(side * 0.14, 0.7, 0);
+    root.add(arm, leg); limbs.push(arm, leg);
     box([0.045, 0.045, 0.02], [side * 0.09, 1.76, -0.185], dark);
-    box([0.2, 0.62, 0.26], [side * 0.38, 1.18, 0], coat);
-    box([0.16, 0.12, 0.2], [side * 0.38, 0.82, 0], skin);
-    box([0.23, 0.7, 0.28], [side * 0.14, 0.35, 0], pants);
-    box([0.25, 0.14, 0.38], [side * 0.14, 0.07, -0.05], dark);
+    box([0.2, 0.62, 0.26], [0, -0.27, 0], coat, arm);
+    box([0.16, 0.12, 0.2], [0, -0.63, 0], skin, arm);
+    box([0.23, 0.7, 0.28], [0, -0.35, 0], pants, leg);
+    box([0.25, 0.14, 0.38], [0, -0.63, -0.05], dark, leg);
   }
   box([0.08, 0.08, 0.07], [0, 1.67, -0.2], skin);
   switch (look.hairStyle) {
@@ -122,16 +128,48 @@ export function buildNpc(npc: Npc): NpcFigure {
     for (const side of [-1, 1]) box([0.11, 0.07, 0.01], [side * 0.09, 1.76, -0.19], rim);
     box([0.07, 0.015, 0.01], [0, 1.77, -0.19], rim);
   }
+  // Keep limb meshes separate so walking remains articulated.
+  const body = new THREE.Group();
+  for (const child of [...root.children]) if (!limbs.includes(child as THREE.Group)) body.add(child);
+  mergeByMaterial(body); root.add(body);
   const name = tag(npc.name, npc.years);
   name.position.set(0, 2.35, 0);
   const mk = marker();
   mk.sprite.position.set(0, 2.75, 0);
   root.add(name, mk.sprite);
+  const bubbleCanvas = document.createElement('canvas');
+  bubbleCanvas.width = 768; bubbleCanvas.height = 256;
+  const bubbleContext = bubbleCanvas.getContext('2d')!;
+  const bubbleTexture = new THREE.CanvasTexture(bubbleCanvas);
+  bubbleTexture.colorSpace = THREE.SRGBColorSpace;
+  const bubble = new THREE.Sprite(new THREE.SpriteMaterial({ map: bubbleTexture, depthWrite: false }));
+  bubble.scale.set(4.8, 1.6, 1); bubble.position.set(0, 3.9, 0); bubble.visible = false;
+  root.add(bubble);
+  let lastSpeech = '';
   const phase = Math.random() * 6;
   return {
     root,
     setMarker: mk.set,
-    update(t) {
+    say(text) {
+      if (text === lastSpeech) return;
+      lastSpeech = text; bubble.visible = !!text;
+      if (!text) return;
+      const g = bubbleContext;
+      g.clearRect(0, 0, 768, 256);
+      g.fillStyle = '#fffdf2'; g.beginPath(); g.roundRect(4, 4, 760, 218, 28); g.fill();
+      g.beginPath(); g.moveTo(350, 220); g.lineTo(384, 253); g.lineTo(414, 220); g.fill();
+      g.fillStyle = '#21313c'; g.font = '30px system-ui'; g.textAlign = 'center';
+      const lines: string[] = []; let line = '';
+      for (const word of text.split(' ')) {
+        const next = line ? `${line} ${word}` : word;
+        if (g.measureText(next).width > 700 && line) { lines.push(line); line = word; } else line = next;
+      }
+      lines.push(line);
+      lines.forEach((l, i) => g.fillText(l, 384, 110 - (lines.length - 1) * 19 + i * 38));
+      bubbleTexture.needsUpdate = true;
+    },
+    update(t, moving = false) {
+      limbs.forEach((limb, i) => { limb.rotation.x = moving ? Math.sin(t * 0.007 + phase) * 0.4 * ([1, -1, -1, 1][i]!) : 0; });
       mk.sprite.position.y = 2.75 + 0.06 * Math.sin(t * 0.003 + phase);
     },
   };

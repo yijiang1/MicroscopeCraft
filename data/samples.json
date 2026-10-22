@@ -884,5 +884,64 @@
       { "id": "gallium_map", "name": "Gallium map", "sizeUm": 20, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 10.367, "drawing": "map", "tint": "#8aff8a",
         "blurb": "Above gallium's absorption edge at 10.37 keV, the chip's whole active area lights up. Gallium also goes into the chips that send signals in phones, so it is counted as a critical material." }
     ]
+  },
+  {
+    "id": "starry_night", "name": "The Starry Night (after Van Gogh)", "worldObject": "starry", "biome": "museum",
+    "features": [
+      { "id": "sn_brushstrokes", "name": "Impasto brushstrokes", "sizeUm": 3000, "contrast": 0.55, "drawing": "lines", "tint": "#5d86cc",
+        "blurb": "Van Gogh laid the paint on thickly in short, curving strokes that still stand up from the canvas. The ridges follow the swirls of the sky, so the path of his brush can be read stroke by stroke." },
+      { "id": "sn_ultramarine", "name": "Artificial ultramarine", "sizeUm": 1.5, "contrast": 0.45, "drawing": "grains", "tint": "#2a40b0",
+        "blurb": "An imaging study of the painting matched the deep blue of the night sky to artificial ultramarine. Made in factories since the late 1820s, it gave painters the blue of lapis lazuli at a small fraction of the price." },
+      { "id": "sn_cobalt_map", "name": "Cobalt map", "sizeUm": 200, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 7.709, "drawing": "map", "tint": "#7aa0ff",
+        "blurb": "Above cobalt's absorption edge at 7.71 keV, the map picks out the brighter blue of the swirls, which the same study matched to cobalt blue. Ultramarine holds only light elements whose weak glow barely shows, so the deep blue around them stays dark." },
+      { "id": "sn_canvas", "name": "Canvas weave", "sizeUm": 500, "contrast": 0, "contrastIn": { "xct": 0.5 }, "drawing": "fibers", "tint": "#c8b090",
+        "blurb": "X-rays pass through the paint and show the weave of the canvas beneath it. By counting threads in X-ray images, researchers have matched canvases that Van Gogh cut from the same roll, which helps to date his paintings." }
+    ]
+  },
+  {
+    "id": "pearl_earring", "name": "Girl with a Pearl Earring (after Vermeer)", "worldObject": "pearlgirl", "biome": "museum",
+    "features": [
+      { "id": "pe_craquelure", "name": "Craquelure", "sizeUm": 600, "contrast": 0.45, "drawing": "mosaic", "tint": "#3a2e22",
+        "blurb": "In more than three and a half centuries the paint has cracked into a fine network as the oil hardened and the canvas moved. Conservators watch these cracks closely, because paint can lift and flake along their edges." },
+      { "id": "pe_ultramarine", "name": "Natural ultramarine", "sizeUm": 10, "contrast": 0.5, "drawing": "grains", "tint": "#1d3fa8",
+        "blurb": "The blue of the turban is ultramarine ground from lapis lazuli mined in what is now Afghanistan, then dearer than gold. Ground from rock, it shows as angular blue grains of uneven size, with colourless crystals of other minerals among them." },
+      { "id": "pe_green_glaze", "name": "Faded green glaze", "sizeUm": 4, "contrast": 0.25, "drawing": "cluster", "tint": "#2a3a28",
+        "blurb": "Imaging and paint samples showed that the dark background was once a green curtain, painted in a translucent green glaze. The green has darkened over the centuries, so the girl now seems to float against black." },
+      { "id": "pe_lead_map", "name": "Lead map", "sizeUm": 200, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 13.035, "drawing": "map", "tint": "#ffffff",
+        "blurb": "Above lead's L edge at 13.04 keV, the pearl lights up as a few touches of lead white, a bright highlight above and a soft reflection below. There is no outline and no hook to hang it from the ear, so the pearl is an illusion." }
+    ]
+  },
+  {
+    "id": "great_wave", "name": "The Great Wave (after Hokusai)", "worldObject": "greatwave", "biome": "museum",
+    "features": [
+      { "id": "gw_paper", "name": "Mulberry paper fibres", "sizeUm": 20, "contrast": 0.4, "drawing": "fibers", "tint": "#e8dcc0",
+        "blurb": "The print is on Japanese paper made from the long inner-bark fibres of the paper mulberry. Long, tough fibres let a sheet survive being pressed again and again onto inked woodblocks, one block for each colour." },
+      { "id": "gw_prussian_blue", "name": "Prussian blue particles", "sizeUm": 0.2, "contrast": 0.45, "drawing": "grains", "tint": "#1a3a90",
+        "blurb": "The bright blue is Prussian blue, a synthetic iron pigment that had only recently become cheap in Japan. Its particles are only a fraction of a micrometre across, so an electron microscope shows them best." },
+      { "id": "gw_iron_map", "name": "Iron map", "sizeUm": 200, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 7.112, "drawing": "map", "tint": "#8ab0ff",
+        "blurb": "Above iron's absorption edge at 7.11 keV, every stroke of Prussian blue lights up, because the pigment is built around iron. Indigo, the older plant blue the printers mixed in for the darkest stripes, has no iron and stays dark." }
+    ]
+  },
+  {
+    "id": "grande_jatte", "name": "A Sunday on La Grande Jatte (after Seurat)", "worldObject": "grandejatte", "biome": "museum",
+    "features": [
+      { "id": "gj_dabs", "name": "Dabs of pure colour", "sizeUm": 2000, "contrast": 0.55, "drawing": "droplets", "tint": "#c8a040",
+        "blurb": "Seurat built the picture from small dabs of unmixed colour placed side by side. From a distance the dabs blend in the eye, which he hoped would keep the colours brighter than mixing them on the palette." },
+      { "id": "gj_zinc_yellow", "name": "Darkened zinc yellow", "sizeUm": 1, "contrast": 0.4, "drawing": "grains", "tint": "#8a7a3a",
+        "blurb": "Seurat used zinc yellow, a new pigment that slowly turns brown, and the change was already showing before he died in 1891. The bright yellow and yellow-green dabs in the sunlit grass are now brown and olive." },
+      { "id": "gj_chromium_map", "name": "Chromium map", "sizeUm": 200, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 5.989, "drawing": "map", "tint": "#ffe060",
+        "blurb": "Zinc yellow is a zinc chromate, so above chromium's edge at 5.99 keV the map finds the dabs that hold it. Experiments on aged copies of the paint tied the browning to the chromium being chemically reduced, the same change that darkens Van Gogh's chrome yellow." }
+    ]
+  },
+  {
+    "id": "night_watch", "name": "The Night Watch (after Rembrandt)", "worldObject": "nightwatch", "biome": "museum",
+    "features": [
+      { "id": "nw_varnish", "name": "Darkened varnish", "sizeUm": 30, "contrast": 0.35, "drawing": "cluster", "tint": "#6a4a20",
+        "blurb": "Old varnish yellowed and darkened until the daytime scene seemed to take place at night, which is how the painting got its nickname. Its full title names the militia company of Captain Frans Banninck Cocq, shown setting out in daylight." },
+      { "id": "nw_lead_formate", "name": "Lead formate", "sizeUm": 0.00035, "contrast": 0, "contrastIn": { "xrd": 0.6 }, "drawing": "spots",
+        "blurb": "X-ray diffraction of tiny paint flakes at synchrotrons found lead formate, a compound never seen before in a historic painting. It turned up even where there is no lead pigment, and the team thinks it came from lead oxide that Rembrandt dissolved in his oil to help it dry." },
+      { "id": "nw_lead_map", "name": "Lead map", "sizeUm": 200, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 13.035, "drawing": "map", "tint": "#ffffff",
+        "blurb": "Above lead's L edge at 13.04 keV, the map shows a lead layer under all the paint, laid on in big curving brushstrokes. Rembrandt soaked the canvas with lead-rich oil before painting, probably to guard it against the damp wall it would hang on." }
+    ]
   }
 ]

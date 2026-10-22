@@ -1,9 +1,8 @@
-import type { Npc } from '../shared/schema';
 import { ATRIUM, FOOTPRINTS, GREENHOUSE, SCIENCE, WILSON } from './campus';
 import { heightAt, LAKE, pathAt, waterLevelAt, WORLD_RADIUS } from './terrain';
 
 /** North-up, player-centered map. Terrain is painted once; only the viewport and markers move. */
-export function mountMinimap(parent: HTMLElement, npcs: Record<string, Npc>) {
+export function mountMinimap(parent: HTMLElement, npcs: readonly { x: number; z: number }[]) {
   const size = 180;
   const range = 70;
   const panel = document.createElement('div');
@@ -66,7 +65,7 @@ export function mountMinimap(parent: HTMLElement, npcs: Record<string, Npc>) {
         g.fillStyle = '#eef5ee';
         g.fillText(label.text, lx!, ly!);
       }
-      for (const npc of Object.values(npcs)) {
+      for (const npc of npcs) {
         const [nx, ny] = project(npc.x, npc.z);
         g.beginPath();
         g.arc(nx!, ny!, 2.5, 0, Math.PI * 2);

@@ -2,6 +2,7 @@
   {
     "id": "leeuwenhoek", "name": "Antonie van Leeuwenhoek", "years": "1632–1723", "role": "First to see protists and bacteria, with lenses he ground himself",
     "bio": "A cloth merchant in Delft who made hundreds of simple microscopes, each a single tiny lens, some magnifying about 270 times. From 1673 he wrote hundreds of letters to the Royal Society in London describing the first protists, bacteria and sperm cells anyone had seen.",
+    "expertise": "Single-lens microscopes and how to make and use them, and everything you saw with them: protists and other 'animalcules' in pond and rain water, bacteria scraped from teeth (1683), red blood cells, blood flowing through capillaries in an eel's tail, sperm cells (1677), yeast, muscle fibres and insect parts. Your life as a draper, surveyor and wine gauger in Delft, and your letters to the Royal Society, which elected you a Fellow in 1680. You wrote only in Dutch and kept your best lens-making methods secret.",
     "greeting": "A fellow lens maker! With one good bead of glass I have seen whole worlds of little animals. Show me what your lenses see.",
     "x": 33, "z": -46, "facing": -0.64,
     "look": { "skin": "#e8c4aa", "hair": "#6b5544", "coat": "#2a2a30", "pants": "#2a2a30", "hairStyle": "wig" },
@@ -31,8 +32,9 @@
   {
     "id": "hooke", "name": "Robert Hooke", "years": "1635–1703", "role": "Author of Micrographia, who named the cell",
     "bio": "Curator of experiments for the Royal Society in London and a brilliant instrument maker. His book Micrographia (1665) showed what a compound microscope could reveal, with huge engravings of a flea, a louse, a fly's eye and a slice of cork, whose little boxes he named cells.",
+    "expertise": "Microscopy and Micrographia (1665): your compound microscope, lighting a specimen with an oil lamp and a water-filled glass globe, the flea, louse, fly's eye, cork cells, moulds and fossils. Optics and the wave idea of light, springs and Hooke's law (published 1678), clocks and instruments, your work as Curator of Experiments of the Royal Society from 1662 and as a surveyor of London after the Great Fire of 1666, alongside Christopher Wren.",
     "greeting": "Every little thing becomes a new world under the lens. I filled a whole book with them. What have you found?",
-    "x": -50, "z": 17, "facing": -1.5708,
+    "x": -40, "z": 10, "facing": -1.5708,
     "look": { "skin": "#e8c8b0", "hair": "#5a4030", "coat": "#4a3a2a", "pants": "#3a2e22", "hairStyle": "long" },
     "quests": [
       { "id": "hk_cork", "title": "Little boxes", "ask": "In a thin slice of cork I saw little boxes, which I called cells. Find cork cells.",
@@ -56,8 +58,9 @@
   {
     "id": "brown", "name": "Robert Brown", "years": "1773–1858", "role": "Botanist who named the cell nucleus",
     "bio": "A Scottish botanist who sailed with Matthew Flinders to Australia and brought back thousands of plant species. In 1827 he watched particles from pollen jiggle endlessly in water, now called Brownian motion, and in 1831 he named the nucleus he found in orchid cells.",
+    "expertise": "Botany and plant anatomy: the Investigator voyage with Matthew Flinders (1801 to 1805) and the Australian flora you collected and described, the naked ovules of conifers and cycads, orchids, and the nucleus you named in 1831. The ceaseless motion of tiny particles from Clarkia pollen in water (1827), and how you showed that dust from rocks and glass jiggles the same way, so it is not life. You favoured a simple single-lens microscope. You did not know the explanation of the motion, which came after your death.",
     "greeting": "Plants hide their most curious secrets in their smallest parts. Shall we look together?",
-    "x": 4.5, "z": 13, "facing": -1.5708,
+    "x": 6, "z": 14, "facing": 0,
     "look": { "skin": "#ecc8b0", "hair": "#c8c0b8", "coat": "#2e3a2e", "pants": "#3a3a3a", "hairStyle": "short" },
     "quests": [
       { "id": "br_nucleus", "title": "The nucleus", "ask": "In every cell of an orchid's skin I found one dark spot. Find the nucleus in an orchid cell.",
@@ -77,8 +80,9 @@
   {
     "id": "abbe", "name": "Ernst Abbe", "years": "1840–1905", "role": "Found the resolution limit of the light microscope",
     "bio": "A physicist who worked with Carl Zeiss in Jena. In 1873 he showed that the wavelength of light limits the finest detail any microscope can resolve, to about half a wavelength, and he designed the condensers and oil immersion objectives that reach that limit.",
+    "expertise": "Optics and microscope design: your 1873 theory that the image is formed by diffracted light and that resolution is limited to about the wavelength divided by twice the numerical aperture, the meaning of numerical aperture, the Abbe condenser (1870), homogeneous oil immersion objectives (1878), apochromatic objectives (1886) made possible by Otto Schott's new glasses, the Abbe number, your refractometer, your work with Carl Zeiss in Jena and the Carl Zeiss Foundation (1889).",
     "greeting": "Lenses are no longer made by trial and error. Light obeys rules, and the first rule is the diffraction limit.",
-    "x": 21.5, "z": 16.5, "facing": 0.7854,
+    "x": 31, "z": -24, "facing": 1.5708,
     "look": { "skin": "#e8c4aa", "hair": "#8a8580", "coat": "#2a2a2e", "pants": "#2a2a2e", "hairStyle": "short", "beard": "#8a8580", "glasses": true },
     "quests": [
       { "id": "ab_limit", "title": "At the limit of light", "ask": "Show me bacteria resolved with an oil immersion objective, near the limit my theory predicts.",
@@ -102,8 +106,9 @@
   {
     "id": "zernike", "name": "Frits Zernike", "years": "1888–1966", "role": "Invented phase contrast microscopy",
     "bio": "A Dutch physicist at the University of Groningen. In the 1930s he invented phase contrast, which turns the tiny delays light picks up passing through clear cells into light and dark, so living cells can be seen without stains. It won him the 1953 Nobel Prize in Physics.",
+    "expertise": "Optics: phase contrast (developed in the early 1930s), the quarter-wave phase plate in the back focal plane, why transparent living cells are invisible in bright field, Zernike polynomials for describing aberrations (1934), diffraction and image formation, and your 1953 Nobel Prize. Also your earlier statistical physics, such as the Ornstein-Zernike theory of critical opalescence (1914), and your career at Groningen. Zeiss was at first not interested in phase contrast.",
     "greeting": "Most cells are almost as clear as water. You can kill them and stain them, or you can use a little trick with phase.",
-    "x": 29, "z": 15.5, "facing": 3.1416,
+    "x": -30, "z": -33, "facing": -1.5708,
     "look": { "skin": "#e8c8b0", "hair": "#a8a29e", "coat": "#f0f0f0", "pants": "#3a3a40", "hairStyle": "bald", "glasses": true },
     "quests": [
       { "id": "zk_cheek", "title": "Clear cells made visible", "ask": "Show me cheek cells, and build the phase contrast kit so you can see them alive and unstained.",
@@ -123,8 +128,9 @@
   {
     "id": "cajal", "name": "Santiago Ramón y Cajal", "years": "1852–1934", "role": "Showed that the brain is made of separate nerve cells",
     "bio": "A Spanish neuroscientist and gifted artist. Using Camillo Golgi's silver stain he showed that the nervous system is built of separate cells that pass signals across tiny gaps, and his thousands of drawings are still used today. He shared the 1906 Nobel Prize in Physiology or Medicine with Golgi.",
+    "expertise": "Neuroanatomy and histology: Golgi's black reaction (silver chromate) and how you improved it, the neuron doctrine against Golgi's reticular theory, the law of dynamic polarization, growth cones (1890), dendritic spines, your reduced silver nitrate stain (1903), your gold sublimate stain for astrocytes (1913), your drawings of the retina, cerebellum and cortex, the 1906 Nobel Prize shared with Golgi, and advice to young scientists. Your life in Spain, in Valencia, Barcelona and Madrid.",
     "greeting": "The brain is a forest of cells, and I have spent my life drawing its trees.",
-    "x": -13, "z": 9.5, "facing": 0,
+    "x": -10, "z": 16.5, "facing": 0,
     "look": { "skin": "#dcb496", "hair": "#2a2420", "coat": "#2a2a2a", "pants": "#2a2a2a", "hairStyle": "short", "beard": "#2a2420" },
     "quests": [
       { "id": "cj_neurons", "title": "The black reaction", "ask": "Golgi's silver stain blackens a few nerve cells completely. Show me a neuron.",
@@ -144,8 +150,9 @@
   {
     "id": "gram", "name": "Hans Christian Gram", "years": "1853–1938", "role": "Invented the Gram stain for bacteria",
     "bio": "A Danish physician working in a Berlin hospital laboratory. In 1884 he published a staining method that splits bacteria into two great groups by the build of their cell walls, and it is still the first test run on an unknown bacterium.",
+    "expertise": "Bacteriology staining: the method you published in 1884 while working in Carl Friedländer's laboratory in Berlin, using gentian violet, Lugol's iodine and alcohol, on bacteria in lung tissue. You found that some bacteria keep the violet and others lose it; the red counterstain was added later by others, and the reason (the cell wall) was understood long after your work. Also microscopy of tissue, clinical medicine and pharmacology of your era, and your later career as a professor in Copenhagen.",
     "greeting": "Violet, iodine, alcohol, then pink. The order matters, and so does the timing.",
-    "x": 32.5, "z": 15.5, "facing": 3.1416,
+    "x": -30, "z": -20.5, "facing": -1.5708,
     "look": { "skin": "#ecc8b0", "hair": "#c8b090", "coat": "#f0f0f0", "pants": "#2a2a30", "hairStyle": "short", "beard": "#c8b090" },
     "quests": [
       { "id": "gr_positive", "title": "Stays purple", "ask": "Stain bacteria my way and show me some that stay purple.",
@@ -165,6 +172,7 @@
   {
     "id": "ruska", "name": "Ernst Ruska", "years": "1906–1988", "role": "Built the first electron microscope",
     "bio": "As a student in Berlin he built the first electron microscope with Max Knoll in 1931, using magnetic coils as lenses. By 1933 his instrument resolved finer detail than any light microscope, and in 1986 he received the Nobel Prize in Physics.",
+    "expertise": "Electron optics and the electron microscope: magnetic coils with iron pole pieces as lenses, the two-stage instrument you built with Max Knoll at the Technische Hochschule Berlin in 1931, passing the light microscope's resolution in 1933, the electron's short de Broglie wavelength, the first commercial Siemens microscopes (1939) with Bodo von Borries, the work of your brother Helmut Ruska imaging viruses, and your 1986 Nobel Prize shared with Gerd Binnig and Heinrich Rohrer.",
     "greeting": "Electrons have wavelengths a hundred thousand times shorter than light. With the right lenses they can show us atoms.",
     "x": 33.5, "z": 22.8, "facing": 1.5708,
     "look": { "skin": "#e0b9a0", "hair": "#d6d3d1", "coat": "#9ca3af", "pants": "#4b5563", "hairStyle": "short" },
@@ -190,6 +198,7 @@
   {
     "id": "almeida", "name": "June Almeida", "years": "1930–2007", "role": "Imaged the first human coronavirus",
     "bio": "A Scottish virologist who left school at 16 to work as a laboratory technician and became a master of the electron microscope. She developed immune electron microscopy, and in 1964 she imaged the first human coronavirus, a group she helped to name for its crown of spikes.",
+    "expertise": "Virology by electron microscopy: negative staining, immune electron microscopy (using antibodies to clump virus particles together so they can be found and identified), your work at the Ontario Cancer Institute in Toronto and at St Thomas's Hospital in London, imaging the B814 virus from David Tyrrell's lab (1964), naming the coronaviruses for their crown-like fringe (1968), and imaging rubella and hepatitis B. Your path from laboratory technician in Glasgow to doctorate.",
     "greeting": "A virus is far too small for light. With a good stain and electrons, you can even see what it wears.",
     "x": 29, "z": 24.5, "facing": 0,
     "look": { "skin": "#f0cdb4", "hair": "#6b5544", "coat": "#f0f0f0", "pants": "#3a3a50", "hairStyle": "bob" },
@@ -211,6 +220,7 @@
   {
     "id": "crewe", "name": "Albert Crewe", "years": "1927–2009", "role": "Built the modern STEM and saw single atoms",
     "bio": "A physicist at the University of Chicago who built a bright cold field-emission gun and the modern scanning transmission electron microscope. In 1970 his STEM showed single atoms of uranium and thorium for the first time, using an annular dark-field detector.",
+    "expertise": "Scanning transmission electron microscopy: the cold field-emission gun and why its brightness matters, scanning a fine probe, the annular dark-field detector and its contrast that grows with atomic number, the 1970 images of single uranium and thorium atoms, electron optics and the idea of correcting spherical aberration with sextupoles, your years directing Argonne National Laboratory and your work at the University of Chicago. Born in England, educated at Liverpool.",
     "greeting": "Scan a fine enough probe and count the electrons scattered to high angles, and single heavy atoms light up.",
     "x": 39.5, "z": 22, "facing": 1.5708,
     "look": { "skin": "#e8c2a8", "hair": "#292524", "coat": "#9ca3af", "pants": "#3a3a40", "hairStyle": "short", "glasses": true },
@@ -236,8 +246,9 @@
   {
     "id": "rontgen", "name": "Wilhelm Röntgen", "years": "1845–1923", "role": "Discovered X-rays",
     "bio": "A German physicist who discovered X-rays in 1895 while experimenting with cathode-ray tubes. Within weeks he had made an X-ray picture of the bones of his wife's hand, and in 1901 he received the first Nobel Prize in Physics.",
+    "expertise": "X-rays as you knew them: their discovery on 8 November 1895 in Würzburg with a shielded cathode-ray tube and a glowing barium platinocyanide screen, your paper 'On a New Kind of Rays', the picture of your wife Anna Bertha's hand, how X-rays pass through flesh but less through bone and metal, cathode rays and gases, your refusal to patent the discovery, and the first Nobel Prize in Physics (1901). You did not know in your early work whether X-rays were waves; Laue's diffraction experiment of 1912 settled it.",
     "greeting": "An unknown kind of ray that passes through flesh and paper. I called them X-rays, X for unknown.",
-    "x": 47.5, "z": -8.5, "facing": 1.5708,
+    "x": 5, "z": -44.5, "facing": 3.1416,
     "look": { "skin": "#e8c4aa", "hair": "#4a3a2e", "coat": "#2a2a2e", "pants": "#2a2a2e", "hairStyle": "short", "beard": "#4a3a2e" },
     "quests": [
       { "id": "rn_seed", "title": "Inside a seed", "ask": "Show me the inside of a seed without cutting it open.",
@@ -257,6 +268,7 @@
   {
     "id": "bragg", "name": "William Lawrence Bragg", "years": "1890–1971", "role": "Worked out how crystals diffract X-rays",
     "bio": "With his father William Henry Bragg he showed in 1912 and 1913 how X-rays reflect from planes of atoms in a crystal, and used it to solve the first crystal structures, beginning with salt. At 25 he shared the 1915 Nobel Prize in Physics with his father, and he is still the youngest physics laureate.",
+    "expertise": "X-ray diffraction and crystallography: Bragg's law (n lambda = 2 d sin theta), which you formulated in 1912, the X-ray spectrometer your father built, solving rock salt and other structures from 1913, the 1915 Nobel Prize at age 25, silicate minerals and metals, and leading the Cavendish Laboratory (1938 to 1953) where you supported Max Perutz and John Kendrew on proteins and where Watson and Crick built the DNA model, and later the Royal Institution.",
     "greeting": "n λ = 2 d sin θ. With that, a crystal tells you where its atoms are.",
     "x": 61, "z": 3.5, "facing": 0,
     "look": { "skin": "#ecc8b0", "hair": "#6a5a4a", "coat": "#3a3a40", "pants": "#3a3a40", "hairStyle": "short", "beard": "#6a5a4a" },
@@ -282,8 +294,9 @@
   {
     "id": "franklin", "name": "Rosalind Franklin", "years": "1920–1958", "role": "Recorded Photo 51, the X-ray pattern of DNA",
     "bio": "A British chemist and X-ray crystallographer. At King's College London in 1952 she and her student Raymond Gosling recorded Photo 51, the X-ray pattern that showed DNA is a helix, and she went on to study the structure of viruses. Earlier she had worked out how the layers of carbon order themselves in coal and charcoal.",
+    "expertise": "X-ray diffraction of carbons and biological molecules: coal porosity at BCURA, graphitizing and non-graphitizing carbons, learning X-ray diffraction in Jacques Mering's lab in Paris, the A and B forms of DNA, Photo 51 (1952) taken with Raymond Gosling, the evidence that the phosphate backbone is on the outside, fibre diffraction, and your virus work at Birkbeck on tobacco mosaic virus and polio virus. Speak accurately and fairly about how your data reached Watson and Crick.",
     "greeting": "A good X-ray picture needs a carefully prepared sample and patience. Shall we take one?",
-    "x": 64.5, "z": 3.5, "facing": 0,
+    "x": -15, "z": 51, "facing": 3.1416,
     "look": { "skin": "#f0d0b8", "hair": "#3a2a20", "coat": "#f0f0f0", "pants": "#2a2a3a", "hairStyle": "bob" },
     "quests": [
       { "id": "rf_x", "title": "Photo 51", "ask": "Record the X-shaped diffraction pattern of a DNA fibre.",
@@ -303,8 +316,9 @@
   {
     "id": "hodgkin", "name": "Dorothy Crowfoot Hodgkin", "years": "1910–1994", "role": "Solved penicillin, vitamin B12 and insulin by X-ray crystallography",
     "bio": "A British chemist who used X-ray crystallography to solve the structures of penicillin (1945), vitamin B12 (1956) and, after 35 years of work, insulin (1969). She won the 1964 Nobel Prize in Chemistry.",
+    "expertise": "X-ray crystallography of molecules: the first X-ray photograph of a protein crystal (pepsin, 1934, with J. D. Bernal), Patterson maps and the heavy-atom method, solving penicillin (1945), vitamin B12 (1956, with early computers) and insulin (1969), your 1964 Nobel Prize in Chemistry, life at Oxford and Somerville College, and working as a scientist while raising a family and living with rheumatoid arthritis.",
     "greeting": "If you can grow a crystal of it, X-rays can show you its atoms. Even of a protein.",
-    "x": 64.5, "z": -11, "facing": 3.1416,
+    "x": 59, "z": 20, "facing": 1.5708,
     "look": { "skin": "#f0d0b8", "hair": "#8a7a6a", "coat": "#5a6a8a", "pants": "#3a3a4a", "hairStyle": "bun" },
     "quests": [
       { "id": "hd_cobalt", "title": "The cobalt heart", "ask": "Show me where the cobalt is in vitamin B12 crystals.",
@@ -324,6 +338,7 @@
   {
     "id": "batterman", "name": "Boris Batterman", "years": "1930–2010", "role": "Founding director of CHESS",
     "bio": "A Cornell physicist and an expert on how X-rays diffract in perfect crystals. He was the first director of the Cornell High Energy Synchrotron Source, from 1978 to 1997, when its beamlines took their X-rays from CESR while the ring ran for particle physics.",
+    "expertise": "X-ray physics and synchrotron radiation: dynamical diffraction in perfect crystals (your 1964 review with Henderson Cole), anomalous transmission, X-ray standing waves, how a storage ring like CESR produces synchrotron light, beamlines, monochromators and detectors, and the founding and running of CHESS at Cornell (director 1978 to 1997).",
     "greeting": "The ring was built to collide particles, and we borrowed its light. Let's build you a beamline.",
     "x": 53.5, "z": -9.5, "facing": -1.5708,
     "look": { "skin": "#e8c4aa", "hair": "#7a7470", "coat": "#4a5a70", "pants": "#3a3a40", "hairStyle": "short" },
@@ -344,6 +359,50 @@
         "hint": "In tomography mode, open Reconstruction and line up the rotation axis.",
         "thanks": "No smeared arcs. Now the slices show what is really inside.",
         "needs": { "best": { "tomo_center": 0.8 } } }
+    ]
+  },
+  {
+    "id": "sorby", "name": "Henry Clifton Sorby", "years": "1826–1908", "role": "Founder of petrography and metallography",
+    "bio": "A Sheffield scientist of independent means who in 1849 ground a slice of rock thin enough to see through under the microscope, founding the microscopic study of rocks. In 1863 he polished and etched steel and examined it by reflected light, the start of metallography, and in 1861 he argued that the tiny bodies filling chalk are the remains of living things, not crystals.",
+    "expertise": "Microscopy of rocks and metals: grinding thin sections of rock (from 1849), the polarizing microscope, fluid inclusions in crystals and what they tell about the temperature of formation (1858), polishing and etching iron and steel and seeing their constituents under reflected light (1863), the microscopic organisms that make up chalk (1861), the microspectroscope and the spectra of blood and pigments, and geology and marine biology around Sheffield.",
+    "greeting": "Grind a rock thin enough and light passes through it, and then it tells you how it was made. Shall we look?",
+    "x": -36.5, "z": 72, "facing": -1.5708,
+    "look": { "skin": "#ecc8b0", "hair": "#d8d4cc", "coat": "#3a3a34", "pants": "#2e2e2a", "hairStyle": "short", "beard": "#e4e0d8" },
+    "quests": [
+      { "id": "so_feldspar", "title": "Rock you can see through", "ask": "In 1849 I ground a slice of rock so thin that light shone through it. Show me the twinned stripes inside granite's feldspar.",
+        "hint": "The granite boulder in the rock garden, in front of the geology hall on the engineering quad. A compound microscope shows the stripes.",
+        "thanks": "Each stripe is the same crystal turned over on itself. From slices like this you can read how a rock cooled and how hard it was squeezed.",
+        "needs": { "discovered": ["feldspar_twins"] } },
+      { "id": "so_chalk", "title": "Shields in the chalk", "ask": "Chalk looks like plain white powder, but it is made of the remains of living things. Find the coccoliths.",
+        "hint": "The chalk in the rock garden, with a compound microscope at 400×.",
+        "thanks": "Tiny calcite shields, each shed by a single-celled alga. A whole white cliff, built one shield at a time.",
+        "needs": { "discovered": ["coccoliths"] } },
+      { "id": "so_pearlite", "title": "The pearly constituent", "ask": "In 1863 I polished and etched steel and looked at it by reflected light. Show me the pearly layers I found in it.",
+        "hint": "The rusty steel beam in the materials yard, east of the south hall. The plates are under half a micrometre apart: use the high-quality microscope at 400× or more.",
+        "thanks": "Plates of soft iron and hard carbide side by side, shimmering like mother-of-pearl. That is why I called it the pearly constituent.",
+        "needs": { "discovered": ["pearlite"] } }
+    ]
+  },
+  {
+    "id": "dresselhaus", "name": "Mildred Dresselhaus", "years": "1930–2017", "role": "The Queen of Carbon: graphite, carbon fibres and nanotubes",
+    "bio": "A physicist and electrical engineer at MIT who spent decades working out how electrons behave in graphite and other forms of carbon. In 1992, with Riichiro Saito, Mitsutaka Fujita and Gene Dresselhaus, she predicted that whether a carbon nanotube conducts like a metal depends on how its honeycomb is rolled.",
+    "expertise": "Carbon and solid-state physics: magneto-optics and electronic structure of graphite, graphite intercalation compounds, carbon fibres, fullerenes, carbon nanotubes and how the chirality of rolling the honeycomb sets metal or semiconductor (1992, with Saito, Fujita and Gene Dresselhaus), Raman spectroscopy of carbon materials, low-dimensional thermoelectrics, graphene, and your career at MIT and encouraging women in science and engineering.",
+    "greeting": "Carbon is my favourite element: soft graphite, hard diamond, and tubes far thinner than a virus. Let's look at it atom by atom.",
+    "x": 19, "z": 50.5, "facing": 3.1416,
+    "look": { "skin": "#f0d0b8", "hair": "#b8b4ae", "coat": "#8a3a4a", "pants": "#2e3040", "hairStyle": "short", "glasses": true },
+    "quests": [
+      { "id": "md_walls", "title": "Tubes of carbon", "ask": "Show me the walls of a carbon nanotube, sheets of carbon 0.34 nanometres apart.",
+        "hint": "Take a bit of the nanotubes from the display case in the atrium to the electron microscope in the science lab, and look at 500,000× or more.",
+        "thanks": "Nested walls, like the rings of a tree. Sumio Iijima saw tubes like these in his electron microscope in 1991.",
+        "needs": { "discovered": ["cnt_walls"] } },
+      { "id": "md_honeycomb", "title": "How the honeycomb rolls", "ask": "We worked out that the angle of the honeycomb decides whether a tube is a metal or a semiconductor. Show me the honeycomb on a nanotube.",
+        "hint": "The nanotubes from the atrium, under the aberration-corrected STEM in annular dark field.",
+        "thanks": "There is the lattice, wrapped around the tube. Roll it one way and it conducts like a metal, another way and it is a semiconductor.",
+        "needs": { "discovered": ["cnt_honeycomb"] } },
+      { "id": "md_graphene", "title": "One flat sheet", "ask": "Unroll a nanotube and you get graphene, a single sheet of carbon atoms. Show me its honeycomb.",
+        "hint": "The graphene sample in the materials cabinet in the science lab, with the aberration-corrected STEM.",
+        "thanks": "Each atom 0.142 nanometres from its neighbours. I studied graphite for decades before anyone peeled off a single sheet.",
+        "needs": { "discovered": ["graphene_lattice"] } }
     ]
   },
   {
@@ -389,7 +448,8 @@
           ]
         }
       }
-    ]
+    ],
+    "expertise": "Theorist of electron diffraction in crystals. Hans Bethe developed a dynamical theory of electron diffraction in crystals, published in 1928. His work describes electron waves interacting with a periodic crystal potential; this game uses fictionalized dialogue."
   },
   {
     "id": "kirkland",
@@ -434,6 +494,7 @@
           ]
         }
       }
-    ]
+    ],
+    "expertise": "Author of Advanced Computing in Electron Microscopy. Earl J. Kirkland is the author of Advanced Computing in Electron Microscopy and has worked on computation in electron microscopy at Cornell. His work covers electron scattering and image simulation; this game uses fictionalized dialogue."
   }
 ]

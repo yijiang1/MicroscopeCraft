@@ -37,9 +37,13 @@ Every module depends on `src/shared`; **no module imports another** (ESLint enfo
 - **State**: `ctx.state` is read-only for renderers. Change it only with the actions in `src/shared/state.ts` (`gather`, `craft`, `discover`, `completeQuest`, `recordScore`, `visit`, `setSite`, `setAlign`). Every action re-checks the achievements.
 - **Events** (`src/shared/events.ts`): `openEyepiece({sampleId})`, `closeEyepiece`, `itemGathered`, `itemCrafted`, `discoveryUnlocked`, `tierChanged`, `zoomChanged`, `scopeChanged`, `trackItem`, `trackTarget`, `talkTo`, `questCompleted`, `achievementUnlocked`, `minigameScored`, `areaVisited`, `guideAsked`, `guideReplied`.
 - **Steps and modes**: a microscope recipe lists `steps` (label, magnification, NA, imaging `mode`, optionally an add-on it `requires`, and a per-step lens blur or voltage). `setZoom(ctx, i)` picks one; `state.scope` always holds the current step.
-- **Microdex**: `microdex(data, state)` (`src/shared/microdex.ts`) groups one card per feature by area. The eyepiece keeps the best picture of each discovery in `state.snapshots`. A sample is a `data/samples.json` entry; `npm test` checks every blurb is two sentences and every feature is reachable by some instrument step.
+- **Microdex**: `microdex(data, state)` (`src/shared/microdex.ts`) groups one card per feature by area. The eyepiece keeps the best picture of each discovery in `state.snapshots` (saved under their own storage key, only when one changes, since they are most of the save). A sample is a `data/samples.json` entry; `npm test` checks every blurb is two sentences and every feature is reachable by some instrument step.
 - **Sim**: `visibility(feature, scope, stain)` in `src/shared/sim/optics.ts` returns whether a feature shows and why not (`other-mode`, `unresolved`, `empty-magnification`, `too-small-to-see`, `low-contrast`). `explainWall()` in `src/shared/sim/walls.ts` turns that into the plain-language "hit a wall" message. The scope banner and the guide both use it.
 - **Achievements and requests**: one rule language (`Condition` in `schema.ts`, checked by `src/shared/achievements.ts`) drives both the achievements and what each scientist asks for. Every request is an achievement too.
+
+Inside `src/world`: `world.ts` wires the scene, input, aiming and gathering together and runs the frame loop; `kinds.ts` says what each kind of object is (what E gathers and F shows, its radius, its model); `placements.ts` says where each one stands; `models.ts`, `campus.ts`, `decor.ts`, `terrain.ts`, `npc.ts` and `player.ts` build the 3D models; `hud.ts` is the text over the view and the sample picker; `navigation.ts` is collision, areas and the compass and arrow texts, as plain geometry with tests.
+
+Performance: each model's parts are merged into one mesh per material (`mergeByMaterial`), the world loop runs at 60 fps at most (20 fps while the mouse is free), and shadows are redrawn only when something in them moved. Check a change with `__world.renderer.info.render.calls` in the dev console.
 
 Units: lengths are micrometres (µm) everywhere, spelled in field names (`sizeUm`, `dLensUm`).
 Simplified physics is labelled in comments next to the formula.
@@ -51,7 +55,7 @@ Simplified physics is labelled in comments next to the formula.
 | Click, WASD, mouse | Look and walk (Esc frees the mouse) |
 | Shift, Space | Run, jump |
 | V | Switch between the over-the-shoulder view (the default) and first-person |
-| E | Gather the item you are aiming at, or talk to the scientist you are aiming at |
+| E | Gather the item you are aiming at, or talk to the scientist you are aiming at (their dialog has a chat box: ask them about their own field, answered by Google Gemini, OpenAI or Anthropic Claude once you pick one and add your own API key under Tab → Settings; it is kept only in your browser) |
 | F | Look at the aimed sample through your newest portable instrument (F or Esc to leave). At a cabinet or table, pick a sample first (1–9). Once you own a fixed instrument this also takes a bit of the sample along; F at the electron microscope in the science lab, or at the beamline desk in Wilson Lab, puts one in |
 | C | Craft the next ready step of your goal (no mouse needed) |
 | 1, 2, 3… | In the eyepiece: switch to another instrument you own, to compare (or click its button) |
@@ -60,7 +64,7 @@ Simplified physics is labelled in comments next to the formula.
 | J | Journal: achievements with progress, and every scientist's requests with Track buttons |
 | M | Microdex (click a card you have not found to track its sample) |
 | I | Show or hide the inventory box |
-| Tab | Menu: tech tree, Microdex, journal, sound, save and restart, guide (G jumps straight to the guide box) |
+| Tab | Menu: tech tree, Microdex, journal, settings (sound, AI chat provider and API key), save and restart |
 | K | Restock every raw material, skipping the identifications (only when the URL ends in `?demo`) |
 
 ## Finding your way
@@ -78,22 +82,23 @@ The goal card at the top right is always on screen. Its bold line is the one thi
 | Aberration-corrected STEM | Monazite (cerium for the scintillator) | TEM, electron diffraction: its 0.286 nm reflection | Dark heavy sand by the creek |
 | CHESS beamline | Beryl (beryllium windows and X-ray lenses) | STEM, ptychography: beryllium atoms, too light for annular dark field | Pale six-sided crystals at the foot of the west slope |
 
-Ask the guide with **G**: "where do I find quartz sand?", "how do I make glass?" or "what next?".
 
 ## The world
 
-A university campus about 300 m across (north is up the quad, -z), laid out after Cornell's. Everything is procedural: terrain, buildings, models and textures are generated in code, with no asset files.
+A university campus about 300 m across (north is up the quad, -z), laid out after Cornell's. Everything is procedural: terrain, buildings, models and textures are generated in code, with no asset files. Every hall has a door and a ground-floor room (bookshelves, a lab bench with glassware, or a blackboard), and many scientists work inside. The clock shows your computer's time, and the tower bells ring it: a chime each quarter hour, and the hour struck on the big bell, louder the closer you are.
 
 | Where | What is there |
 | --- | --- |
-| Quad (centre) | Lawn, halls, bronze statues of Leeuwenhoek and Ruska, a spare bronze chime bell beside the clock tower. Leafy plants, flowers with a honeybee, a butterfly wing, sunflowers, a picnic table (salt, notebook paper). Santiago Ramón y Cajal stands on the steps of the south library |
+| Quad (centre) | Lawn, halls, bronze statues of Leeuwenhoek and Ruska, a spare bronze chime bell beside the clock tower. Leafy plants, flowers with a honeybee, a butterfly wing, sunflowers, a picnic table (salt, notebook paper). Inside the halls: Röntgen in the domed hall, Zernike and Gram in the west row, Abbe behind the portico, Robert Hooke in the library by the tower, Cajal in the south library |
 | Lake (north-east, where you start) | Lake water, mud and an algae mat at the edge, a duck feather, sand. Antonie van Leeuwenhoek waits on the shore |
-| Gorge (north) | Iron, galena, quartz and fluorite on the rim; down by the creek, pale willemite rocks, dark monazite sand and a slab of fossil shale |
-| West slope and pine grove | Copper and iron rocks, heavy tungsten rocks and beryl crystals at the foot, mica schist; among the pines, resin stumps, a pine branch, a fallen oak log, mushrooms, moss, lichen, a spider web, ferns and an old bone. Robert Hooke stands by the log |
+| Gorge (north) | Iron, galena, quartz and fluorite on the rim; down by the creek, pale willemite rocks, dark monazite sand and a slab of fossil shale. An iron railing runs along both rims and the creek itself is too deep to wade; two trails lead down the walls to a ledge along the water. A stone dam holds the lake at the lip of the falls. Just below the falls, a suspension footbridge (after Cornell's Fall Creek suspension bridge) crosses to two residence halls on the north side |
+| Art museum (top of the slope, by the gorge) | After I. M. Pei's Johnson Museum: a concrete gallery under two towers and a cantilevered top floor, with an open sculpture court between. Inside, at their real sizes, procedural copies of The Night Watch, A Sunday on La Grande Jatte, The Starry Night, Girl with a Pearl Earring and The Great Wave. Look closer (F): brushstrokes and craquelure by eye, pigment grains (natural and artificial ultramarine, zinc yellow, Prussian blue) under the microscopes, and at the beamline the canvas weave in tomography, X-ray maps of cobalt, lead, iron and chromium, and the lead formate found in Rembrandt's paint |
+| West slope (after Libe Slope) and pine grove | An open lawn falling 10 m from the clock tower, with benches along the top looking west over a big lake (after Cayuga). At its foot, the Gothic west campus halls and their tower. Copper and iron rocks, heavy tungsten rocks and beryl crystals at the foot, mica schist; among the pines, resin stumps, a pine branch, a fallen oak log, mushrooms, moss, lichen, a spider web, ferns and an old bone. |
 | Greenhouse (south of the quad) | Onion, potato, orchid, stinging nettle and cotton. Robert Brown works here |
-| Science building (south-east) | The glass-walled lab: stains on the shelf by the door, a slide cabinet and a materials cabinet, the electron microscope bay (each part you craft appears in place). Ernst Abbe stands outside; Zernike, Gram, Ruska, June Almeida and Albert Crewe inside |
-| Wilson Lab (east) | The CHESS hall beside the CESR ring: the beamline from the ring wall to the hutch, a sample rack, and Röntgen (at the door), Batterman, Bragg, Franklin and Hodgkin |
-| Engineering quad (south, down the path past the greenhouse) | Halls after Bard, Snee, Upson and Phillips. The geology hall's rock garden: granite, basalt, obsidian, marble, chalk, pyrite, malachite, lodestone and garnet schist. A materials yard: concrete blocks, a rusty steel beam, bricks, a solar panel and a catalytic converter. A glass atrium (after Duffield) with display cases of quantum dots, carbon nanotubes, a zeolite, a metal-organic framework, a superconductor pellet and a blue LED |
+| Science building (south-east) | The glass-walled lab: stains on the shelf by the door, a slide cabinet and a materials cabinet, the electron microscope bay (each part you craft appears in place). Ruska, June Almeida and Albert Crewe work here. Next door to the east, the chemistry building (after Baker Lab), where Dorothy Hodgkin works |
+| Wilson Lab (east) | The CHESS hall beside the CESR ring: the beamline from the ring wall to the hutch, a sample rack, and Batterman and Bragg |
+| Athletic fields (far east) | Over the storage ring's tunnel: a gridiron with goalposts and stands, a practice field, and the field house (after Barton Hall) |
+| Engineering quad (south, down the path past the greenhouse) | Halls after Bard, Snee, Upson and Phillips. The geology hall's rock garden: granite, basalt, obsidian, marble, chalk, pyrite, malachite, lodestone and garnet schist. A materials yard: concrete blocks, a rusty steel beam, bricks, a solar panel and a catalytic converter. A glass atrium (after Duffield) with display cases of quantum dots, carbon nanotubes, a zeolite, a metal-organic framework, a superconductor pellet and a blue LED. Henry Clifton Sorby works in the geology hall, Rosalind Franklin in the materials hall, Mildred Dresselhaus in the atrium |
 
 **Fixed instruments stay where they are built**: the electron microscopes in the science lab, the beamline in Wilson Lab. Look (F) at a sample anywhere and you take a bit along (up to 8); the HUD shows where to carry them. Light microscopes work anywhere.
 
@@ -128,7 +133,7 @@ Seven mini-games, each scored 0-100%, change what the eyepiece shows:
 
 ## Scientists and achievements
 
-Fifteen scientists who made discoveries with microscopes or X-rays stand around campus: Leeuwenhoek, Hooke, Robert Brown, Abbe, Zernike, Cajal, Gram, Ruska, June Almeida, Albert Crewe, Röntgen, W. L. Bragg, Rosalind Franklin, Dorothy Hodgkin and Boris Batterman (CHESS's first director). Press E to talk: each has two to five requests (53 in all), mostly "show me what you found", and every request done is an achievement. A gold **!** over a scientist means you can show them something now; **?** means they are still waiting. With 58 more achievements for discoveries, instruments, areas, mini-games and milestones, there are 111.
+Seventeen scientists who made discoveries with microscopes or X-rays stand around campus: Leeuwenhoek, Hooke, Robert Brown, Abbe, Zernike, Cajal, Gram, Ruska, June Almeida, Albert Crewe, Röntgen, W. L. Bragg, Rosalind Franklin, Dorothy Hodgkin, Boris Batterman (CHESS's first director), Henry Clifton Sorby (rocks and steel, in the geology hall) and Mildred Dresselhaus (carbon nanotubes, in the atrium). Press E to talk: each has two to five requests (59 in all), mostly "show me what you found", and every request done is an achievement. A gold **!** over a scientist means you can show them something now; **?** means they are still waiting. With 63 more achievements for discoveries, instruments, areas, mini-games and milestones, there are 122.
 
 The Microdex holds 170 discoveries in 45 samples across seven areas.
 
@@ -162,7 +167,7 @@ Pitch points: the instrument is earned by building it, part by part; every upgra
 
 **Don't change `src/shared` types (`schema.ts`, `events.ts`, the `GameContext`/state API) without telling the team.** Post in the team chat first, then open a PR that changes only the contract (plus the fixes other modules need to keep compiling). Adding an optional field or a new JSON entry is fine without a heads-up; renaming, removing or tightening anything is not.
 
-**Data-driven**: new recipe, material, sample, scientist, request or achievement = one JSON entry in `data/`. `npm test` validates it against the schema and checks cross-references (an unknown discovery, item, mini-game or area in a condition fails).
+**Data-driven**: new recipe, material, sample, scientist, request or achievement = one JSON entry in `data/`. `npm test` validates it against the schema and checks cross-references (an unknown discovery, item, mini-game or area in a condition fails). A new object in the world = one entry in `src/world/kinds.ts` (with a model builder in `models.ts` if none fits) plus its spot in `placements.ts`; `npm test` checks it gathers a real item or shows a real sample and stands on dry land, indoors only if marked so.
 
 **The LLM never generates pixels or free-form content.** It outputs a world-spec JSON that `validateWorldSpec` accepts or rejects.
 
@@ -177,3 +182,5 @@ See [integration notes](public/minigames/invisible-specimen/INTEGRATION.txt) for
 Hans Bethe stands outside the science building at (20, 20); Earl Kirkland is nearby at (20, 32). Press **E** to talk, or track them from the scientists journal. Each has two requests. Their dialogue and block-style appearances are fictionalized.
 
 Walking and running play quiet, synthesized footsteps, with grass, stone, and water variations. Steps stop in the air, when movement stops, and when controls are unlocked. Use **Tab → Sound** to mute them along with the other game sounds.
+
+Scientists stroll within 6 metres of their home locations, avoiding walls, water, and obstacles. Nearby pairs pause for alternating science conversations in overhead speech bubbles; these are fictional scripted exchanges, not historical quotations. Walk close to a scientist to keep them still for interaction. The bottom-left minimap tracks their live positions.

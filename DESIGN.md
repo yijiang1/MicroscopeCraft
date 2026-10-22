@@ -45,7 +45,7 @@ Every session repeats one loop, at smaller and smaller scales:
 6. **Show a scientist.** Take what you found to the scientist who asked for it; every request done is an achievement.
 7. **Upgrade.** Gather better materials, build better parts and return to step 3.
 
-One pass takes a few minutes, and the climb through instrument tiers is the long arc. The Microdex (170 discoveries), the scientists' 53 requests and 113 achievements give collection goals. Failure is gentle: gathered materials grow back, a damaged sample resets when the eyepiece closes, a bad stain washes off, and the game has no death.
+One pass takes a few minutes, and the climb through instrument tiers is the long arc. The Microdex (255 discoveries), the scientists' 59 requests and 122 achievements give collection goals. Failure is gentle: gathered materials grow back, a damaged sample resets when the eyepiece closes, a bad stain washes off, and the game has no death.
 
 ## Microscope tech tree
 The tree follows the real history of microscopy in eight tiers. Each tier ends at a wall the player can observe, and the next tier is the fix.
@@ -100,7 +100,7 @@ Material choice is the main decision in the game: the properties of what you gat
 There are 70 recipes. Complex instruments are built from components, each with its own recipe (the TEM from six, the STEM from five, the beamline from nine), and the fixed instruments show each component in place as it is built. Add-ons (phase contrast kit, dark-field condenser) unlock extra steps on the fluorescence microscope. Materials grow back 15 seconds after they are gathered, and the world holds enough of each to build any one instrument without waiting.
 
 ## World and scale content
-The world is an open 3D campus, about 300 m across and laid out after Cornell's, built entirely from procedural models and textures: a quad lined with halls, a clock tower, a west slope with a pine grove, a gorge with a waterfall and a creek, a lake, a glass greenhouse, the science building with its lab, an engineering quad to the south (a rock garden, a materials yard and a glass atrium of nanomaterials and devices), and Wilson Laboratory with the CHESS hall beside the CESR storage ring (768 m around, 6 GeV positrons at 200 mA after the CHESS-U upgrade; the hall's shield wall curves with the ring's radius). Cabinets in the lab and a rack at the beamline hold prepared slides and materials samples; F, then a number, picks one.
+The world is an open 3D campus, about 300 m across and laid out after Cornell's, built entirely from procedural models and textures: a quad lined with halls, a clock tower, a west slope with a pine grove, a gorge with a waterfall and a creek, a lake, a glass greenhouse, the science building with its lab, an engineering quad to the south (a rock garden, a materials yard and a glass atrium of nanomaterials and devices), a chemistry building, athletic fields over the storage ring, a suspension footbridge over the gorge to the residence halls, Gothic halls at the foot of the slope with a big lake beyond, an art museum of famous paintings to look at under every instrument, and Wilson Laboratory with the CHESS hall beside the CESR storage ring (768 m around, 6 GeV positrons at 200 mA after the CHESS-U upgrade; the hall's shield wall curves with the ring's radius). Cabinets in the lab and a rack at the beamline hold prepared slides and materials samples; F, then a number, picks one. Every hall can be entered: a door leads into a ground-floor room, where many of the scientists work. The tower clock and its bells follow the player's local time: a chime each quarter hour and the hour struck on the big bell, louder near the tower.
 
 | Area | What the player finds | Discoveries |
 | --- | --- | --- |
@@ -112,6 +112,7 @@ The world is an open 3D campus, about 300 m across and laid out after Cornell's,
 | Science lab | The crystal, seven prepared slides, eight materials samples | 44 |
 | Wilson Lab | Lysozyme, vitamin B12, a DNA fibre, steel, a battery cathode, an insect in amber, an iron meteorite, a silicon crystal | 19 |
 | Engineering quad | Rock garden (granite, basalt, obsidian, marble, chalk, pyrite, malachite, lodestone, garnet schist); materials yard (concrete, rusty steel, brick, a solar panel, a catalytic converter); atrium cases (quantum dots, carbon nanotubes, zeolite, a MOF, a superconductor, a blue LED) | 64 |
+| Art museum | Five paintings: The Starry Night, Girl with a Pearl Earring, The Great Wave, La Grande Jatte, The Night Watch (brushwork, craquelure, pigments, canvas weave, X-ray maps, lead formate) | 17 |
 
 Every sample has hidden layers that appear only when an instrument (and the right mode, stain or alignment) can reveal them. Sizes below are approximate.
 
@@ -206,7 +207,7 @@ The MVP was one complete play loop that can be demoed in about five minutes: gat
 | Microscopes | Tiers 1 to 3 end to end | Tiers 4 and 6 | Tiers 0 to 7 built, including a CHESS beamline |
 | Samples | About ten discoveries | Samples from a prompt | 170 discoveries in 45 samples |
 | Mini-games | None | | Eight: Köhler, Gram stain, progressive stain, TEM alignment, aberration corrector, ptychography, beam tuning, tomography |
-| People and goals | None | | 15 scientists with 53 requests, 113 achievements, a journal |
+| People and goals | None | | 17 scientists with 59 requests, 122 achievements, a journal |
 | AI | Guide grounded in the simulation's numbers | Prompt-to-world, Materials Project, abTEM | Offline guide only; LLM features deferred |
 | Polish | Simple art, readable UI, one sound per action | Music, tutorial | Procedural 3D art, synthesised sounds; no music or tutorial |
 
@@ -265,7 +266,7 @@ The team has four people and the build window is not fixed yet (see open questio
 6. **Polish and demo.** Tier 5 showpiece, sounds, open-world look, demo script. Gate: a clean five-minute run. Built; rehearsal pending.
 
 ## Build status
-Built and tested (87 automated tests across 11 files, plus checks in the browser): the shared contract with imaging modes, stains, sites and conditions; tiers 0 to 7 with zoom steps, focus, beam damage and per-instrument alignment; 70 recipes; 170 discoveries; the discovery gates for every tier; the seven mini-games with their physics; 15 scientists with 53 requests; 113 achievements and the journal; the offline guide; the goal card, inventory box, tech tree (with add-ons), Microdex (with tracking) and toasts; the campus with the greenhouse and Wilson Lab; saving progress between sessions (older saves load with the new fields empty); synthesised sounds; a demo mode (`?demo`, press K to restock materials).
+Built and tested (87 automated tests across 11 files, plus checks in the browser): the shared contract with imaging modes, stains, sites and conditions; tiers 0 to 7 with zoom steps, focus, beam damage and per-instrument alignment; 70 recipes; 255 discoveries; the discovery gates for every tier; the seven mini-games with their physics; 17 scientists with 59 requests; 122 achievements and the journal; the offline guide; the goal card, inventory box, tech tree (with add-ons), Microdex (with tracking) and toasts; the campus with the greenhouse, Wilson Lab and the engineering quad; saving progress between sessions (older saves load with the new fields empty); synthesised sounds; a demo mode (`?demo`, press K to restock materials).
 
 Not built: the LLM planner and guide calls, the server and world cache, music and a tutorial, stations as places in the world.
 

@@ -3,10 +3,11 @@
 import { z } from 'zod';
 import { conditionMet, newlyEarned } from './achievements';
 import { createBus, type Bus } from './events';
-import { SiteSchema, TierSchema, type GameData, type GameState, type Site, type Tier } from './schema';
+import { PlayerLocationSchema, SiteSchema, TierSchema, type GameData, type GameState, type PlayerLocation, type Site, type Tier } from './schema';
 import { NAKED_EYE, ownedScopes, scopeFromInventory } from './sim/scope';
 
 export { ownedScopes }; // microscopes in the inventory, lowest tier first (UI modules may not import sim/scope)
+export const SAMPLE_BAG_SIZE = 8;
 
 /** Handed to every module's mount function. */
 export interface GameContext {
@@ -15,12 +16,15 @@ export interface GameContext {
   bus: Bus;
 }
 
+const SnapshotsSchema = z.record(z.string(), z.object({ image: z.string(), quality: z.number() }));
+
 /** The part of the state worth keeping between visits. A bad save parses to null (start fresh); an older save
- *  without the newer fields gets their defaults. */
+ *  without the newer fields gets their defaults. Snapshots (the Microdex pictures, megabytes by the end) are kept
+ *  under their own key, so the frequent progress saves stay small; older saves still hold them inline. */
 const SaveSchema = z.object({
   inventory: z.record(z.string(), z.number()),
   discoveries: z.array(z.string()),
-  snapshots: z.record(z.string(), z.object({ image: z.string(), quality: z.number() })),
+  snapshots: SnapshotsSchema.default({}),
   scopeChoice: TierSchema.nullable(),
   achievements: z.array(z.string()).default([]),
   quests: z.array(z.string()).default([]),
@@ -28,17 +32,27 @@ const SaveSchema = z.object({
   stats: z.record(z.string(), z.number()).default({}),
   visited: z.array(z.string()).default([]),
   align: z.record(z.string(), z.number()).default({}),
+  carriedSamples: z.array(z.string()).catch([]).default([]),
+  playerLocation: PlayerLocationSchema.nullable().catch(null).default(null),
 });
 export type SaveData = z.infer<typeof SaveSchema>;
 export const SAVE_KEY = 'microscopecraft:save';
+export const SNAPSHOTS_KEY = 'microscopecraft:snapshots';
 
-export const toSave = ({ inventory, discoveries, snapshots, scopeChoice, achievements, quests, best, stats, visited, align }: GameState): SaveData => ({
-  inventory, discoveries, snapshots, scopeChoice, achievements, quests, best, stats, visited, align,
+/** Everything but the snapshots, which are saved on their own under SNAPSHOTS_KEY. */
+export const toSave = ({ inventory, discoveries, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation }: GameState): Omit<SaveData, 'snapshots'> => ({
+  inventory, discoveries, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation,
 });
 
-export function parseSave(json: string | null): SaveData | null {
+/** The save, plus the snapshots saved under their own key (unreadable snapshots are dropped, not the progress). */
+export function parseSave(json: string | null, snapshotsJson: string | null = null): SaveData | null {
   try {
-    return SaveSchema.parse(JSON.parse(json ?? ''));
+    const save = SaveSchema.parse(JSON.parse(json ?? ''));
+    try {
+      return { ...save, snapshots: { ...save.snapshots, ...SnapshotsSchema.parse(JSON.parse(snapshotsJson ?? '{}')) } };
+    } catch {
+      return save;
+    }
   } catch {
     return null;
   }
@@ -47,8 +61,9 @@ export function parseSave(json: string | null): SaveData | null {
 export function createGame(data: GameData, bus: Bus = createBus(), save?: SaveData | null): GameContext {
   const state: GameState = {
     inventory: {}, discoveries: [], snapshots: {}, currentSampleId: null, scopeChoice: null, site: null, scope: NAKED_EYE,
-    achievements: [], quests: [], best: {}, stats: {}, visited: [], align: {}, ...save,
+    achievements: [], quests: [], best: {}, stats: {}, visited: [], align: {}, carriedSamples: [], playerLocation: null, ...save,
   };
+  state.carriedSamples = [...new Set(state.carriedSamples)].filter((id) => data.samples[id]).slice(0, SAMPLE_BAG_SIZE);
   const ctx = { data, state, bus };
   state.scope = usableScope(ctx);
   bus.on('openEyepiece', ({ sampleId }) => {
@@ -57,6 +72,27 @@ export function createGame(data: GameData, bus: Bus = createBus(), save?: SaveDa
   });
   bus.on('closeEyepiece', () => (state.currentSampleId = null));
   return ctx;
+}
+
+/** Keep the eight most recently collected distinct samples, newest first. */
+export function carrySample(ctx: GameContext, sampleId: string) {
+  if (!ctx.data.samples[sampleId]) return;
+  const bag = ctx.state.carriedSamples;
+  if (bag[0] === sampleId) return;
+  const i = bag.indexOf(sampleId);
+  if (i >= 0) bag.splice(i, 1);
+  bag.unshift(sampleId);
+  bag.length = Math.min(bag.length, SAMPLE_BAG_SIZE);
+  ctx.bus.emit('carriedSamplesChanged', {});
+}
+
+/** Store only changed poses; callers may report every frame without causing redundant saves. */
+export function setPlayerLocation(ctx: GameContext, location: PlayerLocation) {
+  const previous = ctx.state.playerLocation;
+  if (previous && previous.x === location.x && previous.z === location.z && previous.yaw === location.yaw &&
+      previous.pitch === location.pitch && previous.thirdPerson === location.thirdPerson) return;
+  ctx.state.playerLocation = { ...location };
+  ctx.bus.emit('playerMoved', {});
 }
 
 /** The microscope in use, at its lowest zoom step: the chosen one if usable here, else the best usable one. */

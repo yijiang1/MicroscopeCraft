@@ -84,5 +84,10 @@
   "zeolite": {"label": "Zeolite crystals", "drawing": "cubes", "minSizeUm": 0.0004, "maxSizeUm": 2, "tiers": [2, 3, 4, 5, 6, 7]},
   "mof": {"label": "Metal-organic framework", "drawing": "cubes", "minSizeUm": 0.0013, "maxSizeUm": 50, "tiers": [1, 2, 3, 4, 5, 6, 7]},
   "ybco": {"label": "Superconductor pellet", "drawing": "mosaic", "minSizeUm": 0.00039, "maxSizeUm": 20, "tiers": [2, 3, 4, 5, 6, 7]},
-  "led": {"label": "Blue LED chip", "drawing": "glow", "minSizeUm": 0.003, "maxSizeUm": 20, "tiers": [2, 3, 4, 5, 6, 7]}
+  "led": {"label": "Blue LED chip", "drawing": "glow", "minSizeUm": 0.003, "maxSizeUm": 20, "tiers": [2, 3, 4, 5, 6, 7]},
+  "starry": {"label": "The Starry Night", "drawing": "lines", "minSizeUm": 1.5, "maxSizeUm": 3000, "tiers": [1, 2, 3, 4, 5, 6, 7]},
+  "pearlgirl": {"label": "Girl with a Pearl Earring", "drawing": "mosaic", "minSizeUm": 4, "maxSizeUm": 600, "tiers": [1, 2, 3, 4, 5, 6, 7]},
+  "greatwave": {"label": "The Great Wave", "drawing": "fibers", "minSizeUm": 0.2, "maxSizeUm": 200, "tiers": [1, 2, 3, 4, 5, 6, 7]},
+  "grandejatte": {"label": "A Sunday on La Grande Jatte", "drawing": "droplets", "minSizeUm": 1, "maxSizeUm": 2000, "tiers": [1, 2, 3, 4, 5, 6, 7]},
+  "nightwatch": {"label": "The Night Watch", "drawing": "cluster", "minSizeUm": 0.00035, "maxSizeUm": 200, "tiers": [1, 2, 3, 4, 5, 6, 7]}
 }
