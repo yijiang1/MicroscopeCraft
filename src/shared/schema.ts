@@ -129,7 +129,7 @@ export const FeatureSchema = z.object({
 });
 export type Feature = z.infer<typeof FeatureSchema>;
 
-export const BiomeSchema = z.enum(['meadow', 'pond', 'forest', 'garden', 'mine', 'lab', 'chess', 'eng']);
+export const BiomeSchema = z.enum(['meadow', 'pond', 'forest', 'garden', 'mine', 'lab', 'chess', 'eng', 'museum']);
 export type Biome = z.infer<typeof BiomeSchema>;
 
 export const SampleSchema = z.object({

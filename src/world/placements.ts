@@ -1,6 +1,6 @@
 // What stands where in the world. Pure data (plus a seeded scatter), no rendering, so it is easy to test and retune.
 // What each kind of thing is (what it gathers or shows, its model) is in kinds.ts.
-import { ATRIUM, CRYSTAL_SPOT, SCIENCE } from './campus';
+import { ATRIUM, CRYSTAL_SPOT, MUSEUM, SCIENCE } from './campus';
 import type { Kind } from './kinds';
 import { gorgeZ, LAKE, mulberry32 } from './terrain';
 
@@ -117,4 +117,10 @@ export const PLACEMENTS: Placement[] = [
   // display cases against the atrium's north wall
   { kind: 'nanocase', x: ATRIUM.x0 + 6, z: ATRIUM.z0 + 0.8 },
   { kind: 'devicecase', x: ATRIUM.x1 - 6, z: ATRIUM.z0 + 0.8 },
+  // The art museum: the two big canvases on the west and north walls, three small ones side by side on the south wall
+  { kind: 'nightwatch', x: MUSEUM.x0 + 0.34, z: -39.5, yaw: Math.PI / 2 },
+  { kind: 'grandejatte', x: -41, z: MUSEUM.z0 + 0.34, yaw: 0 },
+  { kind: 'starry', x: -43.5, z: MUSEUM.z1 - 0.34, yaw: Math.PI },
+  { kind: 'pearlgirl', x: -41.3, z: MUSEUM.z1 - 0.34, yaw: Math.PI },
+  { kind: 'greatwave', x: -39.3, z: MUSEUM.z1 - 0.34, yaw: Math.PI },
 ];

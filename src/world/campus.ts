@@ -3,7 +3,7 @@
 // the engineering quad (after Cornell's): the materials, geology, east and south halls and a glass atrium. Every hall
 // has a door and a ground-floor room. East are the athletic fields over the storage ring and the chemistry building;
 // north, over the gorge, a suspension footbridge leads to the residence halls; west, down the slope, the Gothic west
-// campus halls and a tower. An iron railing runs along both rims of the gorge, open only at the trails down to the creek.
+// campus halls and a tower. At the top of the slope by the gorge, the art museum (after I. M. Pei's Johnson Museum). An iron railing runs along both rims of the gorge, open only at the trails down to the creek.
 // Boxes, prisms and canvas textures only. Walls are axis-aligned boxes the player collides with.
 import * as THREE from 'three';
 import { booksTexture, facadeTexture, fieldTexture, labelTexture, meshTexture, waterfallTexture } from './textures';
@@ -47,6 +47,13 @@ export const BEAM_SPOT = { x: 56, z: 0.5 };
 export const ATRIUM = box(8, 30, 46, 58);
 const AT_DOOR = { x0: 17, x1: 21 };
 const AT_H = 6;
+
+/** The art museum (after I. M. Pei's Johnson Museum of Art, 1973): a concrete gallery on the ground floor, two towers
+ *  rising from it and a top floor bridging them, cantilevered west over the slope, with an open sculpture court beneath.
+ *  Door in the east wall, facing the quad. */
+export const MUSEUM = box(-46, -36, -44.5, -34.5);
+const MU_DOOR = { z0: -40.7, z1: -38.3 };
+const MU_H = 4.6;
 
 const FLOOR_H = 3.6;
 /** Thickness of a hall's ground-floor walls, and the width of its door. */
@@ -114,6 +121,7 @@ export const FOOTPRINTS: Box[] = [
   PORTICO,
   box(TOWER.x - TOWER.half, TOWER.x + TOWER.half, TOWER.z - TOWER.half, TOWER.z + TOWER.half),
   SCIENCE,
+  MUSEUM,
   ...STATUES.map((s) => box(s.x - 0.7, s.x + 0.7, s.z - 0.7, s.z + 0.7)),
 ];
 /** Inside a building, or on a structure where no scenery grows: the sports fields and their stands, the bridge. */
@@ -128,7 +136,7 @@ export const inGreenhouse = (x: number, z: number) => inside(GREENHOUSE, x, z);
 export const inAtrium = (x: number, z: number) => inside(ATRIUM, x, z);
 /** Inside any building's walls: the lab, Wilson Lab, the greenhouse, the atrium or a hall's ground-floor room. */
 export const indoors = (x: number, z: number) =>
-  inLab(x, z) || inChess(x, z) || inGreenhouse(x, z) || inAtrium(x, z) || HALLS.some((h) => inside(h.box, x, z));
+  inLab(x, z) || inChess(x, z) || inGreenhouse(x, z) || inAtrium(x, z) || inside(MUSEUM, x, z) || HALLS.some((h) => inside(h.box, x, z));
 /** Up on the bridge deck, rather than down in the gorge under it, with the feet at `feet`. */
 export const onDeck = (x: number, z: number, feet = Infinity) =>
   Math.abs(x - BRIDGE.x) < BRIDGE.half && z > BRIDGE.z0 && z < BRIDGE.z1 && feet > BRIDGE.y - 1;
@@ -898,6 +906,43 @@ function gorgeRailing(group: THREE.Group, walls: Box[]) {
   walls.push(box(FALLS_X - 0.1, FALLS_X + 0.7, z0, z1));
 }
 
+/** The art museum: a gallery with a door to the east, then two concrete towers and a top floor over an open court. */
+function museum(group: THREE.Group, walls: Box[]) {
+  const { x0, x1, z0, z1 } = MUSEUM;
+  const g = heightAt((x0 + x1) / 2, (z0 + z1) / 2);
+  const concrete = mat('#cdc8bd', 0.95);
+  const slab = (b: Box, y0: number, y1: number, m: THREE.Material | THREE.Material[] = concrete) => {
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(b.x1 - b.x0, y1 - y0, b.z1 - b.z0), m);
+    mesh.position.set((b.x0 + b.x1) / 2, g + (y0 + y1) / 2, (b.z0 + b.z1) / 2);
+    mesh.castShadow = mesh.receiveShadow = true;
+    group.add(mesh);
+  };
+  const T = WALL_T;
+  const gallery = [
+    box(x0, x1, z0, z0 + T), box(x0, x1, z1 - T, z1), box(x0, x0 + T, z0 + T, z1 - T),
+    box(x1 - T, x1, z0 + T, MU_DOOR.z0), box(x1 - T, x1, MU_DOOR.z1, z1 - T),
+  ];
+  for (const b of gallery) slab(b, -0.5, MU_H);
+  walls.push(...gallery);
+  slab(box(x1 - T, x1, MU_DOOR.z0, MU_DOOR.z1), 2.8, MU_H); // over the door
+  slab(box(x0, x1, z0, z1), MU_H, MU_H + 0.5, [concrete, concrete, concrete, CEILING, concrete, concrete]);
+  slab(box(x0 + T, x1 - T, z0 + T, z1 - T), 0, 0.06, mat('#8a8278', 0.5)); // polished floor
+  // the towers north and south, the top floor across them reaching west over the slope, and the open court between
+  slab(box(x0, x1, z0, z0 + 3.4), MU_H + 0.5, 13);
+  slab(box(x0, x1, z1 - 3.4, z1), MU_H + 0.5, 13);
+  slab(box(x0 - 4, x1, z0, z1), 13, 16.6);
+  slab(box(x0 - 4, x1, z0, z1), 16.6, 16.8, SLATE);
+  for (const b of [box(x0 - 4.02, x0 - 4, z0 + 1, z1 - 1), box(x1, x1 + 0.02, z0 + 1, z1 - 1)]) slab(b, 14.3, 15.3, mat('#33404d', 0.3)); // the top floor's long windows
+  // a sculpture in the court: a bronze ring on a plinth
+  const plinth = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), concrete);
+  plinth.position.set((x0 + x1) / 2, g + MU_H + 0.9, (z0 + z1) / 2);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.9, 0.18, 12, 32), mat('#7a5a32', 0.4, 0.7));
+  ring.position.set(plinth.position.x, g + MU_H + 2.2, plinth.position.z);
+  ring.rotation.y = 0.6;
+  group.add(plinth, ring);
+  group.add(sign('Museum of Art', 6, x1 + 0.03, g + 3.5, (z0 + z1) / 2 + 2.6, Math.PI / 2));
+}
+
 /** The suspension footbridge: steel portal towers on each rim, two main cables sagging between them with hangers down to
  *  the deck, and a mesh screen along both sides; the cables run on past the towers down to concrete anchor blocks. */
 function bridge(group: THREE.Group, walls: Box[]) {
@@ -979,7 +1024,7 @@ export function buildCampus(): Campus {
   const walls: Box[] = [];
   HALLS.forEach((h) => hall(h, group, walls));
   // solid outside: the tower, the statues and the portico's columns (the halls and the lab build their own walls)
-  walls.push(...FOOTPRINTS.filter((b) => b !== SCIENCE && b !== PORTICO && !HALLS.some((h) => h.box === b)));
+  walls.push(...FOOTPRINTS.filter((b) => b !== SCIENCE && b !== MUSEUM && b !== PORTICO && !HALLS.some((h) => h.box === b)));
   walls.push(...PORTICO_COLUMNS.map((c) => box(c.x - 0.35, c.x + 0.35, c.z - 0.35, c.z + 0.35)));
 
   // the domed hall's dome
@@ -1021,6 +1066,7 @@ export function buildCampus(): Campus {
   fields(group, walls);
   bridge(group, walls);
   gorgeRailing(group, walls);
+  museum(group, walls);
   const hallSign = (i: number, text: string, side: 'south' | 'east') => {
     const b = HALLS[i]!.box;
     const y = heightAt((b.x0 + b.x1) / 2, (b.z0 + b.z1) / 2) + FLOOR_H + 0.6;

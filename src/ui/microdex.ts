@@ -5,7 +5,7 @@ import type { GameContext } from '../shared/state';
 import { withKeys } from './keys';
 
 const BIOME_NAMES = {
-  meadow: 'Quad', pond: 'Lake', forest: 'Pine grove', garden: 'Greenhouse', mine: 'Gorge and slope rocks', lab: 'Science lab', chess: 'Wilson Lab (CHESS)', eng: 'Engineering quad',
+  meadow: 'Quad', pond: 'Lake', forest: 'Pine grove', garden: 'Greenhouse', mine: 'Gorge and slope rocks', lab: 'Science lab', chess: 'Wilson Lab (CHESS)', eng: 'Engineering quad', museum: 'Art museum',
 } as const;
 
 export interface MicrodexHandle {

@@ -5,7 +5,7 @@ import {
   algaeMat, beeOnFlower, bone, bottle, brickStack, catalyticConverter, chimeBell, concreteBlocks, cottonPlant, crystalCluster,
   deviceCase, fallenLog, feather, fern, flowerPatch, galenaCubes, gramKit, leafPlant, logwoodLog, materialsBench, mergeByMaterial,
   mossyStone, mushrooms, nanoCase, nettlePlant, onionPlant, orchidPlant, oreNode, picnicTable, pineBranch, potatoPlant, resinStump,
-  rustyBeam, sampleRack, sandNode, shaleSlab, slideCabinet, solarPanel, spiderWeb, sunflower, wingOnStone,
+  painting, rustyBeam, sampleRack, sandNode, shaleSlab, slideCabinet, solarPanel, spiderWeb, sunflower, wingOnStone,
 } from './models';
 import { mulberry32 } from './terrain';
 
@@ -116,6 +116,13 @@ const kinds = {
   solar: { aim: { sample: 'solar_cell' }, radius: 0.9, fixedYaw: true, model: () => solarPanel() },
   catconv: { aim: { sample: 'catalytic_converter' }, radius: 0.7, model: () => catalyticConverter() },
   bell: { aim: { sample: 'bell_bronze' }, radius: 0.8, fixedYaw: true, model: () => chimeBell() },
+
+  // the art museum's paintings, each looked at as a whole (F), from brushstrokes down to pigment grains and X-ray maps
+  starry: { aim: { sample: 'starry_night' }, radius: 0, indoors: true, fixedYaw: true, model: () => painting('starry_night') },
+  pearlgirl: { aim: { sample: 'pearl_earring' }, radius: 0, indoors: true, fixedYaw: true, model: () => painting('pearl_earring') },
+  greatwave: { aim: { sample: 'great_wave' }, radius: 0, indoors: true, fixedYaw: true, model: () => painting('great_wave') },
+  grandejatte: { aim: { sample: 'grande_jatte' }, radius: 0, indoors: true, fixedYaw: true, model: () => painting('grande_jatte') },
+  nightwatch: { aim: { sample: 'night_watch' }, radius: 0, indoors: true, fixedYaw: true, model: () => painting('night_watch') },
 
   // cabinets and cases holding several samples
   slides: {

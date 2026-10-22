@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { noise3 } from './terrain';
-import { barkTexture, leafTexture, sunflowerTexture, wingTexture } from './textures';
+import { barkTexture, labelTexture, leafTexture, PAINTINGS, paintingTexture, sunflowerTexture, wingTexture, type PaintingId } from './textures';
 
 const cache = new Map<string, unknown>();
 function memo<T>(key: string, make: () => T): T {
@@ -848,3 +848,25 @@ export const deviceCase = () =>
     g.add(mesh(cyl(0.1, 0.1, 0.03, 20), std('#1e1e22', 0.7), -0.3, 1.055, 0), mesh(box(0.06, 0.03, 0.06), std('#b8bcc4', 0.3, 0.9), -0.3, 1.14, 0));
     g.add(mesh(box(0.14, 0.02, 0.14), std('#e0d8b0', 0.4, 0.6), 0.3, 1.05, 0), mesh(box(0.05, 0.02, 0.05), std('#6a7aff', 0.2, 0, { emissive: '#4a5aff', emissiveIntensity: 1.6 }), 0.3, 1.07, 0));
   });
+
+// ---------------------------------------------------------------- the art museum
+
+/** A painting at its real size in a gilt frame, hung with its centre at eye height (big ones higher, clear of the floor),
+ *  and a placard beside it. Faces +z; the canvas glows a little, as if under gallery lights. */
+export function painting(id: PaintingId): THREE.Group {
+  const { w, h, label } = PAINTINGS[id];
+  const g = new THREE.Group();
+  const y = Math.max(1.55, 0.5 + h / 2);
+  const canvas = memo(`painting:${id}`, () => {
+    const t = paintingTexture(id);
+    return new THREE.MeshStandardMaterial({ map: t, emissiveMap: t, emissive: '#ffffff', emissiveIntensity: 0.35, roughness: 0.85 });
+  });
+  g.add(mesh(new THREE.PlaneGeometry(w, h), canvas, 0, y, 0.03));
+  const gilt = std('#b08a3a', 0.4, 0.6);
+  const f = Math.min(0.12, 0.04 + w * 0.02);
+  g.add(mesh(box(w + 2 * f, f, 0.05), gilt, 0, y + h / 2 + f / 2, 0.025), mesh(box(w + 2 * f, f, 0.05), gilt, 0, y - h / 2 - f / 2, 0.025));
+  g.add(mesh(box(f, h, 0.05), gilt, -w / 2 - f / 2, y, 0.025), mesh(box(f, h, 0.05), gilt, w / 2 + f / 2, y, 0.025));
+  const placard = memo(`placard:${id}`, () => new THREE.MeshStandardMaterial({ map: labelTexture(label), roughness: 0.6 }));
+  g.add(mesh(new THREE.PlaneGeometry(0.64, 0.08), placard, w / 2 + f + 0.4, 1.3, 0.01));
+  return g;
+}

@@ -53,6 +53,7 @@ const PATHS: [number, number, number, number][] = [
   [0, 94, 33, 98], // to the materials yard
   [-36, 4, -46, 2], [-46, 2, -82, -9], [-88, -21, -88, 5], [-88, -9, -82, -9], // from the tower down the slope to the west campus
   [-22, -36, -20, -54], [10, -88, 10, -80], // to the tops of the gorge trails
+  [-22, -36, -35, -39.5], // to the art museum's door
   [47, -4, 47, 23], [47, 23, 52, 23], // past the science building to the chemistry building's door
   [36, -20, 80, -20], [80, -20, 80, 30], [80, 30, 90, 30], [90, 30, 90, 34], // east to the athletic fields and the field house
   [22, -36, 26, -55], // to the suspension bridge, and from its north end to the residence halls
