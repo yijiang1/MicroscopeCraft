@@ -2,6 +2,7 @@
 import type { Tier } from './schema';
 
 export interface GameEvents {
+  musicScene: { distance: number; indoors: boolean };
   economyChanged: Record<string, never>;
   rewardEarned: { coins: number; vouchers: number };
   openCampusActivity: { activity: 'store' | 'lab' | 'chess' };

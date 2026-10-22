@@ -194,3 +194,9 @@ Scientists stroll within 12 metres of their home locations, avoiding walls, wate
 - Ambient conversations use compact, softly shaded overhead bubbles with speaker labels. Characters pause while talking; each utterance holds a stable anchor. Nearby overlapping bubbles are suppressed, and opaque building walls hide conversations. Text is rendered as an overlay so it cannot intersect ceiling geometry. These ambient conversations remain scripted; player-to-NPC AI chat is a separate optional feature.
 
 Store inventory cards show illustrated item previews. Click a preview to enlarge it before buying. ScopeCraft Store has a walk-in glass shop in the microscope base, a specimen stage, curved support arm, focusing wheels, revolving objectives and an angled eyepiece.
+
+### Clock tower lookout and music
+
+The glass elevator on the east side of the clock tower takes you to a railed terrace 30 metres above campus. Walk up to it and press **E** to ride; press **E** near the cabin upstairs to return. You can look around during the ride.
+
+Two original synthesized background themes accompany campus walks and lab visits. After your first click or key enables audio, the tower plays a bell arrangement of the traditional **Oh Tannenbaum** every five minutes, with distance attenuation. The existing **Sound** toggle mutes all music and effects immediately. No audio downloads or API keys are needed.

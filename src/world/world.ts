@@ -1,3 +1,4 @@
+import { advanceLift, buildTowerLift, constrainTerrace, LIFT, liftBase, nearLift } from './tower-lift';
 import { mountSpeechOverlay } from './speech-overlay';
 import { buildActivityStation, STATIONS } from './activity-stations';
 // The open world: a university campus, which you walk and jump across, and 3D models you gather or look at.
@@ -87,6 +88,12 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const water = buildWater();
   scene.add(water);
   const campus = buildCampus();
+  const lift = buildTowerLift(); scene.add(lift.group);
+  let liftHeight = 0;
+  let liftTarget = 0;
+  let ridingLift = false;
+  let onTerrace = false;
+  const playerGround = (x: number, z: number, feet = Infinity) => onTerrace ? liftBase + LIFT.rise : groundAt(x, z, feet);
   scene.add(campus.group);
 
   // --- things to gather or look at
@@ -395,6 +402,14 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       redrawShadows();
       return;
     }
+    if (k === 'e' && !e.repeat && !ridingLift && nearLift(camera.position.x, camera.position.z)) {
+      ridingLift = true; liftTarget = onTerrace ? 0 : LIFT.rise;
+      liftHeight = onTerrace ? LIFT.rise : 0;
+      camera.position.x = LIFT.x; camera.position.z = LIFT.z;
+      hud.flash(onTerrace ? 'Returning to campus…' : 'Ascending to the campus lookout…');
+      return;
+    }
+    if (ridingLift) return;
     const n = aimed();
     if (!n || e.repeat) return;
     if (k === 'e' && n.activity) { controls.unlock(); ctx.bus.emit('openCampusActivity', { activity: n.activity }); return; }
@@ -526,7 +541,12 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     const previousZ = camera.position.z;
     const previousYaw = player.root.rotation.y;
 
-    if (controls.isLocked && !paused && !picker.isOpen()) {
+    if (ridingLift) {
+      if (!paused) liftHeight = advanceLift(liftHeight, liftTarget, dt);
+      lift.cabin.position.y = liftBase + liftHeight;
+      camera.position.set(LIFT.x, liftBase + liftHeight + EYE_HEIGHT, LIFT.z); vy = 0;
+      if (liftHeight === liftTarget) { ridingLift = false; onTerrace = liftTarget > 0; hud.flash(onTerrace ? 'Campus lookout · Explore the terrace; E at the elevator to descend' : 'Back on campus'); }
+    } else if (controls.isLocked && !paused && !picker.isOpen()) {
       const p = camera.position;
       const ground = heightAt(p.x, p.z);
       const wading = ground < waterLevelAt(p.x, p.z);
@@ -537,7 +557,8 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       controls.moveForward(fwd * speed);
       controls.moveRight(right * speed);
       // up on the bridge its side screens are walls too; down in the gorge you walk under it
-      collide(p, onDeck(p.x, p.z, p.y - EYE_HEIGHT) ? [...campus.walls, ...BRIDGE_RAILS] : campus.walls, solids);
+      collide(p, onDeck(p.x, p.z, p.y - EYE_HEIGHT) ? [...campus.walls, ...BRIDGE_RAILS] : campus.walls, onTerrace ? [] : solids);
+      if (onTerrace) constrainTerrace(p);
       // the creek and the big lake are off limits: slide along the water's edge instead (an old save may start in it)
       const inWater = (x: number, z: number) => deepWater(x, z) && !onDeck(x, z, p.y - EYE_HEIGHT);
       if (inWater(p.x, p.z) && !inWater(previousX, previousZ)) {
@@ -547,7 +568,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       }
       const r = Math.hypot(p.x, p.z);
       if (r > WORLD_RADIUS - 2) p.multiplyScalar((WORLD_RADIUS - 2) / r); // keeps x, z; y is reset below
-      const feet = groundAt(p.x, p.z, p.y - EYE_HEIGHT);
+      const feet = playerGround(p.x, p.z, p.y - EYE_HEIGHT);
       const eye = feet + EYE_HEIGHT;
       const onGround = p.y <= eye + 0.02;
       if (onGround && keys.has(' ')) vy = JUMP;
@@ -558,7 +579,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
         vy = 0;
       }
     } else {
-      camera.position.y = Math.max(camera.position.y, groundAt(camera.position.x, camera.position.z, camera.position.y - EYE_HEIGHT) + EYE_HEIGHT);
+      camera.position.y = Math.max(camera.position.y, playerGround(camera.position.x, camera.position.z, camera.position.y - EYE_HEIGHT) + EYE_HEIGHT);
     }
 
     const { x: px, z: pz } = camera.position;
@@ -570,6 +591,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       if (area) visit(ctx, area);
     }
     campus.update(t);
+    ctx.bus.emit('musicScene', { distance: Math.hypot(px - TOWER.x, pz - TOWER.z), indoors: inLab(px, pz) || inChess(px, pz) });
     // the tower bells, by the real clock: a chime each quarter hour, and the hour struck on the big bell
     const now = new Date();
     const quarter = Math.floor(now.getMinutes() / 15);
@@ -580,7 +602,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       lastQuarter = quarter;
     }
     const distance = Math.hypot(px - previousX, pz - previousZ);
-    const grounded = vy === 0 && camera.position.y <= groundAt(px, pz) + EYE_HEIGHT + 0.02;
+    const grounded = vy === 0 && camera.position.y <= playerGround(px, pz) + EYE_HEIGHT + 0.02;
     const running = keys.has('shift');
     if (footsteps.update(distance, controls.isLocked && !paused && !picker.isOpen() && grounded, running)) {
       const surface = heightAt(px, pz) < waterLevelAt(px, pz) ? 'water'
@@ -621,7 +643,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     if (crystal) crystalLight.intensity = 12 + 4 * Math.sin(t * 0.0021);
 
     const n = controls.isLocked && !paused && !picker.isOpen() ? aimed() : null;
-    hud.prompt(describe(n));
+    hud.prompt(ridingLift ? 'Elevator · Enjoy the view' : nearLift(px, pz) ? `[E] Elevator · ${onTerrace ? 'Return to campus' : 'Campus lookout'}` : describe(n));
     ring.visible = !!n;
     if (n) {
       const radius = n.radius > 0 ? n.radius + 0.2 : 0.8;
@@ -666,6 +688,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   if (import.meta.env.DEV) {
     // Dev only: jump around for screenshots, e.g. __world.lookAtKind('iron').
     const teleport = (x: number, z: number, yawDeg = 0, pitchDeg = 0) => {
+      onTerrace = false; ridingLift = false;
       camera.position.set(x, groundAt(x, z) + EYE_HEIGHT, z);
       camera.rotation.set(THREE.MathUtils.degToRad(pitchDeg), THREE.MathUtils.degToRad(yawDeg), 0, 'YXZ');
     };

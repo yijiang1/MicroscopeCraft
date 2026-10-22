@@ -1,3 +1,4 @@
+import { LIFT } from './tower-lift';
 import { buildScopeStore, storeFloorAt, STORE_FOOTPRINT, STORE_WALLS } from './store-building';
 // Campus buildings on the hilltop: the halls and statues around the quad, a clock tower with a working clock,
 // the science building with the electron microscopy lab on its glass ground floor, and the waterfall; to the south,
@@ -128,7 +129,7 @@ export const FOOTPRINTS: Box[] = [
 ];
 /** Inside a building, or on a structure where no scenery grows: the sports fields and their stands, the bridge. */
 export const insideBuilding = (x: number, z: number, margin = 0) =>
-  [...FOOTPRINTS, GREENHOUSE, WILSON, ATRIUM, box(GRIDIRON.x0 - 2, GRIDIRON.x1 + 2, STANDS.z0, PRACTICE.z1 + 2), box(BRIDGE.x - 2, BRIDGE.x + 2, BRIDGE.z0 - 2, BRIDGE.z1 + 2)].some(
+  [box(LIFT.x - 1.6, LIFT.x + 2.3, LIFT.z - 1.6, LIFT.z + 1.6), ...FOOTPRINTS, GREENHOUSE, WILSON, ATRIUM, box(GRIDIRON.x0 - 2, GRIDIRON.x1 + 2, STANDS.z0, PRACTICE.z1 + 2), box(BRIDGE.x - 2, BRIDGE.x + 2, BRIDGE.z0 - 2, BRIDGE.z1 + 2)].some(
     (b) => x > b.x0 - margin && x < b.x1 + margin && z > b.z0 - margin && z < b.z1 + margin,
   );
 const inside = (b: Box, x: number, z: number) => x > b.x0 && x < b.x1 && z > b.z0 && z < b.z1;
