@@ -173,3 +173,5 @@ In winter, find snow on outdoor picnic tables, bench and chair seats, tree crown
 The ScopeCraft Store has clothing rails, field backpacks, bookshelves and science souvenir displays. Enter the fitting booth at the back right and press **E**, or choose **Fitting room** at the store counter. Rotate the character preview and equip your original blue shirt or purchased shirts, backpack and miniature microscope. Unpurchased items cannot be equipped.
 
 Press **Z** to toggle free look while on foot. Mouse movement turns the camera without changing your character’s facing or WASD movement direction. Press Z again to restore mouse steering. Driving and fishing return to their normal camera controls.
+
+Classic glasses cost **30 coins** and Campus sunglasses cost **45 coins**. Both appear on the store souvenir shelf and in the catalog. Purchased pairs are available in the fitting room: wear one pair at a time, or choose Remove to go without. Eyewear is cosmetic and saved with your outfit.

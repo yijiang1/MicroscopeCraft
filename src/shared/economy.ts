@@ -6,12 +6,15 @@ export const EconomySchema = z.object({
   fish: z.record(z.string(), z.number().int().nonnegative()).default({}),
   coins: z.number().int().nonnegative().default(0), vouchers: z.number().int().nonnegative().default(0),
   owned: z.array(z.string()).default([]), rewarded: z.record(z.string(), z.number().int().min(0).max(5)).default({}),
+  eyewear: z.enum(['none', 'glasses', 'sunglasses']).default('none'),
   shirt: z.enum(['blue', 'red', 'lab']).default('blue'), backpack: z.boolean().default(false), model: z.boolean().default(false),
 });
 export type Economy = z.infer<typeof EconomySchema>;
-export interface StoreItem { id: string; name: string; price: number; kind: 'book' | 'shirt' | 'backpack' | 'model' | 'car' | 'tool'; text: string }
+export interface StoreItem { id: string; name: string; price: number; kind: 'book' | 'shirt' | 'backpack' | 'model' | 'car' | 'tool' | 'eyewear'; text: string }
 export function storeCatalog(data: GameData): StoreItem[] {
   return [
+    { id: 'glasses', name: 'Classic glasses', price: 30, kind: 'eyewear', text: 'Dark rectangular frames with clear lenses. Wear them in the fitting room; cosmetic only.' },
+    { id: 'sunglasses', name: 'Campus sunglasses', price: 45, kind: 'eyewear', text: 'Gold frames with dark lenses for campus afternoons. Wear them in the fitting room; cosmetic only.' },
     { id: 'binoculars', name: 'Field binoculars · 2×–8×', price: 75, kind: 'tool', text: 'Survey the campus with adjustable 2×–8× magnification. After purchase, press = to raise or lower them and scroll to zoom. Kept in your field gear inventory.' },
     { id: 'fishing_rod', name: 'Field fishing rod', price: 0, kind: 'tool', text: 'Free field equipment. Approach a lake or stream, then select Fish to catch specimens. Convert your catches into microscope samples.' },
     { id: 'miata_na', name: 'Micro Roadster · Classic red', price: 600, kind: 'car', text: 'A red open-top roadster with pop-up headlights. Take a free 30-second campus test drive, or buy it for unlimited drives. WASD to drive; E returns to the store.' },
@@ -52,6 +55,7 @@ export function equip(ctx: GameContext, id: string) {
   else if (id === 'shirt_red') e.shirt = 'red';
   else if (id === 'shirt_lab') e.shirt = 'lab';
   else if (id === 'backpack') e.backpack = !e.backpack;
+  else if (id === 'glasses' || id === 'sunglasses') e.eyewear = e.eyewear === id ? 'none' : id;
   else if (id === 'model') e.model = !e.model;
   else return false;
   ctx.bus.emit('economyChanged', {}); return true;

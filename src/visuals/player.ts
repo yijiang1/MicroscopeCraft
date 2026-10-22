@@ -1,3 +1,4 @@
+import { buildEyewear } from './eyewear';
 import type { Economy } from '../shared/economy';
 import * as THREE from 'three';
 
@@ -58,6 +59,8 @@ export function buildPlayer() {
   box(souvenir, [0.14, 0.045, 0.14], [0.39, 0.91, -0.03], materials.boots);
   box(souvenir, [0.06, 0.15, 0.06], [0.37, 1.08, -0.03], materials.boots);
   backpack.visible = souvenir.visible = false;
+  const glasses = buildEyewear(), sunglasses = buildEyewear(true);
+  for (const pair of [glasses, sunglasses]) { pair.root.position.y = 1.76; pair.root.visible = false; root.add(pair.root); }
   let phase = 0;
   return {
     root,
@@ -72,6 +75,7 @@ export function buildPlayer() {
     },
     equip(economy: Economy) {
       materials.shirt.color.set(economy.shirt === 'red' ? '#b32235' : economy.shirt === 'lab' ? '#f0f2ed' : '#8ec9ee');
+      glasses.root.visible = economy.eyewear === 'glasses'; sunglasses.root.visible = economy.eyewear === 'sunglasses';
       backpack.visible = economy.backpack; souvenir.visible = economy.model;
     },
     update(distance: number, dt: number) {
@@ -82,6 +86,7 @@ export function buildPlayer() {
       legs.forEach((leg, i) => { leg.rotation.x += ((i === 0 ? -swing : swing) - leg.rotation.x) * blend; });
     },
     dispose() {
+      root.remove(glasses.root, sunglasses.root); glasses.dispose(); sunglasses.dispose();
       root.traverse((obj) => { if (obj instanceof THREE.Mesh) obj.geometry.dispose(); });
       bagMaterial.dispose();
       Object.values(materials).forEach((material) => material.dispose());

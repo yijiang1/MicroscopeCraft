@@ -37,6 +37,25 @@ describe('campus economy', () => {
     const old = toSave(ctx.state) as Partial<ReturnType<typeof toSave>>; delete old.economy;
     expect(parseSave(JSON.stringify(old))!.economy.coins).toBe(0);
   });
+  it('requires eyewear ownership, switches pairs, removes them and restores saved outfits', () => {
+    const ctx = game();
+    expect(equip(ctx, 'glasses')).toBe(false);
+    expect(equip(ctx, 'sunglasses')).toBe(false);
+    expect(ctx.state.economy.eyewear).toBe('none');
+    ctx.state.economy.coins = 75;
+    expect(purchase(ctx, 'glasses', 'coins')).toBe(true);
+    expect(purchase(ctx, 'sunglasses', 'coins')).toBe(true);
+    expect(ctx.state.economy.coins).toBe(0);
+    equip(ctx, 'glasses'); expect(ctx.state.economy.eyewear).toBe('glasses');
+    equip(ctx, 'sunglasses'); expect(ctx.state.economy.eyewear).toBe('sunglasses');
+    const saved = parseSave(JSON.stringify(toSave(ctx.state)))!;
+    expect(createGame(ctx.data, undefined, saved).state.economy.eyewear).toBe('sunglasses');
+    equip(ctx, 'sunglasses'); expect(ctx.state.economy.eyewear).toBe('none');
+    const old = JSON.parse(JSON.stringify(saved)); delete old.economy.eyewear;
+    const migrated = parseSave(JSON.stringify(old))!;
+    expect(migrated.economy.eyewear).toBe('none');
+    expect(migrated.economy.owned).toContain('glasses');
+  });
   it('charges 75 coins for binoculars and saves ownership', () => {
     const ctx=game();ctx.state.economy.coins=74;
     expect(purchase(ctx,'binoculars','coins')).toBe(false);

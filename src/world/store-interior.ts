@@ -1,3 +1,4 @@
+import { buildEyewear } from '../visuals/eyewear';
 import * as THREE from 'three';
 
 // World-space furniture bounds; the middle aisle and roadster display stay open.
@@ -59,6 +60,11 @@ export function buildStoreInterior() {
     const mug=new THREE.Mesh(new THREE.CylinderGeometry(.13,.13,.25,16),red);mug.position.set(x,1.13,-4.9);root.add(mug);
     const handle=new THREE.Mesh(new THREE.TorusGeometry(.08,.025,6,12),gold);handle.position.set(x+.15,1.14,-4.9);root.add(handle);
   }
+  for (const [i, darkLens] of [false, true].entries()) {
+    const pair = buildEyewear(darkLens); pair.root.scale.setScalar(1.8);
+    pair.root.rotation.y = Math.PI; pair.root.position.set(-.5 + i, .43, -4.9); root.add(pair.root);
+  }
+  label('GLASSES & SUNGLASSES', 0, .72, -4.52, 1.85);
   // Walk-in changing booth, open at the front, with a raised rug and framed mirror.
   for(const x of [1.575,5.275])box(.15,2.6,2.6,x,1.36,-4.3,wood);
   box(3.85,.15,.15,3.425,2.65,-3,gold);
