@@ -203,6 +203,8 @@ export const NpcSchema = z.object({
   role: z.string(),
   /** Two or three sentences of history, checked against sources. */
   bio: z.string(),
+  /** What they may talk about in chat (their field, work and life); anything else they decline. */
+  expertise: z.string(),
   greeting: z.string(),
   x: z.number(),
   z: z.number(),
