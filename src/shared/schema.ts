@@ -89,7 +89,11 @@ export type ScopeSpec = z.infer<typeof ScopeSpecSchema>;
 
 /** A lens the player ground at the workbench. It is curved equally on both sides, so this one radius sets its
  *  focal length (sim/assembly.ts). */
-export const LensBuildSchema = z.object({ radiusMm: z.number().min(1).max(500) });
+export const LensBuildSchema = z.object({
+  radiusMm: z.number().min(1).max(500),
+  /** Width of the stop in front of an objective, mm; absent = the whole lens. */
+  stopMm: z.number().positive().optional(),
+});
 export type LensBuild = z.infer<typeof LensBuildSchema>;
 
 /** A compound microscope the player put together by hand at the workbench. Its optics replace the recipe's zoom

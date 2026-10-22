@@ -21,6 +21,8 @@ export const MIN_RADIUS_MM = 1.5;
 export const TUBE_MM = { min: 120, max: 260, standard: 200 } as const;
 /** How far the focus knob can lift the objective above the slide. */
 export const FOCUS_RANGE_MM = { min: 0.15, max: 60 } as const;
+/** The narrowest stop the nosepiece takes, mm. */
+export const STOP_MIN_MM = 0.1;
 /** Lenses on the revolving nosepiece. */
 export const MAX_OBJECTIVES = 3;
 
@@ -28,9 +30,21 @@ export const MAX_OBJECTIVES = 3;
  *  With n = 1.5 the focal length equals the radius of curvature. */
 export const focalLengthMm = (radiusMm: number) => radiusMm / (2 * (GLASS_N - 1));
 
-/** A lens curved on both sides can be no wider than its curves allow: past about 1.4 R the edge gets too thin to hold.
- *  So a strongly curved lens is small (Leeuwenhoek's lenses were glass beads), and a gentle one is as wide as the blank. */
-export const apertureMm = (radiusMm: number) => Math.min(BLANK_DIAMETER_MM, 1.4 * radiusMm);
+/** A lens curved on both sides can be no wider than its curves allow: an exact ray trace through both surfaces shows
+ *  rays past about 1.04 R totally reflected inside the glass, so the usable width is capped at R. A strongly curved
+ *  lens is small (Leeuwenhoek's lenses were glass beads), and a gentle one is as wide as the blank. */
+export const apertureMm = (radiusMm: number) => Math.min(BLANK_DIAMETER_MM, radiusMm);
+
+/** Spherical aberration of one ground lens: its edge focuses closer than its middle. For a thin equiconvex lens in
+ *  n = 1.5 glass the blur at the plane of least confusion, in the specimen, is about K·f·NA³ (third order). K = 0.84
+ *  is fitted to an exact ray trace (Snell's law at both curved surfaces) at NA ≤ 0.3. The eyepiece's is left out:
+ *  the eye's small pupil stops it down. */
+export const SPHERICAL_K = 0.84;
+export const sphericalBlurUm = (fMm: number, NA: number) => SPHERICAL_K * fMm * NA ** 3 * 1000;
+
+/** The NA that makes a lens sharpest: a wider cone shrinks the diffraction blur λ/2NA but grows spherical aberration
+ *  as NA³. Minimising their sum in quadrature gives NA⁸ = (λ/2)² / (3·(K·f)²), λ and K·f in µm. */
+export const sharpestNA = (fMm: number, wavelengthUm: number) => ((wavelengthUm / 2) ** 2 / (3 * (SPHERICAL_K * fMm * 1000) ** 2)) ** (1 / 8);
 
 /** Angular magnification of an eyepiece (or a hand lens) for a relaxed eye: M = 250 mm / f. */
 export const eyepieceMagnification = (fEyeMm: number) => NEAR_POINT_MM / fEyeMm;
@@ -64,7 +78,10 @@ export interface ObjectiveOptics {
   /** Focal lengths and widths of the two lenses, mm. */
   fObjectiveMm: number;
   fEyepieceMm: number;
+  /** The width light gets through: the lens, or the stop in front of it if that is narrower. */
   apertureMm: number;
+  /** How wide the lens itself is, mm. */
+  lensWidthMm: number;
   /** Where the objective's image forms (above the objective lens) and where the slide sits when it is sharp, mm. */
   imageMm: number;
   workingDistanceMm: number;
@@ -73,6 +90,8 @@ export interface ObjectiveOptics {
   eyepieceMag: number;
   magnification: number;
   NA: number;
+  /** Spherical-aberration blur in the specimen, µm. */
+  sphericalUm: number;
   issue: BuildIssue | null;
 }
 
@@ -80,7 +99,8 @@ export interface ObjectiveOptics {
 export function objectiveOptics(objective: LensBuild, eyepiece: LensBuild, tubeMm: number): ObjectiveOptics {
   const fObjectiveMm = focalLengthMm(objective.radiusMm);
   const fEyepieceMm = focalLengthMm(eyepiece.radiusMm);
-  const D = apertureMm(objective.radiusMm);
+  const lensWidthMm = apertureMm(objective.radiusMm);
+  const D = Math.min(lensWidthMm, objective.stopMm ?? Infinity);
   const imageMm = intermediateDistanceMm(tubeMm, fEyepieceMm);
   const workingDistanceMm = objectDistanceMm(fObjectiveMm, imageMm);
   const eyepieceMag = eyepieceMagnification(fEyepieceMm);
@@ -90,10 +110,11 @@ export function objectiveOptics(objective: LensBuild, eyepiece: LensBuild, tubeM
     : workingDistanceMm > FOCUS_RANGE_MM.max ? 'out-of-reach'
     : null;
   const objectiveMag = issue ? 0 : imageMm / workingDistanceMm;
+  const NA = issue ? 0 : numericalAperture(D, workingDistanceMm);
   return {
-    fObjectiveMm, fEyepieceMm, apertureMm: D, imageMm, workingDistanceMm,
+    fObjectiveMm, fEyepieceMm, apertureMm: D, lensWidthMm, imageMm, workingDistanceMm,
     objectiveMag, eyepieceMag, magnification: objectiveMag * eyepieceMag,
-    NA: issue ? 0 : numericalAperture(D, workingDistanceMm),
+    NA, sphericalUm: sphericalBlurUm(fObjectiveMm, NA),
     issue,
   };
 }
@@ -119,8 +140,8 @@ export function issueText(issue: BuildIssue, o: ObjectiveOptics): string {
 }
 
 /** The build as the microscope the game uses: one zoom step per objective, lowest magnification first.
- *  The glass blur, contrast and condenser stay those of the recipe (`base`). Simplification: one ground lens stands in
- *  for each multi-element objective and eyepiece, and their aberrations are folded into the glass blur. */
+ *  Each step's lens blur is the recipe's glass blur (`base`) plus that objective's spherical aberration; contrast and
+ *  condenser stay the recipe's. */
 export function compileBuild(build: CompoundBuild, base: ScopeSpec): ScopeSpec {
   const steps: ZoomStep[] = buildOptics(build)
     .filter((o) => !o.issue)
@@ -130,6 +151,7 @@ export function compileBuild(build: CompoundBuild, base: ScopeSpec): ScopeSpec {
       magnification: Math.max(1, Math.round(o.magnification)),
       NA: Math.round(o.NA * 1000) / 1000,
       mode: 'brightfield',
+      dLensUm: Math.round(Math.hypot(base.dLensUm, o.sphericalUm) * 100) / 100,
     }));
   return { ...base, steps: steps.length ? steps : base.steps };
 }

@@ -163,7 +163,7 @@ export function actionText(action: Action, data: Pick<GameData, 'items'>): strin
   switch (action.kind) {
     case 'identify': {
       const { sample, feature, scope, step, rebuild } = action.identify;
-      if (rebuild) return `Your ${rebuild.name} can't show ${feature.name} (${fmtUm(feature.sizeUm)}) yet: rebuild it at the workbench [B] with a more strongly curved objective`;
+      if (rebuild) return `Your ${rebuild.name} can't show ${feature.name} (${fmtUm(feature.sizeUm)}) yet: rebuild it at the workbench [B] with a more strongly curved objective and its stop set`;
       const at = step && (scope?.scope?.steps.length ?? 0) > 1 ? ` at ${step.label}` : '';
       const site = scope?.scope?.site;
       if (site) return `Look [F] at a ${sample.name} to take a bit, then use the ${scope.name} in the ${SITE_NAMES[site]}${at} to spot ${feature.name}`;

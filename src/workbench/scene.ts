@@ -39,7 +39,7 @@ export interface SceneView {
   placed: readonly PartId[];
   style: Readonly<Record<string, string>>;
   name: string;
-  objectives: readonly { radiusMm: number }[];
+  objectives: readonly { radiusMm: number; stopMm?: number }[];
   active: number;
   eyepiece: { radiusMm: number } | null;
   tubeMm: number;
@@ -631,7 +631,7 @@ export function createBenchScene(host: HTMLElement, on: { pick(p: Pick): void; k
     focalRing.visible = false;
     if (lit && obj && v.placed.includes('tube')) {
       const f = focalLengthMm(obj.radiusMm);
-      const D = apertureMm(obj.radiusMm);
+      const D = Math.min(apertureMm(obj.radiusMm), obj.stopMm ?? Infinity);
       const fEye = v.eyepiece ? focalLengthMm(v.eyepiece.radiusMm) : 1e9;
       const exit = v.eyepiece ? 45 : 0;
       const tube = v.eyepiece ? v.tubeMm : v.tubeMm - 8;

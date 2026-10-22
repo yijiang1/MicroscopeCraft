@@ -52,6 +52,8 @@
   {
     "id": "sunflower_seed", "name": "Sunflower seed", "worldObject": "sunflower_seed", "biome": "meadow",
     "features": [
+      { "id": "pressed_oil", "name": "Pressed oil drops", "sizeUm": 4, "contrast": 0.5, "drawing": "droplets",
+        "blurb": "Squash a seed under the cover glass and its oil runs out and gathers into round drops a few micrometres and up. They are big enough for a microscope with simple lenses, while the oil bodies still packed inside each cell are far smaller." },
       { "id": "seed_oil", "name": "Seed oil droplets", "sizeUm": 1.5, "contrast": 0.4, "drawing": "droplets",
         "blurb": "Every cell of a seed stores energy as tiny droplets of oil, each wrapped in a skin of protein. Squeezed out, oil like this bends light almost as much as glass, which is why a drop of it under a lens helps a microscope see finer detail." },
       { "id": "seed_embryo", "name": "Embryo inside the seed", "sizeUm": 400, "contrast": 0, "contrastIn": { "xct": 0.6 }, "drawing": "slice", "tint": "#d9c58a",

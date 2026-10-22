@@ -162,13 +162,13 @@ describe('microscopes built at the workbench', () => {
     const plan = planFor(goal, data, ctx.state.inventory, ctx.state.discoveries, ctx.state.builds);
     const oil = plan.raw.find((r) => r.itemId === 'plant_oil')!.identify!;
     expect(oil.rebuild?.id).toBe('compound_microscope');
-    expect(actionText({ kind: 'identify', raw: plan.raw[0]!, identify: oil }, data)).toMatch(/^Your Compound microscope can't show Seed oil droplets \(1\.5 µm\) yet: rebuild it/);
-    const strong = { ...weak, objectives: [{ radiusMm: 4 }] };
+    expect(actionText({ kind: 'identify', raw: plan.raw[0]!, identify: oil }, data)).toMatch(/^Your Compound microscope can't show Pressed oil drops \(4 µm\) yet: rebuild it/);
+    const strong = { ...weak, objectives: [{ radiusMm: 2, stopMm: 0.4 }] }; // stopped down to near its sharpest
     gather(ctx, 'lens', 0);
     expect(assemble(ctx, 'compound_microscope', strong)).toBe(true);
     const again = planFor(goal, data, ctx.state.inventory, ctx.state.discoveries, ctx.state.builds);
     const ok = again.raw.find((r) => r.itemId === 'plant_oil')!.identify!;
     expect(ok.rebuild).toBeUndefined();
-    expect(ok.step?.label).toBe('430× (4.0 mm objective)');
+    expect(ok.step?.label).toBe('870× (2.0 mm objective)');
   });
 });

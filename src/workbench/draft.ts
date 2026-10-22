@@ -3,8 +3,8 @@
 // shared/sim/assembly.ts, the same formulas that turn the finished build into the microscope the game uses.
 import type { CompoundBuild } from '../shared/schema';
 import {
-  BLANK_RADIUS_MM, buildIssue, defocusBlurUm, FOCUS_RANGE_MM, imageOffsetMm, MAX_OBJECTIVES, MIN_RADIUS_MM,
-  objectiveOptics, TUBE_MM, type ObjectiveOptics,
+  apertureMm, BLANK_RADIUS_MM, buildIssue, defocusBlurUm, FOCUS_RANGE_MM, imageOffsetMm, MAX_OBJECTIVES, MIN_RADIUS_MM,
+  objectiveOptics, STOP_MIN_MM, TUBE_MM, type ObjectiveOptics,
 } from '../shared/sim/assembly';
 import { abbeLimitUm, effectiveResolutionUm, GREEN_LIGHT_UM } from '../shared/sim/optics';
 
@@ -45,6 +45,8 @@ export const FINISHES = ['brass', 'black', 'nickel', 'iron', 'wood', 'white', 'r
 export interface Blank {
   id: number;
   radiusMm: number;
+  /** Width of the stop in front of it when it is an objective, mm; absent = open. */
+  stopMm?: number;
 }
 
 export interface Draft {
@@ -86,7 +88,7 @@ export function draftFromBuild(build: CompoundBuild, spareBlanks: number): Draft
   const d: Draft = {
     ...newDraft(0),
     placed: PARTS.map((p) => p.id),
-    blanks: [...lenses, ...Array.from({ length: spareBlanks }, () => ({ radiusMm: BLANK_RADIUS_MM }))].map((l, id) => ({ id, radiusMm: l.radiusMm })),
+    blanks: [...lenses, ...Array.from({ length: spareBlanks }, () => ({ radiusMm: BLANK_RADIUS_MM }))].map((l: { radiusMm: number; stopMm?: number }, id) => ({ id, radiusMm: l.radiusMm, stopMm: l.stopMm })),
     objectives: build.objectives.map((_, i) => i),
     eyepiece: build.objectives.length,
     tubeMm: build.tubeMm,
@@ -154,6 +156,12 @@ export function freshBlank(d: Draft, id: number) {
   if (b) b.radiusMm = BLANK_RADIUS_MM;
 }
 
+/** Open or close the stop in front of the objective in use; opened as wide as the lens, it is no stop at all. */
+export function setStop(d: Draft, mm: number) {
+  const b = activeObjective(d);
+  if (b) b.stopMm = mm >= apertureMm(b.radiusMm) ? undefined : Math.max(STOP_MIN_MM, mm);
+}
+
 export function setTube(d: Draft, mm: number) {
   d.tubeMm = Math.min(TUBE_MM.max, Math.max(TUBE_MM.min, mm));
 }
@@ -172,7 +180,7 @@ const activeObjective = (d: Draft) => {
 const eyepieceBlank = (d: Draft) => (d.eyepiece === null ? undefined : blank(d, d.eyepiece));
 
 /** Changes whenever something that moves the focus changes: the lenses in use, how they are ground, the tube. */
-export const opticsKey = (d: Draft) => `${activeObjective(d)?.radiusMm ?? '-'}:${eyepieceBlank(d)?.radiusMm ?? '-'}:${d.tubeMm}`;
+export const opticsKey = (d: Draft) => `${activeObjective(d)?.radiusMm ?? '-'}:${activeObjective(d)?.stopMm ?? '-'}:${eyepieceBlank(d)?.radiusMm ?? '-'}:${d.tubeMm}`;
 
 /** In focus once the defocus blur is under this share of the finest detail the build resolves. */
 export const SHARP = 0.6;
@@ -200,7 +208,7 @@ export function live(d: Draft, dLensUm: number): Live | null {
   if (optics.issue) return { optics, offsetMm, deltaMm: 0, blurUm: Infinity, dEffUm: Infinity, sharp: false };
   const deltaMm = d.focusMm - optics.workingDistanceMm;
   const blurUm = defocusBlurUm(optics.NA, deltaMm);
-  const dEffUm = effectiveResolutionUm(abbeLimitUm(GREEN_LIGHT_UM, optics.NA), dLensUm);
+  const dEffUm = effectiveResolutionUm(abbeLimitUm(GREEN_LIGHT_UM, optics.NA), Math.hypot(dLensUm, optics.sphericalUm));
   return { optics, offsetMm, deltaMm, blurUm, dEffUm, sharp: blurUm <= SHARP * dEffUm };
 }
 
@@ -233,9 +241,10 @@ export function steps(d: Draft): Step[] {
 /** The build as the game keeps it, or null while something is missing. */
 export function toBuild(d: Draft): CompoundBuild | null {
   const eye = eyepieceBlank(d);
-  const objectives = d.objectives.map((id) => blank(d, id)!).map((b) => ({ radiusMm: Math.round(b.radiusMm * 100) / 100 }));
+  const round = (mm: number) => Math.round(mm * 100) / 100;
+  const objectives = d.objectives.map((id) => blank(d, id)!).map((b) => ({ radiusMm: round(b.radiusMm), ...(b.stopMm ? { stopMm: round(b.stopMm) } : {}) }));
   if (!eye || !objectives.length) return null;
-  return { objectives, eyepiece: { radiusMm: Math.round(eye.radiusMm * 100) / 100 }, tubeMm: Math.round(d.tubeMm), style: { ...d.style }, name: d.name.slice(0, 24) };
+  return { objectives, eyepiece: { radiusMm: round(eye.radiusMm) }, tubeMm: Math.round(d.tubeMm), style: { ...d.style }, name: d.name.slice(0, 24) };
 }
 
 /** Ready to become a microscope: every step done and every objective on the nosepiece can be focused. */

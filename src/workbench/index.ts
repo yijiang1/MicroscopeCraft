@@ -4,14 +4,17 @@
 // What it can see comes from how you built it: shared/sim/assembly.ts turns the build into the zoom steps the
 // eyepiece uses. Open it with B, from the menu, or with C when the goal card says to build the microscope.
 import type { CompoundBuild, Feature, Sample, ScopeParams } from '../shared/schema';
-import { buildIssue, buildOptics, compileBuild, FOCUS_RANGE_MM, focalLengthMm, issueText, MAX_OBJECTIVES, TUBE_MM, type ObjectiveOptics } from '../shared/sim/assembly';
-import { usefulMagnificationMax, visibility } from '../shared/sim/optics';
+import {
+  buildIssue, buildOptics, compileBuild, FOCUS_RANGE_MM, focalLengthMm, issueText, MAX_OBJECTIVES, objectiveOptics, sharpestNA, STOP_MIN_MM,
+  TUBE_MM, type ObjectiveOptics,
+} from '../shared/sim/assembly';
+import { GREEN_LIGHT_UM, usefulMagnificationMax, visibility } from '../shared/sim/optics';
 import { findFeature, scopeThatSees } from '../shared/plan';
 import { explainWall, fmtUm } from '../shared/sim/walls';
 import { assemble, canCraft, LENS_ITEM, scopeParamsFromSpec, type GameContext } from '../shared/state';
 import {
   blank, canMount, canPlace, draftFromBuild, FINISHES, freshBlank, grind, live, mountEyepiece, mountObjective, moveFocus,
-  newDraft, noteFocus, partDef, PARTS, place, roleOf, setTube, SHAPES, steps, toBuild, unmount, finishable, type Draft, type Live, type PartId,
+  newDraft, noteFocus, partDef, PARTS, place, roleOf, setStop, setTube, SHAPES, steps, toBuild, unmount, finishable, type Draft, type Live, type PartId,
 } from './draft';
 import { drawPreview, verdicts } from './preview';
 import { createBenchScene, type BenchScene, type GhostId, type Pick } from './scene';
@@ -25,8 +28,13 @@ export interface WorkbenchHandle {
 /** build: you have the parts. edit: you own it and can change it. practice: no parts yet, nothing is kept. */
 type Mode = 'build' | 'edit' | 'practice';
 
-/** A compound microscope crafted before the workbench existed comes back as the recipe's usual three objectives. */
-const LEGACY_BUILD: CompoundBuild = { objectives: [{ radiusMm: 40 }, { radiusMm: 16 }, { radiusMm: 4 }], eyepiece: { radiusMm: 25 }, tubeMm: 201, style: {}, name: '' };
+/** A compound microscope crafted before the workbench existed comes back as the recipe's usual three objectives,
+ *  each stopped down to where it is sharpest. */
+const legacyObjective = (radiusMm: number) => {
+  const o = objectiveOptics({ radiusMm }, { radiusMm: 25 }, 201);
+  return { radiusMm, stopMm: Math.round(200 * o.workingDistanceMm * Math.tan(Math.asin(sharpestNA(o.fObjectiveMm, GREEN_LIGHT_UM)))) / 100 };
+};
+const LEGACY_BUILD: CompoundBuild = { objectives: [40, 16, 4].map(legacyObjective), eyepiece: { radiusMm: 25 }, tubeMm: 201, style: {}, name: '' };
 /** Slides you can put on the stage to try the build; the first one holds what unlocks the next microscope. */
 const SLIDES = ['sunflower_seed', 'leaf', 'blood_slide', 'flower', 'pond_scum', 'bark'];
 const FINISH_COLOR: Record<string, string> = {
@@ -114,9 +122,14 @@ export function mountWorkbench(el: HTMLElement, ctx: GameContext): WorkbenchHand
     setTube(draft, v);
     refresh();
   });
+  // the stop is set on a log scale: the sharpest stops are a fraction of a millimetre
+  const stop = slider('Stop', Math.log10(STOP_MIN_MM), Math.log10(8), 0.01, (v) => {
+    setStop(draft, 10 ** v);
+    refresh();
+  });
   const focusStatus = h('div', 'wb-muted');
   focusStatus.style.cssText = 'margin-top:4px;font-size:12px';
-  dock.append(coarse.row, fineSlider.row, tube.row, focusStatus);
+  dock.append(coarse.row, fineSlider.row, stop.row, tube.row, focusStatus);
 
   // --- state
   let mode: Mode = 'practice';
@@ -169,7 +182,7 @@ export function mountWorkbench(el: HTMLElement, ctx: GameContext): WorkbenchHand
 
   /** The microscope as the game would use it right now, at the objective in use (magnification not rounded). */
   const scopeFor = (o: ObjectiveOptics): ScopeParams =>
-    scopeParamsFromSpec({ ...spec, steps: [{ label: '', magnification: o.magnification, NA: o.NA, mode: 'brightfield' }] }, 0);
+    scopeParamsFromSpec({ ...spec, steps: [{ label: '', magnification: o.magnification, NA: o.NA, mode: 'brightfield', dLensUm: Math.hypot(spec.dLensUm, o.sphericalUm) }] }, 0);
 
   // --- actions
   const select = (tag: string | null) => {
@@ -380,7 +393,8 @@ export function mountWorkbench(el: HTMLElement, ctx: GameContext): WorkbenchHand
   const renderDock = (l: Live | null) => {
     const ready = draft.placed.includes('knobs') && draft.objectives.length > 0;
     dock.style.display = ready || draft.placed.includes('tube') ? 'block' : 'none';
-    coarse.row.style.display = fineSlider.row.style.display = ready ? '' : 'none';
+    coarse.row.style.display = fineSlider.row.style.display = stop.row.style.display = ready ? '' : 'none';
+    if (l) stop.set(Math.log10(l.optics.apertureMm), l.optics.apertureMm < l.optics.lensWidthMm ? fmtMm(l.optics.apertureMm) : 'open');
     tube.row.style.display = draft.placed.includes('tube') ? '' : 'none';
     coarse.set(draft.focusMm, fmtMm(draft.focusMm));
     // the big knob (3D drag, keys, wheel) can carry the focus past the fine slider's travel: re-centre it then
@@ -405,7 +419,7 @@ export function mountWorkbench(el: HTMLElement, ctx: GameContext): WorkbenchHand
     }
     const o = l.optics;
     optics.append(
-      row('Objective', `f ${fmtMm(o.fObjectiveMm)} · ${fmtMm(o.apertureMm)} wide`),
+      row('Objective', `f ${fmtMm(o.fObjectiveMm)} · ${fmtMm(o.lensWidthMm)} wide${o.apertureMm < o.lensWidthMm ? `, stopped to ${fmtMm(o.apertureMm)}` : ''}`),
       row('Eyepiece', `f ${fmtMm(o.fEyepieceMm)} · ${fmtMag(o.eyepieceMag)}`),
       row('Tube', `${Math.round(draft.tubeMm)} mm`),
     );
@@ -418,11 +432,13 @@ export function mountWorkbench(el: HTMLElement, ctx: GameContext): WorkbenchHand
     optics.append(
       row('Magnification', `${fmtMag(o.objectiveMag)} × ${fmtMag(o.eyepieceMag)} = ${fmtMag(o.magnification)}`, 'wb-gold'),
       row('Numerical aperture', o.NA.toFixed(2)),
+      row('Blur from diffraction', fmtUm(GREEN_LIGHT_UM / (2 * o.NA))),
+      row('Blur from the lens shape', fmtUm(o.sphericalUm)),
       row('Finest detail', fmtUm(l.dEffUm)),
       row('Slide below objective', `${fmtMm(o.workingDistanceMm)} when sharp`),
     );
     if (o.magnification > useful) {
-      optics.append(h('div', 'wb-note', `Empty magnification: ${fmtMag(o.magnification)} is more than 1000 × NA (${fmtMag(useful)}). A stronger eyepiece only enlarges the blur; only a wider cone of light (more NA: a stronger, wider objective) adds detail.`));
+      optics.append(h('div', 'wb-note', `Empty magnification: ${fmtMag(o.magnification)} is more than 1000 × NA (${fmtMag(useful)}). A stronger eyepiece only enlarges the blur; only a wider cone of light (more NA) adds detail, and a single lens pays for it in spherical aberration.`));
     }
   };
 
@@ -476,7 +492,7 @@ export function mountWorkbench(el: HTMLElement, ctx: GameContext): WorkbenchHand
       else {
         const best = seen.sort((a, b) => b.o.NA - a.o.NA)[0];
         targetBox.append(h('div', 'wb-warn', best ? `✗ ${explainWall(t.feature, scopeFor(best.o), best.v, null)}` : '✗ None of the objectives can form an image yet.'));
-        if (best) targetBox.append(h('div', 'wb-muted', 'More NA resolves finer detail: grind an objective more strongly (shorter focal length).'));
+        if (best) targetBox.append(h('div', 'wb-muted', 'One lens trades two blurs: a wider cone (more NA) shrinks diffraction, but the lens edge focuses short, and that blur grows as NA³. Grind a shorter focal length, then close the stop until the two blurs are about equal.'));
       }
     }
   };
@@ -747,14 +763,14 @@ export function mountWorkbench(el: HTMLElement, ctx: GameContext): WorkbenchHand
     list.style.fontSize = '13px';
     for (const s of zoom) {
       const sc = scopeParamsFromSpec({ ...spec, steps: [s] }, 0);
-      list.append(h('li', '', `${s.label}: finest detail ${fmtUm(Math.hypot(0.55 / (2 * s.NA), spec.dLensUm))}${s.magnification > usefulMagnificationMax(sc) ? ' (empty magnification)' : ''}`));
+      list.append(h('li', '', `${s.label}: finest detail ${fmtUm(Math.hypot(GREEN_LIGHT_UM / (2 * s.NA), s.dLensUm ?? spec.dLensUm))}${s.magnification > usefulMagnificationMax(sc) ? ' (empty magnification)' : ''}`));
     }
     card.append(list);
     for (const t of targets) {
       const sees = zoom.some((s) => visibility(t.feature, scopeParamsFromSpec({ ...spec, steps: [s] }, 0)).visible);
       card.append(h('div', sees ? 'wb-ok' : 'wb-warn', sees
         ? `✓ It can show ${t.feature.name.toLowerCase()} (${fmtUm(t.feature.sizeUm)}), which unlocks ${t.material}.`
-        : `✗ It cannot show ${t.feature.name.toLowerCase()} (${fmtUm(t.feature.sizeUm)}) yet, and you need them to unlock ${t.material}: come back (B) and grind a stronger objective.`));
+        : `✗ It cannot show ${t.feature.name.toLowerCase()} (${fmtUm(t.feature.sizeUm)}) yet, and you need them to unlock ${t.material}: come back (B), grind a stronger objective and set its stop.`));
     }
     card.append(
       h('p', 'wb-muted', practice
