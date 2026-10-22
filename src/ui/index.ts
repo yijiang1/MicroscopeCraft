@@ -1,6 +1,6 @@
 // Person D. The goal card (always visible, keyboard-first), a menu panel (Tab), the tech tree (T),
 // the Microdex (M), toasts and sound. Plain DOM; swap for anything.
-import { SAVE_KEY, toSave, type GameContext } from '../shared/state';
+import { SAVE_KEY, SNAPSHOTS_KEY, toSave, type GameContext } from '../shared/state';
 import { fmtUm } from '../shared/sim/walls';
 import { allAchievements } from '../shared/achievements';
 import { mountDialog } from './dialog';
@@ -118,6 +118,10 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   // --- save (also automatic after every change and on leaving the page) and restart
   let resetting = false;
   let travelSave = 0;
+  // The snapshots are rewritten only when one is added or improved: they are most of the save by the end. The first
+  // save of a visit always writes them, which also moves an older save's inline snapshots to their own key.
+  const shotsSignature = () => Object.values(ctx.state.snapshots).reduce((sum, s) => sum + s.quality, 0);
+  let savedShots = -1;
   const save = (): boolean => {
     clearTimeout(travelSave);
     travelSave = 0;
@@ -125,11 +129,15 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
     try {
       localStorage.setItem(SAVE_KEY, JSON.stringify(toSave(ctx.state)));
     } catch {
-      // ponytail: quota full (snapshots are images) → keep progress, drop the pictures
+      return false;
+    }
+    const shots = shotsSignature();
+    if (shots !== savedShots) {
       try {
-        localStorage.setItem(SAVE_KEY, JSON.stringify({ ...toSave(ctx.state), snapshots: {} }));
+        localStorage.setItem(SNAPSHOTS_KEY, JSON.stringify(ctx.state.snapshots));
+        savedShots = shots;
       } catch {
-        return false;
+        // ponytail: quota full (snapshots are images) → the progress is saved, the newest pictures are not
       }
     }
     return true;
@@ -140,6 +148,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
     resetting = true;
     try {
       localStorage.removeItem(SAVE_KEY);
+      localStorage.removeItem(SNAPSHOTS_KEY);
       localStorage.removeItem(TUTORIAL_KEY);
     } catch {
       /* nothing saved */

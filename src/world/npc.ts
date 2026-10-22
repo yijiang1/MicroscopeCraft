@@ -2,6 +2,7 @@
 // where one exists), with a name tag and a marker that shows whether they are waiting for something you can show them.
 import * as THREE from 'three';
 import type { Npc } from '../shared/schema';
+import { mergeByMaterial } from './models';
 
 export interface NpcFigure {
   root: THREE.Group;
@@ -122,6 +123,7 @@ export function buildNpc(npc: Npc): NpcFigure {
     for (const side of [-1, 1]) box([0.11, 0.07, 0.01], [side * 0.09, 1.76, -0.19], rim);
     box([0.07, 0.015, 0.01], [0, 1.77, -0.19], rim);
   }
+  mergeByMaterial(root);
   const name = tag(npc.name, npc.years);
   name.position.set(0, 2.35, 0);
   const mk = marker();

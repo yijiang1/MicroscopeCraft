@@ -37,9 +37,13 @@ Every module depends on `src/shared`; **no module imports another** (ESLint enfo
 - **State**: `ctx.state` is read-only for renderers. Change it only with the actions in `src/shared/state.ts` (`gather`, `craft`, `discover`, `completeQuest`, `recordScore`, `visit`, `setSite`, `setAlign`). Every action re-checks the achievements.
 - **Events** (`src/shared/events.ts`): `openEyepiece({sampleId})`, `closeEyepiece`, `itemGathered`, `itemCrafted`, `discoveryUnlocked`, `tierChanged`, `zoomChanged`, `scopeChanged`, `trackItem`, `trackTarget`, `talkTo`, `questCompleted`, `achievementUnlocked`, `minigameScored`, `areaVisited`, `guideAsked`, `guideReplied`.
 - **Steps and modes**: a microscope recipe lists `steps` (label, magnification, NA, imaging `mode`, optionally an add-on it `requires`, and a per-step lens blur or voltage). `setZoom(ctx, i)` picks one; `state.scope` always holds the current step.
-- **Microdex**: `microdex(data, state)` (`src/shared/microdex.ts`) groups one card per feature by area. The eyepiece keeps the best picture of each discovery in `state.snapshots`. A sample is a `data/samples.json` entry; `npm test` checks every blurb is two sentences and every feature is reachable by some instrument step.
+- **Microdex**: `microdex(data, state)` (`src/shared/microdex.ts`) groups one card per feature by area. The eyepiece keeps the best picture of each discovery in `state.snapshots` (saved under their own storage key, only when one changes, since they are most of the save). A sample is a `data/samples.json` entry; `npm test` checks every blurb is two sentences and every feature is reachable by some instrument step.
 - **Sim**: `visibility(feature, scope, stain)` in `src/shared/sim/optics.ts` returns whether a feature shows and why not (`other-mode`, `unresolved`, `empty-magnification`, `too-small-to-see`, `low-contrast`). `explainWall()` in `src/shared/sim/walls.ts` turns that into the plain-language "hit a wall" message. The scope banner and the guide both use it.
 - **Achievements and requests**: one rule language (`Condition` in `schema.ts`, checked by `src/shared/achievements.ts`) drives both the achievements and what each scientist asks for. Every request is an achievement too.
+
+Inside `src/world`: `world.ts` wires the scene, input, aiming and gathering together and runs the frame loop; `kinds.ts` says what each kind of object is (what E gathers and F shows, its radius, its model); `placements.ts` says where each one stands; `models.ts`, `campus.ts`, `decor.ts`, `terrain.ts`, `npc.ts` and `player.ts` build the 3D models; `hud.ts` is the text over the view and the sample picker; `navigation.ts` is collision, areas and the compass and arrow texts, as plain geometry with tests.
+
+Performance: each model's parts are merged into one mesh per material (`mergeByMaterial`), the world loop runs at 60 fps at most (20 fps while the mouse is free), and shadows are redrawn only when something in them moved. Check a change with `__world.renderer.info.render.calls` in the dev console.
 
 Units: lengths are micrometres (µm) everywhere, spelled in field names (`sizeUm`, `dLensUm`).
 Simplified physics is labelled in comments next to the formula.
@@ -161,6 +165,6 @@ Pitch points: the instrument is earned by building it, part by part; every upgra
 
 **Don't change `src/shared` types (`schema.ts`, `events.ts`, the `GameContext`/state API) without telling the team.** Post in the team chat first, then open a PR that changes only the contract (plus the fixes other modules need to keep compiling). Adding an optional field or a new JSON entry is fine without a heads-up; renaming, removing or tightening anything is not.
 
-**Data-driven**: new recipe, material, sample, scientist, request or achievement = one JSON entry in `data/`. `npm test` validates it against the schema and checks cross-references (an unknown discovery, item, mini-game or area in a condition fails).
+**Data-driven**: new recipe, material, sample, scientist, request or achievement = one JSON entry in `data/`. `npm test` validates it against the schema and checks cross-references (an unknown discovery, item, mini-game or area in a condition fails). A new object in the world = one entry in `src/world/kinds.ts` (with a model builder in `models.ts` if none fits) plus its spot in `placements.ts`; `npm test` checks it gathers a real item or shows a real sample and stands on dry land, indoors only if marked so.
 
 **The LLM never generates pixels or free-form content.** It outputs a world-spec JSON that `validateWorldSpec` accepts or rejects.

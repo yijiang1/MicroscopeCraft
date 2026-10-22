@@ -1,7 +1,7 @@
 // Composition root: the only file that imports every module. Wires data → state → modules.
 import { mountGuide } from './guide';
 import { mountScope } from './scope';
-import { createGame, gather, parseSave, SAVE_KEY } from './shared/state';
+import { createGame, gather, parseSave, SAVE_KEY, SNAPSHOTS_KEY } from './shared/state';
 import { loadGameData } from './shared/data';
 import { mountUI } from './ui';
 import { mountWorld } from './world';
@@ -11,7 +11,7 @@ const el = (id: string) => document.getElementById(id) as HTMLElement;
 try {
   let saved = null;
   try {
-    saved = parseSave(localStorage.getItem(SAVE_KEY));
+    saved = parseSave(localStorage.getItem(SAVE_KEY), localStorage.getItem(SNAPSHOTS_KEY));
   } catch {
     /* storage blocked: start fresh */
   }

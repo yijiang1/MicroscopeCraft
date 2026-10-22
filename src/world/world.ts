@@ -9,18 +9,19 @@ import { conditionMet } from '../shared/achievements';
 import { lockedBy, SITE_NAMES } from '../shared/plan';
 import type { Site } from '../shared/schema';
 import { carrySample, gather, ownedScopes, selectScope, setPlayerLocation, setSite, visit, type GameContext } from '../shared/state';
-import { BEAM_SPOT, buildCampus, CRYSTAL_SPOT, EM_SPOT, inChess, inGreenhouse, inLab, SCIENCE, WILSON, type Box } from './campus';
-import { buildDecor, buildSky, FOG_COLOR, SUN_DIRECTION, type Blocker } from './decor';
+import { BEAM_SPOT, buildCampus, CRYSTAL_SPOT, EM_SPOT, inChess, inLab, SCIENCE, WILSON } from './campus';
+import { buildDecor, buildSky, FOG_COLOR, SUN_DIRECTION } from './decor';
+import { createHud, createPicker } from './hud';
 import type { WorldHandle } from './index';
-import { buildModel } from './models';
+import { buildModel, KINDS, samplesOf, type Aim, type Kind } from './kinds';
 import { buildNpc, type NpcFigure } from './npc';
 import { buildPlayer } from './player';
 import { createFrameLoop } from './loop';
-import { AIMS, PLACEMENTS, RADIUS, samplesOf, SPAWN, type Aim, type Kind, type Placement } from './placements';
-import { buildTerrain, buildWater, FALLS_X, gorgeZ, heightAt, LAKE, waterLevelAt, WATER_LEVEL, WORLD_RADIUS } from './terrain';
+import { areaAt, arrowTo, collide, heading, type Solid } from './navigation';
+import { PLACEMENTS, SPAWN, type Placement } from './placements';
+import { buildTerrain, buildWater, heightAt, LAKE, waterLevelAt, WATER_LEVEL, WORLD_RADIUS } from './terrain';
 
 const EYE_HEIGHT = 1.7;
-const PLAYER_RADIUS = 0.35;
 const WALK = 5;
 const RUN = 8.5;
 const GRAVITY = 20;
@@ -30,6 +31,9 @@ const RESPAWN_MS = 15_000; // no scarcity: gathered things grow back
 const ANIM_MS = 260;
 const LOCKED_TEXT = 'Not identified yet: look at it first (F) through a microscope';
 const MARKER_RANGE = 30; // the floating marker only shows when you are this close; the arrow always shows
+const FRAME_MS = 1000 / 60; // walking: 60 fps is plenty, and a 120 Hz display would otherwise double the work
+const IDLE_FRAME_MS = 1000 / 20; // mouse free (a menu, a dialog, the journal): only water and markers move
+const SHADOW_SETTLE_FRAMES = 20; // keep redrawing shadows this long after a change, while limbs swing to rest
 
 interface Node {
   /** 'em': the electron microscopes in the lab; 'beam': the CHESS beamline's desk; 'npc': a scientist. */
@@ -49,11 +53,16 @@ interface Node {
 
 export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5)); // with antialiasing, 2× pixels cost far more than they show
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.6;
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.type = THREE.PCFShadowMap; // three.js dropped PCFSoftShadowMap and falls back to this anyway
+  // Shadows are redrawn only when something in them changed (redrawShadows): standing still or looking around in first
+  // person costs no shadow pass.
+  renderer.shadowMap.autoUpdate = false;
+  let shadowFrames = SHADOW_SETTLE_FRAMES;
+  const redrawShadows = () => (shadowFrames = SHADOW_SETTLE_FRAMES);
   el.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
@@ -78,7 +87,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const nodes: Node[] = [];
   /** Ores that can only be recognised under a microscope look like plain rock until the player has discovered them. */
   const isRevealed = (kind: Kind) => {
-    const item = AIMS[kind].gather;
+    const item = KINDS[kind].aim.gather;
     return !item || !lockedBy(item, ctx.data, ctx.state.discoveries);
   };
   const place = (n: Node, p: Placement, root: THREE.Object3D) => {
@@ -88,7 +97,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     n.root = root;
   };
   const spawnNode = (p: Placement, index: number) => {
-    const node: Node = { kind: p.kind, aim: AIMS[p.kind], root: new THREE.Group(), x: p.x, z: p.z, radius: RADIUS[p.kind], alive: true, index, center: new THREE.Vector3(), aimRadius: 0 };
+    const node: Node = { kind: p.kind, aim: KINDS[p.kind].aim, root: new THREE.Group(), x: p.x, z: p.z, radius: KINDS[p.kind].radius, alive: true, index, center: new THREE.Vector3(), aimRadius: 0 };
     place(node, p, buildModel(p.kind, index, isRevealed(p.kind)));
     const box = new THREE.Box3().setFromObject(node.root);
     node.aimRadius = Math.min(1.3, Math.max(0.35, box.getSize(new THREE.Vector3()).length() * 0.4));
@@ -104,7 +113,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     placementOf.set(spawnNode(p, i), p);
   });
   const pondNode: Node = {
-    kind: 'pond', aim: AIMS.pond, root: water, x: LAKE.x, z: LAKE.z, radius: 0, alive: true, index: -1,
+    kind: 'pond', aim: KINDS.pond.aim, root: water, x: LAKE.x, z: LAKE.z, radius: 0, alive: true, index: -1,
     center: new THREE.Vector3(LAKE.x, WATER_LEVEL, LAKE.z), aimRadius: 0,
   };
   const emY = heightAt(EM_SPOT.x, EM_SPOT.z);
@@ -169,6 +178,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       }
       n.root = fresh;
     }
+    redrawShadows();
     updateMarkers();
   });
 
@@ -209,6 +219,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const offTarget = ctx.bus.on('trackTarget', ({ target: t }) => (target = t));
   const offCrafted = ctx.bus.on('itemCrafted', () => {
     showModels();
+    redrawShadows();
     updateMarkers();
   });
   const offQuest = ctx.bus.on('questCompleted', updateMarkers);
@@ -237,6 +248,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const shoulder = new THREE.Vector3();
   const boom = new THREE.Vector3();
   const boomRay = new THREE.Raycaster();
+  const lookPoint = new THREE.Vector3();
   const updateView = () => {
     player.root.position.copy(camera.position);
     player.root.position.y -= EYE_HEIGHT;
@@ -256,7 +268,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       viewCamera.position.addScaledVector(boom, hit ? Math.max(0.2, hit.distance - 0.3) : length);
       player.root.visible = !hit || hit.distance > 1;
       viewCamera.position.y = Math.max(viewCamera.position.y, heightAt(viewCamera.position.x, viewCamera.position.z) + 0.3);
-      viewCamera.lookAt(camera.position.clone().addScaledVector(viewDirection, REACH));
+      viewCamera.lookAt(lookPoint.copy(camera.position).addScaledVector(viewDirection, REACH));
     }
     viewCamera.updateMatrixWorld();
   };
@@ -264,64 +276,15 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   let vy = 0;
   let paused = false;
 
-  const css = 'position:fixed;color:#fff;text-shadow:0 0 3px #000;pointer-events:none';
-  const hint = document.createElement('div');
-  hint.style.cssText = `${css};left:12px;bottom:12px`;
-  hint.style.maxWidth = 'calc(100% - 340px)';
-  hint.textContent = 'Click to look · WASD move · Shift run · Space jump · E gather/talk · F look · C craft · T tree · I inventory · J journal · Tab menu · M Microdex · V view';
-  const prompt = document.createElement('div');
-  prompt.style.cssText = `${css};left:calc(50% - 170px);width:340px;text-align:center;top:calc(50% + 18px)`;
-  const trackHud = document.createElement('div');
-  trackHud.style.cssText = `${css};left:50%;transform:translateX(-50%);top:14px;font-size:18px;font-weight:600;color:#ffd24a;white-space:nowrap`;
-  const targetHud = document.createElement('div');
-  targetHud.style.cssText = `${css};left:50%;transform:translateX(-50%);top:40px;font-size:16px;font-weight:600;color:#9fdcff;white-space:nowrap`;
-  const carryHud = document.createElement('div');
-  carryHud.style.cssText = `${css};left:50%;transform:translateX(-50%);top:64px;font-size:15px;color:#bfe3ff;max-width:80vw;text-align:center`;
-  const compass = document.createElement('div');
-  compass.style.cssText = `${css};left:12px;top:12px;font-size:13px`;
-  const cross = document.createElement('div');
-  cross.style.cssText = 'position:fixed;left:50%;top:50%;width:6px;height:6px;margin:-3px;background:#fff;mix-blend-mode:difference;pointer-events:none';
-  // a list to pick one sample from: a cabinet's slides, or the samples you carry, at an instrument (keys 1-9)
-  const picker = document.createElement('div');
-  picker.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:12;display:none;min-width:300px;max-width:90vw;padding:12px 16px;border-radius:12px;background:#000d;color:#eee;font:14px system-ui';
-  el.append(hint, prompt, compass, trackHud, targetHud, carryHud, cross, picker);
-
-  let pick: { ids: string[]; then: (sampleId: string) => void } | null = null;
-  const closePicker = () => {
-    pick = null;
-    picker.style.display = 'none';
-  };
-  const openPicker = (title: string, ids: string[], then: (sampleId: string) => void) => {
-    pick = { ids, then };
-    picker.replaceChildren();
-    const h = document.createElement('div');
-    h.style.cssText = 'font-weight:600;margin-bottom:6px';
-    h.textContent = `${title} (press a number, Esc to cancel)`;
-    picker.append(h);
-    ids.slice(0, 9).forEach((id, i) => {
-      const s = ctx.data.samples[id];
-      const found = s ? s.features.filter((f) => ctx.state.discoveries.includes(f.id)).length : 0;
-      const total = s?.features.length ?? 0;
-      const row = document.createElement('button');
-      row.style.cssText = 'display:block;width:100%;margin:2px 0;text-align:left;cursor:pointer';
-      row.textContent = `${i + 1}  ${s?.name ?? id}  ·  ${found}/${total} found${found === total ? ' ✓' : ''}`;
-      row.onclick = () => choose(i);
-      picker.append(row);
-    });
-    picker.style.display = 'block';
-  };
-  const choose = (i: number) => {
-    const p = pick;
-    const id = p?.ids[i];
-    closePicker();
-    if (p && id) p.then(id);
-  };
+  const hud = createHud(el);
+  const picker = createPicker(el, ctx);
 
   const keys = new Set<string>();
   const ray = new THREE.Raycaster();
   ray.far = REACH;
   let hitPoint = new THREE.Vector3();
   const dir = new THREE.Vector3();
+  const toNode = new THREE.Vector3();
   /** The node under the crosshair: the nearest aim sphere the view line passes through, or the pond surface. */
   const aimed = (): Node | null => {
     viewCamera.getWorldDirection(dir);
@@ -330,7 +293,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     for (const n of nodes) {
       if (!n.alive) continue;
       if (n.center.distanceTo(camera.position) > REACH + n.aimRadius) continue;
-      const v = n.center.clone().sub(viewCamera.position);
+      const v = toNode.copy(n.center).sub(viewCamera.position);
       const t = v.dot(dir);
       if (t < 0 || t > REACH + 4 + n.aimRadius || t >= bestT) continue;
       if (v.addScaledVector(dir, -t).length() <= n.aimRadius) {
@@ -373,13 +336,6 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     );
   };
 
-  let flashText = '';
-  let flashUntil = 0;
-  const flash = (text: string) => {
-    flashText = text;
-    flashUntil = performance.now() + 3500;
-  };
-
   const sampleName = (id: string) => ctx.data.samples[id]?.name ?? id;
   const look = (sampleId: string) => {
     controls.unlock();
@@ -396,14 +352,14 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const useInstrument = (site: Site) => {
     const r = fixedAt(site);
     const what = site === 'lab' ? 'electron microscope' : 'beamline';
-    if (!r) return flash(`The ${what} goes here once you build it`);
-    if (!bag.length) return flash('Bring a sample: look (F) at something, and you take a bit of it along');
+    if (!r) return hud.flash(`The ${what} goes here once you build it`);
+    if (!bag.length) return hud.flash('Bring a sample: look (F) at something, and you take a bit of it along');
     const go = (id: string) => {
       selectScope(ctx, r.scope.tier);
       look(id);
     };
     if (bag.length === 1) go(bag[0]!);
-    else openPicker(`Put a sample in the ${r.name}`, bag, go);
+    else picker.open(`Put a sample in the ${r.name}`, bag, go);
   };
 
   const onKey = (e: KeyboardEvent, down: boolean) => {
@@ -418,15 +374,15 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       if (controls.isLocked) e.preventDefault();
     }
     if (!down) return;
-    if (pick) {
-      if (/^[1-9]$/.test(e.key)) choose(+e.key - 1);
-      else if (e.key === 'Escape' || k === 'f') closePicker();
+    if (picker.isOpen()) {
+      picker.key(e);
       return;
     }
     if (paused || !controls.isLocked) return;
     if (k === 'v' && !e.repeat) {
       thirdPerson = !thirdPerson;
       updateView();
+      redrawShadows();
       return;
     }
     const n = aimed();
@@ -435,18 +391,18 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       controls.unlock();
       ctx.bus.emit('talkTo', { npcId: n.npcId! });
     } else if (k === 'e' && n.aim.gather) {
-      if (lockedBy(n.aim.gather, ctx.data, ctx.state.discoveries)) flash(LOCKED_TEXT);
+      if (lockedBy(n.aim.gather, ctx.data, ctx.state.discoveries)) hud.flash(LOCKED_TEXT);
       else gatherNode(n);
     }
     if (k !== 'f') return;
     if (n === emNode) useInstrument('lab');
     else if (n === beamNode) useInstrument('chess');
-    else if (n.aim.samples) openPicker(n.kind === 'picnic' ? 'On the table' : n.kind === 'pine_branch' ? 'From the branch' : 'Pick a sample', n.aim.samples, lookAt);
+    else if (n.aim.samples) picker.open(n.kind === 'picnic' ? 'On the table' : n.kind === 'pine_branch' ? 'From the branch' : 'Pick a sample', n.aim.samples, lookAt);
     else if (n.aim.sample) lookAt(n.aim.sample);
   };
   const onDown = (e: KeyboardEvent) => onKey(e, true);
   const onUp = (e: KeyboardEvent) => onKey(e, false);
-  const onClick = () => !paused && !pick && controls.lock();
+  const onClick = () => !paused && !picker.isOpen() && controls.lock();
   addEventListener('keydown', onDown);
   addEventListener('keyup', onUp);
   renderer.domElement.addEventListener('click', onClick);
@@ -464,6 +420,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const offClose = ctx.bus.on('closeEyepiece', () => {
     paused = false;
     keys.clear();
+    redrawShadows();
     loop.start();
   });
 
@@ -500,72 +457,13 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     return parts.join(' · ');
   };
 
-  /** Push the player out of anything solid: walls, scenery blockers and live nodes. */
-  const collide = (p: THREE.Vector3) => {
-    const pushBox = (b: Box) => {
-      const cx = Math.min(Math.max(p.x, b.x0), b.x1);
-      const cz = Math.min(Math.max(p.z, b.z0), b.z1);
-      const d = Math.hypot(p.x - cx, p.z - cz);
-      if (d >= PLAYER_RADIUS) return;
-      if (d > 1e-4) {
-        p.x = cx + ((p.x - cx) / d) * PLAYER_RADIUS;
-        p.z = cz + ((p.z - cz) / d) * PLAYER_RADIUS;
-        return;
-      }
-      // centre inside the box: leave by the nearest side
-      const r = PLAYER_RADIUS;
-      const exits: [number, number][] = [[b.x0 - r, p.z], [b.x1 + r, p.z], [p.x, b.z0 - r], [p.x, b.z1 + r]];
-      const [x, z] = exits.sort((u, v) => Math.hypot(u[0] - p.x, u[1] - p.z) - Math.hypot(v[0] - p.x, v[1] - p.z))[0]!;
-      p.x = x;
-      p.z = z;
-    };
-    campus.walls.forEach(pushBox);
-    const push = (x: number, z: number, r: number) => {
-      const dx = p.x - x;
-      const dz = p.z - z;
-      const d = Math.hypot(dx, dz);
-      const min = r + PLAYER_RADIUS;
-      if (d < min) {
-        // A save can sit exactly where a harvested rock regenerates on reload.
-        p.x = x + (d > 1e-4 ? dx / d : 1) * min;
-        p.z = z + (d > 1e-4 ? dz / d : 0) * min;
-      }
-    };
-    blockers.forEach((b: Blocker) => push(b.x, b.z, b.r));
-    nodes.forEach((n) => n.alive && n.radius > 0 && push(n.x, n.z, n.radius));
-  };
-
-  const heading = () => {
-    const d = new THREE.Vector3();
-    camera.getWorldDirection(d);
-    const deg = (Math.atan2(d.x, -d.z) * 180) / Math.PI;
-    return ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.round((((deg % 360) + 360) % 360) / 45) % 8]!;
-  };
-
-  /** The part of campus the player is in, for the explorer achievement. */
-  const areaAt = (x: number, z: number): string | null => {
-    if (inLab(x, z)) return 'lab';
-    if (inChess(x, z)) return 'chess';
-    if (inGreenhouse(x, z)) return 'garden';
-    if (Math.hypot(x + 38, z + 1) < 7) return 'tower';
-    if (x < FALLS_X && Math.abs(z - gorgeZ(x)) < 7 && heightAt(x, z) < -5) return 'gorge';
-    if (Math.hypot(x - LAKE.x, z - LAKE.z) < LAKE.r + 9) return 'lake';
-    if (Math.hypot(x + 58, z - 22) < 15) return 'forest';
-    if (x < -46) return 'slope';
-    if (x > -23 && x < 23 && z > -38 && z < 1) return 'quad';
-    if (x > -46 && x < 50 && z > 40 && z < 110) return 'engquad';
-    return null;
-  };
+  /** Everything round and solid: scenery, and the nodes (a gathered one is walkable until it grows back). */
+  const solids: Solid[] = [...blockers.map((b) => ({ x: b.x, z: b.z, radius: b.r })), ...nodes];
   let areaCheck = 0;
-
-  /** An arrow relative to where the player looks, then the distance. */
-  const arrowTo = (x: number, z: number) => {
-    const dx = x - camera.position.x;
-    const dz = z - camera.position.z;
+  /** The arrow and distance from the player to (x, z), relative to where they look. */
+  const pointTo = (x: number, z: number) => {
     camera.getWorldDirection(dir);
-    const angle = (Math.atan2(-dir.z * dx + dir.x * dz, dir.x * dx + dir.z * dz) * 180) / Math.PI; // 0 = straight ahead, 90 = right
-    const arrow = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'][((Math.round(angle / 45) % 8) + 8) % 8]!;
-    return `${arrow} ${Math.hypot(dx, dz).toFixed(0)} m`;
+    return arrowTo(x - camera.position.x, z - camera.position.z, dir.x, dir.z);
   };
   const nearest = (match: (n: Node) => boolean): Node | null => {
     let best = Infinity;
@@ -588,7 +486,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const doors: Record<Site, { x: number; z: number }> = { lab: { x: SCIENCE.x0 - 1, z: EM_SPOT.z }, chess: { x: WILSON.x0 - 1, z: -4 } };
 
   // Regenerated rocks/scenery may now occupy the saved spot; restore on walkable ground.
-  collide(camera.position);
+  collide(camera.position, campus.walls, solids);
   camera.position.y = heightAt(camera.position.x, camera.position.z) + EYE_HEIGHT;
   setSite(ctx, inLab(camera.position.x, camera.position.z) ? 'lab' : inChess(camera.position.x, camera.position.z) ? 'chess' : null);
   rememberPlayer();
@@ -596,9 +494,11 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
 
   const loop = createFrameLoop((dt, t) => {
     const previousX = camera.position.x;
+    const previousY = camera.position.y;
     const previousZ = camera.position.z;
+    const previousYaw = player.root.rotation.y;
 
-    if (controls.isLocked && !paused && !pick) {
+    if (controls.isLocked && !paused && !picker.isOpen()) {
       const p = camera.position;
       const ground = heightAt(p.x, p.z);
       const wading = ground < waterLevelAt(p.x, p.z);
@@ -608,7 +508,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       const speed = ((keys.has('shift') ? RUN : WALK) * (wading ? 0.55 : 1) * dt) / (Math.hypot(fwd, right) || 1);
       controls.moveForward(fwd * speed);
       controls.moveRight(right * speed);
-      collide(p);
+      collide(p, campus.walls, solids);
       const r = Math.hypot(p.x, p.z);
       if (r > WORLD_RADIUS - 2) p.multiplyScalar((WORLD_RADIUS - 2) / r); // keeps x, z; y is reset below
       const feet = heightAt(p.x, p.z);
@@ -637,6 +537,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     player.update(Math.hypot(px - previousX, pz - previousZ), dt);
     figures.forEach((f) => f.update(t));
     updateView();
+    if (px !== previousX || pz !== previousZ || camera.position.y !== previousY || player.root.rotation.y !== previousYaw || anims.length) redrawShadows();
 
     // sun and its shadow follow the player
     sun.position.copy(camera.position).addScaledVector(SUN_DIRECTION, 90);
@@ -653,10 +554,8 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     }
     if (crystal) crystalLight.intensity = 12 + 4 * Math.sin(t * 0.0021);
 
-    const n = controls.isLocked && !paused && !pick ? aimed() : null;
-    const flashing = performance.now() < flashUntil;
-    prompt.textContent = flashing ? flashText : describe(n);
-    prompt.style.color = flashing ? '#ffb27a' : '#fff';
+    const n = controls.isLocked && !paused && !picker.isOpen() ? aimed() : null;
+    hud.prompt(describe(n));
     ring.visible = !!n;
     if (n) {
       const radius = n.radius > 0 ? n.radius + 0.2 : 0.8;
@@ -668,27 +567,32 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     // nearest live source of the tracked item, and the tracked sample or scientist
     const itemNode = tracked ? nearest((m) => m.aim.gather === tracked) : null;
     showMarker(marker, itemNode, t);
-    trackHud.textContent = itemNode ? `${ctx.data.items[tracked!]?.name ?? tracked} ${arrowTo(itemNode.x, itemNode.z)}` : '';
+    hud.track(itemNode ? `${ctx.data.items[tracked!]?.name ?? tracked} ${pointTo(itemNode.x, itemNode.z)}` : '');
     const tgt = target;
     const targetNode = !tgt ? null : tgt.kind === 'npc' ? nearest((m) => m.npcId === tgt.id) : nearest((m) => samplesOf(m.aim).includes(tgt.id));
     showMarker(targetMarker, targetNode, t);
-    targetHud.textContent = targetNode && tgt
-      ? `${tgt.kind === 'npc' ? ctx.data.npcs[tgt.id]?.name : sampleName(tgt.id)} ${arrowTo(targetNode.x, targetNode.z)}`
-      : '';
+    hud.target(targetNode && tgt
+      ? `${tgt.kind === 'npc' ? ctx.data.npcs[tgt.id]?.name : sampleName(tgt.id)} ${pointTo(targetNode.x, targetNode.z)}`
+      : '');
     // what you carry, and where to take it
     const sites = (['lab', 'chess'] as const).filter((s) => fixedAt(s));
     const here = ctx.state.site;
     const names = bag.slice(0, 3).map(sampleName).join(', ') + (bag.length > 3 ? ` and ${bag.length - 3} more` : '');
-    carryHud.textContent = !sites.length
+    hud.carry(!sites.length
       ? ''
       : here && sites.includes(here)
       ? bag.length ? `Carrying ${names}: aim at the ${fixedAt(here)!.name} and press F` : 'No sample yet: look (F) at something to take a bit along'
       : bag.length
-      ? `Carrying ${names} · ${sites.map((s) => `${SITE_NAMES[s]} ${arrowTo(doors[s].x, doors[s].z)}`).join(' · ')}`
-      : `Your ${sites.map((s) => fixedAt(s)!.name).join(' and ')}: look (F) at a sample to take some along`;
-    compass.textContent = `${heading()} · ${px.toFixed(0)}, ${pz.toFixed(0)}`;
+      ? `Carrying ${names} · ${sites.map((s) => `${SITE_NAMES[s]} ${pointTo(doors[s].x, doors[s].z)}`).join(' · ')}`
+      : `Your ${sites.map((s) => fixedAt(s)!.name).join(' and ')}: look (F) at a sample to take some along`);
+    camera.getWorldDirection(dir);
+    hud.compass(`${heading(dir.x, dir.z)} · ${px.toFixed(0)}, ${pz.toFixed(0)}`);
+    if (shadowFrames > 0) {
+      shadowFrames--;
+      renderer.shadowMap.needsUpdate = true;
+    }
     renderer.render(scene, viewCamera);
-  });
+  }, () => (controls.isLocked ? FRAME_MS : IDLE_FRAME_MS));
   loop.start();
 
   if (import.meta.env.DEV) {
@@ -700,6 +604,8 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     (window as unknown as { __world: unknown }).__world = {
       camera,
       controls,
+      renderer,
+      scene,
       teleport,
       nodes: nodes.map((n) => ({ kind: n.kind, x: n.x, z: n.z, npc: n.npcId })),
       bag,

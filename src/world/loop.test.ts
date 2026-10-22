@@ -46,6 +46,17 @@ describe('world frame loop', () => {
     loop.stop();
   });
 
+  it('skips frames that come sooner than the cap, and measures dt from the last drawn frame', () => {
+    const frames = scheduler();
+    const render = vi.fn();
+    const loop = createFrameLoop(render, () => 1000 / 60);
+    loop.start();
+    [0, 8.3, 16.7, 25, 33.4, 50].forEach((t) => frames.tick(t)); // a 120 Hz display, then one late frame
+    expect(render.mock.calls.map(([, t]) => t)).toEqual([0, 16.7, 33.4, 50]);
+    expect(render.mock.calls[1]![0]).toBeCloseTo(0.0167);
+    loop.stop();
+  });
+
   it('does not reschedule when the world is stopped during a frame', () => {
     const frames = scheduler();
     const loop = createFrameLoop(() => loop.stop());

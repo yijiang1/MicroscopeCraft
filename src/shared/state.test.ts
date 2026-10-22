@@ -152,6 +152,16 @@ describe('tier 5 crafting', () => {
     expect(parseSave('{"inventory":5}')).toBeNull();
     expect(parseSave(null)).toBeNull();
   });
+
+  it('keeps snapshots under their own key, still reads inline ones from older saves, and survives a bad snapshot key', () => {
+    const shot = { image: 'data:image/jpeg;base64,AAAA', quality: 2 };
+    const progress = JSON.stringify({ inventory: {}, discoveries: ['leaf_veins'], scopeChoice: null });
+    expect(parseSave(progress, JSON.stringify({ leaf_veins: shot }))?.snapshots).toEqual({ leaf_veins: shot });
+    const inline = JSON.stringify({ inventory: {}, discoveries: [], snapshots: { leaf_veins: shot }, scopeChoice: null });
+    expect(parseSave(inline)?.snapshots).toEqual({ leaf_veins: shot });
+    expect(parseSave(progress, '{not json')).toMatchObject({ discoveries: ['leaf_veins'], snapshots: {} });
+    expect(toSave(createGame(loadGameData(), undefined, parseSave(inline)).state)).not.toHaveProperty('snapshots');
+  });
 });
 
 describe('achievements and requests', () => {

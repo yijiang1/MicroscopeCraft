@@ -1,16 +1,38 @@
 // Procedural 3D models for every gatherable and sample in the world: noise-displaced rocks, sand mounds,
-// crystals, leafy plants, flowers, a butterfly wing. Geometry and materials are cached and shared,
-// so a hundred nodes cost a few dozen draw calls. Owner: Person A.
+// crystals, leafy plants, flowers, a butterfly wing. Geometry and materials are cached and shared, and each
+// model's parts are merged into one mesh per material, so a model costs a few draw calls. Owner: Person A.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import type { Kind } from './placements';
-import { mulberry32, noise3 } from './terrain';
+import { noise3 } from './terrain';
 import { barkTexture, leafTexture, sunflowerTexture, wingTexture } from './textures';
 
 const cache = new Map<string, unknown>();
 function memo<T>(key: string, make: () => T): T {
   if (!cache.has(key)) cache.set(key, make());
   return cache.get(key) as T;
+}
+
+/** Bake a model's meshes into one mesh per material, in the root's own space: a model is then a few draw calls,
+ *  not one per part. Run it once the model is built; the root keeps its own transform. */
+export function mergeByMaterial(root: THREE.Object3D): void {
+  root.updateMatrixWorld(true);
+  const toRoot = root.matrixWorld.clone().invert();
+  const buckets = new Map<string, THREE.Mesh[]>();
+  root.traverse((o) => {
+    if (!(o instanceof THREE.Mesh) || o instanceof THREE.InstancedMesh || Array.isArray(o.material)) return;
+    const key = `${o.material.uuid}:${o.castShadow}:${Object.keys(o.geometry.attributes).sort().join()}`;
+    buckets.set(key, [...(buckets.get(key) ?? []), o]);
+  });
+  for (const meshes of buckets.values()) {
+    if (meshes.length < 2) continue;
+    const merged = mergeGeometries(meshes.map((m) =>
+      (m.geometry.index ? m.geometry.toNonIndexed() : m.geometry.clone()).applyMatrix4(new THREE.Matrix4().multiplyMatrices(toRoot, m.matrixWorld))));
+    if (!merged) continue;
+    const one = new THREE.Mesh(merged, meshes[0]!.material);
+    one.castShadow = meshes[0]!.castShadow;
+    meshes.forEach((m) => m.removeFromParent());
+    root.add(one);
+  }
 }
 
 const col = (hex: string) => new THREE.Color(hex);
@@ -88,7 +110,7 @@ function rock(name: string, seed: number, radius: number): THREE.Mesh {
 }
 
 /** An outcrop: one big boulder with two smaller rocks tucked against it. */
-function oreNode(name: string, rng: () => number): THREE.Group {
+export function oreNode(name: string, rng: () => number): THREE.Group {
   const g = new THREE.Group();
   const seed = 1 + Math.floor(rng() * 4);
   const big = rock(name, seed, 0.5);
@@ -128,7 +150,7 @@ const sandMoundGeometry = (seed: number, palette: [string, string]) =>
   });
 
 /** A mound of beach sand (or dark heavy sand, or mud) with a few pebbles around it. */
-function sandNode(rng: () => number, palette: [string, string] = ['#dcc690', '#c4a96d'], scale = 1): THREE.Group {
+export function sandNode(rng: () => number, palette: [string, string] = ['#dcc690', '#c4a96d'], scale = 1): THREE.Group {
   const g = new THREE.Group();
   const mound = new THREE.Mesh(
     sandMoundGeometry(1 + Math.floor(rng() * 4), palette),
@@ -169,7 +191,7 @@ const crystalMaterial = (color: string, glow: number) =>
     }),
   );
 
-function crystalCluster(rng: () => number, opts: { colors: string[]; glow: number; count: number; height: number; radius: number }): THREE.Group {
+export function crystalCluster(rng: () => number, opts: { colors: string[]; glow: number; count: number; height: number; radius: number }): THREE.Group {
   const g = new THREE.Group();
   for (let i = 0; i < opts.count; i++) {
     const h = opts.height * (0.4 + rng() * 0.7);
@@ -222,7 +244,7 @@ function leaf(scale: number, yaw: number, lift: number): THREE.Object3D {
 const tube = (points: THREE.Vector3[], radius: number) =>
   new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points), 10, radius, 6), stemMaterial());
 
-function leafPlant(rng: () => number): THREE.Group {
+export function leafPlant(rng: () => number): THREE.Group {
   const g = new THREE.Group();
   g.add(tube([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0.01, 0.2, 0), new THREE.Vector3(0, 0.38, 0.01)], 0.018));
   for (let i = 0; i < 11; i++) {
@@ -281,7 +303,7 @@ function flower(rng: () => number): THREE.Group {
   return g;
 }
 
-function flowerPatch(rng: () => number): THREE.Group {
+export function flowerPatch(rng: () => number): THREE.Group {
   const g = new THREE.Group();
   for (let i = 0; i < 4; i++) {
     const f = flower(rng);
@@ -294,7 +316,7 @@ function flowerPatch(rng: () => number): THREE.Group {
   return g;
 }
 
-function sunflower(rng: () => number): THREE.Group {
+export function sunflower(rng: () => number): THREE.Group {
   const g = new THREE.Group();
   g.add(tube([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0.02, 0.7, 0), new THREE.Vector3(0.07, 1.35, 0.03)], 0.022));
   const head = new THREE.Group();
@@ -319,7 +341,7 @@ function sunflower(rng: () => number): THREE.Group {
 
 // ---------------------------------------------------------------- resin stump, wing
 
-function resinStump(rng: () => number): THREE.Group {
+export function resinStump(rng: () => number): THREE.Group {
   const g = new THREE.Group();
   const bark = memo('mat:bark', () => {
     const t = barkTexture();
@@ -348,7 +370,7 @@ function resinStump(rng: () => number): THREE.Group {
 }
 
 /** Butterfly wing: a mirrored pair resting on a flat stone. */
-function wingOnStone(rng: () => number): THREE.Group {
+export function wingOnStone(rng: () => number): THREE.Group {
   const g = new THREE.Group();
   const slab = rock('stone', 3, 0.45);
   slab.scale.y = 0.55;
@@ -398,7 +420,7 @@ const ball = (r: number, ws = 12, hs = 8) => memo(`ball:${r}:${ws}:${hs}`, () =>
 // ---------------------------------------------------------------- creatures and plants
 
 /** A honeybee resting on a flower head: striped body, see-through wings. */
-function beeOnFlower(rng: () => number): THREE.Group {
+export function beeOnFlower(rng: () => number): THREE.Group {
   const g = flower(rng);
   g.scale.setScalar(1.6);
   const bee = new THREE.Group();
@@ -416,7 +438,7 @@ function beeOnFlower(rng: () => number): THREE.Group {
 }
 
 /** A wooden picnic table with a salt shaker and a notebook on it. */
-function picnicTable(): THREE.Group {
+export function picnicTable(): THREE.Group {
   const g = new THREE.Group();
   const wood = std('#8a6a48', 0.9);
   g.add(mesh(box(1.6, 0.06, 0.7), wood, 0, 0.75, 0));
@@ -428,7 +450,7 @@ function picnicTable(): THREE.Group {
 }
 
 /** A slick of green algae and scum at the water's edge. */
-function algaeMat(rng: () => number): THREE.Group {
+export function algaeMat(rng: () => number): THREE.Group {
   const g = new THREE.Group();
   for (let i = 0; i < 6; i++) {
     const r = 0.25 + rng() * 0.35;
@@ -440,7 +462,7 @@ function algaeMat(rng: () => number): THREE.Group {
 }
 
 /** A soft white duck feather lying on the ground: a shaft with a vane either side. */
-function feather(): THREE.Group {
+export function feather(): THREE.Group {
   const g = new THREE.Group();
   const vane = memo('vanegeo', () => {
     const s = new THREE.Shape();
@@ -461,7 +483,7 @@ function feather(): THREE.Group {
 }
 
 /** A low pine branch with yellow pollen cones, at a height you can look at. */
-function pineBranch(rng: () => number): THREE.Group {
+export function pineBranch(rng: () => number): THREE.Group {
   const g = new THREE.Group();
   g.add(mesh(cyl(0.03, 0.05, 0.9, 6), std('#5a4128'), 0, 0.45, 0));
   const needles = std('#2f5d34', 0.9);
@@ -479,7 +501,7 @@ function pineBranch(rng: () => number): THREE.Group {
 }
 
 /** A fallen oak log with thick, cracked bark. */
-function fallenLog(): THREE.Group {
+export function fallenLog(): THREE.Group {
   const g = new THREE.Group();
   const bark = memo('mat:logbark', () => {
     const t = barkTexture();
@@ -493,7 +515,7 @@ function fallenLog(): THREE.Group {
 }
 
 /** Felled logwood: a short log whose cut ends show the dark red heartwood that hematoxylin is extracted from. */
-function logwoodLog(): THREE.Group {
+export function logwoodLog(): THREE.Group {
   const g = new THREE.Group();
   const bark = memo('mat:logbark', () => {
     const t = barkTexture();
@@ -507,7 +529,7 @@ function logwoodLog(): THREE.Group {
 }
 
 /** Three mushrooms: pale stems under brown caps. */
-function mushrooms(rng: () => number): THREE.Group {
+export function mushrooms(rng: () => number): THREE.Group {
   const g = new THREE.Group();
   for (let i = 0; i < 3; i++) {
     const s = 0.6 + rng() * 0.6;
@@ -523,7 +545,7 @@ function mushrooms(rng: () => number): THREE.Group {
 }
 
 /** A cushion of moss on a stone. */
-function mossyStone(rng: () => number): THREE.Group {
+export function mossyStone(rng: () => number): THREE.Group {
   const g = new THREE.Group();
   const stone = rock('stone', 2, 0.4);
   stone.scale.y = 0.6;
@@ -540,7 +562,7 @@ function mossyStone(rng: () => number): THREE.Group {
 }
 
 /** A spider web strung between two sticks. */
-function spiderWeb(): THREE.Group {
+export function spiderWeb(): THREE.Group {
   const g = new THREE.Group();
   const stick = std('#5a4128');
   for (const x of [-0.5, 0.5]) g.add(mesh(cyl(0.015, 0.02, 1.2, 5), stick, x, 0.6, 0));
@@ -563,7 +585,7 @@ function spiderWeb(): THREE.Group {
 }
 
 /** A clump of fern fronds with brown spore dots underneath. */
-function fern(rng: () => number): THREE.Group {
+export function fern(rng: () => number): THREE.Group {
   const g = new THREE.Group();
   for (let i = 0; i < 7; i++) {
     const l = leaf(0.55 + rng() * 0.25, (i / 7) * 6.28 + rng() * 0.3, 0.9 + rng() * 0.3);
@@ -574,7 +596,7 @@ function fern(rng: () => number): THREE.Group {
 }
 
 /** An old weathered deer bone. */
-function bone(): THREE.Group {
+export function bone(): THREE.Group {
   const g = new THREE.Group();
   const white = std('#e8dfc8', 0.8);
   g.add(mesh(cyl(0.035, 0.035, 0.45, 10), white, 0, 0.05, 0, 0, 0, Math.PI / 2));
@@ -587,14 +609,14 @@ function pot(): THREE.Mesh {
   return mesh(cyl(0.16, 0.12, 0.22, 14), std('#b8603a', 0.9), 0, 0.11, 0);
 }
 
-function onionPlant(rng: () => number): THREE.Group {
+export function onionPlant(rng: () => number): THREE.Group {
   const g = new THREE.Group();
   g.add(pot(), mesh(ball(0.09), std('#c88a4a', 0.5), 0, 0.27, 0));
   for (let i = 0; i < 6; i++) g.add(mesh(cyl(0.008, 0.012, 0.45, 5), stemMaterial(), (rng() - 0.5) * 0.05, 0.55, (rng() - 0.5) * 0.05, (rng() - 0.5) * 0.4, 0, (rng() - 0.5) * 0.4));
   return g;
 }
 
-function potatoPlant(rng: () => number): THREE.Group {
+export function potatoPlant(rng: () => number): THREE.Group {
   const g = new THREE.Group();
   g.add(pot());
   for (let i = 0; i < 9; i++) {
@@ -606,7 +628,7 @@ function potatoPlant(rng: () => number): THREE.Group {
   return g;
 }
 
-function orchidPlant(): THREE.Group {
+export function orchidPlant(): THREE.Group {
   const g = new THREE.Group();
   g.add(pot());
   for (const yaw of [0.3, 3.4]) {
@@ -624,7 +646,7 @@ function orchidPlant(): THREE.Group {
   return g;
 }
 
-function nettlePlant(rng: () => number): THREE.Group {
+export function nettlePlant(rng: () => number): THREE.Group {
   const g = new THREE.Group();
   g.add(pot(), mesh(cyl(0.008, 0.012, 0.7, 5), stemMaterial(), 0, 0.57, 0));
   for (let i = 0; i < 5; i++) {
@@ -637,7 +659,7 @@ function nettlePlant(rng: () => number): THREE.Group {
   return g;
 }
 
-function cottonPlant(rng: () => number): THREE.Group {
+export function cottonPlant(rng: () => number): THREE.Group {
   const g = new THREE.Group();
   g.add(pot(), mesh(cyl(0.01, 0.015, 0.5, 5), std('#6a4a2a'), 0, 0.47, 0));
   for (let i = 0; i < 6; i++) {
@@ -653,7 +675,7 @@ function cottonPlant(rng: () => number): THREE.Group {
 }
 
 /** A slab of dark shale in layers, with the ribbed shell of a fossil brachiopod showing on top. */
-function shaleSlab(rng: () => number): THREE.Group {
+export function shaleSlab(rng: () => number): THREE.Group {
   const g = new THREE.Group();
   for (let i = 0; i < 4; i++) g.add(mesh(box(1.1 - i * 0.1, 0.07, 0.8 - i * 0.07), std(i % 2 ? '#45423f' : '#3a3836', 0.95), (rng() - 0.5) * 0.06, 0.035 + i * 0.07, (rng() - 0.5) * 0.06));
   const shell = mesh(memo('shell', () => new THREE.CircleGeometry(0.11, 16, 0, Math.PI)), std('#a89a80', 0.9, 0, { side: THREE.DoubleSide }), 0.15, 0.285, 0.05, -Math.PI / 2);
@@ -662,7 +684,7 @@ function shaleSlab(rng: () => number): THREE.Group {
 }
 
 /** A cluster of metallic cubes: silver-grey galena, or brassy pyrite. */
-function galenaCubes(rng: () => number, color = '#8c939c'): THREE.Group {
+export function galenaCubes(rng: () => number, color = '#8c939c'): THREE.Group {
   const g = new THREE.Group();
   const metal = std(color, 0.3, 0.85);
   for (let i = 0; i < 6; i++) {
@@ -682,13 +704,13 @@ function labCabinet(top: string): THREE.Group {
   return g;
 }
 
-function slideCabinet(): THREE.Group {
+export function slideCabinet(): THREE.Group {
   const g = labCabinet('#2a3a4a');
   for (let i = 0; i < 6; i++) g.add(mesh(box(0.075, 0.003, 0.025), std('#d8f0ff', 0.1, 0, { transparent: true, opacity: 0.7 }), -0.4 + i * 0.16, 1.05, 0.05));
   return g;
 }
 
-function materialsBench(): THREE.Group {
+export function materialsBench(): THREE.Group {
   const g = labCabinet('#3a3a3a');
   g.add(mesh(cyl(0.12, 0.12, 0.06, 16), std('#c8ccd0', 0.4, 0.6), -0.35, 1.07, 0), mesh(box(0.25, 0.12, 0.18), std('#5a6a8a', 0.5), 0.3, 1.1, 0));
   for (let i = 0; i < 4; i++) g.add(mesh(cyl(0.015, 0.015, 0.004, 12), std('#c87a3a', 0.4, 0.8), -0.12 + i * 0.06, 1.045, 0.15)); // copper grids
@@ -696,13 +718,13 @@ function materialsBench(): THREE.Group {
 }
 
 /** A reagent bottle: brown glass for iodine, blue for methylene blue; a small kit box of four for the Gram stain. */
-function bottle(color: string): THREE.Group {
+export function bottle(color: string): THREE.Group {
   const g = new THREE.Group();
   g.add(mesh(cyl(0.05, 0.05, 0.16, 12), std(color, 0.15, 0, { transparent: true, opacity: 0.85 }), 0, 0.08, 0), mesh(cyl(0.025, 0.025, 0.05, 10), std('#2a2a2a', 0.6), 0, 0.185, 0));
   return g;
 }
 
-function gramKit(): THREE.Group {
+export function gramKit(): THREE.Group {
   const g = new THREE.Group();
   g.add(mesh(box(0.34, 0.06, 0.12), std('#e8e8e8', 0.6), 0, 0.03, 0));
   ['#5b2a86', '#8a4a1a', '#d8e8f0', '#d0457a'].forEach((c, i) => {
@@ -715,7 +737,7 @@ function gramKit(): THREE.Group {
 }
 
 /** A trolley of sample holders at the beamline: little pins, a crystal mount, a battery coin, a meteorite slice. */
-function sampleRack(): THREE.Group {
+export function sampleRack(): THREE.Group {
   const g = new THREE.Group();
   const steel = std('#b8c0c8', 0.35, 0.7);
   g.add(mesh(box(1.2, 0.04, 0.6), steel, 0, 0.9, 0), mesh(box(1.2, 0.04, 0.6), steel, 0, 0.4, 0));
@@ -728,7 +750,7 @@ function sampleRack(): THREE.Group {
 // ---------------------------------------------------------------- engineering materials
 
 /** Two concrete blocks, one leaning on the other. */
-function concreteBlocks(): THREE.Group {
+export function concreteBlocks(): THREE.Group {
   const g = new THREE.Group();
   const grey = std('#9c9890', 0.95);
   g.add(mesh(box(0.8, 0.4, 0.4), grey, 0, 0.2, 0), mesh(box(0.8, 0.4, 0.4), grey, 0.1, 0.6, 0.02, 0, 0.15, 0));
@@ -737,7 +759,7 @@ function concreteBlocks(): THREE.Group {
 }
 
 /** A rusty steel I-beam lying on two timbers. */
-function rustyBeam(): THREE.Group {
+export function rustyBeam(): THREE.Group {
   const g = new THREE.Group();
   const rust = std('#8a4a2a', 0.9, 0.3);
   const wood = std('#7a6248', 0.95);
@@ -747,7 +769,7 @@ function rustyBeam(): THREE.Group {
 }
 
 /** Red bricks stacked on a pallet. */
-function brickStack(): THREE.Group {
+export function brickStack(): THREE.Group {
   const g = new THREE.Group();
   g.add(mesh(box(0.9, 0.12, 0.9), std('#8a7050', 0.95), 0, 0.06, 0));
   const reds = ['#9a3a2a', '#a8442e', '#8c3424'].map((c) => std(c, 0.95));
@@ -762,7 +784,7 @@ function brickStack(): THREE.Group {
 }
 
 /** A solar panel tilted on a frame: dark cells, silver grid lines, an aluminium rim. */
-function solarPanel(): THREE.Group {
+export function solarPanel(): THREE.Group {
   const g = new THREE.Group();
   const alu = std('#c8ccd0', 0.35, 0.8);
   const panel = new THREE.Group();
@@ -777,7 +799,7 @@ function solarPanel(): THREE.Group {
 }
 
 /** A car's catalytic converter, its pipes cut off, with a spare ceramic honeycomb brick beside it. */
-function catalyticConverter(): THREE.Group {
+export function catalyticConverter(): THREE.Group {
   const g = new THREE.Group();
   const steel = std('#a8adb2', 0.35, 0.8);
   const can = mesh(cyl(0.16, 0.16, 0.5, 20), steel, 0, 0.18, 0, 0, 0, Math.PI / 2);
@@ -790,7 +812,7 @@ function catalyticConverter(): THREE.Group {
 }
 
 /** A bronze chime bell hung in a small oak frame. */
-function chimeBell(): THREE.Group {
+export function chimeBell(): THREE.Group {
   const g = new THREE.Group();
   const oak = std('#6a5038', 0.9);
   for (const x of [-0.7, 0.7]) g.add(mesh(box(0.14, 1.9, 0.14), oak, x, 0.95, 0), mesh(box(0.14, 0.1, 0.7), oak, x, 0.05, 0));
@@ -811,7 +833,7 @@ function displayCase(contents: (g: THREE.Group) => void): THREE.Group {
 }
 
 /** Nanomaterials: a vial of glowing quantum dots, black nanotube powder, zeolite and MOF crystals in dishes. */
-const nanoCase = () =>
+export const nanoCase = () =>
   displayCase((g) => {
     g.add(mesh(cyl(0.035, 0.035, 0.14, 12), std('#ff7a3a', 0.2, 0, { emissive: '#ff6a2a', emissiveIntensity: 0.9, transparent: true, opacity: 0.9 }), -0.45, 1.11, 0));
     [['#1a1a1a', -0.15], ['#f4f4f8', 0.15], ['#dfe8ff', 0.45]].forEach(([c, x]) => {
@@ -821,80 +843,8 @@ const nanoCase = () =>
   });
 
 /** Devices: a superconductor pellet with a magnet floating above it, and a blue LED chip that glows. */
-const deviceCase = () =>
+export const deviceCase = () =>
   displayCase((g) => {
     g.add(mesh(cyl(0.1, 0.1, 0.03, 20), std('#1e1e22', 0.7), -0.3, 1.055, 0), mesh(box(0.06, 0.03, 0.06), std('#b8bcc4', 0.3, 0.9), -0.3, 1.14, 0));
     g.add(mesh(box(0.14, 0.02, 0.14), std('#e0d8b0', 0.4, 0.6), 0.3, 1.05, 0), mesh(box(0.05, 0.02, 0.05), std('#6a7aff', 0.2, 0, { emissive: '#4a5aff', emissiveIntensity: 1.6 }), 0.3, 1.07, 0));
   });
-
-// ---------------------------------------------------------------- entry point
-
-/** Build the model for a placed thing. `seed` makes each instance a little different but repeatable.
- *  `revealed` false builds the plain-looking version of ores that can only be recognised under a microscope. */
-/** Furniture that stands against a wall keeps the orientation the placement gives it. */
-const FIXED_YAW = new Set<Kind>(['slides', 'materials', 'iodine', 'methylene', 'gramkit', 'rack', 'picnic', 'web', 'log', 'nanocase', 'devicecase', 'bell', 'ibeam', 'solar']);
-
-export function buildModel(kind: Kind, seed: number, revealed = true): THREE.Group {
-  const rng = mulberry32(seed * 7919 + 13);
-  let g: THREE.Group;
-  switch (kind) {
-    case 'sand': g = sandNode(rng); break;
-    case 'quartz': g = crystalCluster(rng, { colors: ['#eef2f7', '#f7eef0', '#e3ecf5'], glow: 0.08, count: 7, height: 0.8, radius: 0.09 }); break;
-    case 'iron': g = oreNode('iron', rng); break;
-    case 'copper': case 'tungsten': g = oreNode(revealed ? kind : 'stone', rng); break;
-    case 'fluorite': g = oreNode(revealed ? 'fluorite' : 'stone', rng); break;
-    case 'willemite': g = oreNode(revealed ? 'willemite' : 'pale', rng); break;
-    case 'monazite': g = sandNode(rng, revealed ? ['#4a3a2c', '#6a4a30'] : ['#3a332c', '#2a2420'], 0.8); break;
-    case 'beryl': g = crystalCluster(rng, revealed ? { colors: ['#7fd8b8', '#9fe0d0', '#6ac8b0'], glow: 0.12, count: 5, height: 0.7, radius: 0.1 } : { colors: ['#d8e0dc', '#e4e8e4'], glow: 0.02, count: 5, height: 0.7, radius: 0.1 }); break;
-    case 'galena': g = galenaCubes(rng); break;
-    case 'mica': g = oreNode('mica', rng); break;
-    case 'lichen': g = oreNode('lichen', rng); break;
-    case 'shale': g = shaleSlab(rng); break;
-    case 'bee': g = beeOnFlower(rng); break;
-    case 'picnic': g = picnicTable(); break;
-    case 'algae_mat': g = algaeMat(rng); break;
-    case 'mud': g = sandNode(rng, ['#5a4632', '#4a3a28'], 0.7); break;
-    case 'feather': g = feather(); break;
-    case 'pine_branch': g = pineBranch(rng); break;
-    case 'log': g = fallenLog(); break;
-    case 'logwood': g = logwoodLog(); break;
-    case 'mushroom': g = mushrooms(rng); break;
-    case 'moss': g = mossyStone(rng); break;
-    case 'web': g = spiderWeb(); break;
-    case 'fern': g = fern(rng); break;
-    case 'bone': g = bone(); break;
-    case 'onion': g = onionPlant(rng); break;
-    case 'potato': g = potatoPlant(rng); break;
-    case 'orchid': g = orchidPlant(); break;
-    case 'nettle': g = nettlePlant(rng); break;
-    case 'cotton': g = cottonPlant(rng); break;
-    case 'slides': g = slideCabinet(); break;
-    case 'materials': g = materialsBench(); break;
-    case 'iodine': g = bottle('#7a3a12'); break;
-    case 'methylene': g = bottle('#2f5fb0'); break;
-    case 'gramkit': g = gramKit(); break;
-    case 'rack': g = sampleRack(); break;
-    case 'sunflower': g = sunflower(rng); break;
-    case 'resin': g = resinStump(rng); break;
-    case 'leaf': g = leafPlant(rng); break;
-    case 'flower': g = flowerPatch(rng); break;
-    case 'wing': g = wingOnStone(rng); break;
-    case 'crystal': g = crystalCluster(rng, { colors: ['#7b6cff', '#5aa9ff', '#b07bff'], glow: 0.7, count: 12, height: 3.4, radius: 0.28 }); break;
-    case 'granite': case 'basalt': case 'obsidian': case 'marble': case 'chalk': case 'malachite': case 'magnetite': case 'garnet': g = oreNode(kind, rng); g.scale.setScalar(1.25); break;
-    case 'pyrite': g = galenaCubes(rng, '#c9a63e'); break;
-    case 'concrete': g = concreteBlocks(); break;
-    case 'ibeam': g = rustyBeam(); break;
-    case 'brick': g = brickStack(); break;
-    case 'solar': g = solarPanel(); break;
-    case 'catconv': g = catalyticConverter(); break;
-    case 'bell': g = chimeBell(); break;
-    case 'nanocase': g = nanoCase(); break;
-    case 'devicecase': g = deviceCase(); break;
-    case 'pond': throw new Error('the pond is built by terrain.buildWater');
-  }
-  if (!FIXED_YAW.has(kind)) g.rotation.y = rng() * 6.28;
-  g.traverse((o) => {
-    if (o instanceof THREE.Mesh) o.castShadow = true;
-  });
-  return g;
-}

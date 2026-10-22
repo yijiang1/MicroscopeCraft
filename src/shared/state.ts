@@ -16,12 +16,15 @@ export interface GameContext {
   bus: Bus;
 }
 
+const SnapshotsSchema = z.record(z.string(), z.object({ image: z.string(), quality: z.number() }));
+
 /** The part of the state worth keeping between visits. A bad save parses to null (start fresh); an older save
- *  without the newer fields gets their defaults. */
+ *  without the newer fields gets their defaults. Snapshots (the Microdex pictures, megabytes by the end) are kept
+ *  under their own key, so the frequent progress saves stay small; older saves still hold them inline. */
 const SaveSchema = z.object({
   inventory: z.record(z.string(), z.number()),
   discoveries: z.array(z.string()),
-  snapshots: z.record(z.string(), z.object({ image: z.string(), quality: z.number() })),
+  snapshots: SnapshotsSchema.default({}),
   scopeChoice: TierSchema.nullable(),
   achievements: z.array(z.string()).default([]),
   quests: z.array(z.string()).default([]),
@@ -34,14 +37,22 @@ const SaveSchema = z.object({
 });
 export type SaveData = z.infer<typeof SaveSchema>;
 export const SAVE_KEY = 'microscopecraft:save';
+export const SNAPSHOTS_KEY = 'microscopecraft:snapshots';
 
-export const toSave = ({ inventory, discoveries, snapshots, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation }: GameState): SaveData => ({
-  inventory, discoveries, snapshots, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation,
+/** Everything but the snapshots, which are saved on their own under SNAPSHOTS_KEY. */
+export const toSave = ({ inventory, discoveries, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation }: GameState): Omit<SaveData, 'snapshots'> => ({
+  inventory, discoveries, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation,
 });
 
-export function parseSave(json: string | null): SaveData | null {
+/** The save, plus the snapshots saved under their own key (unreadable snapshots are dropped, not the progress). */
+export function parseSave(json: string | null, snapshotsJson: string | null = null): SaveData | null {
   try {
-    return SaveSchema.parse(JSON.parse(json ?? ''));
+    const save = SaveSchema.parse(JSON.parse(json ?? ''));
+    try {
+      return { ...save, snapshots: { ...save.snapshots, ...SnapshotsSchema.parse(JSON.parse(snapshotsJson ?? '{}')) } };
+    } catch {
+      return save;
+    }
   } catch {
     return null;
   }
