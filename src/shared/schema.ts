@@ -88,10 +88,36 @@ export const ScopeSpecSchema = z.object({
 });
 export type ScopeSpec = z.infer<typeof ScopeSpecSchema>;
 
+/** A lens the player ground at the workbench. It is curved equally on both sides, so this one radius sets its
+ *  focal length (sim/assembly.ts). */
+export const LensBuildSchema = z.object({
+  radiusMm: z.number().min(1).max(500),
+  /** Width of the stop in front of an objective, mm; absent = the whole lens. */
+  stopMm: z.number().positive().optional(),
+});
+export type LensBuild = z.infer<typeof LensBuildSchema>;
+
+/** A compound microscope the player put together by hand at the workbench. Its optics replace the recipe's zoom
+ *  steps (sim/assembly.ts); style and name are only looks. */
+export const CompoundBuildSchema = z.object({
+  /** On the revolving nosepiece, one zoom step each. */
+  objectives: z.array(LensBuildSchema).min(1).max(3),
+  eyepiece: LensBuildSchema,
+  /** Distance from the objective lens to the eyepiece lens, mm (the tube telescopes). */
+  tubeMm: z.number().min(100).max(300),
+  /** Looks, by part: a shape or a finish name (free-form, so new looks need no schema change). */
+  style: z.record(z.string(), z.string()).default({}),
+  /** Engraved on the base. */
+  name: z.string().max(24).default(''),
+});
+export type CompoundBuild = z.infer<typeof CompoundBuildSchema>;
+
 export const RecipeSchema = z.object({
   id: Id,
   name: z.string(),
   station: z.enum(['hand', 'furnace', 'bench']),
+  /** Put together by hand at the workbench instead of crafted with C: the player's build sets the zoom steps. */
+  assembly: z.literal('compound').optional(),
   /** keep = needed to craft but not used up (a scope you build on stays in your inventory so you can compare). */
   inputs: z.array(z.object({ itemId: Id, count: z.number().int().positive(), keep: z.boolean().optional() })).min(1),
   output: z.object({ itemId: Id, count: z.number().int().positive() }),
@@ -319,6 +345,8 @@ export interface GameState {
   visited: string[];
   /** Knob positions the player left on aligned instruments (they keep their alignment). */
   align: Record<string, number>;
+  /** Microscopes the player built by hand at the workbench, by item id. */
+  builds: Record<string, CompoundBuild>;
 }
 
 /** Everything the app loads from /data, validated, with cross-references checked. */

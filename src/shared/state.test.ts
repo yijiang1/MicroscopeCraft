@@ -3,7 +3,8 @@ import { loadGameData } from './data';
 import type { GameEvents } from './events';
 import { scopeFromInventory } from './sim/scope';
 import {
-  carrySample, completeQuest, craft, createGame, discover, gather, parseSave, recordScore, SAMPLE_BAG_SIZE, selectScope, setPlayerLocation, setSite, setZoom, toSave, visit,
+  assemble, carrySample, completeQuest, craft, createGame, discover, gather, parseSave, recordScore, SAMPLE_BAG_SIZE, selectScope, setPlayerLocation,
+  setSite, setZoom, toSave, visit,
 } from './state';
 
 const gatherAll = (ctx: ReturnType<typeof createGame>, have: Record<string, number>) => {
@@ -259,5 +260,63 @@ describe('saved journey', () => {
     expect(changes).toBe(3);
     pose.x = 100;
     expect(ctx.state.playerLocation!.x).toBe(38);
+  });
+});
+
+describe('microscopes built by hand at the workbench', () => {
+  const parts = { lens: 3, tube: 1, light_source: 1, focus_knob: 1 };
+  const build = (objectives: number[], eyepiece = 25) => ({
+    objectives: objectives.map((radiusMm) => ({ radiusMm })), eyepiece: { radiusMm: eyepiece }, tubeMm: 201, style: { base: 'horseshoe' }, name: 'Mine',
+  });
+
+  it('assemble crafts the microscope from its parts, with one more lens per extra objective, and uses its optics', () => {
+    const ctx = createGame(loadGameData());
+    gatherAll(ctx, parts);
+    const seen: string[] = [];
+    (['itemCrafted', 'tierChanged'] as (keyof GameEvents)[]).forEach((t) => ctx.bus.on(t, () => seen.push(t)));
+    expect(assemble(ctx, 'compound_microscope', build([40, 4]))).toBe(true);
+    expect(ctx.state.inventory).toMatchObject({ compound_microscope: 1, lens: 0, tube: 0, light_source: 0, focus_knob: 0 });
+    expect(ctx.state.builds.compound_microscope!.name).toBe('Mine');
+    expect(ctx.state.scope.steps.map((s) => s.label)).toEqual(['34× (40 mm objective)', '430× (4.0 mm objective)']);
+    expect(seen).toEqual(['tierChanged', 'itemCrafted']);
+    expect(ctx.state.stats.assembled).toBe(1);
+  });
+
+  it('refuses a build that cannot focus, or missing parts, and changes nothing', () => {
+    const ctx = createGame(loadGameData());
+    gatherAll(ctx, { ...parts, lens: 2 });
+    expect(assemble(ctx, 'compound_microscope', build([16], 200))).toBe(false); // the eyepiece was never ground
+    expect(assemble(ctx, 'compound_microscope', build([40, 16]))).toBe(false); // a second objective needs a third lens
+    expect(assemble(ctx, 'hand_lens', build([16]))).toBe(false); // not a workbench recipe
+    expect(ctx.state.inventory.lens).toBe(2);
+    expect(ctx.state.builds).toEqual({});
+  });
+
+  it('rebuilding one you own swaps in the new optics: an added objective costs a lens, a removed one comes back', () => {
+    const ctx = createGame(loadGameData());
+    gatherAll(ctx, { ...parts, lens: 2 });
+    expect(assemble(ctx, 'compound_microscope', build([16]))).toBe(true);
+    expect(assemble(ctx, 'compound_microscope', build([16, 4]))).toBe(false); // no spare lens
+    gather(ctx, 'lens');
+    let changed = 0;
+    ctx.bus.on('scopeChanged', () => changed++);
+    expect(assemble(ctx, 'compound_microscope', build([16, 4]))).toBe(true);
+    expect(ctx.state.inventory).toMatchObject({ lens: 0, compound_microscope: 1 });
+    expect(ctx.state.scope.steps).toHaveLength(2);
+    expect(changed).toBe(1);
+    expect(assemble(ctx, 'compound_microscope', build([4]))).toBe(true);
+    expect(ctx.state.inventory.lens).toBe(1);
+  });
+
+  it('the build is saved with the game, and an older save without builds still loads', () => {
+    const ctx = createGame(loadGameData());
+    gatherAll(ctx, parts);
+    assemble(ctx, 'compound_microscope', build([16]));
+    const loaded = createGame(loadGameData(), undefined, parseSave(JSON.stringify(toSave(ctx.state))));
+    expect(loaded.state.builds.compound_microscope!.objectives).toEqual([{ radiusMm: 16 }]);
+    expect(loaded.state.scope.steps[0]!.label).toBe('100× (16 mm objective)');
+    const old = { ...toSave(ctx.state) } as Partial<ReturnType<typeof toSave>>;
+    delete old.builds;
+    expect(parseSave(JSON.stringify(old))!.builds).toEqual({});
   });
 });

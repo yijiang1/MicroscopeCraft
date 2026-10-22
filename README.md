@@ -29,14 +29,15 @@ src/world/         3D world            (Person A)  mountWorld(el, ctx)
 src/scope/         2D eyepiece         (Person B)  mountScope(el, ctx)   with one panel per mini-game
 src/ui/            crafting, Microdex, journal, scientist dialogs (Person D)  mountUI(el, ctx)
 src/guide/         guide client        (Person C)  mountGuide(ctx)
+src/workbench/     the workbench: build the compound microscope by hand (prototype)  mountWorkbench(el, ctx)
 src/main.ts        loads data, creates state, mounts every module (the only file that imports them all)
 ```
 
 Every module depends on `src/shared`; **no module imports another** (ESLint enforces it). Modules talk through:
 
-- **State**: `ctx.state` is read-only for renderers. Change it only with the actions in `src/shared/state.ts` (`gather`, `craft`, `discover`, `completeQuest`, `recordScore`, `visit`, `setSite`, `setAlign`). Every action re-checks the achievements.
-- **Events** (`src/shared/events.ts`): `openEyepiece({sampleId})`, `closeEyepiece`, `itemGathered`, `itemCrafted`, `discoveryUnlocked`, `tierChanged`, `zoomChanged`, `scopeChanged`, `trackItem`, `trackTarget`, `talkTo`, `questCompleted`, `achievementUnlocked`, `minigameScored`, `areaVisited`, `guideAsked`, `guideReplied`.
-- **Steps and modes**: a microscope recipe lists `steps` (label, magnification, NA, imaging `mode`, optionally an add-on it `requires`, and a per-step lens blur or voltage). `setZoom(ctx, i)` picks one; `state.scope` always holds the current step.
+- **State**: `ctx.state` is read-only for renderers. Change it only with the actions in `src/shared/state.ts` (`gather`, `craft`, `assemble`, `discover`, `completeQuest`, `recordScore`, `visit`, `setSite`, `setAlign`). Every action re-checks the achievements.
+- **Events** (`src/shared/events.ts`): `openEyepiece({sampleId})`, `closeEyepiece`, `itemGathered`, `itemCrafted`, `discoveryUnlocked`, `tierChanged`, `zoomChanged`, `scopeChanged`, `trackItem`, `trackTarget`, `talkTo`, `questCompleted`, `achievementUnlocked`, `minigameScored`, `areaVisited`, `guideAsked`, `guideReplied`, `openWorkbench`, `closeWorkbench`.
+- **Steps and modes**: a microscope recipe lists `steps` (label, magnification, NA, imaging `mode`, optionally an add-on it `requires`, and a per-step lens blur or voltage). `setZoom(ctx, i)` picks one; `state.scope` always holds the current step. A microscope built by hand at the workbench (`"assembly": "compound"` in its recipe) takes its steps from the build instead, one per objective: `state.builds` keeps the build and `compileBuild()` in `src/shared/sim/assembly.ts` turns it into steps.
 - **Microdex**: `microdex(data, state)` (`src/shared/microdex.ts`) groups one card per feature by area. The eyepiece keeps the best picture of each discovery in `state.snapshots` (saved under their own storage key, only when one changes, since they are most of the save). A sample is a `data/samples.json` entry; `npm test` checks every blurb is two sentences and every feature is reachable by some instrument step.
 - **Sim**: `visibility(feature, scope, stain)` in `src/shared/sim/optics.ts` returns whether a feature shows and why not (`other-mode`, `unresolved`, `empty-magnification`, `too-small-to-see`, `low-contrast`). `explainWall()` in `src/shared/sim/walls.ts` turns that into the plain-language "hit a wall" message. The scope banner and the guide both use it.
 - **Achievements and requests**: one rule language (`Condition` in `schema.ts`, checked by `src/shared/achievements.ts`) drives both the achievements and what each scientist asks for. Every request is an achievement too.
@@ -57,14 +58,15 @@ Simplified physics is labelled in comments next to the formula.
 | V | Switch between the over-the-shoulder view (the default) and first-person |
 | E | Gather the item you are aiming at, or talk to the scientist you are aiming at (their dialog has a chat box: ask them about their own field, answered by Google Gemini, OpenAI or Anthropic Claude once you pick one and add your own API key under Tab → Settings; it is kept only in your browser) |
 | F | Look at the aimed sample through your newest portable instrument (F or Esc to leave). At a cabinet or table, pick a sample first (1–9). Once you own a fixed instrument this also takes a bit of the sample along; F at the electron microscope in the science lab, or at the beamline desk in Wilson Lab, puts one in |
-| C | Craft the next ready step of your goal (no mouse needed) |
+| C | Craft the next ready step of your goal (no mouse needed). For the compound microscope it opens the workbench |
+| B | Workbench: build the compound microscope by hand. Grind the lenses, put the parts together, focus it, style it. Without the parts it opens in practice mode |
 | 1, 2, 3… | In the eyepiece: switch to another instrument you own, to compare (or click its button) |
 | Wheel or slider | Focus (light microscopes) |
 | T | Tech tree: every part, with add-ons shown by dashed links |
 | J | Journal: achievements with progress, and every scientist's requests with Track buttons |
 | M | Microdex (click a card you have not found to track its sample) |
 | I | Show or hide the inventory box |
-| Tab | Menu: tech tree, Microdex, journal, settings (sound, AI chat provider and API key), save and restart |
+| Tab | Menu: tech tree, workbench, Microdex, journal, settings (sound, AI chat provider and API key), save and restart |
 | K | Restock every raw material, skipping the identifications (only when the URL ends in `?demo`) |
 
 ## Finding your way
@@ -107,7 +109,7 @@ A university campus about 300 m across (north is up the quad, -z), laid out afte
 | Instrument | Raw materials in total | Components |
 | --- | --- | --- |
 | Hand lens (tier 1) | 2 beach sand, 1 iron | Glass lens, iron frame |
-| Compound microscope (tier 2) | 6 beach sand, 2 iron, 1 copper | 2 glass lenses, iron tube, focus knob, lamp |
+| Compound microscope (tier 2) | 6 beach sand, 2 iron, 1 copper | 2 glass lenses, iron tube, focus knob, lamp. Put together by hand at the workbench; each objective after the first takes one more glass lens |
 | High-quality microscope (tier 3) | 6 quartz sand, 1 copper, 1 plant oil, plus the compound microscope | 2 precision lenses, condenser, immersion oil |
 | Fluorescence microscope (tier 4) | 6 quartz sand, 2 fluorite, 1 tungsten, plus the high-quality microscope | Fluorite objective, arc lamp, filter cube. Add-ons: phase contrast kit, dark-field condenser |
 | Transmission electron microscope (tier 5) | 3 tungsten, 10 iron, 9 copper, 3 resin, 1 willemite, 2 beach sand | Electron gun (filament, Wehnelt cap, high-voltage tank); condenser lens system; objective lens and stage; projector lens system; vacuum system; viewing screen |
@@ -171,6 +173,7 @@ Pitch points: the instrument is earned by building it, part by part; every upgra
 | `src/scope`, `src/shared/sim` | Person B: microscope view and simulation |
 | `server`, `src/guide`, `src/shared/worldspec.ts` | Person C: AI and backend |
 | `src/ui`, `data/*.json` content | Person D: content and UI |
+| `src/workbench`, `src/shared/sim/assembly.ts` | Workbench prototype (see DESIGN.md) |
 | `src/shared` (rest), `src/main.ts` | Everyone; see below |
 
 **Branches**: `<area>/<short-description>`, with area one of `world`, `scope`, `ai`, `ui`, `shared`, `docs`. Example: `scope/blur-by-deff`. Branch from `main`.

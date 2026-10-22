@@ -3,11 +3,16 @@
 import { z } from 'zod';
 import { conditionMet, newlyEarned } from './achievements';
 import { createBus, type Bus } from './events';
-import { PlayerLocationSchema, SiteSchema, TierSchema, type GameData, type GameState, type PlayerLocation, type Site, type Tier } from './schema';
-import { NAKED_EYE, ownedScopes, scopeFromInventory } from './sim/scope';
+import {
+  CompoundBuildSchema, PlayerLocationSchema, SiteSchema, TierSchema, type CompoundBuild, type GameData, type GameState, type PlayerLocation,
+  type Site, type Tier,
+} from './schema';
+import { buildIssue } from './sim/assembly';
+import { NAKED_EYE, ownedScopes, scopeFromInventory, scopeParamsFromSpec } from './sim/scope';
 import { MYSTERY_SAMPLE_ID, parseMystery } from './mystery';
 
-export { ownedScopes }; // microscopes in the inventory, lowest tier first (UI modules may not import sim/scope)
+// microscopes in the inventory, lowest tier first, and a spec at one zoom step (modules may not import sim/scope)
+export { ownedScopes, scopeParamsFromSpec };
 export const SAMPLE_BAG_SIZE = 8;
 
 /** Handed to every module's mount function. */
@@ -40,14 +45,15 @@ const SaveSchema = z.object({
   align: z.record(z.string(), z.number()).default({}),
   carriedSamples: z.array(z.string()).catch([]).default([]),
   playerLocation: PlayerLocationSchema.nullable().catch(null).default(null),
+  builds: z.record(z.string(), CompoundBuildSchema).catch({}).default({}),
 });
 export type SaveData = z.infer<typeof SaveSchema>;
 export const SAVE_KEY = 'microscopecraft:save';
 export const SNAPSHOTS_KEY = 'microscopecraft:snapshots';
 
 /** Everything but the snapshots, which are saved on their own under SNAPSHOTS_KEY. */
-export const toSave = ({ inventory, discoveries, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation, mystery }: GameState): Omit<SaveData, 'snapshots'> => ({
-  inventory, discoveries, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation, mystery: mystery ?? null,
+export const toSave = ({ inventory, discoveries, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation, builds, mystery }: GameState): Omit<SaveData, 'snapshots'> => ({
+  inventory, discoveries, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation, builds, mystery: mystery ?? null,
 });
 
 /** The save, plus the snapshots saved under their own key (unreadable snapshots are dropped, not the progress). */
@@ -67,7 +73,7 @@ export function parseSave(json: string | null, snapshotsJson: string | null = nu
 export function createGame(data: GameData, bus: Bus = createBus(), save?: SaveData | null): GameContext {
   const state: GameState = {
     inventory: {}, discoveries: [], snapshots: {}, currentSampleId: null, scopeChoice: null, site: null, scope: NAKED_EYE,
-    achievements: [], quests: [], best: {}, stats: {}, visited: [], align: {}, carriedSamples: [], playerLocation: null, ...save,
+    achievements: [], quests: [], best: {}, stats: {}, visited: [], align: {}, carriedSamples: [], playerLocation: null, builds: {}, ...save,
   };
   state.carriedSamples = [...new Set(state.carriedSamples)].filter((id) => data.samples[id]).slice(0, SAMPLE_BAG_SIZE);
   if (state.mystery) state.carriedSamples = [MYSTERY_SAMPLE_ID, ...state.carriedSamples].slice(0, SAMPLE_BAG_SIZE);
@@ -108,7 +114,8 @@ export function setPlayerLocation(ctx: GameContext, location: PlayerLocation) {
 }
 
 /** The microscope in use, at its lowest zoom step: the chosen one if usable here, else the best usable one. */
-const usableScope = ({ data, state }: GameContext, step = 0) => scopeFromInventory(state.inventory, data, step, state.scopeChoice, state.site);
+const usableScope = ({ data, state }: GameContext, step = 0) =>
+  scopeFromInventory(state.inventory, data, step, state.scopeChoice, state.site, state.builds);
 
 /** The world calls this as the player walks in or out of a site: fixed instruments only work where they are installed. */
 export function setSite(ctx: GameContext, site: Site | null) {
@@ -180,6 +187,38 @@ export function craft(ctx: GameContext, recipeId: string): boolean {
   if (tier !== best) ctx.bus.emit('tierChanged', { tier });
   ctx.bus.emit('itemCrafted', { itemId: recipe.output.itemId });
   bump(ctx, 'crafted');
+  return true;
+}
+
+/** The item a hand-built nosepiece uses for every objective beyond the first (the recipe pays for one and the eyepiece). */
+export const LENS_ITEM = 'lens';
+export const extraLenses = (build: Pick<CompoundBuild, 'objectives'>) => Math.max(0, build.objectives.length - 1);
+
+/** Finish a microscope built by hand at the workbench. The first time it is crafted like any recipe, plus one glass
+ *  lens for each extra objective; a microscope you already own only takes the new build (an objective added costs a
+ *  lens, one taken off goes back to the inventory). Returns false, and changes nothing, if the build cannot form a
+ *  focusable image or parts are missing. */
+export function assemble(ctx: GameContext, recipeId: string, build: CompoundBuild): boolean {
+  const recipe = ctx.data.recipes.find((r) => r.id === recipeId);
+  if (!recipe?.assembly || !recipe.scope) return false;
+  const parsed = CompoundBuildSchema.safeParse(build);
+  if (!parsed.success || buildIssue(parsed.data)) return false;
+  const { inventory, builds } = ctx.state;
+  const item = recipe.output.itemId;
+  const owned = (inventory[item] ?? 0) > 0;
+  const previous = owned ? builds[item] : undefined;
+  // A microscope crafted before the workbench came with the recipe's objectives: its first rebuild is free.
+  const before = previous ? extraLenses(previous) : owned ? extraLenses(parsed.data) : 0;
+  const extra = extraLenses(parsed.data) - before;
+  const lenses = Math.max(0, extra) + (owned ? 0 : recipe.inputs.find((i) => i.itemId === LENS_ITEM)?.count ?? 0);
+  if ((inventory[LENS_ITEM] ?? 0) < lenses || (!owned && !canCraft(ctx, recipeId))) return false;
+  builds[item] = parsed.data;
+  if (extra) inventory[LENS_ITEM] = (inventory[LENS_ITEM] ?? 0) - extra;
+  if (owned) {
+    ctx.state.scope = usableScope(ctx, ctx.state.scope.step);
+    ctx.bus.emit('scopeChanged', { tier: ctx.state.scope.tier });
+  } else craft(ctx, recipeId); // with the build in place, so the new microscope already has its steps
+  bump(ctx, 'assembled');
   return true;
 }
 

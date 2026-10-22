@@ -189,8 +189,8 @@ export function drawTree(ctx: GameContext, layout: TreeLayout, o: DrawOpts): HTM
     if (locked) t.append(styled('span', 'position:absolute;right:-7px;top:-8px;font-size:11px', '🔒'));
     t.title = `${data.items[id]?.name ?? id}\n${
       recipe ? `${recipe.station}: ${recipe.inputs.map((i) => `${i.count} ${data.items[i.itemId]?.name ?? i.itemId}${i.keep ? ' (kept)' : ''}`).join(' + ')}` : (data.materials[id]?.where ?? '')
-    }${ready ? '\nClick to craft' : ''}`;
-    if (ready) t.onclick = () => craft(ctx, recipe.id);
+    }${ready ? (recipe.assembly ? '\nClick to build it at the workbench' : '\nClick to craft') : ''}`;
+    if (ready) t.onclick = () => (recipe.assembly ? ctx.bus.emit('openWorkbench', { recipeId: recipe.id }) : craft(ctx, recipe.id));
     else if (o.onPick) t.onclick = () => o.onPick!(id);
     const node = styled('div', `position:absolute;left:${x(c.col, c.lane) - S.col / 2}px;top:${y(c.row)}px;width:${S.col}px`);
     node.append(t);
@@ -248,7 +248,10 @@ export function mountTechTree(parent: HTMLElement, ctx: GameContext): TechTreeHa
   };
   addEventListener('keydown', onKey);
   const refresh = () => shown() && render();
-  const offs = [ctx.bus.on('itemGathered', refresh), ctx.bus.on('itemCrafted', refresh), ctx.bus.on('discoveryUnlocked', refresh)];
+  const offs = [
+    ctx.bus.on('itemGathered', refresh), ctx.bus.on('itemCrafted', refresh), ctx.bus.on('discoveryUnlocked', refresh),
+    ctx.bus.on('openWorkbench', () => shown() && toggle()), // building happens at the workbench, not in the tree
+  ];
 
   return {
     toggle,

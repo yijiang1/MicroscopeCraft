@@ -2,7 +2,8 @@
 // Pure, from the recipes, the inventory and the discoveries. Used by the goal panel and the guide. Owner: Person D.
 import type { Feature, GameData, GameState, Recipe, Sample, Site, ZoomStep } from './schema';
 import { visibility } from './sim/optics';
-import { scopeFromInventory, scopeParamsFromSpec } from './sim/scope';
+import { scopeFromInventory, scopeParamsFromSpec, withBuilds, type Builds } from './sim/scope';
+import { fmtUm } from './sim/walls';
 
 export interface PlanStep {
   recipe: Recipe;
@@ -18,6 +19,8 @@ export interface Identify {
   scope: Recipe | null;
   step: ZoomStep | null;
   done: boolean;
+  /** A microscope the player built by hand that would show the feature if built differently: rebuild it. */
+  rebuild?: Recipe;
 }
 
 export interface PlanRaw {
@@ -80,9 +83,11 @@ export function nextGoalRecipe(data: Pick<GameData, 'recipes'>, state: Pick<Game
   );
 }
 
-const identifyOf = (found: { feature: Feature; sample: Sample }, data: Pick<GameData, 'recipes'>, discoveries: readonly string[]): Identify => {
-  const scope = scopeThatSees(found.feature, data);
-  return { ...found, scope, step: scope && stepThatSees(found.feature, scope), done: discoveries.includes(found.feature.id) };
+const identifyOf = (found: { feature: Feature; sample: Sample }, data: Pick<GameData, 'recipes'>, discoveries: readonly string[], builds: Builds): Identify => {
+  const scope = scopeThatSees(found.feature, withBuilds(data, builds));
+  const usual = scopeThatSees(found.feature, data);
+  const rebuild = usual?.assembly && builds[usual.output.itemId] && scope?.id !== usual.id ? usual : undefined;
+  return { ...found, scope, step: scope && stepThatSees(found.feature, scope), done: discoveries.includes(found.feature.id), rebuild };
 };
 
 export function planFor(
@@ -90,6 +95,7 @@ export function planFor(
   data: Pick<GameData, 'recipes' | 'materials' | 'samples'>,
   inventory: Record<string, number>,
   discoveries: readonly string[] = [],
+  builds: Builds = {},
 ): Plan {
   /** Expand the goal against an inventory: what raw material is missing and which crafts are needed. */
   const expand = (have: Record<string, number>) => {
@@ -123,7 +129,7 @@ export function planFor(
       itemId,
       total,
       missing: now.missing.get(itemId) ?? 0,
-      identify: found ? identifyOf(found, data, discoveries) : undefined,
+      identify: found ? identifyOf(found, data, discoveries, builds) : undefined,
     };
   });
   // Materials that must be identified under a microscope first come first: they are the new thing to learn.
@@ -156,7 +162,8 @@ export function currentAction(plan: Plan): Action | null {
 export function actionText(action: Action, data: Pick<GameData, 'items'>): string {
   switch (action.kind) {
     case 'identify': {
-      const { sample, feature, scope, step } = action.identify;
+      const { sample, feature, scope, step, rebuild } = action.identify;
+      if (rebuild) return `Your ${rebuild.name} can't show ${feature.name} (${fmtUm(feature.sizeUm)}) yet: rebuild it at the workbench [B] with a more strongly curved objective and its stop set`;
       const at = step && (scope?.scope?.steps.length ?? 0) > 1 ? ` at ${step.label}` : '';
       const site = scope?.scope?.site;
       if (site) return `Look [F] at a ${sample.name} to take a bit, then use the ${scope.name} in the ${SITE_NAMES[site]}${at} to spot ${feature.name}`;
@@ -165,7 +172,9 @@ export function actionText(action: Action, data: Pick<GameData, 'items'>): strin
     case 'gather':
       return `Gather ${action.raw.missing} ${data.items[action.raw.itemId]?.name ?? action.raw.itemId} (aim and press [E])`;
     case 'craft':
-      return `Press C to craft ${action.step.recipe.name}`;
+      return action.step.recipe.assembly
+        ? `Press [C] to build the ${action.step.recipe.name} at the workbench`
+        : `Press C to craft ${action.step.recipe.name}`;
   }
 }
 
@@ -187,6 +196,7 @@ export function howToGet(
     return `${name}: ${where}.${locked && scope ? ` You can only gather it after you have looked at it with a ${scope.name} and spotted ${found!.feature.name}.` : ' Aim at it and press [E].'}`;
   }
   const parts = recipe.inputs.map((i) => `${i.count} ${data.items[i.itemId]?.name ?? i.itemId}`);
+  if (recipe.assembly) return `${name} is built by hand at the workbench [B], from ${parts.join(' and ')}: you grind the lenses and put the parts together.`;
   return `${name} is crafted, not found in the world. Make it in the crafting panel from ${parts.join(' and ')}.`;
 }
 

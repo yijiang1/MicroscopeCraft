@@ -49,7 +49,7 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void, 
     card.replaceChildren();
     let tree: ((size: 'small' | 'tiny') => HTMLElement) | null = null;
     const goal = nextGoalRecipe(data, state);
-    plan = goal ? planFor(goal, data, state.inventory, state.discoveries) : null;
+    plan = goal ? planFor(goal, data, state.inventory, state.discoveries, state.builds) : null;
     const action = plan ? currentAction(plan) : null;
 
     // --- header: the one thing to do now
@@ -148,7 +148,8 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void, 
     out.append(itemIcon(recipe.output.itemId, data, 22), `${data.items[recipe.output.itemId]?.name ?? recipe.output.itemId}`);
     line.append(div('color:#9ab;font-size:16px', '→'), out);
     const btn = document.createElement('button');
-    withKeys(btn, 'Craft [C]');
+    withKeys(btn, recipe.assembly ? 'Build it [C]' : 'Craft [C]');
+    btn.title = recipe.assembly ? 'Opens the workbench: you grind the lenses and put the microscope together yourself' : '';
     btn.disabled = !ready;
     btn.style.cssText = `margin-left:auto;padding:3px 10px;border-radius:6px;border:0;font-weight:700;${ready ? 'background:#ffd35a;color:#222;cursor:pointer;box-shadow:0 0 8px #ffd35a88' : 'background:#444;color:#999'}`;
     btn.onclick = () => doCraft(recipe.id);
@@ -159,7 +160,9 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void, 
   };
 
   const doCraft = (recipeId: string) => {
-    if (craft(ctx, recipeId)) toast.notify(`Crafted ${ctx.data.items[ctx.data.recipes.find((r) => r.id === recipeId)!.output.itemId]?.name}`);
+    const recipe = ctx.data.recipes.find((r) => r.id === recipeId);
+    if (recipe?.assembly) return ctx.bus.emit('openWorkbench', { recipeId }); // built by hand, not crafted
+    if (craft(ctx, recipeId)) toast.notify(`Crafted ${ctx.data.items[recipe!.output.itemId]?.name}`);
   };
 
   const onKey = (e: KeyboardEvent) => {
@@ -186,6 +189,12 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void, 
       card.style.display = '';
       render();
     }),
+    ctx.bus.on('openWorkbench', () => (card.style.display = 'none')),
+    ctx.bus.on('closeWorkbench', () => {
+      card.style.display = ctx.state.currentSampleId ? 'none' : '';
+      render();
+    }),
+    ctx.bus.on('scopeChanged', render), // a microscope rebuilt at the workbench changes what the plan says
   ];
   return {
     render,

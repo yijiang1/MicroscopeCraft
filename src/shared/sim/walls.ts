@@ -76,7 +76,7 @@ export function explainWall(f: Wall, scope: ScopeParams, v?: Visibility, stain: 
       if (scope.illuminationNA !== undefined && scope.illuminationNA < scope.NA * 0.95) {
         return `${head} Your condenser lights the sample with an NA of only ${scope.illuminationNA.toFixed(2)}, so the objective cannot reach its limit. Align it (Köhler illumination).`;
       }
-      if (scope.dLensUm > dDiff) return `${head} Defects in your lens glass cause most of the blur. Purer glass and a precision lens would sharpen it.`;
+      if (scope.dLensUm > dDiff) return `${head} Lens errors, from flawed glass and from the curved surfaces of simple lenses, cause most of the blur. Purer glass and a precision lens would sharpen it.`;
       if (scope.tier < 3) return `${head} The wave nature of light blurs detail more with a small numerical aperture (NA ${scope.NA}). A better objective, immersion oil and a condenser raise it.`;
       return `${head} That is the diffraction limit: visible light can't resolve much below half its wavelength (about ${fmtUm(abbeLimitUm(scope.wavelengthUm, 1.4))}). Electrons have far shorter wavelengths.`;
     }

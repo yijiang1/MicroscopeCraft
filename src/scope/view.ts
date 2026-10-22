@@ -221,7 +221,7 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
     scopeBox.append('Instrument:');
     owned.forEach((r, i) => {
       const b = document.createElement('button');
-      b.textContent = `${i + 1} ${r.name}`;
+      b.textContent = `${i + 1} ${ctx.state.builds[r.output.itemId]?.name || r.name}`; // a hand-built one goes by its engraved name
       b.disabled = r.scope.tier === scope.tier;
       b.style.cssText = b.disabled ? 'background:#3d7fd6;color:#fff;font-weight:600' : '';
       b.onclick = () => selectScope(ctx, r.scope.tier); // scopeChanged triggers the redraw

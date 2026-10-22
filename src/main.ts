@@ -4,6 +4,7 @@ import { mountScope } from './scope';
 import { createGame, gather, parseSave, SAVE_KEY, SNAPSHOTS_KEY } from './shared/state';
 import { loadGameData } from './shared/data';
 import { mountUI } from './ui';
+import { mountWorkbench } from './workbench';
 import { mountWorld } from './world';
 
 const el = (id: string) => document.getElementById(id) as HTMLElement;
@@ -19,6 +20,7 @@ try {
   mountWorld(el('world'), ctx);
   mountScope(el('scope'), ctx);
   mountUI(el('ui'), ctx);
+  mountWorkbench(el('workbench'), ctx);
   mountGuide(ctx);
   // Demo mode (?demo): press K to restock every raw material, so a live demo can skip repeat gathering.
   if (new URLSearchParams(location.search).has('demo')) {

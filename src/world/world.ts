@@ -407,7 +407,9 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   addEventListener('keydown', onDown);
   addEventListener('keyup', onUp);
   renderer.domElement.addEventListener('click', onClick);
-  const offOpen = ctx.bus.on('openEyepiece', () => {
+  // The eyepiece and the workbench each cover the world: it stops (no drawing, no movement) while either is open.
+  let atBench = false;
+  const pauseWorld = () => {
     rememberPlayer();
     paused = true;
     keys.clear();
@@ -417,12 +419,24 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       a.obj.scale.setScalar(a.to);
       a.done?.();
     }
-  });
-  const offClose = ctx.bus.on('closeEyepiece', () => {
+  };
+  const resumeWorld = () => {
+    if (atBench || ctx.state.currentSampleId) return; // still covered by the other one
     paused = false;
     keys.clear();
     redrawShadows();
     loop.start();
+  };
+  const offOpen = ctx.bus.on('openEyepiece', pauseWorld);
+  const offClose = ctx.bus.on('closeEyepiece', resumeWorld);
+  const offBench = ctx.bus.on('openWorkbench', () => {
+    atBench = true;
+    controls.unlock();
+    pauseWorld();
+  });
+  const offBenchClose = ctx.bus.on('closeWorkbench', () => {
+    atBench = false;
+    resumeWorld();
   });
 
   const resize = () => {
@@ -644,7 +658,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       loop.stop();
       timers.forEach((id) => clearTimeout(id));
       ro.disconnect();
-      [offOpen, offClose, offTrack, offTarget, offCrafted, offQuest, offScore, offDiscovery].forEach((off) => off());
+      [offOpen, offClose, offBench, offBenchClose, offTrack, offTarget, offCrafted, offQuest, offScore, offDiscovery].forEach((off) => off());
       removeEventListener('keydown', onDown);
       removeEventListener('keyup', onUp);
       removeEventListener('pagehide', rememberPlayer);
