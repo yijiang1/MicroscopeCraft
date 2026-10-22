@@ -39,7 +39,7 @@ Every session repeats one loop, at smaller and smaller scales:
 
 1. **Explore and gather.** Walk the campus and collect sand, ores, oil, resin, minerals and lab reagents. The goal panel names the next instrument and what it still needs; an arrow with the distance points to the nearest source.
 2. **Identify.** Some materials look like plain rock or seeds until you look at them through the instrument you already have. Spotting what is inside unlocks gathering them (see "Discovery gates").
-3. **Craft and assemble.** Smelt sand into glass, grind lenses, wind coils, build each component of an instrument separately, then assemble it. The goal card lists the steps and C crafts the next ready one. Fixed instruments show each component in place as you build it.
+3. **Craft and assemble.** Smelt sand into glass, grind lenses, wind coils, build each component of an instrument separately, then assemble it. The goal card lists the steps and C crafts the next ready one. Fixed instruments show each component in place as you build it. The compound microscope is put together by hand at the workbench (prototype; see "The workbench").
 4. **Look and align.** Aim at a sample and press F; at a cabinet, pick a slide. Choose an imaging mode, stain the sample, and align the instrument with its mini-game; the view shows only what it can resolve.
 5. **Hit a wall.** The view is blurry, empty, too dark or shows nothing in this mode, and the game explains the limit in plain words, using the simulation's own numbers.
 6. **Show a scientist.** Take what you found to the scientist who asked for it; every request done is an achievement.
@@ -128,6 +128,26 @@ Every sample has hidden layers that appear only when an instrument (and the righ
 | 7 | Inside, elements, structure | Tomography of seeds, fossils and batteries; element maps; protein, DNA and metal diffraction |
 
 The Microdex is a collection log with one card per discovery: a picture of what the player actually saw (their sharpest view), its size, and a two-sentence explanation, grouped by area. It holds 170 discoveries in 45 samples; seven of them unlock materials.
+
+## The workbench (prototype)
+
+Crafting with C is quick, but a notice that the microscope is built does not make it feel like yours. In a sandbox game the hook is the building, and a microscope suits that better than most things, because its optics are geometry: how you put it together decides what it can see. The workbench (B, the menu, or C when the goal says to build the compound microscope) lets the player do that for tier 2.
+
+**What you do.** Put up the stand (base, arm, stage), put the lamp under the stage, mount the tube and the focus knobs, grind a lens blank and screw it in as the objective, grind another and drop it in as the eyepiece, then turn the knobs until the slide is sharp. A live eyepiece view and a traced light path show the result while you build. Up to three objectives fit on the nosepiece; each one after the first takes one more glass lens. Without the parts, the workbench opens in practice mode and nothing is kept.
+
+**Physics.** Thin lenses on one axis, paraxial rays, a relaxed eye (`src/shared/sim/assembly.ts`):
+
+- Grinding tightens the curve of an equiconvex lens. Lensmaker: $1/f = (n-1)\cdot 2/R$, so with $n = 1.5$ the focal length equals the radius of curvature. A strongly curved lens must also be small: width $D = \min(8\ \text{mm}, 1.4R)$.
+- For a relaxed eye the objective's image must form at the eyepiece's focal point, $s' = L - f_{eye}$ above the objective ($L$ is the tube length). The thin-lens equation then fixes where the slide must be, $s = f s'/(s' - f)$; the focus knobs move the tube until it is there.
+- $M = (s'/s)\cdot(250\ \text{mm}/f_{eye})$, and $NA = \sin\arctan(D/2s)$. A 16 mm objective, a 25 mm eyepiece and a 201 mm tube give the textbook 10× × 10× = 100×.
+- Out of focus by δ, a point blurs to about $2\,NA\,\delta$; the view counts as sharp below 0.6 × $d_{eff}$.
+- A build fails, in plain words, if the eyepiece is barely ground, if the objective is too weak to form an image in the tube, or if the slide would have to sit further than the knob reaches (60 mm).
+
+**How it plugs in.** The recipe says `"assembly": "compound"`. `assemble(ctx, recipeId, build)` crafts it like any recipe and keeps the build in `state.builds` (saved with the game); `compileBuild()` turns the build into one zoom step per objective, so the eyepiece, the walls, the Microdex and the guide treat it like any microscope. The glass blur stays the recipe's. If the build cannot show the feature that unlocks the next tier (seed oil droplets, 1.5 µm), the workbench says so, and the goal card says to rebuild with a more strongly curved objective.
+
+**Looks.** Shapes for the base (horseshoe, round, square, tripod), arm (curved, pillar, swan) and stage (square, round); a finish for every part (brass, black, nickel, iron, wood, white, red, blue, green, a gilded leather tube like Hooke's, or any paint); a name engraved on the base, which the eyepiece shows in its instrument picker.
+
+**Open questions.** Two glass lenses give one objective, so a first build has one zoom step instead of the recipe's four: is that the right pressure to grind more? Should the hand lens, the condenser and immersion oil also be built here, and should the workbench become a place in the world? A fresh blank is free in the prototype; should starting over cost glass? A single ground lens stands in for each multi-element objective, so spherical aberration is folded into the glass blur. For the electron tiers, assembling the column could become the electron shooting contest: place and tune coils so the beam reaches the screen.
 
 ## Simulation model
 A few formulas decide what the player sees. They are simplified but directionally correct, so a better material, a smaller wavelength or a better alignment always helps for the right reason. All lengths are in micrometres in the code.
@@ -237,6 +257,7 @@ The code is split into four owned modules around one shared core, so four people
 | Microscope view | src/scope | Person B | 2D canvas view with zoom, focus, imaging modes, stains, beam damage, drawings by feature type, and one panel per mini-game; also owns the simulation rules and their tests |
 | AI and backend | src/guide, server | Person C | Guide (offline today), world-spec validator; planner, world cache and endpoints are deferred |
 | Content and UI | src/ui, data | Person D | Goal card, inventory box, tech tree, Microdex, journal, scientist dialogs, toasts, sound, guide box; recipe, material, sample, scientist and achievement JSON |
+| Workbench (prototype) | src/workbench | (open) | The 3D bench, lens grinding, assembly, focus, looks and the live eyepiece view; the optics of a build are in src/shared/sim/assembly.ts |
 
 **The shared contract** was written first, and every module builds on it:
 
@@ -317,7 +338,7 @@ For judges, the pitch has four points:
 - [ ] Which LLM and API will power the planner and the guide? Deferred with the LLM features.
 - [ ] What are the hackathon's tracks, judging criteria and submission format? The event page does not list them.
 - [ ] Do the discovery gates feel rewarding? Option if they feel like busywork: make the plain rocks and seeds also glimmer faintly so players know to look, or add a hint from the guide after a minute without progress.
-- [ ] Should crafting stations (furnace, bench) become places in the world, or stay a panel?
+- [ ] Should crafting stations (furnace, bench) become places in the world, or stay a panel? The workbench prototype is a full-screen bench reached with B; it could also become a bench in the science lab.
 - [x] Should the electron wavelength use the relativistic formula? Yes, now relativistic.
 - [ ] Is the late-game gathering (about 12 iron and 11 copper for the STEM and beamline) satisfying or a grind? Options: more nodes, or components that drop from scientists' requests.
 - [ ] Should the scientists speak in the first person? They do now, from their documented work; every NPC is a historical figure who has died, and no living scientist is given invented words.
