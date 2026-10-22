@@ -200,3 +200,5 @@ Store inventory cards show illustrated item previews. Click a preview to enlarge
 The glass elevator on the east side of the clock tower takes you to a railed terrace 30 metres above campus. Walk up to it and press **E** to ride; press **E** near the cabin upstairs to return. You can look around during the ride.
 
 Two original synthesized background themes accompany campus walks and lab visits. After your first click or key enables audio, the tower plays a bell arrangement of the traditional **Oh Tannenbaum** every five minutes, with distance attenuation. The existing **Sound** toggle mutes all music and effects immediately. No audio downloads or API keys are needed.
+
+The tower elevator, support rails and lookout terrace use faint blue transparent glass. The ScopeCraft Store also displays the **Micro Roadster**, a red classic convertible priced at **600 coins / 24 vouchers**. Try it free for **30 seconds**, then return automatically to the store. Use **W/S** to accelerate or reverse, **A/D** to steer, and **E** to return early. Purchased cars unlock untimed drives.

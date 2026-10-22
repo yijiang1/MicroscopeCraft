@@ -1,3 +1,4 @@
+import { buildMiata, driveStep, TEST_DRIVE_MS } from './miata';
 import { advanceLift, buildTowerLift, constrainTerrace, LIFT, liftBase, nearLift } from './tower-lift';
 import { mountSpeechOverlay } from './speech-overlay';
 import { buildActivityStation, STATIONS } from './activity-stations';
@@ -253,11 +254,15 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const player = buildPlayer();
   scene.add(player.root);
   const viewCamera = camera.clone();
+  const roadster = buildMiata(); roadster.root.visible = false; scene.add(roadster.root);
+  let driving = false, driveSpeed = 0, driveYaw = 0, driveDeadline = 0;
+  let driveTimer: ReturnType<typeof setTimeout> | undefined;
+  let savedThirdPerson = true;
   let thirdPerson = start?.thirdPerson ?? true;
   const facing = new THREE.Euler();
   const rememberPlayer = () => {
     facing.setFromQuaternion(camera.quaternion, 'YXZ');
-    setPlayerLocation(ctx, { x: camera.position.x, z: camera.position.z, yaw: facing.y, pitch: facing.x, thirdPerson });
+    setPlayerLocation(ctx, { x: driving ? -12 : camera.position.x, z: driving ? 35.5 : camera.position.z, yaw: facing.y, pitch: facing.x, thirdPerson });
   };
   addEventListener('pagehide', rememberPlayer);
   document.addEventListener('visibilitychange', rememberPlayer);
@@ -286,6 +291,14 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       player.root.visible = !hit || hit.distance > 1;
       viewCamera.position.y = Math.max(viewCamera.position.y, heightAt(viewCamera.position.x, viewCamera.position.z) + 0.3);
       viewCamera.lookAt(lookPoint.copy(camera.position).addScaledVector(viewDirection, REACH));
+    }
+    if (driving) {
+      player.root.visible = false;
+      camera.rotation.set(0,driveYaw,0,'YXZ');
+      roadster.root.position.set(camera.position.x, camera.position.y - EYE_HEIGHT, camera.position.z);
+      roadster.root.rotation.y = driveYaw;
+      viewCamera.position.set(camera.position.x + Math.sin(driveYaw) * 6, camera.position.y + 2.5, camera.position.z + Math.cos(driveYaw) * 6);
+      viewCamera.lookAt(camera.position.x - Math.sin(driveYaw) * 4, camera.position.y - 0.3, camera.position.z - Math.cos(driveYaw) * 4);
     }
     viewCamera.updateMatrixWorld();
   };
@@ -395,7 +408,8 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       picker.key(e);
       return;
     }
-    if (paused || !controls.isLocked) return;
+    if (paused || (!controls.isLocked && !driving)) return;
+    if (driving) { if (k === 'e' && !e.repeat) finishDrive(); return; }
     if (k === 'v' && !e.repeat) {
       thirdPerson = !thirdPerson;
       updateView();
@@ -534,6 +548,26 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const dress = () => { player.equip(ctx.state.economy); redrawShadows(); };
   dress();
   const offDress = ctx.bus.on('economyChanged', dress);
+  const finishDrive = () => {
+    if (!driving) return;
+    driving = false; clearTimeout(driveTimer); driveSpeed = 0; keys.clear();
+    roadster.root.visible = false; thirdPerson = savedThirdPerson; vy = 0;
+    camera.position.set(-12, groundAt(-12,35.5) + EYE_HEIGHT,35.5);
+    camera.rotation.set(0,0,0,'YXZ'); rememberPlayer(); redrawShadows();
+    controls.unlock(); ctx.bus.emit('openCampusActivity', { activity: 'store' });
+  };
+  const offDrive = ctx.bus.on('driveMiata', ({ trial }) => {
+    if (driving || (!trial && !ctx.state.economy.owned.includes('miata_na'))) return;
+    ridingLift = false; onTerrace = false; paused = false; keys.clear(); vy = 0;
+    savedThirdPerson = thirdPerson; thirdPerson = true;
+    driving = true; driveSpeed = 0; driveYaw = -Math.PI / 2;
+    driveDeadline = trial ? performance.now() + TEST_DRIVE_MS : Infinity;
+    camera.position.set(-12, groundAt(-12,42) + EYE_HEIGHT,42);
+    roadster.root.visible = true;
+    if (trial) driveTimer = setTimeout(finishDrive, TEST_DRIVE_MS);
+    hud.flash('Micro Roadster · W/S accelerate & reverse · A/D steer · E return to store');
+    redrawShadows();
+  });
   const footsteps = createFootstepTracker();
   const loop = createFrameLoop((dt, t) => {
     const previousX = camera.position.x;
@@ -541,7 +575,22 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     const previousZ = camera.position.z;
     const previousYaw = player.root.rotation.y;
 
-    if (ridingLift) {
+    if (driving) {
+      if (performance.now() >= driveDeadline) finishDrive();
+      else if (!paused) {
+        const step = driveStep(driveSpeed, (keys.has('w') ? 1 : 0) - (keys.has('s') ? 1 : 0), (keys.has('a') ? 1 : 0) - (keys.has('d') ? 1 : 0), driveYaw, dt);
+        const x = camera.position.x + step.dx, z = camera.position.z + step.dz;
+        let blocked = Math.hypot(x,z) > WORLD_RADIUS - 4;
+        // Check the car's full footprint, including corners, against buildings and people.
+        for (const side of [-0.8,0,0.8]) for (const front of [-1.7,0,1.7]) {
+          const q = { x: x + side * Math.cos(step.yaw) + front * Math.sin(step.yaw), z: z - side * Math.sin(step.yaw) + front * Math.cos(step.yaw) };
+          const before = { ...q }; collide(q, campus.walls, solids);
+          if (Math.hypot(q.x-before.x,q.z-before.z) > 0.001 || deepWater(before.x,before.z) || Math.abs(groundAt(before.x,before.z) - (camera.position.y-EYE_HEIGHT)) > 0.65) blocked = true;
+        }
+        if (blocked) driveSpeed = 0;
+        else { driveSpeed = step.speed; driveYaw = step.yaw; camera.position.set(x,groundAt(x,z)+EYE_HEIGHT,z); }
+      }
+    } else if (ridingLift) {
       if (!paused) liftHeight = advanceLift(liftHeight, liftTarget, dt);
       lift.cabin.position.y = liftBase + liftHeight;
       camera.position.set(LIFT.x, liftBase + liftHeight + EYE_HEIGHT, LIFT.z); vy = 0;
@@ -604,7 +653,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     const distance = Math.hypot(px - previousX, pz - previousZ);
     const grounded = vy === 0 && camera.position.y <= playerGround(px, pz) + EYE_HEIGHT + 0.02;
     const running = keys.has('shift');
-    if (footsteps.update(distance, controls.isLocked && !paused && !picker.isOpen() && grounded, running)) {
+    if (footsteps.update(distance, controls.isLocked && !paused && !driving && !picker.isOpen() && grounded, running)) {
       const surface = heightAt(px, pz) < waterLevelAt(px, pz) ? 'water'
         : pathAt(px, pz) > 0.5 || inLab(px, pz) || inChess(px, pz) ? 'stone' : 'grass';
       ctx.bus.emit('footstep', { surface, running });
@@ -643,7 +692,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     if (crystal) crystalLight.intensity = 12 + 4 * Math.sin(t * 0.0021);
 
     const n = controls.isLocked && !paused && !picker.isOpen() ? aimed() : null;
-    hud.prompt(ridingLift ? 'Elevator · Enjoy the view' : nearLift(px, pz) ? `[E] Elevator · ${onTerrace ? 'Return to campus' : 'Campus lookout'}` : describe(n));
+    hud.prompt(driving ? `Micro Roadster · ${Number.isFinite(driveDeadline) ? `${Math.max(0,Math.ceil((driveDeadline-performance.now())/1000))}s left · ` : ''}W/S drive · A/D steer · E return` : ridingLift ? 'Elevator · Enjoy the view' : nearLift(px, pz) ? `[E] Elevator · ${onTerrace ? 'Return to campus' : 'Campus lookout'}` : describe(n));
     ring.visible = !!n;
     if (n) {
       const radius = n.radius > 0 ? n.radius + 0.2 : 0.8;
@@ -721,7 +770,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       removeEventListener('pagehide', rememberPlayer);
       document.removeEventListener('visibilitychange', rememberPlayer);
       minimap.dispose();
-      speech.dispose(); offActivity(); offDress();
+      speech.dispose(); offActivity(); offDress(); offDrive(); clearTimeout(driveTimer);
       player.dispose();
       controls.dispose();
       renderer.dispose();
