@@ -5,6 +5,7 @@ import { conditionMet, newlyEarned } from './achievements';
 import { createBus, type Bus } from './events';
 import { PlayerLocationSchema, SiteSchema, TierSchema, type GameData, type GameState, type PlayerLocation, type Site, type Tier } from './schema';
 import { NAKED_EYE, ownedScopes, scopeFromInventory } from './sim/scope';
+import { MYSTERY_SAMPLE_ID, parseMystery } from './mystery';
 
 export { ownedScopes }; // microscopes in the inventory, lowest tier first (UI modules may not import sim/scope)
 export const SAMPLE_BAG_SIZE = 8;
@@ -22,6 +23,11 @@ const SnapshotsSchema = z.record(z.string(), z.object({ image: z.string(), quali
  *  without the newer fields gets their defaults. Snapshots (the Microdex pictures, megabytes by the end) are kept
  *  under their own key, so the frequent progress saves stay small; older saves still hold them inline. */
 const SaveSchema = z.object({
+  mystery: z.unknown().optional().transform((v) => {
+    const run = parseMystery(JSON.stringify(v) ?? null);
+    // The old standalone prototype cannot grant evidence in the main game.
+    return run && run.scans.every((s) => s.instrument) ? run : null;
+  }),
   inventory: z.record(z.string(), z.number()),
   discoveries: z.array(z.string()),
   snapshots: SnapshotsSchema.default({}),
@@ -40,8 +46,8 @@ export const SAVE_KEY = 'microscopecraft:save';
 export const SNAPSHOTS_KEY = 'microscopecraft:snapshots';
 
 /** Everything but the snapshots, which are saved on their own under SNAPSHOTS_KEY. */
-export const toSave = ({ inventory, discoveries, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation }: GameState): Omit<SaveData, 'snapshots'> => ({
-  inventory, discoveries, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation,
+export const toSave = ({ inventory, discoveries, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation, mystery }: GameState): Omit<SaveData, 'snapshots'> => ({
+  inventory, discoveries, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation, mystery: mystery ?? null,
 });
 
 /** The save, plus the snapshots saved under their own key (unreadable snapshots are dropped, not the progress). */
@@ -64,6 +70,7 @@ export function createGame(data: GameData, bus: Bus = createBus(), save?: SaveDa
     achievements: [], quests: [], best: {}, stats: {}, visited: [], align: {}, carriedSamples: [], playerLocation: null, ...save,
   };
   state.carriedSamples = [...new Set(state.carriedSamples)].filter((id) => data.samples[id]).slice(0, SAMPLE_BAG_SIZE);
+  if (state.mystery) state.carriedSamples = [MYSTERY_SAMPLE_ID, ...state.carriedSamples].slice(0, SAMPLE_BAG_SIZE);
   const ctx = { data, state, bus };
   state.scope = usableScope(ctx);
   bus.on('openEyepiece', ({ sampleId }) => {
@@ -76,12 +83,17 @@ export function createGame(data: GameData, bus: Bus = createBus(), save?: SaveDa
 
 /** Keep the eight most recently collected distinct samples, newest first. */
 export function carrySample(ctx: GameContext, sampleId: string) {
-  if (!ctx.data.samples[sampleId]) return;
+  if (!ctx.data.samples[sampleId] && !(sampleId === MYSTERY_SAMPLE_ID && ctx.state.mystery)) return;
   const bag = ctx.state.carriedSamples;
   if (bag[0] === sampleId) return;
   const i = bag.indexOf(sampleId);
   if (i >= 0) bag.splice(i, 1);
   bag.unshift(sampleId);
+  // Reserve the mission cartridge so collecting ordinary samples cannot silently lose a quest item.
+  if (ctx.state.mystery && bag.indexOf(MYSTERY_SAMPLE_ID) >= SAMPLE_BAG_SIZE) {
+    bag.splice(bag.indexOf(MYSTERY_SAMPLE_ID), 1);
+    bag.splice(SAMPLE_BAG_SIZE - 1, 0, MYSTERY_SAMPLE_ID);
+  }
   bag.length = Math.min(bag.length, SAMPLE_BAG_SIZE);
   ctx.bus.emit('carriedSamplesChanged', {});
 }

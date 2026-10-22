@@ -273,6 +273,10 @@
     "x": 61, "z": 3.5, "facing": 0,
     "look": { "skin": "#ecc8b0", "hair": "#6a5a4a", "coat": "#3a3a40", "pants": "#3a3a40", "hairStyle": "short", "beard": "#6a5a4a" },
     "quests": [
+      { "id": "bg_mystery", "title": "The unlabelled alloy", "ask": "Accept my unknown sample, measure it with an instrument you build, and bring me a conclusion supported by diffraction evidence.",
+        "hint": "Talk to Bragg in Wilson Lab to accept the mission. Carry his unknown to your TEM or STEM in the science lab, or your CHESS beamline, press F at the instrument, and choose diffraction mode.",
+        "thanks": "You tested a prediction, measured different plane families, and ruled out alternatives. That is an identification I can trust.",
+        "needs": { "stats": { "mystery_identified": 1 } } },
       { "id": "bg_salt", "title": "The structure of salt", "ask": "Record the Bragg peaks of table salt.",
         "hint": "The salt on the picnic table in the quad, by X-ray diffraction or by electron diffraction in the TEM.",
         "thanks": "Sodium and chlorine alternate in a cubic grid, with no salt molecule at all. Chemists were shocked.",

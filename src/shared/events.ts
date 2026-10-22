@@ -2,6 +2,8 @@
 import type { Tier } from './schema';
 
 export interface GameEvents {
+  mysteryChanged: Record<string, never>;
+  openMysteryNotebook: Record<string, never>;
   /** world → scope: player aimed at a sample and pressed the eyepiece key. */
   openEyepiece: { sampleId: string };
   /** scope → world: eyepiece dismissed. */

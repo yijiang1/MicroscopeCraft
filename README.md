@@ -131,9 +131,21 @@ Seven mini-games, each scored 0-100%, change what the eyepiece shows:
 | Beam tuning | Beamline, X-ray fluorescence | Slide the undulator's magnet rows, turn the Si(111) monochromator | CCU harmonics on 6 GeV CESR, Bragg's law, absorption edges |
 | Tomography | Beamline, tomography | Find the rotation axis | Sinogram and filtered back-projection; a wrong axis smears edges into arcs |
 
+## Mystery samples: The unlabelled alloy
+
+Talk to **W. L. Bragg in Wilson Lab** (`E`) and choose **Accept mission · The unlabelled alloy**. He gives you a prepared unknown powder in your sample bag. The journal (`J`) can track Bragg, and **Tab → Mission notebook** reviews the investigation; the menu cannot issue a sample or run an experiment.
+
+Build a **TEM or STEM** and carry the unknown to the electron microscope in the science lab, or use your built **CHESS beamline** in Wilson Lab. Press **F at the instrument**, pick **Bragg’s unknown powder**, and switch to **Electron diffraction** or **X-ray diffraction**. The eyepiece shows the unknown’s rings and a panel for making a prediction and recording a survey or precision measurement. The instrument must be owned, at its station, in diffraction mode, with the mission sample loaded.
+
+Identify copper, nickel, or a model 50:50 atomic Cu–Ni alloy within eight beam-time credits. Compare the measured (111)/(200) spacings with the notebook’s reference predictions and select evidence to cite. Return to Bragg, open **Present evidence**, and submit a supported conclusion to complete his journal request and earn its achievement. Unsupported guesses can be revised. Bragg can issue another sample after completion.
+
+The notebook, predictions, instrument provenance, and results are part of the main game save. The mission sample is protected from bag overflow. A completed case offers a downloadable JSON lab report. Guidance is deterministic; no API key is needed. Earlier standalone prototype evidence does not count toward this mission.
+
+This is an explicitly simplified, closed-set simulation: FCC plane spacings, bounded synthetic error, and an approximate linear alloy lattice parameter. It does not identify arbitrary real materials. Sources and assumptions are available inside the notebook. Mission logic is in `src/shared/mystery.ts` and `src/shared/mysteryActions.ts`, acquisition in `src/scope/mystery.ts`, and the notebook in `src/ui/mystery.ts`.
+
 ## Scientists and achievements
 
-Seventeen scientists who made discoveries with microscopes or X-rays stand around campus: Leeuwenhoek, Hooke, Robert Brown, Abbe, Zernike, Cajal, Gram, Ruska, June Almeida, Albert Crewe, Röntgen, W. L. Bragg, Rosalind Franklin, Dorothy Hodgkin, Boris Batterman (CHESS's first director), Henry Clifton Sorby (rocks and steel, in the geology hall) and Mildred Dresselhaus (carbon nanotubes, in the atrium). Press E to talk: each has two to five requests (59 in all), mostly "show me what you found", and every request done is an achievement. A gold **!** over a scientist means you can show them something now; **?** means they are still waiting. With 63 more achievements for discoveries, instruments, areas, mini-games and milestones, there are 122.
+Seventeen scientists who made discoveries with microscopes or X-rays stand around campus: Leeuwenhoek, Hooke, Robert Brown, Abbe, Zernike, Cajal, Gram, Ruska, June Almeida, Albert Crewe, Röntgen, W. L. Bragg, Rosalind Franklin, Dorothy Hodgkin, Boris Batterman (CHESS's first director), Henry Clifton Sorby (rocks and steel, in the geology hall) and Mildred Dresselhaus (carbon nanotubes, in the atrium). Press E to talk: each has two to five requests (60 in all), mostly "show me what you found", and every request done is an achievement. A gold **!** over a scientist means you can show them something now; **?** means they are still waiting. With 63 more achievements for discoveries, instruments, areas, mini-games and milestones, there are 123.
 
 The Microdex holds 170 discoveries in 45 samples across seven areas.
 

@@ -1,6 +1,8 @@
 // The text laid over the 3D view: key hints, the crosshair and what E/F do there, the tracking arrows, what you carry,
 // the compass, and the list you pick one sample from (a cabinet's slides, or the samples you carry, at an instrument).
 import type { GameContext } from '../shared/state';
+import { missionSample } from '../shared/mysteryActions';
+import { MYSTERY_SAMPLE_ID } from '../shared/mystery';
 
 const CSS = 'position:fixed;color:#fff;text-shadow:0 0 3px #000;pointer-events:none';
 const FLASH_MS = 3500;
@@ -111,12 +113,12 @@ export function createPicker(el: HTMLElement, ctx: GameContext): Picker {
       setText(h, `${title} · press [1]–[${Math.min(ids.length, 9)}] · [Esc] cancels`);
       box.append(h);
       ids.slice(0, 9).forEach((id, i) => {
-        const s = ctx.data.samples[id];
+        const s = missionSample(ctx, id);
         const found = s ? s.features.filter((f) => ctx.state.discoveries.includes(f.id)).length : 0;
         const total = s?.features.length ?? 0;
         const row = document.createElement('button');
         row.style.cssText = 'display:block;width:100%;margin:2px 0;text-align:left;cursor:pointer';
-        setText(row, `[${i + 1}] ${s?.name ?? id}  ·  ${found}/${total} found${found === total ? ' ✓' : ''}`);
+        setText(row, `[${i + 1}] ${s?.name ?? id}  ·  ${id === MYSTERY_SAMPLE_ID ? 'Bragg’s research mission' : `${found}/${total} found${found === total ? ' ✓' : ''}`}`);
         row.onclick = () => choose(i);
         box.append(row);
       });

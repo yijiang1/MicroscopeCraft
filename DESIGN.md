@@ -45,7 +45,7 @@ Every session repeats one loop, at smaller and smaller scales:
 6. **Show a scientist.** Take what you found to the scientist who asked for it; every request done is an achievement.
 7. **Upgrade.** Gather better materials, build better parts and return to step 3.
 
-One pass takes a few minutes, and the climb through instrument tiers is the long arc. The Microdex (255 discoveries), the scientists' 59 requests and 122 achievements give collection goals. Failure is gentle: gathered materials grow back, a damaged sample resets when the eyepiece closes, a bad stain washes off, and the game has no death.
+One pass takes a few minutes, and the climb through instrument tiers is the long arc. The Microdex (255 discoveries), the scientists' 60 requests and 123 achievements give collection goals. Failure is gentle: gathered materials grow back, a damaged sample resets when the eyepiece closes, a bad stain washes off, and the game has no death.
 
 ## Microscope tech tree
 The tree follows the real history of microscopy in eight tiers. Each tier ends at a wall the player can observe, and the next tier is the fix.
@@ -170,6 +170,14 @@ Every simplification is labelled in a code comment next to its formula. The wall
 
 ## AI features
 
+### Mystery samples: first playable research mission
+
+**Built:** “The unlabelled alloy” is accepted in Bragg’s dialogue in Wilson Lab. He supplies a prepared unknown powder, which stays in the player’s sample bag. The player builds a TEM/STEM or CHESS beamline through normal crafting, loads the unknown at the corresponding fixed instrument with F, and selects electron or X-ray diffraction. Predictions and scans are recorded inside the eyepiece; the notebook only reviews evidence and plans experiments. A measurement checks ownership, station, loaded sample, and diffraction mode. The unknown is copper, nickel, or an ideal 50:50 atomic Cu–Ni solid solution. The survey costs two credits and remains ambiguous; each precision scan costs three, within an eight-credit budget. Identification requires both plane families and evidence distinguishing one candidate. The player returns to Bragg to submit a conclusion, complete a journal request, and earn its achievement. Bragg can then issue another sample.
+
+Progress and instrument provenance persist in the main game save; completed cases offer a JSON report. Prototype standalone evidence is not imported. The mission uses cubic spacings and approximate linear interpolation for the alloy lattice parameter, with explicit sources and simplifications in its notebook. Its observation-based coach is deterministic. Pure simulation is in `src/shared/mystery.ts`, game actions in `src/shared/mysteryActions.ts`, eyepiece controls in `src/scope/mystery.ts`, and the notebook in `src/ui/mystery.ts`.
+
+### Other AI features
+
 The LLM never draws the world. It writes a structured description, and the game's own generators turn that into content. This keeps worlds consistent, fast and physically sensible. Status: the contract (JSON schema, validator, fixed catalog, fallback world) is built and tested; the model calls and the server are deferred.
 
 **Prompt-to-world generator.** A teacher or player types a sentence such as "a drop of pond water" or "a perovskite solar cell". A planner model returns a JSON spec of objects at each scale. A validator checks it against a fixed catalog of object types, tiers and size ranges, and sends one error message back to the model for a retry if it fails. The generators then build the content, and the world is cached so no model call happens during play. Built: the spec schema, the validator with retry-ready error messages, the object catalog and the default world spec. Not built: the planner call, the retry loop, the cache and the generators.
@@ -207,7 +215,7 @@ The MVP was one complete play loop that can be demoed in about five minutes: gat
 | Microscopes | Tiers 1 to 3 end to end | Tiers 4 and 6 | Tiers 0 to 7 built, including a CHESS beamline |
 | Samples | About ten discoveries | Samples from a prompt | 170 discoveries in 45 samples |
 | Mini-games | None | | Eight: Köhler, Gram stain, progressive stain, TEM alignment, aberration corrector, ptychography, beam tuning, tomography |
-| People and goals | None | | 17 scientists with 59 requests, 122 achievements, a journal |
+| People and goals | None | | 17 scientists with 60 requests, 123 achievements, a journal |
 | AI | Guide grounded in the simulation's numbers | Prompt-to-world, Materials Project, abTEM | Offline guide only; LLM features deferred |
 | Polish | Simple art, readable UI, one sound per action | Music, tutorial | Procedural 3D art, synthesised sounds; no music or tutorial |
 
@@ -266,7 +274,7 @@ The team has four people and the build window is not fixed yet (see open questio
 6. **Polish and demo.** Tier 5 showpiece, sounds, open-world look, demo script. Gate: a clean five-minute run. Built; rehearsal pending.
 
 ## Build status
-Built and tested (87 automated tests across 11 files, plus checks in the browser): the shared contract with imaging modes, stains, sites and conditions; tiers 0 to 7 with zoom steps, focus, beam damage and per-instrument alignment; 70 recipes; 255 discoveries; the discovery gates for every tier; the seven mini-games with their physics; 17 scientists with 59 requests; 122 achievements and the journal; the offline guide; the goal card, inventory box, tech tree (with add-ons), Microdex (with tracking) and toasts; the campus with the greenhouse, Wilson Lab and the engineering quad; saving progress between sessions (older saves load with the new fields empty); synthesised sounds; a demo mode (`?demo`, press K to restock materials).
+Built and tested (87 automated tests across 11 files, plus checks in the browser): the shared contract with imaging modes, stains, sites and conditions; tiers 0 to 7 with zoom steps, focus, beam damage and per-instrument alignment; 70 recipes; 255 discoveries; the discovery gates for every tier; the seven mini-games with their physics; 17 scientists with 60 requests; 123 achievements and the journal; the offline guide; the goal card, inventory box, tech tree (with add-ons), Microdex (with tracking) and toasts; the campus with the greenhouse, Wilson Lab and the engineering quad; saving progress between sessions (older saves load with the new fields empty); synthesised sounds; a demo mode (`?demo`, press K to restock materials).
 
 Not built: the LLM planner and guide calls, the server and world cache, music and a tutorial, stations as places in the world.
 

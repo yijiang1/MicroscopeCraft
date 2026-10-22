@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 import { conditionMet } from '../shared/achievements';
 import { lockedBy, SITE_NAMES } from '../shared/plan';
+import { missionSample } from '../shared/mysteryActions';
 import type { Site } from '../shared/schema';
 import { carrySample, gather, ownedScopes, selectScope, setPlayerLocation, setSite, visit, type GameContext } from '../shared/state';
 import { BEAM_SPOT, BRIDGE_RAILS, buildCampus, CRYSTAL_SPOT, EM_SPOT, groundAt, inChess, inLab, onDeck, SCIENCE, TOWER, WILSON } from './campus';
@@ -336,7 +337,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     );
   };
 
-  const sampleName = (id: string) => ctx.data.samples[id]?.name ?? id;
+  const sampleName = (id: string) => missionSample(ctx, id)?.name ?? id;
   const look = (sampleId: string) => {
     controls.unlock();
     ctx.bus.emit('openEyepiece', { sampleId });
@@ -598,7 +599,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     const here = ctx.state.site;
     const names = bag.slice(0, 3).map(sampleName).join(', ') + (bag.length > 3 ? ` and ${bag.length - 3} more` : '');
     hud.carry(!sites.length
-      ? ''
+      ? ctx.state.mystery && !ctx.state.mystery.conclusion ? 'Bragg’s unknown is in your sample bag. Build a TEM to measure its diffraction rings.' : ''
       : here && sites.includes(here)
       ? bag.length ? `Carrying ${names}: aim at the ${fixedAt(here)!.name} and press [F]` : 'No sample yet: look [F] at something to take a bit along'
       : bag.length

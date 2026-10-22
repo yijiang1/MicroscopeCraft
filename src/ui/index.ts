@@ -8,6 +8,8 @@ import { mountGoal } from './goal';
 import { mountInventory } from './inventory';
 import { mountJournal } from './journal';
 import { mountMicrodex } from './microdex';
+import { mountMystery } from './mystery';
+import { MYSTERY_SAVE_KEY, SCANS } from '../shared/mystery';
 import { getKey, getProvider, PROVIDERS, setKey, setProvider, type Provider } from './npcChat';
 import { mountSound } from './sound';
 import { mountTechTree } from './techtree';
@@ -25,7 +27,8 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   const inventory = mountInventory(ctx);
   const techTree = mountTechTree(document.body, ctx);
   const journal = mountJournal(document.body, ctx);
-  const closeDialog = mountDialog(ctx, toast);
+  const mystery = mountMystery(document.body, ctx);
+  const closeDialog = mountDialog(ctx, toast, () => mystery.open(true));
   const tutorial = mountTutorial(ctx);
 
   // --- menu panel (hidden until Tab): one icon row per action, key hint on the right
@@ -33,6 +36,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   const css = document.createElement('style');
   css.textContent = `
     .mc-menu-row{display:flex;align-items:center;gap:10px;width:100%;margin:3px 0;padding:8px 10px;border:1px solid #ffffff1a;border-radius:8px;background:#ffffff0d;color:inherit;font:inherit;text-align:left;cursor:pointer}
+    .mc-menu-row[hidden]{display:none}
     .mc-menu-row:hover,.mc-menu-row:focus-visible{background:#ffffff24;outline:none}
     .mc-menu-row .ic{font-size:18px;width:22px;text-align:center}
     .mc-menu-row .lb{flex:1;display:flex;flex-direction:column;line-height:1.2}
@@ -57,6 +61,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   const tree = row('🌳', 'Tech tree', () => techTree.toggle(), 'T');
   const dex = row('🔬', 'Microdex', () => microdex.toggle(), 'M');
   const journalBtn = row('📓', 'Journal', () => journal.toggle(), 'J');
+  const mysteryBtn = row('🧩', 'Mystery samples', () => { setMenu(false); mystery.open(); });
   const refsBtn = row('📚', 'References', () => journal.toggle('references'));
   const tutorialBtn = row('🎓', 'Tutorial', () => {
     setMenu(false);
@@ -149,6 +154,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
       localStorage.removeItem(SAVE_KEY);
       localStorage.removeItem(SNAPSHOTS_KEY);
       localStorage.removeItem(TUTORIAL_KEY);
+      localStorage.removeItem(MYSTERY_SAVE_KEY);
     } catch {
       /* nothing saved */
     }
@@ -162,7 +168,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   title.innerHTML = 'Menu <kbd>Tab</kbd>';
   title.style.margin = '2px 2px 10px';
   const heading = (text: string) => Object.assign(document.createElement('div'), { className: 'mc-menu-h', textContent: text });
-  el.append(css, title, tree.b, dex.b, journalBtn.b, refsBtn.b, sep(), heading('Settings'), mute.b, keyRow.b, keyForm, sep(), tutorialBtn.b, saveBtn.b, restart.b);
+  el.append(css, title, tree.b, dex.b, journalBtn.b, mysteryBtn.b, refsBtn.b, sep(), heading('Settings'), mute.b, keyRow.b, keyForm, sep(), tutorialBtn.b, saveBtn.b, restart.b);
 
   let menuOpen = false;
   const setMenu = (open: boolean) => {
@@ -176,6 +182,9 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   const render = () => {
     dex.set('Microdex', microdex.summary());
     journalBtn.set('Journal', journal.summary());
+    const mission = ctx.state.mystery;
+    mysteryBtn.b.hidden = !mission;
+    mysteryBtn.set('Mission notebook', mission?.conclusion ? 'The unlabelled alloy · complete' : mission ? `The unlabelled alloy · ${mission.scans.length}/${SCANS.length} scans` : 'Accept a mystery sample from Bragg');
   };
   render();
 
@@ -194,6 +203,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
       if (!travelSave) travelSave = window.setTimeout(save, 5000);
     }),
     ctx.bus.on('carriedSamplesChanged', save),
+    ctx.bus.on('mysteryChanged', () => { save(); render(); }),
     ...(['itemGathered', 'itemCrafted', 'discoveryUnlocked', 'scopeChanged', 'questCompleted', 'achievementUnlocked', 'minigameScored', 'areaVisited', 'closeEyepiece'] as const).map((t) => ctx.bus.on(t, save)),
     ctx.bus.on('itemGathered',({ itemId, count }) => {
       render();
@@ -233,6 +243,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
       clearTimeout(travelSave);
       goal.dispose();
       journal.dispose();
+      mystery.dispose();
       closeDialog();
       tutorial.dispose();
       inventory.dispose();

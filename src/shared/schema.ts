@@ -4,6 +4,7 @@
 // Change these only after telling the team (see README → Contributing).
 // Units: all lengths are micrometres (µm), spelled out in field names (sizeUm, dLensUm).
 import { z } from 'zod';
+import type { MysteryRun } from './mystery';
 
 /** 0 naked eye · 1 hand lens · 2 compound · 3 high-quality optics · 4 fluorescence (phase contrast, dark field)
  *  · 5 transmission electron · 6 aberration-corrected STEM · 7 synchrotron beamline (see DESIGN.md). */
@@ -290,6 +291,8 @@ export const PlayerLocationSchema = z.object({
 export type PlayerLocation = z.infer<typeof PlayerLocationSchema>;
 
 export interface GameState {
+  /** NPC-issued investigation, saved with the main game. */
+  mystery?: MysteryRun | null;
   carriedSamples: string[];
   playerLocation: PlayerLocation | null;
   inventory: Record<string, number>;

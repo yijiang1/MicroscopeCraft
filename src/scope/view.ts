@@ -17,6 +17,9 @@ import { ptychoTuning } from './ptycho';
 import { temTuning } from './tem';
 import { tomoTuning } from './tomo';
 import type { ScopeHandle } from './index';
+import { MYSTERY_SAMPLE_ID } from '../shared/mystery';
+import { missionSample } from '../shared/mysteryActions';
+import { mountMysteryAcquisition } from './mystery';
 
 /** Screen pixels per µm of *apparent* (magnified) size. Display choice: an 800 px field spans 20 mm of apparent size,
  *  so a 10× hand lens shows about 2 mm of specimen. Simplification: real eyepiece fields are about 10× wider. */
@@ -135,6 +138,7 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
   const closeButton = button('Close eyepiece (Esc / F)', () => ctx.bus.emit('closeEyepiece', {}),
     'position:absolute;right:10px;bottom:10px;z-index:4');
   el.append(closeButton);
+  const mysteryAcquisition = mountMysteryAcquisition(el, ctx);
 
   let sampleId: string | null = null;
   /** Electrons per nm² delivered to the sample since the eyepiece opened (electron imaging only). Resets on open. */
@@ -162,8 +166,8 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
     tuning?.dispose();
     tuning = null;
     tuningKey = key;
-    if (!key || !sampleId) return;
-    const sample = ctx.data.samples[sampleId]!;
+    if (!key || !sampleId || sampleId === MYSTERY_SAMPLE_ID) return;
+    const sample = missionSample(ctx, sampleId)!;
     building = true;
     if (scope.condenser && TRANSMITTED.includes(scope.mode)) tuning = koehlerTuning(el, ctx, scope.tier, render);
     else if (scope.tier === 5 && scope.mode === 'tem') tuning = temTuning(el, ctx, sampleId, render);
@@ -300,7 +304,7 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
 
   function render() {
     if (building) return;
-    const sample = sampleId ? ctx.data.samples[sampleId] : undefined;
+    const sample = sampleId ? missionSample(ctx, sampleId) : undefined;
     const g = canvas.getContext('2d');
     const sg = scene.getContext('2d');
     if (!sample || !g || !sg || !el.clientWidth || !el.clientHeight) return; // hidden or zero-sized pane
@@ -383,10 +387,10 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
       const v = visibility(f, scope, stain);
       g.fillStyle = v.visible ? '#9be59b' : '#ffb27a';
       const what = v.visible ? (v.detectedOnly ? 'detected (smaller than the resolution)' : 'visible') : REASONS[v.reason] ?? v.reason;
-      g.fillText(`${v.visible ? '✓' : '✗'} ${f.name} (${fmtUm(f.sizeUm)}): ${what}`, 20, lineY);
+      g.fillText(`${v.visible ? '✓' : '✗'} ${f.name}${sampleId === MYSTERY_SAMPLE_ID ? '' : ` (${fmtUm(f.sizeUm)})`}: ${what}`, 20, lineY);
       lineY += 22;
       if (v.reason === 'empty-magnification') emptyMag = true;
-      if (v.visible) {
+      if (v.visible && sampleId !== MYSTERY_SAMPLE_ID) {
         if (v.detectedOnly) once('detected');
         const px = f.sizeUm * pxPerUm;
         const good = diffraction || (px >= SNAPSHOT_FEATURE_PX.min && px <= SNAPSHOT_FEATURE_PX.max);
@@ -447,6 +451,7 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
   };
 
   const openSample = (id: string) => {
+    if (!missionSample(ctx, id)) return;
     closeStain?.();
     closeStain = null;
     sampleId = id;
@@ -507,6 +512,7 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
     ctx.bus.on('zoomChanged', redraw),
     ctx.bus.on('scopeChanged', redraw),
     ctx.bus.on('itemCrafted', redraw),
+    ctx.bus.on('mysteryChanged', redraw),
   ];
 
   return {
@@ -516,6 +522,7 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
       closeStain?.();
       closeStain = null;
       tuning?.dispose();
+      mysteryAcquisition.dispose();
       removeEventListener('keydown', onKey);
       offs.forEach((off) => off());
       el.replaceChildren();

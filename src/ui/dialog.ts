@@ -6,6 +6,7 @@ import { completeQuest, type GameContext } from '../shared/state';
 import { questTarget } from './journal';
 import type { Toast } from './toast';
 import { withKeys } from './keys';
+import { acceptMystery } from '../shared/mysteryActions';
 
 const styled = (tag: string, css: string, text = '') => {
   const e = document.createElement(tag);
@@ -14,7 +15,7 @@ const styled = (tag: string, css: string, text = '') => {
   return e;
 };
 
-export function mountDialog(ctx: GameContext, toast: Toast): () => void {
+export function mountDialog(ctx: GameContext, toast: Toast, openMystery?: () => void): () => void {
   const box = styled('div', 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:25;display:none;width:min(560px,92vw);max-height:84vh;overflow:auto;box-sizing:border-box;padding:16px 20px;border-radius:14px;background:#0f1418f2;color:#eee;font:14px system-ui;box-shadow:0 8px 40px #000a');
   document.body.append(box);
   let npcId: string | null = null;
@@ -91,6 +92,17 @@ export function mountDialog(ctx: GameContext, toast: Toast): () => void {
     head.append(x);
     box.append(head, styled('div', 'color:#9fc8e8;margin:2px 0 8px', npc.role), styled('div', 'color:#bbc;font-size:13px;line-height:1.45', npc.bio));
     box.append(styled('div', 'margin:12px 0;padding:10px 12px;border-radius:10px;background:#1c2a33;font-style:italic;line-height:1.45', `“${said || npc.greeting}”`));
+    if (npc.id === 'bragg' && openMystery) {
+      box.append(styled('p', 'color:#b9dfd4', ctx.state.mystery
+        ? 'Bring me your diffraction measurements and explain which material they support.'
+        : 'Take this prepared unknown. Build a TEM and measure its diffraction rings in the science lab; your CHESS beamline will work too. Then bring me the evidence.'));
+      const mission = styled('button', 'width:100%;padding:12px;margin-bottom:12px;background:#204039;color:#b6ffe7;border:1px solid #79edcb;border-radius:8px;font-weight:700', ctx.state.mystery ? 'Present evidence · The unlabelled alloy' : 'Accept mission · The unlabelled alloy');
+      mission.onclick = () => {
+        if (!ctx.state.mystery && !acceptMystery(ctx, crypto.getRandomValues(new Uint32Array(1))[0]!)) return;
+        close(); openMystery();
+      };
+      box.append(mission);
+    }
     if (chat) box.append(chat);
     for (const q of npc.quests) {
       const done = ctx.state.quests.includes(q.id);
