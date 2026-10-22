@@ -1,14 +1,18 @@
 import { describe, expect, it } from 'vitest';
+import { allQuests } from './achievements';
 import { loadGameData, parseGameData } from './data';
 import { visibility } from './sim/optics';
 import { NAKED_EYE, scopeParamsFromSpec } from './sim/scope';
+import { StainSchema, type ScopeParams } from './schema';
 import materials from '../../data/materials.json';
 import recipes from '../../data/recipes.json';
 import samples from '../../data/samples.json';
 import catalog from '../../data/catalog.json';
+import achievements from '../../data/achievements.json';
+import npcs from '../../data/npcs.json';
 import defaultWorld from '../../data/worlds/default.json';
 
-const raw = { materials, recipes, samples, catalog, defaultWorld };
+const raw = { materials, recipes, samples, catalog, defaultWorld, achievements, npcs };
 
 describe('game data', () => {
   it('all /data JSON validates and cross-references resolve', () => {
@@ -26,27 +30,50 @@ describe('game data', () => {
     const bad = { ...raw, samples: [{ ...samples[0], worldObject: 'ghost' }] };
     expect(() => parseGameData(bad)).toThrow(/not in catalog/);
   });
+
+  it("rejects a scientist's request for a discovery that does not exist", () => {
+    const bad = { ...raw, npcs: [{ ...npcs[0], quests: [{ ...npcs[0]!.quests[0], needs: { discovered: ['unicorn'] } }] }] };
+    expect(() => parseGameData(bad)).toThrow(/unknown discovery "unicorn"/);
+  });
 });
 
 describe('content rules', () => {
   const data = loadGameData();
   const features = Object.values(data.samples).flatMap((s) => s.features);
+  /** Every step of every instrument, ideally set up, plus the naked eye. */
+  const scopes: ScopeParams[] = [NAKED_EYE, ...data.recipes.flatMap((r) => (r.scope ? r.scope.steps.map((_, i) => scopeParamsFromSpec(r.scope!, i)) : []))];
+  /** Stains are put on in the eyepiece of a light microscope (tiers 2 to 4). */
+  const sees = (s: ScopeParams, f: (typeof features)[number]) =>
+    [null, ...(s.tier >= 2 && s.tier <= 4 ? StainSchema.options : [])].some((stain) => visibility(f, s, stain).visible);
+  const minTier = (id: string) => Math.min(...scopes.filter((s) => sees(s, features.find((f) => f.id === id)!)).map((s) => s.tier));
 
-  it('has about a dozen discoveries', () => expect(features.length).toBeGreaterThanOrEqual(10));
+  it('has well over 100 discoveries', () => expect(features.length).toBeGreaterThanOrEqual(100));
 
   it('every Microdex blurb is exactly two sentences', () => {
     for (const f of features) expect(f.blurb.match(/[.!?](\s|$)/g)?.length, f.id).toBe(2);
   });
 
-  it('every feature can be seen by some microscope step (perfect focus, no beam damage)', () => {
-    const scopes = [NAKED_EYE, ...data.recipes.flatMap((r) => (r.scope ? r.scope.steps.map((_, i) => scopeParamsFromSpec(r.scope!, i)) : []))];
-    for (const f of features) expect(scopes.some((s) => visibility(f, s).visible), f.id).toBe(true);
+  it('every feature can be seen by some microscope step (perfect focus, aligned, no beam damage)', () => {
+    for (const f of features) expect(scopes.some((s) => sees(s, f)), f.id).toBe(true);
   });
 
-  it('the first discovery needs the right tier: veins at tier 1, bacteria at 3, atoms only at 5', () => {
-    const minTier = (id: string) =>
-      Math.min(...[NAKED_EYE, ...data.recipes.flatMap((r) => (r.scope ? r.scope.steps.map((_, i) => scopeParamsFromSpec(r.scope!, i)) : []))]
-        .filter((s) => visibility(features.find((f) => f.id === id)!, s).visible).map((s) => s.tier));
-    expect([minTier('leaf_veins'), minTier('leaf_cells'), minTier('pond_bacteria'), minTier('crystal_lattice')]).toEqual([1, 2, 3, 5]);
+  it('each discovery needs the right tier: veins 1, cells 2, bacteria 3, a glow 4, atoms 5, beryllium 6, inside a seed 7', () => {
+    expect(['leaf_veins', 'leaf_cells', 'pond_bacteria', 'willemite_glow', 'crystal_lattice', 'beryllium_atoms', 'seed_embryo'].map(minTier)).toEqual([1, 2, 3, 4, 5, 6, 7]);
+  });
+
+  it('X-ray maps say which absorption edge to tune above, and nothing else does', () => {
+    for (const f of features) expect(!!f.edgeKeV, f.id).toBe(f.contrastIn.xrf !== undefined);
+  });
+
+  it('the "everything" achievements count everything', () => {
+    expect(data.achievements.find((a) => a.id === 'discover_all')?.when.discoveries).toBe(features.length);
+    expect(data.achievements.find((a) => a.id === 'quests_all')?.when.quests).toBe(allQuests(data).length);
+  });
+
+  it('every scientist has at least two requests, and every request says where to look', () => {
+    for (const npc of Object.values(data.npcs)) {
+      expect(npc.quests.length, npc.id).toBeGreaterThanOrEqual(2);
+      for (const q of npc.quests) expect(q.hint.length, q.id).toBeGreaterThan(10);
+    }
   });
 });

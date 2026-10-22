@@ -1,221 +1,888 @@
 [
   {
-    "id": "leaf",
-    "name": "Leaf",
-    "worldObject": "leaf",
-    "biome": "meadow",
+    "id": "leaf", "name": "Leaf", "worldObject": "leaf", "biome": "meadow",
     "features": [
-      {
-        "id": "leaf_veins",
-        "name": "Leaf veins",
-        "sizeUm": 40,
-        "contrast": 0.5,
-        "drawing": "veins",
-        "blurb": "Veins carry water in and sugar out of the leaf. Fine veins branch until no cell is far from one."
-      },
-      {
-        "id": "leaf_cells",
-        "name": "Leaf cells",
-        "sizeUm": 15,
-        "contrast": 0.3,
-        "drawing": "cells",
-        "blurb": "Each green box is a living cell packed with chloroplasts. Cell walls give the leaf its tiled look."
-      }
+      { "id": "leaf_veins", "name": "Leaf veins", "sizeUm": 40, "contrast": 0.5, "drawing": "veins",
+        "blurb": "Veins carry water in and sugar out of the leaf. Fine veins branch until no cell is far from one." },
+      { "id": "leaf_cells", "name": "Leaf cells", "sizeUm": 15, "contrast": 0.3, "drawing": "cells",
+        "blurb": "Each green box is a living cell packed with chloroplasts. Cell walls give the leaf its tiled look." },
+      { "id": "leaf_stomata", "name": "Stomata", "sizeUm": 25, "contrast": 0.35, "drawing": "stomata",
+        "blurb": "Stomata are tiny mouths in the leaf's skin, each guarded by two bean-shaped cells. They open to let carbon dioxide in and water vapour out, and close when the plant is thirsty." },
+      { "id": "chloroplasts", "name": "Chloroplasts", "sizeUm": 4, "contrast": 0.4, "drawing": "droplets", "tint": "#3f9a3a", "onTop": true,
+        "blurb": "Each leaf cell holds dozens of green chloroplasts, where sunlight, water and carbon dioxide become sugar. Long ago their ancestors were free-living bacteria." },
+      { "id": "grana_stacks", "name": "Thylakoid stacks", "sizeUm": 0.016, "contrast": 0.35, "drawing": "lines", "tint": "#9fd59a", "onTop": true,
+        "blurb": "Inside a chloroplast, flat membrane sacs called thylakoids are piled into stacks like coins. The light-catching chlorophyll sits in these membranes, each only a few nanometres thick." }
     ]
   },
   {
-    "id": "sand_grain",
-    "name": "Sand grain",
-    "worldObject": "sand_grain",
-    "biome": "meadow",
+    "id": "sand_grain", "name": "Sand grain", "worldObject": "sand_grain", "biome": "meadow",
     "features": [
-      {
-        "id": "grain_facets",
-        "name": "Grain facets",
-        "sizeUm": 60,
-        "contrast": 0.6,
-        "drawing": "grains",
-        "blurb": "Each grain is a tiny rock with its own shape. Clear grains are mostly quartz, the stuff of good glass."
-      }
+      { "id": "grain_facets", "name": "Grain facets", "sizeUm": 60, "contrast": 0.6, "drawing": "grains",
+        "blurb": "Each grain is a tiny rock with its own shape. Clear grains are mostly quartz, the stuff of good glass." },
+      { "id": "sand_iron_coating", "name": "Iron oxide coating", "sizeUm": 8, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 7.112, "drawing": "map", "tint": "#e0603a",
+        "blurb": "Iron atoms give off X-rays of their own colour when the beam is above iron's absorption edge at 7.11 keV, so the map shows where iron sits. A thin coat of iron oxide on the grains, rust in effect, gives the sand its tan colour." },
+      { "id": "sand_quartz_rings", "name": "Quartz powder rings", "sizeUm": 0.000334, "contrast": 0, "contrastIn": { "ediff": 0.6, "xrd": 0.6 }, "drawing": "rings",
+        "blurb": "Many tiny crystals at random angles turn each reflection into a ring. The strongest quartz ring comes from planes of atoms 0.334 nanometres apart." }
     ]
   },
   {
-    "id": "pond_water",
-    "name": "Pond water",
-    "worldObject": "pond_water",
-    "biome": "pond",
+    "id": "flower", "name": "Flower", "worldObject": "flower", "biome": "meadow",
     "features": [
-      {
-        "id": "pond_alga",
-        "name": "Pond alga",
-        "sizeUm": 25,
-        "contrast": 0.35,
-        "drawing": "algae",
-        "blurb": "Spirogyra grows as long green threads, one cell after another. Its spiral chloroplast is a ribbon wound around each cell."
-      },
-      {
-        "id": "pond_bacteria",
-        "name": "Bacteria",
-        "sizeUm": 1,
-        "contrast": 0.3,
-        "drawing": "rods",
-        "blurb": "These rod-shaped cells are about a thousandth of a millimetre long. Your good glass and oil finally let you resolve them."
-      },
-      {
-        "id": "pond_virus",
-        "name": "Virus particles",
-        "sizeUm": 0.1,
-        "contrast": 0.5,
-        "drawing": "virus",
-        "blurb": "Viruses are hundreds of times smaller than a pond alga cell. Visible light is too coarse to resolve them, so you need electrons.",
-        "criticalDoseENm2": 50000
-      }
+      { "id": "flower_hairs", "name": "Petal hairs", "sizeUm": 60, "contrast": 0.45, "drawing": "hair",
+        "blurb": "Tiny hairs cover petals and stems. They slow the wind at the surface and keep small pests off." },
+      { "id": "flower_pollen", "name": "Pollen grains", "sizeUm": 30, "contrast": 0.5, "drawing": "pollen",
+        "blurb": "Each pollen grain carries half of a plant's genes inside a tough shell. The spikes and ridges on that shell are different for every species." },
+      { "id": "petal_cells", "name": "Cone cells", "sizeUm": 18, "contrast": 0.4, "drawing": "facets", "tint": "#e86aa8",
+        "blurb": "The skin of a petal is made of cone-shaped cells that make it look velvety. Bees grip these little cones with their feet when they land." },
+      { "id": "pollen_particles", "name": "Particles inside pollen", "sizeUm": 1.2, "contrast": 0.35, "drawing": "droplets", "tint": "#f2e08a", "onTop": true,
+        "blurb": "Burst a pollen grain in water and tiny grains of starch and oil spill out and jiggle without stopping. Robert Brown saw this in 1827, and in 1905 Einstein explained it as water molecules bumping the particles." }
     ]
   },
   {
-    "id": "flower",
-    "name": "Flower",
-    "worldObject": "flower",
-    "biome": "meadow",
+    "id": "insect_wing", "name": "Insect wing", "worldObject": "insect_wing", "biome": "meadow",
     "features": [
-      {
-        "id": "flower_hairs",
-        "name": "Petal hairs",
-        "sizeUm": 60,
-        "contrast": 0.45,
-        "drawing": "hair",
-        "blurb": "Tiny hairs cover petals and stems. They slow the wind at the surface and keep small pests off."
-      },
-      {
-        "id": "flower_pollen",
-        "name": "Pollen grains",
-        "sizeUm": 30,
-        "contrast": 0.5,
-        "drawing": "pollen",
-        "blurb": "Each pollen grain carries half of a plant's genes inside a tough shell. The spikes and ridges on that shell are different for every species."
-      }
+      { "id": "wing_veins", "name": "Wing veins", "sizeUm": 80, "contrast": 0.6, "drawing": "veins",
+        "blurb": "Veins stiffen the thin wing like the spokes of an umbrella. They also carry fluid and air tubes to keep the wing alive." },
+      { "id": "wing_scales", "name": "Wing scales", "sizeUm": 20, "contrast": 0.4, "drawing": "scales",
+        "blurb": "A butterfly's colors come from thousands of overlapping scales, like roof tiles. Each scale is only about twenty micrometres wide." },
+      { "id": "scale_ridges", "name": "Scale ridges", "sizeUm": 1, "contrast": 0.4, "drawing": "lines", "tint": "#c8742a", "onTop": true,
+        "blurb": "Each wing scale is ribbed with parallel ridges about a micrometre apart. In some butterflies the ridges carry layers so fine that they make shimmering blue by interference, without any pigment." }
     ]
   },
   {
-    "id": "insect_wing",
-    "name": "Insect wing",
-    "worldObject": "insect_wing",
-    "biome": "meadow",
+    "id": "sunflower_seed", "name": "Sunflower seed", "worldObject": "sunflower_seed", "biome": "meadow",
     "features": [
-      {
-        "id": "wing_veins",
-        "name": "Wing veins",
-        "sizeUm": 80,
-        "contrast": 0.6,
-        "drawing": "veins",
-        "blurb": "Veins stiffen the thin wing like the spokes of an umbrella. They also carry fluid and air tubes to keep the wing alive."
-      },
-      {
-        "id": "wing_scales",
-        "name": "Wing scales",
-        "sizeUm": 20,
-        "contrast": 0.4,
-        "drawing": "scales",
-        "blurb": "A butterfly's colors come from thousands of overlapping scales, like roof tiles. Each scale is only about twenty micrometres wide."
-      }
+      { "id": "seed_oil", "name": "Seed oil droplets", "sizeUm": 1.5, "contrast": 0.4, "drawing": "droplets",
+        "blurb": "Every cell of a seed stores energy as tiny droplets of oil, each wrapped in a skin of protein. Squeezed out, oil like this bends light almost as much as glass, which is why a drop of it under a lens helps a microscope see finer detail." },
+      { "id": "seed_embryo", "name": "Embryo inside the seed", "sizeUm": 400, "contrast": 0, "contrastIn": { "xct": 0.6 }, "drawing": "slice", "tint": "#d9c58a",
+        "blurb": "X-rays pass through the shell, so tomography can slice the seed without cutting it. Inside lies the embryo: two folded seed leaves and a tiny root, packed with oil and protein." }
     ]
   },
   {
-    "id": "quartz_grain",
-    "name": "Quartz grain",
-    "worldObject": "quartz_grain",
-    "biome": "meadow",
+    "id": "bee", "name": "Honeybee", "worldObject": "bee", "biome": "meadow",
     "features": [
-      {
-        "id": "quartz_facets",
-        "name": "Quartz facets",
-        "sizeUm": 120,
-        "contrast": 0.6,
-        "drawing": "grains",
-        "blurb": "Quartz grains are clear and have sharp, glassy faces. That purity makes quartz sand the best raw material for lenses."
-      },
-      {
-        "id": "quartz_pits",
-        "name": "Surface pits",
-        "sizeUm": 0.8,
-        "contrast": 0.35,
-        "drawing": "lattice",
-        "blurb": "Wind and water slowly pit the surface of sand grains as they tumble. Pits this small only show up under an oil-immersion lens.",
-        "onTop": true
-      }
+      { "id": "bee_eye", "name": "Eye facets", "sizeUm": 25, "contrast": 0.5, "drawing": "facets", "tint": "#6a4a2a",
+        "blurb": "A bee's compound eye is a mosaic of about 5,000 little eyes, each with its own lens. Together they see a coarse picture but catch fast movement and ultraviolet light." },
+      { "id": "bee_hairs", "name": "Branched hairs", "sizeUm": 6, "contrast": 0.45, "drawing": "hair", "tint": "#e8d7a0",
+        "blurb": "A bee's hairs are branched like tiny feathers, and they pick up an electric charge as it flies. Pollen sticks to them, and the bee combs it into baskets on its hind legs." },
+      { "id": "bee_hamuli", "name": "Wing hooks", "sizeUm": 15, "contrast": 0.4, "drawing": "needles", "tint": "#8a6a3a",
+        "blurb": "A row of about twenty tiny hooks on the hind wing grabs a fold on the front wing. Hooked together, the two wings beat as one." }
     ]
   },
   {
-    "id": "crystal_sample",
-    "name": "Crystal",
-    "worldObject": "crystal",
-    "biome": "lab",
+    "id": "table_salt", "name": "Table salt", "worldObject": "salt", "biome": "meadow",
     "features": [
-      {
-        "id": "crystal_grains",
-        "name": "Crystal grains",
-        "sizeUm": 0.05,
-        "contrast": 0.5,
-        "drawing": "grains",
-        "blurb": "A solid crystal is often many tiny grains packed together. Where two grains meet, their rows of atoms point in different directions."
-      },
-      {
-        "id": "crystal_lattice",
-        "name": "Atomic lattice",
-        "sizeUm": 0.0004,
-        "contrast": 0.5,
-        "drawing": "lattice",
-        "onTop": true,
-        "blurb": "Each dot is a column of atoms in an orderly grid. The spacing between the dots, about 0.4 nanometres, is a fingerprint of the material."
-      }
+      { "id": "salt_cubes", "name": "Salt cubes", "sizeUm": 300, "contrast": 0.6, "drawing": "cubes", "tint": "#f4f4f4",
+        "blurb": "Every grain of table salt is a little cube, because sodium and chloride ions stack in a cubic grid. You can just see the cubes without a lens." },
+      { "id": "salt_bragg", "name": "Salt Bragg peaks", "sizeUm": 0.000282, "contrast": 0, "contrastIn": { "xrd": 0.7, "ediff": 0.5 }, "drawing": "rings",
+        "blurb": "Salt's strongest X-ray reflection comes from planes of ions 0.282 nanometres apart. In 1913 the Braggs used patterns like this to work out the arrangement of atoms in salt, one of the first crystal structures ever solved." }
     ]
   },
   {
-    "id": "copper_rock",
-    "name": "Grey rock",
-    "worldObject": "copper_rock",
-    "biome": "mine",
+    "id": "paper", "name": "Notebook paper", "worldObject": "paper", "biome": "meadow",
     "features": [
-      {
-        "id": "copper_veins",
-        "name": "Copper veins",
-        "sizeUm": 50,
-        "contrast": 0.5,
-        "drawing": "veins",
-        "blurb": "Green streaks run through this rock: they are a copper mineral. Copper carries electricity and heat well, so it makes good lamp parts and coils."
-      }
+      { "id": "paper_fibers", "name": "Wood fibers", "sizeUm": 25, "contrast": 0.45, "drawing": "fibers", "tint": "#e8e2d0",
+        "blurb": "Paper is a mat of flattened wood fibers, each one a single long dead cell. They hold together by hydrogen bonds wherever they touch." },
+      { "id": "paper_clay", "name": "Clay filler", "sizeUm": 1.5, "contrast": 0.35, "drawing": "grains", "tint": "#f0f0f0", "onTop": true,
+        "blurb": "Tiny flat plates of kaolin clay fill the gaps between fibers, making paper smoother and whiter. They are about a micrometre across." },
+      { "id": "cellulose_microfibrils", "name": "Cellulose microfibrils", "sizeUm": 0.004, "contrast": 0.3, "drawing": "fibers", "tint": "#cfc8b0",
+        "blurb": "Each fiber wall is wound from bundles of cellulose chains only a few nanometres wide. For their weight, these microfibrils are stronger than steel." }
     ]
   },
   {
-    "id": "sunflower_seed",
-    "name": "Sunflower seed",
-    "worldObject": "sunflower_seed",
-    "biome": "meadow",
+    "id": "pond_water", "name": "Lake water", "worldObject": "pond_water", "biome": "pond",
     "features": [
-      {
-        "id": "seed_oil",
-        "name": "Seed oil droplets",
-        "sizeUm": 8,
-        "contrast": 0.4,
-        "drawing": "droplets",
-        "blurb": "Every cell of a seed stores energy as tiny droplets of oil. Squeezed out, that oil bends light just right to help a microscope see finer detail."
-      }
+      { "id": "pond_alga", "name": "Pond alga", "sizeUm": 25, "contrast": 0.35, "drawing": "algae",
+        "blurb": "Spirogyra grows as long green threads, one cell after another. Its spiral chloroplast is a ribbon wound around each cell." },
+      { "id": "volvox", "name": "Volvox", "sizeUm": 450, "contrast": 0.5, "drawing": "colony", "tint": "#4caf50",
+        "blurb": "Volvox is a hollow green ball of hundreds or thousands of cells, each beating two flagella to roll the ball along. Daughter colonies grow inside it and burst out." },
+      { "id": "pond_bacteria", "name": "Bacteria", "sizeUm": 1, "contrast": 0.3, "drawing": "rods",
+        "blurb": "These rod-shaped cells are about a thousandth of a millimetre long. Your good glass and oil finally let you resolve them." },
+      { "id": "pond_virus", "name": "Virus particles", "sizeUm": 0.1, "contrast": 0.5, "drawing": "virus", "criticalDoseENm2": 50000,
+        "blurb": "Viruses are hundreds of times smaller than a pond alga cell. Visible light is too coarse to resolve them, so you need electrons." }
     ]
   },
   {
-    "id": "tungsten_rock",
-    "name": "Heavy rock",
-    "worldObject": "tungsten_rock",
-    "biome": "mine",
+    "id": "pond_scum", "name": "Algae mat", "worldObject": "algae_mat", "biome": "pond",
     "features": [
-      {
-        "id": "tungsten_grains",
-        "name": "Tungsten grains",
-        "sizeUm": 0.8,
-        "contrast": 0.5,
-        "drawing": "grains",
-        "blurb": "Tiny dark grains of tungsten mineral hide inside this plain-looking rock. Tungsten melts above 3,400 degrees, which is why it makes a steady electron-source filament."
-      }
+      { "id": "diatoms", "name": "Diatoms", "sizeUm": 30, "contrast": 0.45, "drawing": "diatoms", "tint": "#c8b070",
+        "blurb": "Diatoms are single algal cells inside a glass box of two halves that fit like a lid on a dish. They make roughly a fifth of the oxygen produced on Earth." },
+      { "id": "diatom_striae", "name": "Diatom pore rows", "sizeUm": 0.6, "contrast": 0.35, "drawing": "lines", "tint": "#e8f0d8", "onTop": true,
+        "blurb": "The glass wall is pierced by rows of pores, too fine for an ordinary microscope. Opticians once judged their best lenses by which diatoms' rows they could make out." },
+      { "id": "cyanobacteria", "name": "Cyanobacteria chains", "sizeUm": 5, "contrast": 0.4, "drawing": "beads", "tint": "#3c8f6a",
+        "blurb": "These blue-green bacteria grow in chains of beads and make their food from sunlight. Every so often a bigger, thick-walled cell, a heterocyst, takes nitrogen from the air." },
+      { "id": "euglena", "name": "Euglena", "sizeUm": 50, "contrast": 0.4, "drawing": "flagellate", "tint": "#4caf50",
+        "blurb": "Euglena swims with a whip-like flagellum and steers toward light with a red eyespot. It photosynthesizes in the light and can feed on dissolved food in the dark." }
+    ]
+  },
+  {
+    "id": "lake_mud", "name": "Lake mud", "worldObject": "mud", "biome": "pond",
+    "features": [
+      { "id": "paramecium", "name": "Paramecium", "sizeUm": 220, "contrast": 0.3, "contrastIn": { "phase": 0.6 }, "drawing": "ciliate", "tint": "#c8d8c0",
+        "blurb": "Paramecium is a single cell shaped like a slipper, a fifth of a millimetre long. It swims by beating thousands of hair-like cilia in waves." },
+      { "id": "cilia", "name": "Cilia", "sizeUm": 0.25, "contrast": 0.05, "contrastIn": { "phase": 0.5, "darkfield": 0.5 }, "drawing": "hair", "tint": "#e0f0e0", "onTop": true,
+        "blurb": "Each cilium is a thin whip about a quarter of a micrometre wide, beating dozens of times a second. Unstained they are nearly invisible, but phase contrast or dark field brings them out." },
+      { "id": "contractile_vacuole", "name": "Contractile vacuole", "sizeUm": 12, "contrast": 0.15, "contrastIn": { "phase": 0.5 }, "drawing": "droplets", "tint": "#eaf6ff",
+        "blurb": "Fresh water keeps leaking into the cell, so a star-shaped pump fills and squirts it out every few seconds. Without it the paramecium would swell and burst." },
+      { "id": "vorticella", "name": "Vorticella", "sizeUm": 80, "contrast": 0.35, "drawing": "clubs", "tint": "#d8e8d0",
+        "blurb": "Vorticella is a bell-shaped cell on a long stalk that coils up like a spring in a flash. Antonie van Leeuwenhoek described these little animals in 1676." },
+      { "id": "rotifer", "name": "Rotifer", "sizeUm": 250, "contrast": 0.35, "drawing": "critter", "tint": "#d8d0b8",
+        "blurb": "Rotifers are animals smaller than a grain of salt, with a crown of cilia that looks like spinning wheels. Some kinds survive being dried out for years and revive with a drop of water." }
+    ]
+  },
+  {
+    "id": "feather", "name": "Duck feather", "worldObject": "feather", "biome": "pond",
+    "features": [
+      { "id": "feather_barbs", "name": "Barbs", "sizeUm": 60, "contrast": 0.5, "drawing": "veins", "tint": "#e8e4dc",
+        "blurb": "A feather's shaft carries hundreds of side branches called barbs. Each barb carries rows of smaller branches of its own." },
+      { "id": "feather_barbules", "name": "Barbules", "sizeUm": 10, "contrast": 0.45, "drawing": "hair", "tint": "#d8d2c8",
+        "blurb": "Barbules branch off each barb and overlap those of the next barb like the teeth of a zip. Preening zips them back together when they come apart." },
+      { "id": "feather_hooklets", "name": "Hooklets", "sizeUm": 2, "contrast": 0.4, "drawing": "needles", "tint": "#c8c0b0", "onTop": true,
+        "blurb": "Tiny hooks on one row of barbules catch the plain barbules of the next row. Thousands of them make the vane a single, airtight surface." }
+    ]
+  },
+  {
+    "id": "pine_needle", "name": "Pine needle", "worldObject": "pine_needle", "biome": "forest",
+    "features": [
+      { "id": "pine_stomata", "name": "Stomata rows", "sizeUm": 45, "contrast": 0.45, "drawing": "stomata", "tint": "#6b8f5a",
+        "blurb": "Pine needles breathe through stomata set in neat rows and sunk in pits. Plugs of wax in the pits save water through dry winters." },
+      { "id": "resin_canal", "name": "Resin canals", "sizeUm": 120, "contrast": 0.5, "drawing": "discs", "tint": "#d9a24a",
+        "blurb": "Channels lined with gland cells run the length of each needle, full of sticky resin. When an insect bites, resin floods the wound and seals it." }
+    ]
+  },
+  {
+    "id": "pine_pollen", "name": "Pine pollen", "worldObject": "pine_pollen", "biome": "forest",
+    "features": [
+      { "id": "pine_pollen_grains", "name": "Winged pollen", "sizeUm": 60, "contrast": 0.5, "drawing": "saccate", "tint": "#f0d070",
+        "blurb": "Pine pollen grains have two air sacs, like a pair of ears, that help them drift on the wind for kilometres. A single pine branch sheds millions of them in spring." },
+      { "id": "pine_sacs", "name": "Air sac honeycomb", "sizeUm": 2, "contrast": 0.35, "drawing": "facets", "tint": "#f0e0a0", "onTop": true,
+        "blurb": "The walls of the air sacs are a honeycomb of tiny chambers, light and strong. Details of the sacs help pollen experts tell one kind of pine from another." }
+    ]
+  },
+  {
+    "id": "bark", "name": "Oak bark", "worldObject": "bark", "biome": "forest",
+    "features": [
+      { "id": "cork_cells", "name": "Cork cells", "sizeUm": 25, "contrast": 0.45, "drawing": "boxes", "tint": "#a07850",
+        "blurb": "Bark is made of rows of tiny empty boxes, cork cells whose walls are soaked in waxy suberin. Robert Hooke saw these in 1665 and called them cells, after small rooms." },
+      { "id": "suberin_lamellae", "name": "Suberin layers", "sizeUm": 0.004, "contrast": 0.35, "drawing": "lines", "tint": "#c8a070",
+        "blurb": "Under electrons, each cork cell wall shows thin alternating light and dark bands of suberin and wax. These layers keep water in and fungi out." }
+    ]
+  },
+  {
+    "id": "mushroom", "name": "Mushroom", "worldObject": "mushroom", "biome": "forest",
+    "features": [
+      { "id": "mushroom_gills", "name": "Gills", "sizeUm": 500, "contrast": 0.5, "drawing": "lines", "tint": "#b07a6a",
+        "blurb": "Under the cap hang hundreds of thin gills, which give a big surface for making spores. A single mushroom can drop billions of spores in a few days." },
+      { "id": "basidia", "name": "Basidia", "sizeUm": 20, "contrast": 0.4, "drawing": "clubs", "tint": "#e8dcc8",
+        "blurb": "The gill surfaces are lined with club-shaped cells called basidia. Each one grows four spores on little prongs and flicks them off with a drop of water." },
+      { "id": "mushroom_spores", "name": "Spores", "sizeUm": 7, "contrast": 0.5, "drawing": "droplets", "tint": "#b07a5a",
+        "blurb": "Each spore is a single cell that can grow into a new fungus if it lands somewhere damp. Their colour, shape and size help identify the mushroom." },
+      { "id": "hyphae", "name": "Hyphae", "sizeUm": 5, "contrast": 0.35, "drawing": "fibers", "tint": "#e8e0d0",
+        "blurb": "The mushroom is only the fruit; the fungus itself is a web of threads called hyphae, spread through the soil. Each thread is a tube of cells a few micrometres wide." }
+    ]
+  },
+  {
+    "id": "moss", "name": "Moss", "worldObject": "moss", "biome": "forest",
+    "features": [
+      { "id": "moss_cells", "name": "Moss leaf cells", "sizeUm": 15, "contrast": 0.4, "drawing": "boxes", "tint": "#4e9a3a",
+        "blurb": "A moss leaf is just one cell thick, so light passes through and you can see every cell. Each is packed with chloroplasts." },
+      { "id": "tardigrade", "name": "Tardigrade", "sizeUm": 350, "contrast": 0.35, "drawing": "critter", "tint": "#d8c0a0",
+        "blurb": "Tardigrades, or water bears, plod through wet moss on eight stubby legs. Dried out, they can survive boiling, freezing and even the vacuum of space." },
+      { "id": "tardigrade_claws", "name": "Tardigrade claws", "sizeUm": 8, "contrast": 0.45, "drawing": "needles", "tint": "#c8b090",
+        "blurb": "Each of a tardigrade's eight legs ends in four to eight curved claws. Their shape is one of the main ways to tell the species apart." }
+    ]
+  },
+  {
+    "id": "lichen", "name": "Lichen", "worldObject": "lichen", "biome": "forest",
+    "features": [
+      { "id": "lichen_hyphae", "name": "Fungal threads", "sizeUm": 4, "contrast": 0.4, "drawing": "fibers", "tint": "#d8d4c0",
+        "blurb": "A lichen is two organisms in one, and a fungus builds the body out of tightly woven threads. It gives its partner shelter, water and minerals." },
+      { "id": "lichen_algae", "name": "Green partner cells", "sizeUm": 12, "contrast": 0.45, "drawing": "droplets", "tint": "#5aa04a",
+        "blurb": "Round green algal cells live among the fungal threads and make sugar from sunlight for both partners. Together they grow on bare rock where neither could live alone." },
+      { "id": "soredia", "name": "Soredia", "sizeUm": 60, "contrast": 0.45, "drawing": "cluster", "tint": "#b8c8a0",
+        "blurb": "Lichens spread by shedding tiny bundles of fungal threads wrapped around a few algal cells. Wind and raindrops carry these soredia to new rocks." }
+    ]
+  },
+  {
+    "id": "spider_web", "name": "Spider web", "worldObject": "spider_web", "biome": "forest",
+    "features": [
+      { "id": "silk_thread", "name": "Silk threads", "sizeUm": 3, "contrast": 0.4, "drawing": "fibers", "tint": "#f0f0f0",
+        "blurb": "A web's frame is spun from dragline silk only a few micrometres thick. For its weight it is tougher than steel or Kevlar." },
+      { "id": "glue_droplets", "name": "Glue droplets", "sizeUm": 20, "contrast": 0.45, "drawing": "beads", "tint": "#e8f4ff",
+        "blurb": "The sticky spiral is coated with glue that beads up into a row of tiny droplets, like pearls on a string. The droplets hold prey while the thread stretches." }
+    ]
+  },
+  {
+    "id": "fern", "name": "Fern", "worldObject": "fern", "biome": "forest",
+    "features": [
+      { "id": "fern_sori", "name": "Sori", "sizeUm": 1000, "contrast": 0.5, "drawing": "discs", "tint": "#8a5a2a",
+        "blurb": "The brown dots under a fern frond are sori, clusters of spore cases. Ferns have no flowers or seeds and spread by spores instead." },
+      { "id": "sporangia", "name": "Spore cases", "sizeUm": 250, "contrast": 0.45, "drawing": "discs", "tint": "#a0703a",
+        "blurb": "Each spore case has a ring of thick-walled cells that dries out, bends back and then snaps shut like a catapult. That throws the spores out at about 10 metres per second." },
+      { "id": "fern_spores", "name": "Fern spores", "sizeUm": 40, "contrast": 0.5, "drawing": "droplets", "tint": "#8a6a3a",
+        "blurb": "A single fern can release millions of spores. One that lands somewhere damp grows into a tiny heart-shaped plant that makes the eggs and sperm for the next fern." }
+    ]
+  },
+  {
+    "id": "bone", "name": "Old deer bone", "worldObject": "bone", "biome": "forest",
+    "features": [
+      { "id": "haversian_canals", "name": "Bone canals", "sizeUm": 60, "contrast": 0.5, "drawing": "discs", "tint": "#e8dcc0",
+        "blurb": "Living bone is threaded with canals that carry blood vessels and nerves. Rings of bone are laid down around each canal, like the rings of a tree." },
+      { "id": "osteocyte_lacunae", "name": "Bone cell hollows", "sizeUm": 12, "contrast": 0.35, "contrastIn": { "xct": 0.6 }, "drawing": "droplets", "tint": "#c8b8a0",
+        "blurb": "Bone cells live in tiny hollows linked by hair-thin channels, sensing strain and directing repairs. X-ray tomography maps millions of these hollows inside a bone without cutting it." },
+      { "id": "collagen_banding", "name": "Collagen bands", "sizeUm": 0.067, "contrast": 0.35, "drawing": "lines", "tint": "#d8c8a8",
+        "blurb": "Bone's collagen fibrils are striped every 67 nanometres, where the molecules overlap in a staggered pattern. Mineral crystals grow in the gaps." },
+      { "id": "bone_calcium", "name": "Calcium map", "sizeUm": 30, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 4.038, "drawing": "map", "tint": "#f0f0a0",
+        "blurb": "Calcium atoms give off X-rays of their own colour once the beam is above 4.04 keV, so the map shows where the mineral is. Bone is about two-thirds mineral by weight, mostly calcium phosphate." }
+    ]
+  },
+  {
+    "id": "onion", "name": "Onion", "worldObject": "onion", "biome": "garden",
+    "features": [
+      { "id": "onion_cells", "name": "Onion skin cells", "sizeUm": 50, "contrast": 0.25, "drawing": "boxes", "tint": "#e8e0d0",
+        "blurb": "The thin skin inside an onion layer is one cell thick, a sheet of long brick-shaped cells. It is the classic first slide in a school biology lab." },
+      { "id": "onion_nuclei", "name": "Cell nuclei", "sizeUm": 15, "contrast": 0.06, "contrastIn": { "methylene_blue": 0.6, "hematoxylin": 0.6, "iodine": 0.4, "phase": 0.4 }, "drawing": "droplets", "tint": "#d8d0c0", "onTop": true,
+        "blurb": "Each onion cell has one nucleus, which holds its DNA. Unstained it is almost invisible; a drop of stain turns it dark." },
+      { "id": "onion_chromosomes", "name": "Chromosomes", "sizeUm": 1.5, "contrast": 0.05, "contrastIn": { "methylene_blue": 0.5, "hematoxylin": 0.5 }, "drawing": "needles", "tint": "#8a8ae0", "onTop": true,
+        "blurb": "In the tip of an onion root, cells divide all the time, and the DNA in dividing cells packs into rod-shaped chromosomes. An onion cell has 16 of them." }
+    ]
+  },
+  {
+    "id": "potato", "name": "Potato", "worldObject": "potato", "biome": "garden",
+    "features": [
+      { "id": "potato_cells", "name": "Potato cells", "sizeUm": 100, "contrast": 0.3, "drawing": "boxes", "tint": "#e8e0c0",
+        "blurb": "Potato tuber cells are large, thin-walled boxes, each a store room for starch. A single potato has tens of millions of them." },
+      { "id": "starch_grains", "name": "Starch grains", "sizeUm": 30, "contrast": 0.25, "contrastIn": { "iodine": 0.8 }, "drawing": "discs", "tint": "#f4f2e8",
+        "blurb": "Potato cells are stuffed with grains of starch, the plant's stored sugar. Iodine turns starch blue-black, a test known since 1814." }
+    ]
+  },
+  {
+    "id": "orchid", "name": "Orchid", "worldObject": "orchid", "biome": "garden",
+    "features": [
+      { "id": "orchid_cells", "name": "Orchid leaf cells", "sizeUm": 40, "contrast": 0.3, "drawing": "boxes", "tint": "#8ac070",
+        "blurb": "Orchid leaves are thick and waxy, made for storing water. Their outer skin cells are large and clear enough to look inside." },
+      { "id": "orchid_nucleus", "name": "Orchid cell nucleus", "sizeUm": 10, "contrast": 0.25, "drawing": "droplets", "tint": "#b0b8c8", "onTop": true,
+        "blurb": "In 1831 Robert Brown noticed one small dark spot in every orchid cell and named it the nucleus. It turned out to be the cell's control centre, holding its DNA." },
+      { "id": "raphides", "name": "Raphides", "sizeUm": 2, "contrast": 0.5, "drawing": "needles", "tint": "#f0f0f0", "onTop": true,
+        "blurb": "Some cells hold bundles of needle-sharp crystals of calcium oxalate. They make the plant painful to chew." }
+    ]
+  },
+  {
+    "id": "nettle", "name": "Stinging nettle", "worldObject": "nettle", "biome": "garden",
+    "features": [
+      { "id": "nettle_hairs", "name": "Stinging hairs", "sizeUm": 80, "contrast": 0.45, "drawing": "hair", "tint": "#e0f0d0",
+        "blurb": "Each stinging hair is a single long cell, a glassy tube full of irritating juice. It works like a tiny hypodermic needle." },
+      { "id": "nettle_tip", "name": "Glass tip", "sizeUm": 4, "contrast": 0.4, "drawing": "needles", "tint": "#f0fff0",
+        "blurb": "The hair's tip is made of silica, the stuff of glass, and snaps off at an angle when touched. The sharp end pierces skin and injects histamine and other irritants." }
+    ]
+  },
+  {
+    "id": "cotton", "name": "Cotton boll", "worldObject": "cotton", "biome": "garden",
+    "features": [
+      { "id": "cotton_fibers", "name": "Cotton fibers", "sizeUm": 18, "contrast": 0.45, "drawing": "fibers", "tint": "#f4f2ea",
+        "blurb": "Each cotton fiber is one long cell that grew out from the seed's skin, then dried into a flat, twisted ribbon. The twists help fibers grip each other when spun into thread." },
+      { "id": "cellulose_pattern", "name": "Cellulose fiber pattern", "sizeUm": 0.00039, "contrast": 0, "contrastIn": { "xrd": 0.6 }, "drawing": "rings",
+        "blurb": "Cellulose chains in a cotton fiber line up in crystals, so they scatter X-rays into arcs and rings. The strongest comes from layers of chains about 0.39 nanometres apart." }
+    ]
+  },
+  {
+    "id": "quartz_grain", "name": "Quartz grain", "worldObject": "quartz_grain", "biome": "mine",
+    "features": [
+      { "id": "quartz_facets", "name": "Quartz facets", "sizeUm": 120, "contrast": 0.6, "drawing": "grains",
+        "blurb": "Quartz grains are clear and have sharp, glassy faces. That purity makes quartz sand the best raw material for lenses." },
+      { "id": "quartz_pits", "name": "Surface pits", "sizeUm": 0.8, "contrast": 0.35, "drawing": "lattice", "onTop": true,
+        "blurb": "Wind and water slowly pit the surface of sand grains as they tumble. Pits this small only show up under an oil-immersion lens." },
+      { "id": "fluid_inclusions", "name": "Fluid inclusions", "sizeUm": 6, "contrast": 0.35, "drawing": "droplets", "tint": "#d8eef5",
+        "blurb": "Tiny pockets of the hot water the crystal grew from are trapped inside it, some still holding a bubble of vapour. Geologists heat them to read the temperature at which the quartz formed." },
+      { "id": "quartz_spots", "name": "Quartz diffraction spots", "sizeUm": 0.000334, "contrast": 0, "contrastIn": { "xrd": 0.6 }, "drawing": "spots",
+        "blurb": "A single crystal sends X-rays into sharp spots, each from one family of planes of atoms. Seen down the crystal's long axis the spots repeat every 60 degrees, matching quartz's six-sided prisms." }
+    ]
+  },
+  {
+    "id": "copper_rock", "name": "Grey rock", "worldObject": "copper_rock", "biome": "mine",
+    "features": [
+      { "id": "copper_veins", "name": "Copper veins", "sizeUm": 50, "contrast": 0.5, "drawing": "veins",
+        "blurb": "Green streaks run through this rock: they are a copper mineral. Copper carries electricity and heat well, so it makes good lamp parts and coils." },
+      { "id": "malachite_needles", "name": "Malachite needles", "sizeUm": 3, "contrast": 0.5, "drawing": "needles", "tint": "#3fa58a", "onTop": true,
+        "blurb": "The green in the veins is malachite, a copper carbonate that grows as tufts of fine needles. People have ground it into green paint for thousands of years." },
+      { "id": "copper_map", "name": "Copper map", "sizeUm": 30, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 8.979, "drawing": "map", "tint": "#f08a3a",
+        "blurb": "Above copper's absorption edge at 8.98 keV, every copper atom the beam hits gives off copper's own X-rays. The map traces the ore veins through the rock." }
+    ]
+  },
+  {
+    "id": "tungsten_rock", "name": "Heavy rock", "worldObject": "tungsten_rock", "biome": "mine",
+    "features": [
+      { "id": "tungsten_grains", "name": "Tungsten grains", "sizeUm": 0.8, "contrast": 0.5, "drawing": "grains",
+        "blurb": "Tiny dark grains of tungsten mineral hide inside this plain-looking rock. Tungsten melts above 3,400 degrees, which is why it makes a steady electron-source filament." },
+      { "id": "scheelite_glow", "name": "Blue-white glow", "sizeUm": 25, "contrast": 0, "contrastIn": { "fluorescence": 0.7 }, "drawing": "glow", "tint": "#9fd0ff",
+        "blurb": "The tungsten mineral here, scheelite, glows bright blue-white under ultraviolet light. Prospectors hunt for tungsten ore at night with UV lamps." }
+    ]
+  },
+  {
+    "id": "fluorite_rock", "name": "Purple-veined rock", "worldObject": "fluorite_rock", "biome": "mine",
+    "features": [
+      { "id": "fluorite_cubes", "name": "Fluorite crystals", "sizeUm": 0.6, "contrast": 0.45, "drawing": "cubes", "tint": "#9b6fd1",
+        "blurb": "Tiny purple cubes of fluorite, calcium fluoride, are scattered through this rock. Fluorite bends all colours of light almost equally, so lens makers use it in objectives that stay sharp in every colour." },
+      { "id": "fluorite_glow", "name": "Violet glow", "sizeUm": 20, "contrast": 0, "contrastIn": { "fluorescence": 0.6 }, "drawing": "glow", "tint": "#8a7aff",
+        "blurb": "Fluorite gave fluorescence its name: in 1852 George Stokes studied how it and other minerals glow in ultraviolet light. Traces of other elements in the crystal absorb the light and send it out again in a new colour." }
+    ]
+  },
+  {
+    "id": "willemite_rock", "name": "Pale green rock", "worldObject": "willemite_rock", "biome": "mine",
+    "features": [
+      { "id": "willemite_crystals", "name": "Zinc silicate crystals", "sizeUm": 15, "contrast": 0.3, "drawing": "prisms", "tint": "#c8e8c0",
+        "blurb": "This pale rock is speckled with small six-sided crystals of willemite, a zinc silicate. In ordinary light it is hard to tell from many other pale minerals." },
+      { "id": "willemite_glow", "name": "Green glow", "sizeUm": 30, "contrast": 0, "contrastIn": { "fluorescence": 0.8 }, "drawing": "glow", "tint": "#5cff6a",
+        "blurb": "Under ultraviolet light, willemite glows a vivid green, thanks to traces of manganese. Coated on glass, the same mineral made the green screens of early oscilloscopes and radar." }
+    ]
+  },
+  {
+    "id": "black_sand", "name": "Dark creek sand", "worldObject": "black_sand", "biome": "mine",
+    "features": [
+      { "id": "heavy_minerals", "name": "Heavy mineral grains", "sizeUm": 150, "contrast": 0.55, "drawing": "grains", "tint": "#8a8070",
+        "blurb": "Running water sweeps light quartz away and leaves heavy dark grains behind in the creek bed. These black sands collect magnetite, garnet and rarer minerals." },
+      { "id": "magnetite", "name": "Magnetite octahedra", "sizeUm": 40, "contrast": 0.5, "drawing": "prisms", "tint": "#8a8a96",
+        "blurb": "Some of the black grains are tiny eight-sided crystals of magnetite, an iron oxide. A magnet pulls them out of the sand." },
+      { "id": "monazite_diffraction", "name": "Monazite diffraction", "sizeUm": 0.000286, "contrast": 0, "contrastIn": { "ediff": 0.6, "xrd": 0.6 }, "drawing": "spots",
+        "blurb": "Electron diffraction picks out a few grains of monazite, a rare-earth phosphate, by its lattice: its strongest reflection comes from planes 0.286 nanometres apart. Monazite holds cerium, lanthanum and neodymium, and a little radioactive thorium." }
+    ]
+  },
+  {
+    "id": "beryl_crystal", "name": "Pale six-sided crystal", "worldObject": "beryl_crystal", "biome": "mine",
+    "features": [
+      { "id": "beryl_prism", "name": "Six-sided prism", "sizeUm": 2000, "contrast": 0.5, "drawing": "prisms", "tint": "#9fd8c8",
+        "blurb": "Beryl grows as six-sided prisms; green beryl is emerald and blue beryl is aquamarine. These pale crystals grew slowly in a pocket of cooling granite." },
+      { "id": "beryllium_atoms", "name": "Beryllium atoms", "sizeUm": 0.00016, "contrast": 0.02, "contrastIn": { "ptycho": 0.5 }, "drawing": "atoms", "tint": "#8affd0", "onTop": true,
+        "blurb": "Beryllium atoms are so light that they barely scatter electrons, so annular dark field misses them next to heavier atoms. Ptychography measures the tiny phase shift they cause, and the light atoms appear at last." }
+    ]
+  },
+  {
+    "id": "shale", "name": "Fossil shale", "worldObject": "shale", "biome": "mine",
+    "features": [
+      { "id": "brachiopod", "name": "Brachiopod fossil", "sizeUm": 8000, "contrast": 0.45, "drawing": "lines", "tint": "#a89a80",
+        "blurb": "This shell belonged to a brachiopod that lived on a muddy sea floor about 380 million years ago, when a shallow sea covered this land. The gorge walls around Ithaca are full of them." },
+      { "id": "shell_fibers", "name": "Shell fibers", "sizeUm": 12, "contrast": 0.45, "drawing": "fibers", "tint": "#e0d8c8",
+        "blurb": "The fossil shell is a stack of long calcite fibers, each laid down by one cell of the living animal. After 380 million years they are still in place." },
+      { "id": "framboids", "name": "Pyrite framboids", "sizeUm": 10, "contrast": 0.5, "drawing": "cluster", "tint": "#d8b84a",
+        "blurb": "These raspberry-shaped balls are clusters of tiny pyrite crystals that grew where there was no oxygen. They show that the old sea floor mud was foul and airless." },
+      { "id": "clay_layers", "name": "Clay layers", "sizeUm": 0.001, "contrast": 0.4, "drawing": "lines", "tint": "#a8a090",
+        "blurb": "Shale is mostly clay, and clay crystals are stacks of sheets of atoms. In illite, the commonest clay here, the sheets repeat every 1.0 nanometre." },
+      { "id": "hidden_trilobite", "name": "Hidden trilobite", "sizeUm": 3000, "contrast": 0, "contrastIn": { "xct": 0.5 }, "drawing": "slice", "tint": "#8a8070",
+        "blurb": "Tomography found a trilobite still buried inside the slab, curled up like a woodlouse. These sea creatures had eyes with lenses made of calcite crystals." }
+    ]
+  },
+  {
+    "id": "mica_rock", "name": "Glittering schist", "worldObject": "mica_rock", "biome": "mine",
+    "features": [
+      { "id": "mica_flakes", "name": "Mica flakes", "sizeUm": 100, "contrast": 0.55, "drawing": "mosaic", "tint": "#c8ccd4",
+        "blurb": "The glitter in this rock is mica, which splits into sheets thinner than paper. Old stove windows were made of it." },
+      { "id": "mica_layers", "name": "Mica layers", "sizeUm": 0.001, "contrast": 0.45, "drawing": "lines", "tint": "#c0c8d0",
+        "blurb": "Mica's sheets of atoms repeat every nanometre, held together by a layer of potassium ions. The bonds between sheets are weak, so mica splits cleanly along them." }
+    ]
+  },
+  {
+    "id": "iron_rock", "name": "Rusty rock", "worldObject": "iron_rock", "biome": "mine",
+    "features": [
+      { "id": "hematite_flakes", "name": "Hematite flakes", "sizeUm": 5, "contrast": 0.5, "drawing": "grains", "tint": "#b0402a",
+        "blurb": "The rust colour comes from hematite, an iron oxide, in thin red flakes. Ground to powder, it is the red ochre of cave paintings." },
+      { "id": "iron_map", "name": "Iron map", "sizeUm": 25, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 7.112, "drawing": "map", "tint": "#ff6a4a",
+        "blurb": "Tuned above iron's absorption edge at 7.11 keV, the beam makes every iron atom give off iron's own X-rays. The map shows the iron concentrated in bands, where the ore was laid down." }
+    ]
+  },
+  {
+    "id": "galena_rock", "name": "Silver-grey cubes", "worldObject": "galena_rock", "biome": "mine",
+    "features": [
+      { "id": "galena_cubes", "name": "Galena cubes", "sizeUm": 500, "contrast": 0.6, "drawing": "cubes", "tint": "#8c939c",
+        "blurb": "Galena, lead sulfide, breaks into perfect little cubes along its cleavage planes. It is the main ore of lead, and early radio sets used its crystals as detectors." },
+      { "id": "lead_map", "name": "Lead map", "sizeUm": 40, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 13.035, "drawing": "map", "tint": "#b0b8ff",
+        "blurb": "Lead's K edge, at 88 keV, is beyond this beamline, but its L edge at 13.04 keV is in reach, and above it lead atoms give off their L X-rays. The undulator's first harmonic stops near 12 keV, so this map needs its third." }
+    ]
+  },
+  {
+    "id": "crystal_sample", "name": "Crystal", "worldObject": "crystal", "biome": "lab",
+    "features": [
+      { "id": "crystal_grains", "name": "Crystal grains", "sizeUm": 0.05, "contrast": 0.5, "drawing": "grains",
+        "blurb": "A solid crystal is often many tiny grains packed together. Where two grains meet, their rows of atoms point in different directions." },
+      { "id": "crystal_lattice", "name": "Atomic lattice", "sizeUm": 0.0004, "contrast": 0.5, "drawing": "lattice", "onTop": true,
+        "blurb": "Each dot is a column of atoms in an orderly grid. The spacing between the dots, about 0.4 nanometres, is a fingerprint of the material." }
+    ]
+  },
+  {
+    "id": "cheek_slide", "name": "Cheek cell slide", "worldObject": "cheek_cells", "biome": "lab",
+    "features": [
+      { "id": "cheek_cells", "name": "Cheek cells", "sizeUm": 60, "contrast": 0.06, "contrastIn": { "phase": 0.5, "methylene_blue": 0.6 }, "drawing": "mosaic", "tint": "#9ab0e0",
+        "blurb": "The inside of your cheek is lined with flat cells that rub off all the time, and a gentle swab picks up thousands. Unstained they are almost invisible, so biology classes add a drop of methylene blue." },
+      { "id": "cheek_nucleus", "name": "Cheek cell nucleus", "sizeUm": 8, "contrast": 0.05, "contrastIn": { "phase": 0.4, "methylene_blue": 0.7, "hematoxylin": 0.7 }, "drawing": "droplets", "tint": "#c8c8d0", "onTop": true,
+        "blurb": "Each cheek cell has a single nucleus near its middle, about a tenth of the cell's width. The dye binds to its DNA and turns it deep blue." },
+      { "id": "mouth_bacteria", "name": "Mouth bacteria", "sizeUm": 1, "contrast": 0.05, "contrastIn": { "methylene_blue": 0.5, "phase": 0.4 }, "drawing": "rods", "tint": "#d0d0e0", "onTop": true,
+        "blurb": "Small rods and balls cling to the cells: bacteria from your mouth. In 1683 Antonie van Leeuwenhoek scraped his own teeth and saw these little animals swimming." }
+    ]
+  },
+  {
+    "id": "blood_slide", "name": "Blood smear", "worldObject": "blood", "biome": "lab",
+    "features": [
+      { "id": "red_blood_cells", "name": "Red blood cells", "sizeUm": 7.5, "contrast": 0.5, "drawing": "discs", "tint": "#d05050",
+        "blurb": "Red blood cells are dimpled discs about 7.5 micrometres across, with no nucleus. Their shape gives a large surface for picking up oxygen and lets them fold through the narrowest capillaries." },
+      { "id": "white_blood_cells", "name": "White blood cells", "sizeUm": 12, "contrast": 0.5, "drawing": "cluster", "tint": "#7a4aa0",
+        "blurb": "Here and there among the red cells is a white blood cell, with a large nucleus stained purple. Many have a nucleus of several lobes, and they hunt bacteria." },
+      { "id": "platelets", "name": "Platelets", "sizeUm": 2.5, "contrast": 0.45, "drawing": "droplets", "tint": "#a070c0", "onTop": true,
+        "blurb": "Platelets are tiny fragments of giant bone marrow cells. They clump together to plug a cut and start a clot." }
+    ]
+  },
+  {
+    "id": "nerve_slide", "name": "Nerve tissue (silver stain)", "worldObject": "nerve_tissue", "biome": "lab",
+    "features": [
+      { "id": "neurons", "name": "Neurons", "sizeUm": 30, "contrast": 0.6, "drawing": "neurons", "tint": "#d8c8a0",
+        "blurb": "Golgi's silver stain blackens only a few nerve cells out of hundreds, so each one stands out with all its branches. Santiago Ramón y Cajal used it to show that the brain is made of separate cells." },
+      { "id": "dendritic_spines", "name": "Dendritic spines", "sizeUm": 0.8, "contrast": 0.5, "drawing": "needles", "tint": "#e8d8b0", "onTop": true,
+        "blurb": "The branches are studded with tiny bumps called dendritic spines, which Cajal first described in 1888. Each spine is where a connection from another neuron lands." },
+      { "id": "synaptic_vesicles", "name": "Synaptic vesicles", "sizeUm": 0.04, "contrast": 0.4, "drawing": "droplets", "tint": "#d0d0d0",
+        "blurb": "Electrons show the gap between two neurons, about 20 nanometres wide, and on one side a cluster of round vesicles. Each vesicle holds thousands of neurotransmitter molecules, released to carry the signal across." }
+    ]
+  },
+  {
+    "id": "bacteria_culture", "name": "Bacteria culture", "worldObject": "bacteria_culture", "biome": "lab",
+    "features": [
+      { "id": "gram_positive", "name": "Gram-positive rods", "gram": "positive", "sizeUm": 2, "contrast": 0.05, "contrastIn": { "gram": 0.6, "phase": 0.35 }, "drawing": "rods", "tint": "#a066e0",
+        "blurb": "A thick wall of peptidoglycan holds on to crystal violet, so these Bacillus rods stay purple through the Gram stain. Hans Christian Gram devised the stain in 1884." },
+      { "id": "gram_negative", "name": "Gram-negative rods", "gram": "negative", "sizeUm": 2, "contrast": 0.05, "contrastIn": { "gram": 0.6, "phase": 0.35 }, "drawing": "rods", "tint": "#ff6aa0",
+        "blurb": "Escherichia coli has a thin wall under an outer membrane, so alcohol washes the violet out and the pink counterstain shows instead. The difference matters, because many antibiotics work on one group but not the other." },
+      { "id": "endospores", "name": "Endospores", "sizeUm": 1, "contrast": 0.08, "contrastIn": { "phase": 0.6 }, "drawing": "droplets", "tint": "#f0f0e0", "onTop": true,
+        "blurb": "Under stress, Bacillus packs a copy of its DNA into a tough spore inside the cell. Spores survive boiling and drying for years, and they shine bright in phase contrast." },
+      { "id": "flagella", "name": "Flagella", "sizeUm": 0.02, "contrast": 0.02, "contrastIn": { "darkfield": 0.5 }, "drawing": "hair", "tint": "#e0e0ff", "onTop": true,
+        "blurb": "Flagella are whips only about 20 nanometres thick that spin like propellers, driven by a rotary motor in the cell wall. Far too thin to resolve with light, they still scatter enough to shine in dark field." }
+    ]
+  },
+  {
+    "id": "yeast_culture", "name": "Yeast culture", "worldObject": "yeast", "biome": "lab",
+    "features": [
+      { "id": "yeast_cells", "name": "Yeast cells", "sizeUm": 5, "contrast": 0.35, "drawing": "droplets", "tint": "#e8e0c0",
+        "blurb": "Baker's yeast is a single-celled fungus about 5 micrometres across. It turns sugar into carbon dioxide, which raises bread, and alcohol." },
+      { "id": "bud_scars", "name": "Bud scars", "sizeUm": 1.2, "contrast": 0.05, "contrastIn": { "fluorescence": 0.7 }, "drawing": "glow", "tint": "#6ab0ff", "onTop": true,
+        "blurb": "Each time a yeast cell buds, it leaves a ring of chitin on its wall. A fluorescent dye that binds chitin makes the rings glow, so you can count how many daughters a cell has had." }
+    ]
+  },
+  {
+    "id": "diatom_test", "name": "Diatom test slide", "worldObject": "diatom_slide", "biome": "lab",
+    "features": [
+      { "id": "amphipleura", "name": "Amphipleura pellucida", "sizeUm": 100, "contrast": 0.4, "drawing": "diatoms", "tint": "#d0e8e0",
+        "blurb": "This slender diatom was the hardest test object of the 19th century, mounted on slides to judge the best microscope lenses. Its glass shell is about a tenth of a millimetre long." },
+      { "id": "amphipleura_striae", "name": "Amphipleura striae", "sizeUm": 0.25, "contrast": 0.3, "drawing": "lines", "tint": "#e8f8f0", "onTop": true,
+        "blurb": "Its rows of pores are only about 0.25 micrometres apart, around 40 in every hundredth of a millimetre. Resolving them takes oil immersion, a well-aligned condenser and light near the very limit Ernst Abbe predicted." }
+    ]
+  },
+  {
+    "id": "cell_section", "name": "Liver cell section", "worldObject": "tissue_section", "biome": "lab",
+    "features": [
+      { "id": "mitochondria", "name": "Mitochondria", "sizeUm": 0.8, "contrast": 0.35, "drawing": "rods", "tint": "#c08a6a",
+        "blurb": "Mitochondria are the cell's power stations, turning food into a chemical fuel called ATP. At the light microscope's limit they are just tiny grains." },
+      { "id": "cristae", "name": "Cristae", "sizeUm": 0.03, "contrast": 0.05, "contrastIn": { "tem": 0.45 }, "drawing": "lines", "tint": "#d8c8b8", "onTop": true,
+        "blurb": "Electrons reveal each mitochondrion's inner membrane folded into shelves called cristae. The folds pack in more surface for the enzymes that make ATP." },
+      { "id": "ribosomes", "name": "Ribosomes", "sizeUm": 0.025, "contrast": 0.4, "drawing": "droplets", "tint": "#d8d8d8", "onTop": true,
+        "blurb": "Tiny dark grains line the cell's internal membranes: ribosomes, where proteins are built. George Palade described them with the electron microscope in 1955." },
+      { "id": "cell_membrane", "name": "Membrane bilayer", "sizeUm": 0.008, "contrast": 0.05, "contrastIn": { "tem": 0.4 }, "drawing": "lines", "tint": "#d8d8d8", "onTop": true,
+        "blurb": "Every cell is wrapped in a membrane about 8 nanometres thick. Stained with osmium, it shows as two dark lines with a pale line between, the two layers of fat molecules." }
+    ]
+  },
+  {
+    "id": "virus_grid", "name": "Virus sample (negative stain)", "worldObject": "virus_prep", "biome": "lab",
+    "features": [
+      { "id": "corona_particles", "name": "Coronavirus particles", "sizeUm": 0.1, "contrast": 0.5, "drawing": "virus", "tint": "#c8c8c8",
+        "blurb": "Seen in a heavy-metal stain, each particle is a round envelope about 100 nanometres across. June Almeida took the first pictures of a human coronavirus this way in 1964." },
+      { "id": "corona_spikes", "name": "Crown of spikes", "sizeUm": 0.02, "contrast": 0.45, "drawing": "needles", "tint": "#e0e0e0", "onTop": true,
+        "blurb": "A fringe of club-shaped spikes, each about 20 nanometres long, surrounds every particle like the corona of the Sun. Almeida and her colleagues named the coronaviruses after it in 1968." },
+      { "id": "immune_clumps", "name": "Antibody clumps", "sizeUm": 0.5, "contrast": 0.05, "contrastIn": { "tem": 0.5 }, "drawing": "cluster", "tint": "#b8b8b8",
+        "blurb": "Antibodies from a patient's blood stick virus particles together into clumps. Almeida's immune electron microscopy used this to find viruses that were too few to spot one by one." }
+    ]
+  },
+  {
+    "id": "gold_grid", "name": "Gold nanoparticles", "worldObject": "gold_grid", "biome": "lab",
+    "features": [
+      { "id": "gold_particles", "name": "Gold nanoparticles", "sizeUm": 0.01, "contrast": 0.6, "drawing": "droplets", "tint": "#e0e0d8",
+        "blurb": "These dark dots are gold particles about 10 nanometres across, sitting on a carbon film. A glass of them in water is ruby red, not golden, because particles this small absorb and scatter light differently." },
+      { "id": "gold_fringes", "name": "Gold lattice fringes", "sizeUm": 0.000235, "contrast": 0.45, "drawing": "lines", "tint": "#f0f0f0", "onTop": true,
+        "blurb": "Inside each particle, rows of gold atoms 0.235 nanometres apart show as fine stripes. Seeing them takes a well-aligned microscope working at its very limit." },
+      { "id": "gold_rings", "name": "Gold diffraction rings", "sizeUm": 0.000204, "contrast": 0, "contrastIn": { "ediff": 0.6, "xrd": 0.6 }, "drawing": "rings",
+        "blurb": "Thousands of randomly turned gold crystals give a pattern of sharp rings, one for each family of atomic planes. Because the spacings are known exactly, microscopists use these rings to calibrate their instruments." }
+    ]
+  },
+  {
+    "id": "graphene_sample", "name": "Graphene", "worldObject": "graphene", "biome": "lab",
+    "features": [
+      { "id": "graphene_lattice", "name": "Graphene honeycomb", "sizeUm": 0.000142, "contrast": 0.3, "contrastIn": { "haadf": 0.4 }, "drawing": "honeycomb", "tint": "#e0e8f0",
+        "blurb": "Graphene is a single sheet of carbon atoms in a honeycomb, each atom 0.142 nanometres from its neighbours. It is the thinnest material there is, and one of the strongest." },
+      { "id": "dopant_atoms", "name": "Silicon atoms in graphene", "sizeUm": 0.0002, "contrast": 0.05, "contrastIn": { "haadf": 0.8 }, "drawing": "atoms", "tint": "#ffffff", "onTop": true,
+        "blurb": "A few silicon atoms have taken the place of carbon in the sheet. Heavier atoms scatter electrons to higher angles, so in annular dark field each one shines far brighter than the carbon around it." }
+    ]
+  },
+  {
+    "id": "soot_sample", "name": "Carbon soot", "worldObject": "soot", "biome": "lab",
+    "features": [
+      { "id": "soot_spheres", "name": "Soot particles", "sizeUm": 0.03, "contrast": 0.5, "drawing": "cluster", "tint": "#c8c8c8",
+        "blurb": "Soot is made of chains of tiny carbon balls, each about 30 nanometres wide. Under electrons each ball shows curved, onion-like layers of carbon." },
+      { "id": "nanotubes", "name": "Carbon nanotubes", "sizeUm": 0.012, "contrast": 0.45, "drawing": "fibers", "tint": "#d0d0d0",
+        "blurb": "Soot from a carbon arc holds hollow tubes made of rolled-up sheets of carbon atoms. Sumio Iijima spotted them in 1991 by looking at arc soot in an electron microscope." },
+      { "id": "tube_walls", "name": "Nanotube walls", "sizeUm": 0.00034, "contrast": 0.4, "drawing": "lines", "tint": "#d0d0d0", "onTop": true,
+        "blurb": "Each tube wall is a set of nested carbon sheets 0.34 nanometres apart, the same spacing as the layers in graphite. That is why the walls show as fine parallel lines." }
+    ]
+  },
+  {
+    "id": "chip_sample", "name": "Computer chip", "worldObject": "chip", "biome": "lab",
+    "features": [
+      { "id": "chip_transistors", "name": "Transistor gates", "sizeUm": 0.05, "contrast": 0.5, "drawing": "lines", "tint": "#c0c8d0",
+        "blurb": "A modern chip packs billions of transistors with gates in rows only about 50 nanometres apart. Light microscopes can't separate them, but electrons can." },
+      { "id": "si_dumbbells", "name": "Silicon dumbbells", "sizeUm": 0.000136, "contrast": 0.3, "contrastIn": { "haadf": 0.5 }, "drawing": "dumbbells", "tint": "#e8e8f0", "onTop": true,
+        "blurb": "Looking along one direction of the silicon crystal, the atom columns come in close pairs only 0.136 nanometres apart. Resolving these dumbbells was a famous test for the first aberration-corrected microscopes." },
+      { "id": "chip_copper", "name": "Copper wiring map", "sizeUm": 2, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 8.979, "drawing": "map", "tint": "#f08a3a",
+        "blurb": "Above the transistors, layers of copper wires carry signals and power, the upper ones micrometres wide. An X-ray fluorescence map shows the copper without taking the chip apart." }
+    ]
+  },
+  {
+    "id": "sto_crystal", "name": "Strontium titanate", "worldObject": "perovskite", "biome": "lab",
+    "features": [
+      { "id": "sto_lattice", "name": "Perovskite lattice", "sizeUm": 0.00039, "contrast": 0.45, "drawing": "lattice", "tint": "#e8f0ff",
+        "blurb": "Strontium titanate is a perovskite crystal whose cube of atoms repeats every 0.39 nanometres. It is the standard base for growing thin films of new materials." },
+      { "id": "sto_zcontrast", "name": "Strontium and titanium columns", "sizeUm": 0.000276, "contrast": 0.05, "contrastIn": { "haadf": 0.7 }, "drawing": "lattice", "tint": "#ffffff", "onTop": true,
+        "blurb": "In annular dark field, columns of heavy strontium shine brighter than columns of lighter titanium and oxygen. The brightness tells you which atoms are where, a method called Z-contrast." },
+      { "id": "sto_oxygen", "name": "Oxygen columns", "sizeUm": 0.000195, "contrast": 0.02, "contrastIn": { "ptycho": 0.5 }, "drawing": "atoms", "tint": "#ff8a8a", "onTop": true,
+        "blurb": "Pure oxygen columns sit between the titanium columns, too light to show in annular dark field. Ptychography picks them out, which matters because oxygen controls much of how oxides behave." }
+    ]
+  },
+  {
+    "id": "mos2_sample", "name": "Twisted bilayer MoS₂", "worldObject": "mos2", "biome": "lab",
+    "features": [
+      { "id": "mos2_moire", "name": "Moiré pattern", "sizeUm": 0.005, "contrast": 0.4, "drawing": "honeycomb", "tint": "#c0d0e0",
+        "blurb": "Two single-layer sheets of molybdenum disulfide, twisted by a few degrees, overlap in a large repeating moiré pattern. Here each moiré cell is about 5 nanometres across." },
+      { "id": "mos2_atoms", "name": "Molybdenum and sulfur atoms", "sizeUm": 0.00018, "contrast": 0.05, "contrastIn": { "haadf": 0.6 }, "drawing": "honeycomb", "tint": "#ffffff", "onTop": true,
+        "blurb": "Each layer is a sheet of molybdenum atoms sandwiched between two sheets of sulfur. In projection the molybdenum and sulfur columns sit 0.18 nanometres apart." },
+      { "id": "ptycho_record", "name": "Deep sub-ångström detail", "sizeUm": 0.000039, "contrast": 0.05, "contrastIn": { "ptycho": 0.5 }, "drawing": "atoms", "tint": "#ffffff", "onTop": true,
+        "blurb": "In 2018 electron ptychography with Cornell's EMPAD detector reached a resolution of 0.39 ångström on this material, a world record for any microscope. It works at a gentle 80 kV, so the fragile sheets survive." }
+    ]
+  },
+  {
+    "id": "uranium_film", "name": "Uranium on carbon film", "worldObject": "atom_film", "biome": "lab",
+    "features": [
+      { "id": "uranium_atoms", "name": "Single uranium atoms", "sizeUm": 0.0003, "contrast": 0.03, "contrastIn": { "haadf": 0.8 }, "drawing": "atoms", "tint": "#ffffff",
+        "blurb": "Each bright dot is one uranium atom on a thin carbon film. Albert Crewe's scanning microscope showed single atoms like these in 1970, the first single atoms ever seen with electrons." }
+    ]
+  },
+  {
+    "id": "lysozyme", "name": "Lysozyme crystal", "worldObject": "protein_crystal", "biome": "chess",
+    "features": [
+      { "id": "lysozyme_crystal", "name": "Protein crystal", "sizeUm": 200, "contrast": 0.45, "drawing": "prisms", "tint": "#e0f0ff",
+        "blurb": "This clear crystal is lysozyme, an enzyme from egg white, its molecules stacked in a regular grid with water between them. Lysozyme was the first enzyme whose structure was solved, in 1965." },
+      { "id": "lysozyme_spots", "name": "Protein Bragg spots", "sizeUm": 0.00015, "contrast": 0, "contrastIn": { "xrd": 0.6 }, "drawing": "spots",
+        "blurb": "A protein crystal's huge repeating unit gives thousands of closely spaced spots, out to spacings of about 0.15 nanometres. Cooled to minus 173 degrees to slow radiation damage, it gives the data to build an atomic model of the protein." }
+    ]
+  },
+  {
+    "id": "b12_crystals", "name": "Vitamin B12 crystals", "worldObject": "b12", "biome": "chess",
+    "features": [
+      { "id": "b12_needles", "name": "Red B12 crystals", "sizeUm": 80, "contrast": 0.55, "drawing": "needles", "tint": "#c0302a",
+        "blurb": "Vitamin B12 forms dark red crystals, coloured by the cobalt atom at the heart of each molecule. Dorothy Hodgkin worked out its structure from X-ray patterns by 1956." },
+      { "id": "b12_cobalt", "name": "Cobalt map", "sizeUm": 20, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 7.709, "drawing": "map", "tint": "#4a7aff",
+        "blurb": "Above cobalt's absorption edge at 7.71 keV, each cobalt atom gives off its own X-rays. Every vitamin B12 molecule carries exactly one." },
+      { "id": "b12_spots", "name": "B12 Bragg spots", "sizeUm": 0.00011, "contrast": 0, "contrastIn": { "xrd": 0.6 }, "drawing": "spots",
+        "blurb": "The pattern holds thousands of spots, which Hodgkin's team measured and computed for years, with help from some of the first electronic computers. Vitamin B12 was one of the largest structures solved at the time." }
+    ]
+  },
+  {
+    "id": "dna_fiber", "name": "DNA fibre", "worldObject": "dna_fiber", "biome": "chess",
+    "features": [
+      { "id": "dna_fibre", "name": "DNA fibre", "sizeUm": 30, "contrast": 0.4, "drawing": "fibers", "tint": "#e8e8f8",
+        "blurb": "Pulled from a wet gel of DNA, this thin fibre holds millions of DNA molecules lying side by side. Kept moist, they stay in the B form found in living cells." },
+      { "id": "dna_x", "name": "Helix X pattern", "sizeUm": 0.0034, "contrast": 0, "contrastIn": { "xrd": 0.6 }, "drawing": "helix",
+        "blurb": "A helix scatters X-rays into a cross, and the layer lines of the cross repeat for each 3.4 nanometre turn of the helix. Rosalind Franklin and Raymond Gosling recorded this pattern, Photo 51, in 1952." },
+      { "id": "dna_stacking", "name": "Base stacking arcs", "sizeUm": 0.00034, "contrast": 0, "contrastIn": { "xrd": 0.6 }, "drawing": "helix",
+        "blurb": "Strong arcs at the top and bottom come from the base pairs, stacked 0.34 nanometres apart like the steps of a staircase. Ten steps make one turn." }
+    ]
+  },
+  {
+    "id": "steel_sample", "name": "Steel sample", "worldObject": "steel", "biome": "chess",
+    "features": [
+      { "id": "steel_grains", "name": "Steel grains", "sizeUm": 40, "contrast": 0.4, "drawing": "mosaic", "tint": "#a0a8b0",
+        "blurb": "Polished and etched, steel shows that it is made of many small crystals, or grains, packed together. Smaller grains generally make a stronger steel." },
+      { "id": "grain_map", "name": "3D grain map", "sizeUm": 40, "contrast": 0, "contrastIn": { "xrd": 0.7 }, "drawing": "mosaic",
+        "blurb": "High-energy diffraction microscopy, done at the CHESS FAST beamline, finds the position and orientation of every grain inside a solid piece of metal. Watching the map while the metal is pulled shows how it bends and breaks." },
+      { "id": "ferrite_rings", "name": "Iron lattice rings", "sizeUm": 0.000203, "contrast": 0, "contrastIn": { "xrd": 0.6, "ediff": 0.5 }, "drawing": "rings",
+        "blurb": "Most steel is ferrite, iron atoms in a body-centred cubic lattice, and its strongest ring comes from planes 0.203 nanometres apart. Stress in the metal shifts the rings very slightly, which is how engineers measure stress inside parts." }
+    ]
+  },
+  {
+    "id": "battery_cathode", "name": "Battery cathode", "worldObject": "battery", "biome": "chess",
+    "features": [
+      { "id": "cathode_particles", "name": "Cathode particles", "sizeUm": 10, "contrast": 0.5, "drawing": "cluster", "tint": "#a0a0b4",
+        "blurb": "A lithium-ion battery's cathode is a powder of round particles about 10 micrometres across, each a cluster of smaller crystals. Lithium ions move into and out of them as the battery charges and discharges." },
+      { "id": "cathode_cracks", "name": "Cracks inside particles", "sizeUm": 3, "contrast": 0, "contrastIn": { "xct": 0.6 }, "drawing": "slice", "tint": "#8a8a9a",
+        "blurb": "Tomography looks inside the particles without cutting them, and finds cracks. Every charge swells and shrinks the crystals a little, and over many cycles the particles crack and the battery fades." },
+      { "id": "nickel_map", "name": "Nickel map", "sizeUm": 10, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 8.333, "drawing": "map", "tint": "#6aff8a",
+        "blurb": "Above nickel's absorption edge at 8.33 keV, the map shows where the nickel is, the main metal in this cathode. Maps like this show where a battery wears out first." }
+    ]
+  },
+  {
+    "id": "amber_insect", "name": "Insect in amber", "worldObject": "amber", "biome": "chess",
+    "features": [
+      { "id": "amber_fly", "name": "Fly in amber", "sizeUm": 3000, "contrast": 0.45, "drawing": "critter", "tint": "#d98a2b",
+        "blurb": "This fly was trapped in tree resin tens of millions of years ago, and the resin hardened into amber. Every bristle on its body is still in place." },
+      { "id": "amber_muscles", "name": "Flight muscles", "sizeUm": 50, "contrast": 0, "contrastIn": { "xct": 0.5 }, "drawing": "slice", "tint": "#b08040",
+        "blurb": "Phase-contrast X-ray tomography can find soft tissue inside insects in amber, such as bundles of flight muscle, without breaking the amber. Synchrotrons have revealed whole fossil insects this way." }
+    ]
+  },
+  {
+    "id": "meteorite_slice", "name": "Iron meteorite", "worldObject": "meteorite", "biome": "chess",
+    "features": [
+      { "id": "widmanstatten", "name": "Widmanstätten pattern", "sizeUm": 1000, "contrast": 0.5, "drawing": "lines", "tint": "#a8b0b8",
+        "blurb": "Etched with acid, this iron meteorite shows crossing bands of two iron-nickel alloys. They grew as the metal cooled by only a few degrees per million years inside an asteroid." },
+      { "id": "meteorite_nickel", "name": "Nickel-rich bands", "sizeUm": 20, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 8.333, "drawing": "map", "tint": "#6aff8a",
+        "blurb": "Mapping nickel shows thin nickel-rich taenite bands between broad plates of nickel-poor kamacite. Rocks from Earth's crust almost never hold metallic iron-nickel, so this one came from space." }
+    ]
+  },
+  {
+    "id": "silicon_crystal", "name": "Silicon crystal", "worldObject": "silicon_crystal", "biome": "chess",
+    "features": [
+      { "id": "si_111", "name": "Silicon (111) reflection", "sizeUm": 0.000314, "contrast": 0, "contrastIn": { "xrd": 0.7, "ediff": 0.5 }, "drawing": "spots",
+        "blurb": "Planes of silicon atoms 0.314 nanometres apart reflect X-rays only at the exact angle Bragg's law allows. Perfect silicon crystals like this one pick out a single colour of X-rays in a monochromator." }
+    ]
+  },
+  {
+    "id": "granite", "name": "Granite boulder", "worldObject": "granite", "biome": "eng",
+    "features": [
+      { "id": "granite_minerals", "name": "Three minerals", "sizeUm": 1500, "contrast": 0.6, "drawing": "mosaic", "tint": "#d9c3b8",
+        "blurb": "Granite is a patchwork of three minerals that grew together as molten rock cooled slowly deep underground. The glassy grey grains are quartz, the pink and white ones feldspar, and the black flakes mica." },
+      { "id": "feldspar_twins", "name": "Feldspar twins", "sizeUm": 30, "contrast": 0.35, "drawing": "lines", "tint": "#f0e0d8",
+        "blurb": "Inside the feldspar, thin parallel stripes mark twins, slabs of crystal mirrored across a shared plane. Geologists use the pattern of stripes to tell one kind of feldspar from another." },
+      { "id": "zircon_crystals", "name": "Zircon crystals", "sizeUm": 60, "contrast": 0.3, "drawing": "prisms", "tint": "#e8c8a0",
+        "blurb": "Tiny zircon crystals hide among the larger grains, and they lock in uranium as they grow. Measuring how much of that uranium has decayed to lead dates the granite, often to hundreds of millions of years." },
+      { "id": "potassium_map", "name": "Potassium map", "sizeUm": 300, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 3.608, "drawing": "map", "tint": "#ff9ad0",
+        "blurb": "Above potassium's absorption edge at 3.61 keV, the pink feldspar grains light up, because they are rich in potassium. A little of that potassium is radioactive, which is why granite buildings have slightly more background radiation." }
+    ]
+  },
+  {
+    "id": "basalt", "name": "Black basalt", "worldObject": "basalt", "biome": "eng",
+    "features": [
+      { "id": "plagioclase_laths", "name": "Plagioclase laths", "sizeUm": 150, "contrast": 0.45, "drawing": "needles", "tint": "#e8e4dc",
+        "blurb": "Basalt is lava that cooled quickly at the surface, so its crystals stayed small. The pale needles are plagioclase feldspar, often jumbled like spilled matchsticks." },
+      { "id": "olivine_crystals", "name": "Olivine crystals", "sizeUm": 400, "contrast": 0.5, "drawing": "facets", "tint": "#9aae4a",
+        "blurb": "The bottle-green crystals are olivine, a magnesium iron silicate and the most common mineral in Earth's upper mantle. Gem-quality olivine is called peridot." },
+      { "id": "basalt_vesicles", "name": "Gas bubbles", "sizeUm": 800, "contrast": 0.4, "drawing": "droplets", "tint": "#2a2a2a",
+        "blurb": "Round holes called vesicles were gas bubbles in the lava, frozen in place as it set. Lava full of bubbles becomes scoria, light enough to lift a big lump with one hand." }
+    ]
+  },
+  {
+    "id": "obsidian", "name": "Obsidian", "worldObject": "obsidian", "biome": "eng",
+    "features": [
+      { "id": "obsidian_bands", "name": "Flow bands", "sizeUm": 60, "contrast": 0.3, "drawing": "lines", "tint": "#4a4a52",
+        "blurb": "Obsidian is volcanic glass, lava that cooled too fast for crystals to form. Faint bands show how the sticky melt flowed and stretched before it froze." },
+      { "id": "obsidian_microlites", "name": "Microlites", "sizeUm": 3, "contrast": 0.4, "drawing": "needles", "tint": "#c8c8d0",
+        "blurb": "A few hair-thin crystals, called microlites, managed to start growing before the glass froze. Their sizes record how fast the lava cooled." },
+      { "id": "obsidian_halo", "name": "Glassy halo", "sizeUm": 0.00042, "contrast": 0, "contrastIn": { "ediff": 0.45, "xrd": 0.45 }, "drawing": "rings",
+        "blurb": "A glass has no repeating lattice, so instead of sharp rings it gives one broad, fuzzy halo. Its width says the atoms are ordered only out to their nearest few neighbours." }
+    ]
+  },
+  {
+    "id": "marble", "name": "White marble", "worldObject": "marble", "biome": "eng",
+    "features": [
+      { "id": "marble_grains", "name": "Calcite grains", "sizeUm": 500, "contrast": 0.45, "drawing": "mosaic", "tint": "#f0ece4",
+        "blurb": "Marble is limestone that was buried, squeezed and heated until its grains regrew into an interlocking mosaic of calcite. The grains catch light on their flat cleavage faces, which makes marble sparkle." },
+      { "id": "calcite_twin_lamellae", "name": "Twin lamellae", "sizeUm": 15, "contrast": 0.35, "drawing": "lines", "tint": "#ddd8cc",
+        "blurb": "Fine parallel stripes cross many grains: twins pressed into the calcite as the rock was squeezed. Geologists count them to estimate how hard the rock was pushed." },
+      { "id": "calcite_rings", "name": "Calcite rings", "sizeUm": 0.000304, "contrast": 0, "contrastIn": { "xrd": 0.6, "ediff": 0.5 }, "drawing": "rings",
+        "blurb": "Calcite's strongest diffraction ring comes from atomic planes 0.304 nanometres apart. Every crystalline mineral has its own set of rings, so the pattern identifies it like a fingerprint." }
+    ]
+  },
+  {
+    "id": "chalk", "name": "Chalk", "worldObject": "chalk", "biome": "eng",
+    "features": [
+      { "id": "coccoliths", "name": "Coccoliths", "sizeUm": 6, "contrast": 0.5, "drawing": "discs", "tint": "#f4f2ea",
+        "blurb": "Chalk is made almost entirely of coccoliths, tiny shields of calcite shed by single-celled algae in ancient seas. The white cliffs of Dover are countless trillions of them, piled up over millions of years." },
+      { "id": "coccolith_plates", "name": "Calcite elements", "sizeUm": 0.4, "contrast": 0.45, "drawing": "prisms", "tint": "#ffffff", "onTop": true,
+        "blurb": "Each coccolith is built from a ring of interlocking calcite crystals, each smaller than a micrometre. The algae grow them inside the cell and push them out to the surface, a feat materials chemists still try to copy." },
+      { "id": "forams", "name": "Foraminifera", "sizeUm": 80, "contrast": 0.4, "drawing": "rings", "tint": "#e8e0d0",
+        "blurb": "Larger chambered shells belong to foraminifera, single-celled creatures that build spiral homes of calcite. The chemistry of their shells records the temperature of the sea they lived in." }
+    ]
+  },
+  {
+    "id": "pyrite", "name": "Fool's gold", "worldObject": "pyrite", "biome": "eng",
+    "features": [
+      { "id": "pyrite_cubes", "name": "Pyrite cubes", "sizeUm": 400, "contrast": 0.6, "drawing": "cubes", "tint": "#d4b44a",
+        "blurb": "Pyrite, iron sulfide, grows in near-perfect brassy cubes and fooled many gold prospectors. Unlike gold, it is hard and brittle and leaves a black streak." },
+      { "id": "pyrite_framboids", "name": "Framboids", "sizeUm": 10, "contrast": 0.45, "drawing": "cluster", "tint": "#c8a840",
+        "blurb": "Some pyrite grows as framboids, raspberry-shaped balls of thousands of tiny crystals. They form in mud without oxygen, where bacteria release sulfide, so they mark ancient seafloors." },
+      { "id": "pyrite_iron", "name": "Iron map", "sizeUm": 50, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 7.112, "drawing": "map", "tint": "#ff7a4a",
+        "blurb": "Above iron's absorption edge at 7.11 keV, every pyrite grain lights up. When pyrite weathers it makes sulfuric acid, a major cause of acid water draining from old mines." }
+    ]
+  },
+  {
+    "id": "malachite", "name": "Green-banded stone", "worldObject": "malachite", "biome": "eng",
+    "features": [
+      { "id": "malachite_bands", "name": "Growth bands", "sizeUm": 300, "contrast": 0.5, "drawing": "rings", "tint": "#3a9a62",
+        "blurb": "Malachite, a copper carbonate, grows in layers like tree rings, light and dark green. Each band records a change in the water that deposited it." },
+      { "id": "malachite_fibres", "name": "Radiating fibres", "sizeUm": 2, "contrast": 0.4, "drawing": "needles", "tint": "#5ac088",
+        "blurb": "Under a microscope the bands are made of thin fibres that fan outward from a centre. The fibres grew side by side, crowding each other into the same direction." },
+      { "id": "malachite_copper", "name": "Copper map", "sizeUm": 100, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 8.979, "drawing": "map", "tint": "#f08a3a",
+        "blurb": "Above copper's absorption edge at 8.98 keV, the whole stone lights up, because more than half its weight is copper. Malachite was once ground up as green paint and is still an ore of copper." }
+    ]
+  },
+  {
+    "id": "magnetite", "name": "Lodestone", "worldObject": "magnetite", "biome": "eng",
+    "features": [
+      { "id": "magnetite_octahedra", "name": "Magnetite octahedra", "sizeUm": 300, "contrast": 0.55, "drawing": "facets", "tint": "#3a3c42",
+        "blurb": "Magnetite, an iron oxide, grows as small black eight-sided crystals. It is the most magnetic natural mineral, and pieces called lodestones made the first compasses." },
+      { "id": "ilmenite_lamellae", "name": "Ilmenite lamellae", "sizeUm": 4, "contrast": 0.35, "drawing": "lines", "tint": "#8a8a90",
+        "blurb": "Thin plates of ilmenite cross the grains in three directions. They separated out of the magnetite as it cooled, the way frost grows on a window." },
+      { "id": "magnetite_fringes", "name": "Spinel lattice", "sizeUm": 0.000297, "contrast": 0.4, "drawing": "lattice", "tint": "#e0e0e8", "onTop": true,
+        "blurb": "Magnetite is a spinel, with iron atoms in two kinds of sites between closely packed oxygens. These fringes are planes of atoms 0.297 nanometres apart." }
+    ]
+  },
+  {
+    "id": "garnet_schist", "name": "Garnet schist", "worldObject": "garnet", "biome": "eng",
+    "features": [
+      { "id": "garnet_crystals", "name": "Garnet crystals", "sizeUm": 2000, "contrast": 0.6, "drawing": "facets", "tint": "#8a2433",
+        "blurb": "The red balls are garnets that grew inside the rock while it was cooked and squeezed deep in a mountain belt. Their twelve-sided shapes push the surrounding layers aside." },
+      { "id": "schist_foliation", "name": "Mica layers", "sizeUm": 40, "contrast": 0.35, "drawing": "lines", "tint": "#c8c4b8",
+        "blurb": "Flakes of mica lie flat in parallel layers, which is why schist splits into sheets. The layers lie at right angles to the squeeze that made them." }
+    ]
+  },
+  {
+    "id": "concrete", "name": "Concrete block", "worldObject": "concrete", "biome": "eng",
+    "features": [
+      { "id": "concrete_aggregate", "name": "Sand and gravel", "sizeUm": 1000, "contrast": 0.5, "drawing": "grains", "tint": "#b8b0a4",
+        "blurb": "Concrete is mostly sand and gravel, glued together by a paste of cement and water. The stones carry the load, and the paste fills the gaps between them." },
+      { "id": "portlandite_plates", "name": "Portlandite plates", "sizeUm": 8, "contrast": 0.4, "drawing": "prisms", "tint": "#e8e8e0",
+        "blurb": "As cement reacts with water it grows six-sided plates of portlandite, calcium hydroxide. They make concrete strongly alkaline, which protects the steel bars inside from rusting." },
+      { "id": "ettringite_needles", "name": "Ettringite needles", "sizeUm": 0.6, "contrast": 0.4, "drawing": "needles", "tint": "#f0f0f0",
+        "blurb": "Fine needles of ettringite grow in the first hours after mixing. They help the paste stiffen, but if they form late in hardened concrete they can crack it apart." },
+      { "id": "csh_gel", "name": "Cement gel", "sizeUm": 0.005, "contrast": 0.35, "drawing": "cluster", "tint": "#c8c8c8",
+        "blurb": "The real glue is calcium silicate hydrate, a gel of sheets only a few nanometres across with no regular lattice. It is what holds together concrete, the most used material on Earth after water." }
+    ]
+  },
+  {
+    "id": "rusty_steel", "name": "Rusty steel beam", "worldObject": "ibeam", "biome": "eng",
+    "features": [
+      { "id": "rust_layers", "name": "Rust layers", "sizeUm": 30, "contrast": 0.45, "drawing": "lines", "tint": "#a0522d",
+        "blurb": "Rust is not one substance but layers of iron oxides and hydroxides that grow outward from the steel. Water and oxygen seep through cracks between the layers, so rust keeps eating in." },
+      { "id": "pearlite", "name": "Pearlite", "sizeUm": 0.4, "contrast": 0.45, "drawing": "lines", "tint": "#c0c8d0",
+        "blurb": "Polished and etched, the steel shows pearlite, thin alternating plates of soft iron and hard iron carbide. The finer the plates, the stronger the steel." },
+      { "id": "lepidocrocite", "name": "Rust crystals", "sizeUm": 0.08, "contrast": 0.4, "drawing": "needles", "tint": "#d07a3a",
+        "blurb": "At high magnification the rust is a felt of tiny orange crystals, mostly lepidocrocite and goethite. Their shapes tell corrosion scientists how wet the steel has been." }
+    ]
+  },
+  {
+    "id": "brick", "name": "Red brick", "worldObject": "brick", "biome": "eng",
+    "features": [
+      { "id": "brick_quartz", "name": "Quartz grains", "sizeUm": 150, "contrast": 0.4, "drawing": "grains", "tint": "#e0d0c0",
+        "blurb": "A brick is clay mixed with sand and fired in a kiln at around a thousand degrees Celsius. The sand grains survive the firing and act like the gravel in concrete." },
+      { "id": "brick_pores", "name": "Pores", "sizeUm": 30, "contrast": 0.4, "drawing": "droplets", "tint": "#3a2a22",
+        "blurb": "Water and burned-off plant matter leave pores behind, which make bricks lighter and better insulators. The pores also soak up rain, so frost can crack a brick from inside." },
+      { "id": "mullite_needles", "name": "Mullite needles", "sizeUm": 0.3, "contrast": 0.35, "drawing": "needles", "tint": "#f0e0d0",
+        "blurb": "In the hottest part of the kiln, clay turns into needles of mullite, an aluminium silicate. A tangle of these needles is what makes fired brick and porcelain so hard." },
+      { "id": "brick_hematite", "name": "Hematite specks", "sizeUm": 0.05, "contrast": 0.4, "drawing": "spots", "tint": "#c0302a",
+        "blurb": "Bricks are red because of tiny specks of hematite, iron oxide, formed from iron in the clay. Fire the same clay with little air and the iron forms a different oxide, so the brick comes out dark." }
+    ]
+  },
+  {
+    "id": "solar_cell", "name": "Solar panel", "worldObject": "solar", "biome": "eng",
+    "features": [
+      { "id": "silver_fingers", "name": "Silver fingers", "sizeUm": 50, "contrast": 0.55, "drawing": "lines", "tint": "#e8e8e8",
+        "blurb": "The thin silver lines printed across the cell collect the current, each about as wide as a hair. They are kept thin to shade as little of the silicon as possible." },
+      { "id": "solar_pyramids", "name": "Light-trapping pyramids", "sizeUm": 4, "contrast": 0.45, "drawing": "facets", "tint": "#2a3a6a",
+        "blurb": "The silicon surface is etched into tiny pyramids, so light that bounces off one face hits another. Trapping light this way, together with a blue coating, makes the cell look nearly black." },
+      { "id": "sinx_coating", "name": "Antireflection coating", "sizeUm": 0.075, "contrast": 0.35, "drawing": "lines", "tint": "#4a6ab0", "onTop": true,
+        "blurb": "A layer of silicon nitride about 75 nanometres thick coats the pyramids. Its thickness is tuned so that reflected light cancels itself out, the same trick used on camera lenses." },
+      { "id": "silver_map", "name": "Silver map", "sizeUm": 50, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 3.351, "drawing": "map", "tint": "#d0d8ff",
+        "blurb": "Above silver's absorption edge at 3.35 keV, the printed fingers light up. Solar panels use about a tenth of the world's silver, so engineers are working to replace it with copper." }
+    ]
+  },
+  {
+    "id": "catalytic_converter", "name": "Catalytic converter", "worldObject": "catconv", "biome": "eng",
+    "features": [
+      { "id": "converter_cells", "name": "Honeycomb channels", "sizeUm": 1000, "contrast": 0.55, "drawing": "honeycomb", "tint": "#d8d0c0",
+        "blurb": "Inside a car's catalytic converter, exhaust flows through a ceramic honeycomb with hundreds of tiny channels. The thin walls pack a large surface into a small box." },
+      { "id": "washcoat", "name": "Alumina washcoat", "sizeUm": 15, "contrast": 0.4, "drawing": "cluster", "tint": "#e8e0d4",
+        "blurb": "The channel walls are coated with a porous layer of alumina and ceria. Its pores give the gases a surface the size of several football fields to touch." },
+      { "id": "platinum_particles", "name": "Platinum nanoparticles", "sizeUm": 0.002, "contrast": 0.1, "contrastIn": { "tem": 0.25, "haadf": 0.8 }, "drawing": "droplets", "tint": "#ffffff", "onTop": true,
+        "blurb": "Scattered over the coating are platinum and palladium particles only a couple of nanometres across. They turn carbon monoxide and unburned fuel into carbon dioxide and water, and annular dark field makes the heavy metal atoms shine." },
+      { "id": "platinum_map", "name": "Platinum map", "sizeUm": 50, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 11.564, "drawing": "map", "tint": "#e0e0ff",
+        "blurb": "Above platinum's L edge at 11.56 keV, the map shows where the precious metal sits along the channels. Converters lose activity as the particles clump together, and maps like this show where it happens first." }
+    ]
+  },
+  {
+    "id": "bell_bronze", "name": "Bronze chime bell", "worldObject": "bell", "biome": "meadow",
+    "features": [
+      { "id": "bronze_dendrites", "name": "Cast dendrites", "sizeUm": 200, "contrast": 0.45, "drawing": "veins", "tint": "#c89a4a",
+        "blurb": "Bell bronze is about four parts copper to one part tin, poured molten into a mould. As it cooled, copper-rich crystals grew in branching tree shapes called dendrites." },
+      { "id": "bronze_delta", "name": "Tin-rich phase", "sizeUm": 8, "contrast": 0.4, "drawing": "cluster", "tint": "#e8d8b0",
+        "blurb": "Between the dendrites, the last metal to freeze is rich in tin and forms a hard, brittle phase. That phase helps a bell ring clearly, but it also means a bell can crack if struck too hard." },
+      { "id": "bronze_patina", "name": "Green patina", "sizeUm": 3, "contrast": 0.45, "drawing": "droplets", "tint": "#4aa082",
+        "blurb": "Outdoors, the bronze slowly grows a green skin of copper sulfates and carbonates. The patina protects the metal underneath, so old bells and statues last for centuries." },
+      { "id": "tin_map", "name": "Tin map", "sizeUm": 200, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 3.929, "drawing": "map", "tint": "#a0e0ff",
+        "blurb": "Above tin's L edge at 3.93 keV, the map shows tin piled up between the dendrites. Bell founders cool their bells slowly and evenly, because unevenly spread tin can spoil the tone." }
+    ]
+  },
+  {
+    "id": "quantum_dots", "name": "Quantum dots", "worldObject": "qdots", "biome": "eng",
+    "features": [
+      { "id": "qd_glow", "name": "Orange glow", "sizeUm": 20, "contrast": 0, "contrastIn": { "fluorescence": 0.7 }, "drawing": "glow", "tint": "#ff7a3a",
+        "blurb": "A vial of quantum dots glows a pure colour set by the size of the particles, not by what they are made of. Smaller dots glow bluer and larger ones redder, which is why they are used in bright television screens." },
+      { "id": "qd_particles", "name": "Nanocrystals", "sizeUm": 0.005, "contrast": 0.45, "drawing": "droplets", "tint": "#e0e0d8",
+        "blurb": "Each dot is a crystal of cadmium selenide only about 5 nanometres across, a few thousand atoms. In so small a crystal the electrons are squeezed so tightly that the size sets the energy of the light." },
+      { "id": "qd_lattice", "name": "Dot lattice", "sizeUm": 0.00035, "contrast": 0.3, "contrastIn": { "haadf": 0.6 }, "drawing": "lattice", "tint": "#ffffff", "onTop": true,
+        "blurb": "Rows of atoms 0.35 nanometres apart run straight across each dot, so every dot is a single perfect crystal. A thin shell of zinc sulfide grown on top keeps the glow bright." }
+    ]
+  },
+  {
+    "id": "nanotubes", "name": "Carbon nanotubes", "worldObject": "nanotubes", "biome": "eng",
+    "features": [
+      { "id": "cnt_bundles", "name": "Nanotube bundles", "sizeUm": 0.02, "contrast": 0.4, "drawing": "fibers", "tint": "#5a5a5a",
+        "blurb": "This black powder is a tangle of carbon nanotubes, stuck together side by side in ropes about 20 nanometres thick. Weight for weight, a single tube is many times stronger than steel." },
+      { "id": "cnt_walls", "name": "Tube walls", "sizeUm": 0.00034, "contrast": 0.4, "drawing": "lines", "tint": "#e0e0e0", "onTop": true,
+        "blurb": "Seen from the side, each tube shows its walls as dark lines 0.34 nanometres apart. Tubes can have one wall or many nested inside each other like the rings of a tree." },
+      { "id": "cnt_honeycomb", "name": "Rolled honeycomb", "sizeUm": 0.000142, "contrast": 0.2, "contrastIn": { "haadf": 0.45 }, "drawing": "honeycomb", "tint": "#e0e8f0", "onTop": true,
+        "blurb": "A nanotube is a sheet of graphene rolled into a seamless cylinder. The angle at which the honeycomb is rolled decides whether the tube conducts like a metal or a semiconductor." }
+    ]
+  },
+  {
+    "id": "zeolite", "name": "Zeolite crystals", "worldObject": "zeolite", "biome": "eng",
+    "features": [
+      { "id": "zeolite_cubes", "name": "Zeolite cubes", "sizeUm": 2, "contrast": 0.45, "drawing": "cubes", "tint": "#f0f0f4",
+        "blurb": "Zeolites are aluminium silicate crystals riddled with channels just wide enough for small molecules. These cubes are zeolite A, the kind put in laundry detergent to soften water." },
+      { "id": "zeolite_pores", "name": "Molecular pores", "sizeUm": 0.0004, "contrast": 0.1, "contrastIn": { "ptycho": 0.55, "haadf": 0.25 }, "drawing": "honeycomb", "tint": "#a0c8ff", "onTop": true,
+        "blurb": "Ptychography shows the open rings of the framework, each pore about 0.4 nanometres wide. Zeolites like this one sort molecules by shape, and related zeolites turn crude oil into petrol." }
+    ]
+  },
+  {
+    "id": "mof", "name": "Metal-organic framework", "worldObject": "mof", "biome": "eng",
+    "features": [
+      { "id": "mof_crystals", "name": "MOF crystals", "sizeUm": 50, "contrast": 0.45, "drawing": "cubes", "tint": "#e8f0ff",
+        "blurb": "Metal-organic frameworks are crystals built from metal clusters joined by organic struts, like a molecular climbing frame. One gram of some of them has an inner surface bigger than a football field." },
+      { "id": "mof_spots", "name": "Framework spots", "sizeUm": 0.0013, "contrast": 0, "contrastIn": { "xrd": 0.6 }, "drawing": "spots",
+        "blurb": "The framework repeats every 1.3 nanometres, far wider than an ordinary crystal, so its diffraction spots crowd close to the centre. Metal-organic frameworks earned the 2025 Nobel Prize in Chemistry, and diffraction is how chemists check they built the framework they designed." }
+    ]
+  },
+  {
+    "id": "superconductor", "name": "Superconductor pellet", "worldObject": "ybco", "biome": "eng",
+    "features": [
+      { "id": "ybco_grains", "name": "Superconductor grains", "sizeUm": 20, "contrast": 0.4, "drawing": "mosaic", "tint": "#4a4a54",
+        "blurb": "This black pellet is yttrium barium copper oxide, which carries electricity with zero resistance when cooled with liquid nitrogen. Below that temperature it pushes magnetic fields out, so a magnet floats above it." },
+      { "id": "ybco_twins", "name": "Twin domains", "sizeUm": 0.2, "contrast": 0.3, "drawing": "lines", "tint": "#5a5a68",
+        "blurb": "Each grain is crossed by fine twins where the crystal's two slightly unequal axes swap direction. The twin boundaries help pin magnetic vortices, which lets the material carry more current." },
+      { "id": "cuo_planes", "name": "Copper-oxide layers", "sizeUm": 0.00117, "contrast": 0.4, "drawing": "lattice", "tint": "#e0e0f0", "onTop": true,
+        "blurb": "The crystal is a stack of layers that repeats every 1.17 nanometres. Electrons pair up and flow freely in its copper-oxide planes, and exactly how they do it is still debated." },
+      { "id": "ybco_columns", "name": "Heavy-atom columns", "sizeUm": 0.00039, "contrast": 0.05, "contrastIn": { "haadf": 0.7 }, "drawing": "atoms", "tint": "#ffffff", "onTop": true,
+        "blurb": "In annular dark field the barium and yttrium columns glow brightest because they are heaviest. Missing oxygen between them, invisible here, decides whether the crystal superconducts at all." }
+    ]
+  },
+  {
+    "id": "blue_led", "name": "Blue LED chip", "worldObject": "led", "biome": "eng",
+    "features": [
+      { "id": "led_glow", "name": "Blue glow", "sizeUm": 20, "contrast": 0, "contrastIn": { "fluorescence": 0.7 }, "drawing": "glow", "tint": "#5a6aff",
+        "blurb": "Shine ultraviolet light on the chip and it glows blue, the same light it makes when current flows. The 2014 Nobel Prize in Physics went to the inventors of the efficient blue LED, which made white LED lighting possible." },
+      { "id": "quantum_wells", "name": "Quantum wells", "sizeUm": 0.003, "contrast": 0.1, "contrastIn": { "tem": 0.35, "haadf": 0.7 }, "drawing": "lines", "tint": "#e8e8ff",
+        "blurb": "The light comes from layers of indium gallium nitride only about 3 nanometres thick, sandwiched in gallium nitride. Indium is heavier than gallium, so in annular dark field the wells show as bright stripes." },
+      { "id": "threading_dislocations", "name": "Threading dislocations", "sizeUm": 0.02, "contrast": 0.35, "drawing": "needles", "tint": "#c0c0d0",
+        "blurb": "Gallium nitride grown on sapphire is full of dislocations, lines of misfit atoms running up through the layers. Remarkably the LED glows brightly anyway, a puzzle that took years to explain." },
+      { "id": "gallium_map", "name": "Gallium map", "sizeUm": 20, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 10.367, "drawing": "map", "tint": "#8aff8a",
+        "blurb": "Above gallium's absorption edge at 10.37 keV, the chip's whole active area lights up. Gallium also goes into the chips that send signals in phones, so it is counted as a critical material." }
     ]
   }
 ]

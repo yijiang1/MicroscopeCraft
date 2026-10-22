@@ -1,12 +1,17 @@
-// Person D. The goal card (always visible, keyboard-first), a menu panel (Tab) with inventory, every recipe and
-// the guide, the Microdex (M), toasts and sound. Plain DOM; swap for anything.
-import { canCraft, craft, type GameContext } from '../shared/state';
+// Person D. The goal card (always visible, keyboard-first), a menu panel (Tab) with the guide, the tech tree (T),
+// the Microdex (M), toasts and sound. Plain DOM; swap for anything.
+import { SAVE_KEY, toSave, type GameContext } from '../shared/state';
 import { fmtUm } from '../shared/sim/walls';
+import { allAchievements } from '../shared/achievements';
+import { mountDialog } from './dialog';
 import { mountGoal } from './goal';
 import { mountInventory } from './inventory';
+import { mountJournal } from './journal';
 import { mountMicrodex } from './microdex';
 import { mountSound } from './sound';
+import { mountTechTree } from './techtree';
 import { createToast } from './toast';
+import { mountTutorial, TUTORIAL_KEY } from './tutorial';
 
 export interface UIHandle {
   dispose(): void;
@@ -17,17 +22,38 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   const microdex = mountMicrodex(document.body, ctx);
   const sound = mountSound(ctx);
   const inventory = mountInventory(ctx);
+  const techTree = mountTechTree(document.body, ctx);
+  const journal = mountJournal(document.body, ctx);
+  const closeDialog = mountDialog(ctx, toast);
+  const tutorial = mountTutorial(ctx);
 
-  // --- menu panel (hidden until Tab): inventory, every recipe, microdex button, sound, guide
+  // --- menu panel (hidden until Tab): tech tree and microdex buttons, sound, guide
   el.style.cssText += ';background:#000d;padding:8px;box-sizing:border-box;display:none';
-  const inv = document.createElement('div');
+  const tree = document.createElement('button');
   const dex = document.createElement('button');
+  const journalBtn = document.createElement('button');
   const mute = document.createElement('button');
   const guide = document.createElement('div');
   const input = document.createElement('input');
   const reply = document.createElement('p');
-  dex.style.cssText = 'display:block;width:100%;margin:8px 0';
+  tree.style.cssText = 'display:block;width:100%;margin:8px 0 2px';
+  tree.textContent = 'Tech tree (T)';
+  tree.onclick = () => techTree.toggle();
+  dex.style.cssText = 'display:block;width:100%;margin:2px 0';
   dex.onclick = () => microdex.toggle();
+  journalBtn.style.cssText = 'display:block;width:100%;margin:2px 0';
+  journalBtn.onclick = () => journal.toggle();
+  const tutorialBtn = document.createElement('button');
+  tutorialBtn.style.cssText = 'display:block;width:100%;margin:2px 0';
+  tutorialBtn.textContent = 'Tutorial';
+  tutorialBtn.onclick = () => {
+    setMenu(false);
+    tutorial.replay();
+  };
+  const refsBtn = document.createElement('button');
+  refsBtn.style.cssText = 'display:block;width:100%;margin:2px 0';
+  refsBtn.textContent = 'References';
+  refsBtn.onclick = () => journal.toggle('references');
   mute.style.cssText = 'display:block;width:100%;margin:2px 0';
   const syncMute = () => (mute.textContent = sound.muted() ? 'Sound: off' : 'Sound: on');
   mute.onclick = () => {
@@ -35,6 +61,40 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
     syncMute();
   };
   syncMute();
+  // --- save (also automatic after every change and on leaving the page) and restart
+  const saveBtn = document.createElement('button');
+  const restart = document.createElement('button');
+  saveBtn.style.cssText = restart.style.cssText = 'display:block;width:100%;margin:2px 0';
+  saveBtn.textContent = 'Save game';
+  restart.textContent = 'Restart game';
+  let resetting = false;
+  const save = (): boolean => {
+    if (resetting) return false;
+    try {
+      localStorage.setItem(SAVE_KEY, JSON.stringify(toSave(ctx.state)));
+    } catch {
+      // ponytail: quota full (snapshots are images) → keep progress, drop the pictures
+      try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify({ ...toSave(ctx.state), snapshots: {} }));
+      } catch {
+        return false;
+      }
+    }
+    return true;
+  };
+  saveBtn.onclick = () => toast.notify(save() ? 'Game saved' : 'Could not save (browser storage blocked)', 1600, 2);
+  restart.onclick = () => {
+    if (!confirm('Restart from scratch? Your inventory, microscopes and Microdex will be erased.')) return;
+    resetting = true;
+    try {
+      localStorage.removeItem(SAVE_KEY);
+      localStorage.removeItem(TUTORIAL_KEY);
+    } catch {
+      /* nothing saved */
+    }
+    location.reload();
+  };
+  addEventListener('pagehide', save);
   input.placeholder = 'Ask the guide (try "where do I find sand?")';
   input.style.cssText = 'width:100%;box-sizing:border-box';
   input.addEventListener('keydown', (e) => {
@@ -52,7 +112,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   const title = document.createElement('h4');
   title.textContent = 'Menu (Tab to close)';
   title.style.margin = '4px 0 8px';
-  el.append(title, inv, dex, mute, guide);
+  el.append(title, tree, dex, journalBtn, refsBtn, tutorialBtn, mute, saveBtn, restart, guide);
 
   let menuOpen = false;
   const setMenu = (open: boolean) => {
@@ -61,27 +121,11 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
     document.documentElement.style.setProperty('--panel-w', open ? 'min(260px, 85vw)' : '0px');
     if (open) document.exitPointerLock?.(); // free the mouse so the menu can be clicked
   };
-  const goal = mountGoal(ctx, toast, () => setMenu(!menuOpen));
+  const goal = mountGoal(ctx, toast, () => setMenu(!menuOpen), inventory.el);
 
   const render = () => {
-    const { data } = ctx;
-    inv.replaceChildren();
-    const all = document.createElement('details');
-    const sum = document.createElement('summary');
-    sum.textContent = 'All recipes';
-    sum.style.cssText = 'cursor:pointer;font-weight:600;margin:8px 0 4px';
-    all.append(sum);
-    for (const r of data.recipes) {
-      const b = document.createElement('button');
-      b.textContent = r.name;
-      b.title = `Uses ${r.inputs.map((x) => `${x.count} ${data.items[x.itemId]?.name ?? x.itemId}`).join(' + ')}`;
-      b.disabled = !canCraft(ctx, r.id);
-      b.style.cssText = 'display:block;margin:2px 0;width:100%';
-      b.onclick = () => craft(ctx, r.id);
-      all.append(b);
-    }
-    inv.append(all);
     dex.textContent = `Microdex (M) · ${microdex.summary()}`;
+    journalBtn.textContent = `Journal (J) · ${journal.summary()}`;
   };
   render();
 
@@ -100,15 +144,29 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
 
   const name = (id: string) => ctx.data.items[id]?.name ?? id;
   const offs = [
-    ctx.bus.on('itemGathered', ({ itemId, count }) => {
+    ...(['itemGathered', 'itemCrafted', 'discoveryUnlocked', 'scopeChanged', 'questCompleted', 'achievementUnlocked', 'minigameScored', 'areaVisited', 'closeEyepiece'] as const).map((t) => ctx.bus.on(t, save)),
+    ctx.bus.on('itemGathered',({ itemId, count }) => {
       render();
       toast.notify(`+${count} ${name(itemId)}`, 1200);
     }),
     ctx.bus.on('itemCrafted', render),
     ctx.bus.on('tierChanged', ({ tier }) => {
       const built = ctx.data.recipes.find((r) => r.scope?.tier === tier);
-      if (built) toast.notify(`You built the ${built.name}! Aim at something and press F to look closer.`, 6000, 3);
+      const how = built?.scope?.site === 'chess'
+        ? 'It is in the CHESS hall of Wilson Lab (east of campus): look (F) at a sample to take some, then carry it there and press F at the control desk.'
+        : built?.scope?.site
+        ? 'It is installed in the lab of the science building (south-east): look (F) at a sample to take some, then carry it there.'
+        : tier === 4
+        ? 'Aim at something and press F; switch to fluorescence in the eyepiece. Phase contrast and dark field are add-ons you can build next.'
+        : 'Aim at something and press F to look closer.';
+      if (built) toast.notify(`You built the ${built.name}! ${how}`, 8000, 3);
     }),
+    ctx.bus.on('achievementUnlocked', ({ id }) => {
+      render();
+      const a = allAchievements(ctx.data).find((x) => x.id === id);
+      if (a) toast.notify(`🏆 Achievement: ${a.name}`, 3500, 3);
+    }),
+    ctx.bus.on('questCompleted', () => render()),
     ctx.bus.on('discoveryUnlocked', ({ id }) => {
       render();
       const f = Object.values(ctx.data.samples).flatMap((x) => x.features).find((x) => x.id === id);
@@ -123,8 +181,13 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
     dispose() {
       offs.forEach((off) => off());
       removeEventListener('keydown', onKey);
+      removeEventListener('pagehide', save);
       goal.dispose();
+      journal.dispose();
+      closeDialog();
+      tutorial.dispose();
       inventory.dispose();
+      techTree.dispose();
       microdex.dispose();
       sound.dispose();
       toast.dispose();

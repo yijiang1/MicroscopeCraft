@@ -42,7 +42,7 @@ describe('the three walls of the tech tree', () => {
     expect(visibility(feature('pond_virus'), em).visible).toBe(true);
     const msg = explainWall({ name: 'Single atom', sizeUm: 0.0001, contrast: 0.5 }, scopeAt('electron_microscope', 3))!;
     expect(msg).toMatch(/lens errors.*aberration correctors/);
-    expect(msg).toMatch(/0\.24 nm/);
+    expect(msg).toMatch(/0\.22 nm/);
   });
 
   it('visible features have no wall; fmtUm picks sensible units', () => {

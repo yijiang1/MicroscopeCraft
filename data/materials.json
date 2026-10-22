@@ -1,10 +1,19 @@
 [
-  {"id": "beach_sand", "name": "Beach sand", "color": "#e8d9a0", "properties": {"purity": 0.6}, "where": "Tan sand mounds on the pond shore, west of the spawn"},
-  {"id": "quartz_sand", "name": "Quartz sand", "color": "#f4f1ea", "properties": {"purity": 0.95}, "where": "White crystal clusters in the rocky highlands, about 22 m east"},
-  {"id": "iron_ore", "name": "Iron ore", "color": "#8a5a44", "properties": {"strength": 0.7}, "where": "Dark rust-flecked rocks in the highlands, about 15 m east"},
-  {"id": "copper_ore", "name": "Copper ore", "color": "#c27d4a", "properties": {"conductivity": 0.9}, "where": "Plain grey rocks in the highlands, about 25 m east. Look at one with your hand lens (F) to find out what it is", "unlockedBy": "copper_veins"},
-  {"id": "plant_oil", "name": "Plant oil", "color": "#d9c84a", "properties": {"refractiveIndex": 1.47}, "where": "Sunflowers north-west of the spawn. Look at a sunflower seed with a compound microscope (F) to find the oil", "unlockedBy": "seed_oil"},
+  {"id": "beach_sand", "name": "Beach sand", "color": "#e8d9a0", "properties": {"purity": 0.6}, "where": "Tan sand mounds on the south shore of the lake, just ahead of where you start"},
+  {"id": "quartz_sand", "name": "Quartz sand", "color": "#f4f1ea", "properties": {"purity": 0.95}, "where": "White crystal clusters on the rim of the gorge, north-west behind the west row of halls"},
+  {"id": "iron_ore", "name": "Iron ore", "color": "#8a5a44", "properties": {"strength": 0.7}, "where": "Dark rust-flecked rocks on the rim of the gorge, west of the lake near the waterfall, and more at the top of the west slope"},
+  {"id": "copper_ore", "name": "Copper ore", "color": "#c27d4a", "properties": {"conductivity": 0.9}, "where": "Plain grey rocks on the west slope, west below the clock tower, and more just west of the library. Look at one with your hand lens (F) to find out what it is", "unlockedBy": "copper_veins"},
+  {"id": "plant_oil", "name": "Plant oil", "color": "#d9c84a", "properties": {"refractiveIndex": 1.47}, "where": "Sunflowers in the middle of the quad lawn, south-west of the lake. Look at a sunflower seed with a compound microscope (F) to find the oil", "unlockedBy": "seed_oil"},
   {"id": "leaf_fiber", "name": "Leaf fiber", "color": "#5fa05a", "properties": {}},
-  {"id": "tungsten_ore", "name": "Tungsten ore", "color": "#4a4f57", "properties": {"meltingPointC": 3422}, "where": "Heavy grey rocks at the far end of the highlands, about 31 m east. Look at one with a high-quality microscope (F) to see what is inside", "unlockedBy": "tungsten_grains"},
-  {"id": "resin", "name": "Resin", "color": "#c8742a", "properties": {"leakRate": 0.1}, "where": "Amber-dripping stumps in the pine grove, north-east, about 25 m away"}
+  {"id": "tungsten_ore", "name": "Tungsten ore", "color": "#4a4f57", "properties": {"meltingPointC": 3422}, "where": "Heavy grey rocks at the foot of the west slope, far to the west. Look at one with a high-quality microscope (F) to see what is inside", "unlockedBy": "tungsten_grains"},
+  {"id": "resin", "name": "Resin", "color": "#c8742a", "properties": {"leakRate": 0.1}, "where": "Amber-dripping stumps among the pines on the lower west slope, south-west"},
+  {"id": "fluorite", "name": "Fluorite", "color": "#9b6fd1", "properties": {"refractiveIndex": 1.434}, "where": "Purple-veined rocks on the gorge rim, west of the quartz crystals. Look at one with a high-quality microscope at 400× (F) to spot the tiny purple cubes", "unlockedBy": "fluorite_cubes"},
+  {"id": "willemite", "name": "Willemite", "color": "#8fd19e", "properties": {"emissionNm": 525}, "where": "Pale green rocks on the creek bank at the bottom of the gorge. Look at one with the fluorescence microscope in fluorescence mode (F) to see it glow", "unlockedBy": "willemite_glow"},
+  {"id": "monazite", "name": "Monazite sand", "color": "#5a4636", "properties": {"rareEarthFraction": 0.6}, "where": "Dark heavy sand on the creek bank at the bottom of the gorge. Take a bit to the transmission electron microscope and record its electron diffraction", "unlockedBy": "monazite_diffraction"},
+  {"id": "beryl", "name": "Beryl", "color": "#9fd8c8", "properties": {"density": 2.7}, "where": "Pale six-sided crystals at the foot of the west slope, north of the heavy grey rocks. Take a bit to the STEM and image it with ptychography", "unlockedBy": "beryllium_atoms"},
+  {"id": "galena", "name": "Galena", "color": "#8c939c", "properties": {"density": 7.6}, "where": "Heavy silver-grey cubes on the gorge rim, east of the iron rocks near the waterfall"},
+  {"id": "iodine_stain", "name": "Iodine stain", "color": "#8a4a1a", "properties": {}, "where": "The reagent shelf by the west door of the science lab"},
+  {"id": "methylene_blue", "name": "Methylene blue", "color": "#2f5fb0", "properties": {}, "where": "The reagent shelf by the west door of the science lab"},
+  {"id": "gram_kit", "name": "Gram stain kit", "color": "#7a3aa0", "properties": {}, "where": "The reagent shelf by the west door of the science lab"},
+  {"id": "hematoxylin", "name": "Hematoxylin", "color": "#4b3a8c", "properties": {}, "where": "Felled logwood on the east edge of the quad lawn: its dark red heartwood gives hematoxylin, the classic stain for cell nuclei"}
 ]

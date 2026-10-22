@@ -1,9 +1,11 @@
-// Goal card: always on screen, tells the player what to do right now and shows the whole checklist for the next
-// microscope. Works without the mouse: C crafts the next ready step. It also tells the world which material to
+// Goal card: always on screen, tells the player what to do right now and shows the tech tree of the next
+// microscope (click a material to track it). Works without the mouse: C crafts the next ready step. It also tells the world which material to
 // point at (trackItem). Owner: Person D.
 import { actionText, currentAction, nextGoalRecipe, planFor, type Plan } from '../shared/plan';
-import { fmtUm } from '../shared/sim/walls';
+import type { Recipe } from '../shared/schema';
 import { canCraft, craft, type GameContext } from '../shared/state';
+import { itemIcon } from './icons';
+import { drawTree, goalLayout } from './techtree';
 import type { Toast } from './toast';
 
 export interface GoalHandle {
@@ -13,6 +15,8 @@ export interface GoalHandle {
   dispose(): void;
 }
 
+const WIDTH = 'min(310px,calc(100vw - 16px))';
+
 const div = (css = '', text = '') => {
   const d = document.createElement('div');
   d.style.cssText = css;
@@ -20,11 +24,10 @@ const div = (css = '', text = '') => {
   return d;
 };
 
-const MARK = { done: '✓', now: '▶', todo: '○', locked: '🔒' } as const;
-
-export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void): GoalHandle {
+/** `below` is the inventory box: the card takes the height above it. */
+export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void, below: HTMLElement): GoalHandle {
   const card = div(
-    'position:fixed;top:8px;right:calc(var(--panel-w, 0px) + 8px);z-index:15;width:min(310px,calc(100vw - 16px));max-height:56vh;overflow:auto;box-sizing:border-box;padding:8px 10px;border-radius:10px;background:#000c;color:#eee;font:13px system-ui',
+    `position:fixed;top:8px;right:calc(var(--panel-w, 0px) + 8px);z-index:15;width:${WIDTH};max-height:56vh;overflow:auto;box-sizing:border-box;padding:8px 10px;border-radius:10px;background:#000c;color:#eee;font:13px system-ui`,
   );
   document.body.append(card);
   let pinned: string | null = null;
@@ -43,16 +46,17 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void):
   const render = () => {
     const { data, state } = ctx;
     card.replaceChildren();
+    let tree: ((size: 'small' | 'tiny') => HTMLElement) | null = null;
     const goal = nextGoalRecipe(data, state);
     plan = goal ? planFor(goal, data, state.inventory, state.discoveries) : null;
     const action = plan ? currentAction(plan) : null;
 
     // --- header: the one thing to do now
     const head = div('display:flex;gap:8px;align-items:flex-start');
-    const now = div('flex:1;font-size:14px;font-weight:600;color:#ffe08a', plan ? (action ? actionText(action, data) : 'Look around') : 'You built every microscope!');
+    const now = div('flex:1;font-size:14px;font-weight:600;color:#ffe08a', plan ? (action ? actionText(action, data) : 'Look around') : 'You built every instrument!');
     const toggle = document.createElement('button');
     toggle.textContent = expanded ? '▾' : '▸';
-    toggle.title = 'Show or hide the checklist';
+    toggle.title = 'Show or hide the tree';
     toggle.onclick = () => {
       expanded = !expanded;
       render();
@@ -66,66 +70,91 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void):
 
     if (!plan) {
       track(null);
-      card.append(div('color:#9ab;margin-top:4px', 'Explore, look at everything, and fill the Microdex (M).'));
+      card.append(div('color:#9ab;margin-top:4px', 'Fill the Microdex (M), and help the scientists around campus: J shows what each one asks for.'));
     } else {
       const trackedRaw = plan.raw.find((r) => r.itemId === pinned && r.missing > 0) ?? plan.raw.find((r) => r.missing > 0);
       if (pinned && trackedRaw?.itemId !== pinned) pinned = null;
       track(trackedRaw?.itemId ?? null);
-      if (expanded) card.append(...checklist(plan, trackedRaw?.itemId ?? null));
+      const p = plan;
+      const where = action?.kind === 'gather' && trackedRaw ? data.materials[trackedRaw.itemId]?.where : undefined;
+      if (where) card.append(div('font-size:11px;color:#b8c8b8;margin-top:2px', where));
+      const step = p.nextStep ?? p.steps[0];
+      if (step) card.append(recipeStrip(step.recipe));
+      if (expanded) {
+        const left = (id: string) => p.steps.find((x) => x.recipe.output.itemId === id)?.times ?? 0;
+        const raw = (id: string) => p.raw.find((r) => r.itemId === id);
+        const layout = goalLayout(p.goal, data);
+        tree = (size: 'small' | 'tiny') => drawTree(ctx, layout, {
+            size,
+            done: (id) => (raw(id) ? raw(id)!.missing === 0 : left(id) === 0),
+            badge: (id) => {
+              const r = raw(id);
+              const have = state.inventory[id] ?? 0;
+              return r ? `${r.total - r.missing}/${r.total}` : have ? `${have}` : null;
+            },
+            hi: action?.kind === 'craft' ? action.step.recipe.output.itemId : trackedRaw?.itemId,
+            onPick: (id) => raw(id) && raw(id)!.missing > 0 && ((pinned = id), render()),
+          });
+      }
     }
 
+    // The guide's answer goes above the tree, so fit() counts it.
     if (said) card.append(div('margin-top:8px;padding:6px 8px;border-radius:6px;background:#1c3a1f;color:#fff', said));
-    card.append(div('margin-top:6px;font-size:11px;color:#789', 'C craft next · F look · I inventory · Tab menu · G guide · M Microdex'));
+    card.style.width = WIDTH;
+    card.style.maxHeight = `${Math.max(innerHeight * 0.4, innerHeight - below.offsetHeight - 24)}px`;
+    if (tree) {
+      // Labelled tiles when they fit at a readable size, else icons only; whatever is still too big is scaled down.
+      let t = tree('small');
+      if (fit(t) < 0.85) {
+        t.remove();
+        fit((t = tree('tiny')));
+      }
+    }
   };
 
-  const checklist = (p: Plan, tracked: string | null): HTMLElement[] => {
-    const { data } = ctx;
-    const rows: HTMLElement[] = [];
-    const row = (mark: keyof typeof MARK, text: string, opts: { sub?: string; onClick?: () => void; hi?: boolean; dim?: boolean } = {}) => {
-      const r = div(
-        `margin:3px 0;padding:3px 6px;border-radius:6px;${opts.onClick ? 'cursor:pointer;' : ''}${opts.hi ? 'background:#2c4a2f;' : ''}${opts.dim ? 'opacity:.55;' : ''}`,
-      );
-      r.append(div('', `${MARK[mark]} ${text}`));
-      if (opts.sub) r.append(div('font-size:11px;color:#b8c8b8;margin-left:16px', opts.sub));
-      if (opts.onClick) r.onclick = opts.onClick;
-      rows.push(r);
-    };
-    const nextId = p.nextStep?.recipe.id;
-    const firstOpen = p.raw.find((r) => r.missing > 0);
+  /** Widens the card for a wide tree (up to 45vw), then shrinks the tree so the card never scrolls. Returns the scale. */
+  const fit = (t: HTMLElement) => {
+    card.append(t);
+    const pad = 20;
+    const w = parseFloat(t.style.width), h = parseFloat(t.style.height);
+    card.style.width = `min(max(310px, ${w + pad}px), 45vw, calc(100vw - 16px))`;
+    if (!card.clientWidth) return 1; // hidden behind the eyepiece; refit on close
+    const rest = card.scrollHeight - t.offsetHeight;
+    const maxH = parseFloat(getComputedStyle(card).maxHeight);
+    const z = Math.min(1, (card.clientWidth - pad) / w, (maxH - rest - pad) / h);
+    t.style.zoom = `${z}`;
+    return z;
+  };
 
-    for (const r of p.raw) {
-      const name = data.items[r.itemId]?.name ?? r.itemId;
-      const idn = r.identify;
-      if (idn) {
-        const mark = idn.done ? 'done' : r === firstOpen ? 'now' : 'todo';
-        row(mark, `Identify ${idn.feature.name} (${fmtUm(idn.feature.sizeUm)})`, {
-          sub: idn.done ? undefined : `Look (F) at a ${idn.sample.name} with a ${idn.scope?.name ?? 'microscope'}`,
-          hi: !idn.done && r === firstOpen,
-          onClick: () => (pinned = r.itemId, render()),
-        });
-      }
-      const done = r.missing === 0;
-      const locked = !!idn && !idn.done;
-      const have = r.total - r.missing;
-      row(done ? 'done' : locked ? 'locked' : r === firstOpen ? 'now' : 'todo', `Gather ${name} ${have}/${r.total}`, {
-        sub: !done && (r.itemId === tracked || r === firstOpen) ? data.materials[r.itemId]?.where : undefined,
-        hi: r.itemId === tracked && !done,
-        dim: done || locked,
-        onClick: done ? undefined : () => (pinned = r.itemId, render()),
-      });
+  /** The next craft as a formula: [2 sand] + … → [glass], with a button that lights up once it can be made. */
+  const recipeStrip = (recipe: Recipe) => {
+    const { data, state } = ctx;
+    const ready = canCraft(ctx, recipe.id);
+    const box = div(`margin-top:8px;padding:6px 8px;border-radius:8px;background:#ffffff10;border:1px solid ${ready ? '#ffd35a' : '#ffffff22'}`);
+    box.append(div('font-size:11px;color:#9ab;margin-bottom:4px', 'NEXT CRAFT'));
+    const line = div('display:flex;align-items:center;gap:6px;flex-wrap:wrap');
+    const short: string[] = [];
+    for (const [k, i] of recipe.inputs.entries()) {
+      const have = state.inventory[i.itemId] ?? 0;
+      const name = data.items[i.itemId]?.name ?? i.itemId;
+      if (have < i.count) short.push(`${i.count - have} more ${name}`);
+      const chip = div('display:inline-flex;align-items:center;gap:3px');
+      chip.title = name;
+      chip.append(itemIcon(i.itemId, data, 22), div(`font-weight:600;color:${have >= i.count ? '#9be07f' : '#ff8a7a'}`, `${Math.min(have, i.count)}/${i.count}`));
+      line.append(...(k ? [div('color:#9ab', '+')] : []), chip);
     }
-    for (const s of p.allSteps) {
-      const left = p.steps.find((x) => x.recipe.id === s.recipe.id)?.times ?? 0;
-      const ready = nextId === s.recipe.id;
-      const uses = s.recipe.inputs.map((x) => `${x.count} ${data.items[x.itemId]?.name ?? x.itemId}`).join(' + ');
-      row(left === 0 ? 'done' : ready ? 'now' : 'todo', `Craft ${s.recipe.name}${left > 1 ? ` ×${left}` : ''}${ready ? '  [C]' : ''}`, {
-        sub: left > 0 ? `uses ${uses}` : undefined,
-        hi: ready,
-        dim: left === 0,
-        onClick: left > 0 && canCraft(ctx, s.recipe.id) ? () => doCraft(s.recipe.id) : undefined,
-      });
-    }
-    return rows;
+    const out = div('display:inline-flex;align-items:center;gap:3px;font-weight:600');
+    out.append(itemIcon(recipe.output.itemId, data, 22), `${data.items[recipe.output.itemId]?.name ?? recipe.output.itemId}`);
+    line.append(div('color:#9ab;font-size:16px', '→'), out);
+    const btn = document.createElement('button');
+    btn.textContent = 'Craft (C)';
+    btn.disabled = !ready;
+    btn.style.cssText = `margin-left:auto;padding:3px 10px;border-radius:6px;border:0;font-weight:700;${ready ? 'background:#ffd35a;color:#222;cursor:pointer;box-shadow:0 0 8px #ffd35a88' : 'background:#444;color:#999'}`;
+    btn.onclick = () => doCraft(recipe.id);
+    line.append(btn);
+    box.append(line);
+    if (short.length) box.append(div('font-size:11px;color:#ff8a7a;margin-top:4px', `Need ${short.join(' and ')} first.`));
+    return box;
   };
 
   const doCraft = (recipeId: string) => {
@@ -142,12 +171,20 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void):
     }
   };
   addEventListener('keydown', onKey);
+  addEventListener('resize', render);
+  const belowSize = new ResizeObserver(() => render());
+  belowSize.observe(below);
 
   render();
   const offs = [
     ctx.bus.on('itemGathered', render),
     ctx.bus.on('itemCrafted', render),
     ctx.bus.on('discoveryUnlocked', render),
+    ctx.bus.on('openEyepiece', () => (card.style.display = 'none')), // the eyepiece has its own panels there
+    ctx.bus.on('closeEyepiece', () => {
+      card.style.display = '';
+      render();
+    }),
   ];
   return {
     render,
@@ -163,6 +200,8 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void):
     dispose() {
       offs.forEach((off) => off());
       removeEventListener('keydown', onKey);
+      removeEventListener('resize', render);
+      belowSize.disconnect();
       clearTimeout(sayTimer);
       track(null);
       card.remove();

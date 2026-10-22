@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameData } from './data';
-import { howToGet, itemsMentioned, lockedBy, nextGoalRecipe, planFor, scopeThatSees } from './plan';
+import { actionText, currentAction, howToGet, itemsMentioned, lockedBy, nextGoalRecipe, planFor, scopeThatSees } from './plan';
 import { craft, createGame, gather } from './state';
 
 const data = loadGameData();
@@ -31,29 +31,32 @@ describe('goal plan', () => {
   });
 
   it('later goals list the raw totals from the README table', () => {
-    const ctx = createGame(data);
-    ctx.state.inventory = { hand_lens: 1 }; // owning it is what counts
-    const compound = planFor(nextGoalRecipe(data, ctx.state)!, data, {});
-    expect(totals(compound)).toEqual({ beach_sand: 6, iron_ore: 2, copper_ore: 1 });
-    expect(compound.steps.find((s) => s.recipe.id === 'glass')?.times).toBe(3);
-
-    ctx.state.inventory = { compound_microscope: 1 }; // owning it is what counts
-    const hq = planFor(nextGoalRecipe(data, ctx.state)!, data, { compound_microscope: 1 });
-    expect(totals(hq)).toEqual({ quartz_sand: 6, copper_ore: 1, plant_oil: 1 });
-
-    ctx.state.inventory = { hq_microscope: 1 }; // owning it is what counts
-    const em = planFor(nextGoalRecipe(data, ctx.state)!, data, {});
-    expect(totals(em)).toEqual({ tungsten_ore: 1, resin: 2, iron_ore: 4, copper_ore: 4 });
-
-    ctx.state.inventory = { electron_microscope: 1 }; // owning it is what counts
-    expect(nextGoalRecipe(data, ctx.state)).toBeNull();
+    const totalsAfter = (owned: string, keep: Record<string, number> = {}) => {
+      const goal = nextGoalRecipe(data, { inventory: { [owned]: 1 } })!;
+      return { id: goal.id, raw: totals(planFor(goal, data, keep)) };
+    };
+    const compound = totalsAfter('hand_lens');
+    expect(compound.raw).toEqual({ beach_sand: 6, iron_ore: 2, copper_ore: 1 });
+    expect(planFor(nextGoalRecipe(data, { inventory: { hand_lens: 1 } })!, data, {}).steps.find((s) => s.recipe.id === 'glass')?.times).toBe(3);
+    expect(totalsAfter('compound_microscope', { compound_microscope: 1 })).toEqual({ id: 'hq_microscope', raw: { quartz_sand: 6, copper_ore: 1, plant_oil: 1 } });
+    expect(totalsAfter('hq_microscope', { hq_microscope: 1 })).toEqual({ id: 'fluorescence_microscope', raw: { quartz_sand: 6, fluorite: 2, tungsten_ore: 1 } });
+    expect(totalsAfter('fluorescence_microscope')).toEqual({
+      id: 'electron_microscope', raw: { tungsten_ore: 3, iron_ore: 10, copper_ore: 9, resin: 3, willemite: 1, beach_sand: 2 },
+    });
+    expect(totalsAfter('electron_microscope', { electron_microscope: 1 })).toEqual({
+      id: 'stem_microscope', raw: { tungsten_ore: 1, iron_ore: 5, copper_ore: 11, resin: 1, monazite: 1, quartz_sand: 4, beach_sand: 2 },
+    });
+    expect(totalsAfter('stem_microscope')).toEqual({
+      id: 'chess_beamline', raw: { iron_ore: 12, copper_ore: 9, monazite: 2, resin: 2, beryl: 2, quartz_sand: 10, galena: 3 },
+    });
+    expect(nextGoalRecipe(data, { inventory: { chess_beamline: 1 } })).toBeNull();
   });
 });
 
 describe('hidden materials: each tier needs something found with the tier below', () => {
   const goals = data.recipes.filter((r) => r.scope).sort((a, b) => a.scope!.tier - b.scope!.tier);
 
-  it('copper needs the hand lens, plant oil the compound microscope, tungsten the high-quality microscope', () => {
+  it('each hidden material is identified with the instrument one tier down from where it is needed', () => {
     const scopeOf = (item: string) => {
       const feature = data.materials[item]!.unlockedBy!;
       const f = Object.values(data.samples).flatMap((s) => s.features).find((x) => x.id === feature)!;
@@ -62,6 +65,10 @@ describe('hidden materials: each tier needs something found with the tier below'
     expect(scopeOf('copper_ore')).toBe('hand_lens');
     expect(scopeOf('plant_oil')).toBe('compound_microscope');
     expect(scopeOf('tungsten_ore')).toBe('hq_microscope');
+    expect(scopeOf('fluorite')).toBe('hq_microscope');
+    expect(scopeOf('willemite')).toBe('fluorescence_microscope');
+    expect(scopeOf('monazite')).toBe('electron_microscope');
+    expect(scopeOf('beryl')).toBe('stem_microscope');
   });
 
   it('every microscope after the first needs a material that is only identifiable with the previous tier', () => {
@@ -83,6 +90,23 @@ describe('hidden materials: each tier needs something found with the tier below'
     expect(lockedBy('iron_ore', data, [])).toBeNull();
     expect(planFor(compound, data, {}, ['copper_veins']).raw.find((r) => r.itemId === 'copper_ore')!.identify!.done).toBe(true);
   });
+
+  it('for an instrument in the lab, the goal says to take a bit of the sample there, and which step shows it', () => {
+    const stem = goals.find((g) => g.id === 'stem_microscope')!;
+    const action = currentAction(planFor(stem, data, { electron_microscope: 1 }, ['copper_veins', 'tungsten_grains']))!;
+    expect(actionText(action, data)).toBe(
+      'Look (F) at a Dark creek sand to take a bit, then use the Transmission electron microscope in the science lab at Electron diffraction to spot Monazite diffraction',
+    );
+  });
+});
+
+describe('current action', () => {
+  it('says to craft as soon as a step is ready, before gathering the rest', () => {
+    const goal = nextGoalRecipe(data, { inventory: {} })!;
+    const action = currentAction(planFor(goal, data, { beach_sand: 2 }))!;
+    expect(action.kind === 'craft' && action.step.recipe.id).toBe('glass');
+    expect(currentAction(planFor(goal, data, {}))!.kind).toBe('gather');
+  });
 });
 
 describe('where to find things', () => {
@@ -93,7 +117,7 @@ describe('where to find things', () => {
   });
 
   it('answers for raw and crafted items; matches the longest name', () => {
-    expect(howToGet('beach_sand', data)).toMatch(/pond shore/);
+    expect(howToGet('beach_sand', data)).toMatch(/the lake/);
     expect(howToGet('glass', data)).toMatch(/crafted.*2 Beach sand/);
     expect(howToGet('copper_ore', data)).toMatch(/only gather it after you have looked at it with a Hand lens and spotted Copper veins/);
     expect(howToGet('copper_ore', data, ['copper_veins'])).toMatch(/press E/);
@@ -107,5 +131,15 @@ describe('where to find things', () => {
     ctx.state.inventory = { hand_lens: 1, compound_microscope: 1 };
     ctx.state.scopeChoice = 1;
     expect(nextGoalRecipe(data, ctx.state)?.id).toBe('hq_microscope');
+  });
+
+  it('recognises common material names without confusing specific names or substrings', () => {
+    expect(itemsMentioned('where do I find sand?', data)).toEqual(['beach_sand', 'quartz_sand']);
+    expect(itemsMentioned('Where is QUARTZ SAND?', data)).toEqual(['quartz_sand']);
+    expect(itemsMentioned('beach-sand', data)).toEqual(['beach_sand']);
+    expect(itemsMentioned('where is copper?', data)).toEqual(['copper_ore']);
+    expect(itemsMentioned('where is tungsten?', data)).toEqual(['tungsten_ore']);
+    expect(itemsMentioned('immersion oil', data)).toEqual(['immersion_oil']);
+    expect(itemsMentioned('sandwich in the environment', data)).toEqual([]);
   });
 });

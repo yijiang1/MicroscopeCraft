@@ -1,8 +1,11 @@
 // Inventory box: always visible bottom-right, so the player sees what they carry without opening the menu.
 // Three groups: raw materials, crafted parts, microscopes (the one in use is marked). I collapses it. Owner: Person D.
 import { ownedScopes, type GameContext } from '../shared/state';
+import { itemIcon } from './icons';
 
 export interface InventoryHandle {
+  /** The box, so the goal card above can take the height that is left. */
+  el: HTMLElement;
   dispose(): void;
 }
 
@@ -22,9 +25,9 @@ export function mountInventory(ctx: GameContext): InventoryHandle {
   let collapsed = false;
 
   const chip = (itemId: string, n: number, extra = '') => {
-    const { name, color } = ctx.data.items[itemId] ?? { name: itemId, color: '#888' };
+    const name = ctx.data.items[itemId]?.name ?? itemId;
     const c = el('span', 'display:inline-flex;align-items:center;gap:4px;margin:2px 8px 2px 0;white-space:nowrap');
-    c.append(el('span', `width:10px;height:10px;border-radius:3px;background:${color};border:1px solid #fff6`), `${name}${n > 1 ? ` ×${n}` : ''}${extra}`);
+    c.append(itemIcon(itemId, ctx.data, 18), `${name}${n > 1 ? ` ×${n}` : ''}${extra}`);
     return c;
   };
 
@@ -79,6 +82,7 @@ export function mountInventory(ctx: GameContext): InventoryHandle {
     ctx.bus.on('closeEyepiece', () => (box.style.display = '')),
   ];
   return {
+    el: box,
     dispose() {
       offs.forEach((off) => off());
       removeEventListener('keydown', onKey);

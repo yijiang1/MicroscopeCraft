@@ -6,6 +6,8 @@ export interface GameEvents {
   openEyepiece: { sampleId: string };
   /** scope → world: eyepiece dismissed. */
   closeEyepiece: Record<string, never>;
+  /** scope → guide: advice from the rendered image, including focus, alignment, stains and damage. */
+  eyepieceStatus: { sampleId: string; text: string };
   itemGathered: { itemId: string; count: number };
   itemCrafted: { itemId: string };
   discoveryUnlocked: { id: string };
@@ -16,10 +18,21 @@ export interface GameEvents {
   scopeChanged: { tier: Tier };
   /** ui → world: point the player at the nearest source of this item (null = stop). */
   trackItem: { itemId: string | null };
+  /** ui → world: point the player at a sample to look at, or a scientist (null = stop). */
+  trackTarget: { target: { kind: 'sample' | 'npc'; id: string } | null };
   /** ui → guide: the player asked the guide a question. */
   guideAsked: { question: string };
   /** guide → ui: the guide's answer. */
   guideReplied: { text: string };
+  /** world → ui: the player pressed E at a scientist. */
+  talkTo: { npcId: string };
+  /** A scientist's request was done. */
+  questCompleted: { npcId: string; questId: string };
+  achievementUnlocked: { id: string };
+  /** A mini-game finished with a score from 0 to 1; best = it beat the previous best. */
+  minigameScored: { game: string; score: number; best: boolean };
+  /** The player reached an area of the campus for the first time. */
+  areaVisited: { area: string };
 }
 
 export type Bus = ReturnType<typeof createBus>;

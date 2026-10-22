@@ -3,154 +3,169 @@
 October 21, 2026 · Yi Jiang · Updated October 21, 2026 to match the build (see "Build status")
 
 ## Vision
-
-MicroscopeCraft is an open-world exploration game where you build every microscope yourself, from a hand lens to an electron microscope, and use each one to see a smaller world. The world is a walkable 3D landscape with realistic objects, and you play it the way you play a sandbox game: roam freely, gather what you find, craft, and build.
+MicroscopeCraft is an open-world exploration game where you build every instrument yourself, from a hand lens to an aberration-corrected electron microscope and a synchrotron beamline, and use each one to see a smaller or hidden world. The world is a walkable 3D campus with realistic objects, and you play it the way you play a sandbox game: roam freely, gather what you find, craft, and build.
 
 *Build the instrument. See the invisible.*
 
-Five design pillars guide every decision:
+Eight design pillars guide every decision:
 
-- **Build to see.** Every new view of the world is earned by building a better instrument.
-- **Real physics, simple rules.** Material and optics choices change what you can see, and the rules are directionally correct.
+- **Build to see.** Every new view of the world is earned by building a better instrument, part by part.
+- **Real physics, simple rules.** Material and optics choices change what you can see, and the rules are directionally correct; the numbers come from real instruments.
 - **Wonder before jargon.** The first zoom happens within minutes, and terms appear only when a player needs them.
-- **Every upgrade has a reason.** Each microscope hits a visible limit that the next tier solves.
-- **Discovery gates progress.** A better microscope needs a material that only the previous microscope could recognise, so the instrument you built is what lets you build the next one.
+- **Every upgrade has a reason.** Each instrument hits a visible limit that the next one solves.
+- **Discovery gates progress.** A better instrument needs a material that only the previous one could recognise, so the instrument you built is what lets you build the next one.
+- **Instruments are aligned, not just owned.** The mini-games are the real procedures (Köhler illumination, TEM alignment, aberration correction, ptychography, beam tuning, tomography), and doing them well is what reveals the finest detail.
+- **Scientists ask questions.** The people who made these discoveries stand around campus and ask to see what you found; showing them is an achievement.
 - **Worlds from a prompt.** An LLM turns a sentence such as "a drop of pond water" into a playable, scale-layered world. (Designed and validated, not built yet; see "Build status".)
 
 The game is built for the [4th Annual Open Scientific Intelligence Hackathon](https://luma.com/ku88xh92), a hybrid event focused on LLMs, agents and multimodal models for materials science, chemistry, physics and math.
 
 ## Audience and goals
+The primary audience is students from about age 12 to first-year undergraduate who already play sandbox games and have no microscopy background. Secondary audiences are teachers, who can generate a world from a prompt, and outreach staff at microscopy and synchrotron facilities.
 
-The primary audience is students from about age 12 to first-year undergraduate who already play sandbox games and have no microscopy background. Secondary audiences are teachers, who can generate a world from a prompt, and outreach staff at microscopy facilities.
-
-Players should feel surprise at each new scale and pride that they built the tool that revealed it. Over a full playthrough they should learn four ideas, in this order:
+Players should feel surprise at each new scale and pride that they built the tool that revealed it. Over a full playthrough (about 10 to 12 hours to finish everything) they should learn six ideas, in this order:
 
 1. **Magnification and focal length.** Lenses bend light, and their shape sets how much.
-2. **Resolution.** More magnification adds no detail past a limit set by wavelength and lens quality.
-3. **Contrast.** A feature can be large enough to resolve and still be invisible without contrast.
-4. **Electrons and damage.** Electrons see smaller than light does, and the beam can destroy the sample.
+2. **Resolution.** More magnification adds no detail past a limit set by wavelength, numerical aperture and how the sample is lit.
+3. **Contrast.** A feature can be large enough to resolve and still be invisible without contrast: phase contrast, dark field, fluorescence and stains make it show.
+4. **Electrons, aberrations and damage.** Electrons see smaller than light does; lens aberrations, not the wavelength, then set the limit, and correctors and ptychography push past it. The beam can destroy the sample.
+5. **Diffraction.** A crystal's pattern records its atomic spacings by Bragg's law, which is also how a monochromator picks one X-ray energy.
+6. **X-rays.** Synchrotron X-rays see inside thick things (tomography), find where each element is (fluorescence) and solve structures (diffraction).
 
-Success is checked in playtests before the demo: a new player builds a second-tier microscope without help, and can say in their own words why their first microscope could not see bacteria.
+Success is checked in playtests: a new player builds a second-tier microscope without help, can say in their own words why their first microscope could not see bacteria, and can say why the TEM needs alignment before it shows atoms.
 
 ## Core gameplay loop
-
 Every session repeats one loop, at smaller and smaller scales:
 
-1. **Explore and gather.** Walk the landscape and collect sand, ore, plant oil, resin and other raw materials. The game never leaves the player lost: a goal panel names the next microscope, lists what is still needed and where it is found, and an arrow with the distance points to the nearest source, and a small marker floats over it when the player is close.
-2. **Identify.** Some materials look like plain rock or seeds until you look at them through the microscope you already have. Spotting what is inside unlocks gathering them (see "Discovery gates").
-3. **Craft and assemble.** Smelt sand into glass, grind lenses, forge frames and tubes, then craft the microscope from its parts. The goal card lists the steps and the C key crafts the next ready one.
-4. **Look.** Aim at a sample, press a key to look through the instrument, and focus; the view shows only what the instrument can resolve.
-5. **Hit a wall.** The view is blurry, empty or too dark, and the game explains the limit in plain words, using the simulation's own numbers.
-6. **Upgrade.** Gather better materials, craft better parts and return to step 3.
+1. **Explore and gather.** Walk the campus and collect sand, ores, oil, resin, minerals and lab reagents. The goal panel names the next instrument and what it still needs; an arrow with the distance points to the nearest source.
+2. **Identify.** Some materials look like plain rock or seeds until you look at them through the instrument you already have. Spotting what is inside unlocks gathering them (see "Discovery gates").
+3. **Craft and assemble.** Smelt sand into glass, grind lenses, wind coils, build each component of an instrument separately, then assemble it. The goal card lists the steps and C crafts the next ready one. Fixed instruments show each component in place as you build it.
+4. **Look and align.** Aim at a sample and press F; at a cabinet, pick a slide. Choose an imaging mode, stain the sample, and align the instrument with its mini-game; the view shows only what it can resolve.
+5. **Hit a wall.** The view is blurry, empty, too dark or shows nothing in this mode, and the game explains the limit in plain words, using the simulation's own numbers.
+6. **Show a scientist.** Take what you found to the scientist who asked for it; every request done is an achievement.
+7. **Upgrade.** Gather better materials, build better parts and return to step 3.
 
-One pass takes a few minutes, and the climb through microscope tiers is the long arc. A discovery log (the Microdex) records everything the player has seen and gives a collection goal. Failure is gentle: gathered materials grow back, a damaged sample resets when the eyepiece closes, and the game has no death.
+One pass takes a few minutes, and the climb through instrument tiers is the long arc. The Microdex (170 discoveries), the scientists' 53 requests and 113 achievements give collection goals. Failure is gentle: gathered materials grow back, a damaged sample resets when the eyepiece closes, a bad stain washes off, and the game has no death.
 
 ## Microscope tech tree
-
-The tree follows the real history of microscopy in six tiers. Each tier ends at a wall the player can observe, and the next tier is the fix. Tier numbers keep the gaps (no 4 or 6 yet) so those tiers can be added without renumbering.
+The tree follows the real history of microscopy in eight tiers. Each tier ends at a wall the player can observe, and the next tier is the fix.
 
 | Tier | What you build | Physics learned | Wall that motivates the next tier |
 | --- | --- | --- | --- |
 | 0. Naked eye | Nothing | The eye resolves about 0.1 mm | Fine veins and grains blur together |
-| 1. Hand lens | One glass lens in a frame | Magnification, focal length, lens shape | Cells and other tiny things are still too small |
-| 2. Compound microscope | Two lenses, a tube, a lamp and a focus knob; four zoom settings | Objective versus eyepiece, illumination, focus | Pushing magnification higher only makes a bigger blur |
-| 3. High-quality optics | Pure quartz glass, a condenser, immersion oil | Aberrations, numerical aperture, the diffraction limit | Visible light cannot resolve anything smaller than about half its wavelength |
-| 4. Contrast methods (not built) | Dark field and fluorescence parts | Contrast, why staining and labeling help | Light itself is still the limit |
-| 5. Electron microscope | Tungsten filament, vacuum chamber, magnetic lenses | Wavelength versus resolution, vacuum, beam damage | Lens errors and sample damage cap the detail |
-| 6. Aberration-corrected STEM (not built) | Correctors and a stable stage | Imaging individual atoms | End of the tree |
+| 1. Hand lens | One glass lens in a frame | Magnification, focal length | Cells and other tiny things are still too small |
+| 2. Compound microscope | Two lenses, a tube, a lamp and a focus knob | Objective versus eyepiece, focus | Pushing magnification higher only makes a bigger blur |
+| 3. High-quality optics | Quartz lenses, a condenser, immersion oil | Numerical aperture, Köhler illumination, the diffraction limit | Clear cells and fine labelled structures have too little contrast |
+| 4. Fluorescence microscope | Fluorite objective, arc lamp, filter cube; add-ons for phase contrast and dark field | Contrast methods, detection below the resolution limit | Light itself is still the limit |
+| 5. Transmission electron microscope | Electron gun, condenser lenses, objective and stage, projector lenses, vacuum system, viewing screen | Electron wavelength, alignment, Scherzer focus, electron diffraction, beam damage | Lens aberrations cap the detail near 0.2 nm |
+| 6. Aberration-corrected STEM | Field-emission gun, aberration corrector, scan coils, annular dark-field detector, pixel detector (EMPAD) | Correcting aberrations, Z-contrast, ptychography | Electrons need thin samples in vacuum; they cannot see inside a seed or map elements in a rock |
+| 7. CHESS beamline | A double-bend achromat cell on CESR, a CHESS Compact Undulator, front end, monochromator, X-ray lens, hutch and detectors | Undulator harmonics, Bragg's law, absorption edges, tomography | End of the tree |
+
+Higher-tier instruments do not replace lower ones: a new instrument becomes the one you look through, but every instrument stays in the inventory, and in the eyepiece the keys 1, 2, 3... switch between the ones usable here. The goal card always follows the best instrument owned.
 
 ### Discovery gates
 
-To build a microscope above the first, the player needs a material that is only recognisable through the microscope below it. Until the player has seen it (and its Microdex card unlocks), the material cannot be gathered: the rocks are plain grey, the seeds are just seeds, and pressing E says "not identified yet". After the discovery the rocks show their ore and E works. The rule is data: a material lists `unlockedBy`, the id of a discovery. A test fails if any tier above the first lacks such a gate, or if the gate is not visible with the previous tier.
+To build an instrument above the first, the player needs a material that is only recognisable through the instrument below it. Until the player has seen it, the material cannot be gathered. The rule is data: a material lists `unlockedBy`, the id of a discovery. A test fails if any tier above the first lacks such a gate, or if the gate is not visible with the previous tier.
 
 | To build | Material that is gated | Discovered with | What the player sees |
 | --- | --- | --- | --- |
-| Compound microscope | Copper ore (lamp) | Hand lens | Green copper veins in a plain grey rock |
-| High-quality microscope | Plant oil (immersion oil) | Compound microscope | Oil droplets inside a sunflower seed |
-| Electron microscope | Tungsten ore (filament) | High-quality microscope | Dark tungsten grains inside a heavy grey rock |
+| Compound microscope | Copper ore (lamp) | Hand lens | Green copper veins in a plain grey rock (50 µm) |
+| High-quality microscope | Plant oil (immersion oil) | Compound microscope | Oil bodies in a sunflower seed (1.5 µm) |
+| Fluorescence microscope | Fluorite (objective, filters); tungsten (arc lamp) | High-quality microscope | Purple fluorite cubes (0.6 µm); tungsten grains (0.8 µm) |
+| Transmission electron microscope | Willemite (the green phosphor screen, Zn₂SiO₄:Mn, the old P1 phosphor) | Fluorescence microscope | A rock that glows green under UV |
+| Aberration-corrected STEM | Monazite (cerium for the scintillator) | TEM, electron diffraction | Monazite's strongest reflection, 0.286 nm |
+| CHESS beamline | Beryl (beryllium windows and refractive lenses) | STEM, ptychography | Beryllium atoms, too light for annular dark field |
 
-The sizes are chosen so each gate really is out of reach of the tier before it: copper veins (50 µm) need the hand lens's 30 µm resolution, seed oil droplets (8 µm) need the compound microscope's 1.5 µm, tungsten grains (0.8 µm) need the high-quality microscope's 0.2 µm. The goal card shows an "Identify" row ahead of the gather rows, with what to look at and which microscope to use.
-
-Tiers 0 to 3 and 5 are playable. Higher-tier microscopes do not replace lower ones: a new microscope becomes the one you look through, but every microscope you own stays in the inventory (the high-quality microscope needs the compound microscope you built first, yet does not use it up). Inside the eyepiece an instrument picker (keys 1, 2, 3 or the buttons) switches between them, so the same sample can be compared at tier 1, 2, 3 and 5; zoom steps and focus follow the chosen instrument. The goal card always follows the best microscope owned, not the one picked.
+The sizes are chosen so each gate really is out of reach of the tier before it. The goal card shows an "Identify" row ahead of the gather rows, with what to look at, which instrument and which step, and for fixed instruments where to take the sample.
 
 ## Materials and crafting
+Material choice is the main decision in the game: the properties of what you gather set the quality of what you build.
 
-Material choice is the main decision in the game: the properties of what you gather set the quality of what you build. Each resource carries a few numeric properties that feed the simulation model.
+| Resource | Crafted into | Why |
+| --- | --- | --- |
+| Beach sand | Glass, lenses | Impure glass blurs (a 30 µm lens blur in a hand lens, 1 µm in the compound microscope) |
+| Quartz sand | Quartz glass, precision lenses, silicon | Pure: 0.05 µm lens blur; reduced to silicon for crystals and detectors |
+| Iron ore | Frames, tubes, magnet yokes, vacuum chambers | Strength, and soft iron guides magnetic fields |
+| Copper ore (identify) | Lamps, coils, magnets, detectors | Conductivity |
+| Plant oil (identify) | Immersion oil | Refractive index close to glass raises the NA to 1.3 |
+| Tungsten ore (identify) | Filament, arc-lamp electrodes, apertures, field-emission tip | Melts above 3,400 °C |
+| Resin | Vacuum seals, high-voltage insulation | Leak-tight |
+| Fluorite (identify) | Fluorite objective, filter cube | Low dispersion; fluorescence |
+| Willemite (identify) | Viewing screen | Glows green where electrons land |
+| Monazite (identify) | Scintillator, NdFeB magnets | Cerium and neodymium |
+| Beryl (identify) | Beryllium window, compound refractive lens | Beryllium barely absorbs X-rays |
+| Galena | Lead for the hutch | Stops X-rays |
+| Stains (lab shelf; logwood on the quad lawn) | Iodine, methylene blue, the Gram stain kit; hematoxylin | Contrast for starch, DNA and bacterial walls |
 
-| Resource | Crafted part | Property that matters | Effect in game |
-| --- | --- | --- | --- |
-| Beach sand | Basic glass lens | Impurity level | Impure glass blurs the image (lens blur of 30 µm in a hand lens, 1 µm in the compound microscope) |
-| Quartz sand | High-quality lens | Purity, low dispersion | Much smaller lens blur (0.05 µm) |
-| Iron ore | Frame, tube, focus knob, coils | Strength | Needed to assemble the instrument |
-| Copper ore (identify with the hand lens) | Lamp, condenser, coils | Conductivity | Needed for the light source and the magnetic lenses |
-| Plant oil (identify with the compound microscope) | Immersion oil | Refractive index | Raises numerical aperture, so finer detail resolves (up to NA 1.3) |
-| Tungsten ore (identify with the high-quality microscope) | Electron-source filament | Melting point | Needed to emit a steady electron beam |
-| Resin | Vacuum seals | Leak rate | Needed for the vacuum chamber |
-| Glass slides and cover slips (not built) | Sample holders | Thickness, flatness | Thin, flat samples are easier to focus |
-| Natural dyes (not built) | Stains | Which structures they bind | Raise contrast for chosen features |
-
-The goal panel lists the crafts in order and highlights the next one; the full recipe list is a click away. The guide answers "where do I find X?", "how do I make X?" and "what next?" from the same data (each raw material carries a where-to-find hint in its JSON). Crafting happens in the crafting panel, which labels each recipe with its station (furnace or bench). Stations are not yet places in the world, so any recipe can be crafted from the panel. Recipes are data (JSON): there are 18 now, and adding a part means adding one entry. The raw materials for the whole tree are: 8 beach sand, 6 quartz sand, 7 iron, 6 copper, 1 plant oil, 1 tungsten and 2 resin. Each material carries a where-to-find hint, which the goal card and the guide show. Materials grow back 15 seconds after they are gathered.
+There are 70 recipes. Complex instruments are built from components, each with its own recipe (the TEM from six, the STEM from five, the beamline from nine), and the fixed instruments show each component in place as it is built. Add-ons (phase contrast kit, dark-field condenser) unlock extra steps on the fluorescence microscope. Materials grow back 15 seconds after they are gathered, and the world holds enough of each to build any one instrument without waiting.
 
 ## World and scale content
+The world is an open 3D campus, about 300 m across and laid out after Cornell's, built entirely from procedural models and textures: a quad lined with halls, a clock tower, a west slope with a pine grove, a gorge with a waterfall and a creek, a lake, a glass greenhouse, the science building with its lab, an engineering quad to the south (a rock garden, a materials yard and a glass atrium of nanomaterials and devices), and Wilson Laboratory with the CHESS hall beside the CESR storage ring (768 m around, 6 GeV positrons at 200 mA after the CHESS-U upgrade; the hall's shield wall curves with the ring's radius). Cabinets in the lab and a rack at the beamline hold prepared slides and materials samples; F, then a number, picks one.
 
-The world is a small open 3D landscape, about 150 m across, that the player walks, runs and jumps through in first person. It is built entirely from procedural models and textures generated in code, so there are no art assets to license: rolling hills, a pond, rocky highlands, a pine grove and a lab pad, with tens of thousands of instanced grass blades, flowers and trees, a sky, soft shadows and distance fog. Gatherable things are real-looking models, not blocks: noise-shaped ore rocks with colored veins, mounds of sand, quartz crystal clusters, veined leaves, flowers, sunflowers, resin-dripping stumps and a butterfly wing on a stone. Aiming is forgiving (a ring and a prompt show what the crosshair is on), and the player collides with trees, rocks and gatherables.
-
-| Area | Where | What the player finds |
+| Area | What the player finds | Discoveries |
 | --- | --- | --- |
-| Meadow | Centre (spawn) | Leafy plants, flowers, a butterfly wing, sunflowers (look at a seed under the compound microscope), grass and oaks |
-| Pond | West | Pond water to sample, sand along the shore |
-| Highlands (the mine) | East | Iron rocks, quartz crystals, and plain grey and heavy grey rocks that hide copper and tungsten, boulders |
-| Pine grove | North-east | Resin stumps among pines |
-| Workshop lab | Far north | A flat pad with lamp posts and a glowing crystal |
+| Quad | Leaves, flowers, a honeybee, a butterfly wing, sunflowers, a picnic table (salt, paper), a bronze chime bell | 29 |
+| Lake | Lake water, an algae mat, mud, a duck feather | 16 |
+| Pine grove | Pine needles and pollen, oak bark, mushrooms, moss, lichen, a spider web, ferns, an old bone | 25 |
+| Greenhouse | Onion, potato, orchid, stinging nettle, cotton | 12 |
+| Gorge and slope rocks | Quartz, copper, tungsten, fluorite, willemite, monazite sand, beryl, fossil shale, mica, iron, galena | 29 |
+| Science lab | The crystal, seven prepared slides, eight materials samples | 44 |
+| Wilson Lab | Lysozyme, vitamin B12, a DNA fibre, steel, a battery cathode, an insect in amber, an iron meteorite, a silicon crystal | 19 |
+| Engineering quad | Rock garden (granite, basalt, obsidian, marble, chalk, pyrite, malachite, lodestone, garnet schist); materials yard (concrete, rusty steel, brick, a solar panel, a catalytic converter); atrium cases (quantum dots, carbon nanotubes, zeolite, a MOF, a superconductor, a blue LED) | 64 |
 
-Every sample has a hidden layer at each smaller scale, and a layer appears only when the player's microscope can resolve it. Sizes below are approximate.
+Every sample has hidden layers that appear only when an instrument (and the right mode, stain or alignment) can reveal them. Sizes below are approximate.
 
 | Tier | Typical feature size | What the player can discover |
 | --- | --- | --- |
-| 1 | About 0.1 mm and below | Leaf veins, sand grain facets, wing veins, petal hairs, copper veins |
-| 2 | About 10 to 100 µm | Leaf cells, pollen, wing scales, pond algae, seed oil droplets |
-| 3 | About 1 µm | Bacteria in pond water, tiny pits on a quartz grain, tungsten grains |
-| 4 | About 1 µm, with contrast | Transparent cells, stained or labeled structures (not built) |
-| 5 | About 10 to 100 nm | Viruses, crystal grains, the atomic lattice |
-| 6 | About 0.1 to 0.4 nm | Single atomic columns (not built) |
+| 0 | About 0.2 mm and up | Salt cubes, Volvox, Paramecium, rotifers, tardigrades, mushroom gills |
+| 1 | About 30 µm and up | Leaf and wing veins, copper veins, pine stomata, fern spores |
+| 2 | About 1 to 30 µm | Cells, pollen, chloroplasts, red blood cells, Gram-stained bacteria, chromosomes |
+| 3 | About 0.2 to 1 µm | Bacteria, diatom pore rows, Amphipleura's 0.25 µm striae, dendritic spines, mitochondria |
+| 4 | Contrast, not size | Clear cells and cilia in phase contrast, flagella in dark field, glowing minerals and bud scars in fluorescence |
+| 5 | About 0.2 to 100 nm | Viruses and their spikes, ribosomes, membranes, nanotubes, gold lattice planes, diffraction patterns |
+| 6 | About 0.04 to 0.2 nm | Graphene, silicon dumbbells, single uranium atoms, Z-contrast columns, light atoms by ptychography, the 0.39 Å record |
+| 7 | Inside, elements, structure | Tomography of seeds, fossils and batteries; element maps; protein, DNA and metal diffraction |
 
-The Microdex is a collection log with one card per discovery: a picture of what the player actually saw (kept as their sharpest view), its size, and a two-sentence explanation. Cards are grouped by biome with progress and a completion mark, and a biome with no samples yet would show as locked (all four have samples now). The build has 17 discoveries across 10 hand-authored samples; three of them (copper veins, seed oil, tungsten grains) unlock materials. A discovery toast appears the first time something is seen.
+The Microdex is a collection log with one card per discovery: a picture of what the player actually saw (their sharpest view), its size, and a two-sentence explanation, grouped by area. It holds 170 discoveries in 45 samples; seven of them unlock materials.
 
 ## Simulation model
+A few formulas decide what the player sees. They are simplified but directionally correct, so a better material, a smaller wavelength or a better alignment always helps for the right reason. All lengths are in micrometres in the code.
 
-Four small formulas decide what the player sees. They are simplified but directionally correct, so a better material or a smaller wavelength always helps for the right reason. All lengths are in micrometres in the code.
+Total magnification is the product of the two lens stages: $M = M_{obj} \cdot M_{eye}$.
 
-Total magnification is the product of the two lens stages (each microscope lists its zoom settings, and the objective's numerical aperture changes with the setting):
+The smallest detail a microscope resolves (Abbe) depends on wavelength and the numerical apertures of the objective and of the illumination:
 
-$$M = M_{obj} \cdot M_{eye}$$
+$$d_{diff} = \frac{\lambda}{NA_{obj} + NA_{ill}}$$
 
-The smallest detail a light microscope can resolve (the Abbe limit) depends on wavelength and numerical aperture:
+With a well-aligned condenser (or incoherent light, as in fluorescence) $NA_{ill} = NA_{obj}$ and this is the familiar $\lambda / 2NA$. The Köhler mini-game sets $NA_{ill}$ for the high-quality and fluorescence microscopes; unaligned, the condenser lights about half the objective's aperture.
 
-$$d_{diff} = \frac{\lambda}{2\,NA}$$
+Electron wavelengths are relativistic (2.51 pm at 200 kV, 4.18 pm at 80 kV), X-ray wavelengths come from the photon energy (0.103 nm at 12 keV):
 
-For electrons the wavelength comes from the accelerating voltage V in volts (non-relativistic form, used as a game simplification; it is about 10% off at 200 kV):
+$$\lambda_{e}\,[\mathrm{nm}] = \frac{1.22639}{\sqrt{V\,(1 + 0.97848 \times 10^{-6}\,V)}} \qquad \lambda_{X}\,[\mathrm{nm}] = \frac{1.23984}{E\,[\mathrm{keV}]}$$
 
-$$\lambda_{e}\,[\mathrm{nm}] \approx \frac{1.226}{\sqrt{V}}$$
+Lens defects (and the player's leftover misalignment) add blur in quadrature: $d_{eff} = \sqrt{d_{diff}^{2} + d_{lens}^{2}}$. Focus adds to the lens blur on light microscopes; on the TEM the alignment panel does (leftover defocus from Scherzer focus and astigmatism); on the STEM the corrector sets the probe; on the beamline the rotation-axis error smears tomograms.
 
-Lens defects add blur on top of the diffraction limit. Each microscope's defect size is part of its recipe:
+**Imaging modes.** Each step has a mode, and each feature has a contrast in bright field plus optional contrasts per mode or stain (`contrastIn`). Fluorescence, the diffraction modes and X-ray fluorescence are exclusive: they show only features listed for them. Ptychography also shows what the other electron images show. In diffraction modes the smallest spacing recorded is Bragg's $d = \lambda / 2\sin\theta_{max}$, with no lens term and no eye limit. In dark field and fluorescence a listed feature smaller than $d_{eff}$ is still *detected*, as a spot the size of $d_{eff}$.
 
-$$d_{eff} = \sqrt{d_{diff}^{2} + d_{lens}^{2}}$$
+A feature appears only if the rules pass, checked in the order the player hits the walls:
 
-Focus adds to the lens blur: from tier 2 up, defocus blur is the distance from sharp focus times the numerical aperture, so high-power objectives are fussier, as in real microscopes.
+1. **Right mode.** It has contrast in this mode (or stain); otherwise "shows up another way", with a hint at which.
+2. **Resolved** (or detected). Otherwise "unresolved", or "empty magnification" past about 1000 × NA (light only).
+3. **Visible to the eye.** Size × M reaches about 0.1 mm (not in diffraction).
+4. **Contrast.** Effective contrast above 0.1.
 
-A feature appears in the view only if three rules pass, checked in the order the player hits the walls:
+At tiers 5 and 6 the player also manages dose, $D = I t / A$; a fragile sample's signal fades as $e^{-D/D_c}$, so a virus dies in seconds at 150,000× and survives minutes at 50,000×.
 
-1. **Resolved.** The feature is at least as large as $d_{eff}$. If not, the view says "unresolved", or "empty magnification" when the zoom is already past the useful limit of about 1000 × NA (light microscopes only; electron images are digital and have no such limit).
-2. **Visible to the eye.** The feature's size times M reaches the eye's limit of about 0.1 mm; otherwise it is "too small to see".
-3. **Contrast.** The sample's contrast, scaled by stains and the imaging method, is above a threshold of 0.1; otherwise "low contrast".
+**Mini-game physics** (all in `src/shared/sim`, all tested):
 
-At tier 5 the player also manages dose, the number of electrons per unit area:
+- *TEM alignment* (`tem.ts`): the wave aberration $\chi(k) = \pi\lambda(\Delta f\,k^2 + A\ \text{terms}) + \tfrac{\pi}{2} C_s \lambda^3 k^4$ with $C_s$ = 1.2 mm; Thon rings $\sin^2\chi$ in the live diffractogram; Scherzer defocus $-1.2\sqrt{C_s\lambda} \approx -66$ nm. A sample off the eucentric height is defocused by 1000 nm per µm.
+- *Aberration corrector* (`corrector.ts`): Krivanek's $\chi(\theta,\phi)$ with C1, A1, B2, A2, C3 tunable and a fixed C5 = 4 mm; the Ronchigram is computed as $|FFT(\text{probe} \times \text{amorphous carbon})|^2$; probe size is the diffraction limit $\lambda / 2\theta$ combined with the geometric ray blur $(\lambda/2\pi)|\nabla\chi|$ at the aperture edge.
+- *Ptychography* (`ptycho.ts`): real ePIE (object and probe updated) on simulated diffraction patterns, starting from a probe guess without its defocus; about 60-70% overlap converges, 50% or less does not.
+- *Beam tuning* (`beamline.ts`): CHESS Compact Undulator (28.4 mm period, 0.952 T, tuned by shifting one magnet row: $B = B_0|\cos(\pi\phi/\lambda_u)|$, $K = 0.934\,B\,\lambda_u[\mathrm{cm}]$, $E_n = n \cdot 0.9496\,E^2 / (\lambda_u (1 + K^2/2))$ on 6 GeV CESR, odd harmonics with Bessel-function strengths), a Si(111) monochromator (d = 0.31356 nm) and absorption edges (Cu K 8.98 keV, Pb L₃ 13.04 keV...).
+- *Tomography* (`tomo.ts`): sinogram and Ram-Lak filtered back-projection; the axis error smears the slice.
+- *Köhler and Gram* (`bench.ts`): Köhler's four parts score the setup and set $NA_{ill}$; the Gram stain is simple dye kinetics (crystal violet soaks in over about 20 s, alcohol strips thin walls at 0.5/s and iodine-locked thick walls at 0.02/s). The progressive stain (hematoxylin, methylene blue) is first-order uptake with nuclei 4× faster than cytoplasm; the contrast peaks at $t^* = \ln(\tau_b/\tau_t)\,\tau_t\tau_b/(\tau_b-\tau_t)$, and the share of the peak reached scales the stain's contrast.
 
-$$D = \frac{I \cdot t}{A}$$
-
-Each fragile sample has a critical dose $D_c$ and its signal fades as $e^{-D/D_c}$. Zooming in shrinks the imaged area A and raises the dose rate, so a virus dies in seconds at 150,000× and survives minutes at 50,000×. This is the same tradeoff real microscopists face. Simplification: damage applies to the whole sample, and the beam current is a game value.
-
-Every simplification is labeled in a code comment next to its formula. The wall explanations (`explainWall`) are built from these numbers (your resolution, the feature size, NA, dose), and both the eyepiece banner and the guide use them, so they always say the same true thing.
+Every simplification is labelled in a code comment next to its formula. The wall explanations (`explainWall`) are built from these numbers, and both the eyepiece banner and the guide use them.
 
 ## AI features
 
@@ -182,28 +197,29 @@ Example spec (the shipped default world):
 **Agent benchmark (stretch).** An LLM agent plays the same crafting loop through an API, which gives a measurable test of how well agents plan and characterize unknown materials. (Not built.)
 
 ## MVP scope for the hackathon
+The MVP was one complete play loop that can be demoed in about five minutes: gather, craft, see something new, upgrade. The build has since grown into a full game.
 
-The MVP is one complete play loop that can be demoed in about five minutes: gather, craft, see something new, upgrade. Anything beyond that loop is faked or left as a stretch goal.
-
-| Area | Must ship | Faked or hand-authored | Stretch | Status |
-| --- | --- | --- | --- | --- |
-| World | One small open 3D map with a meadow and a pond | Other biomes shown as locked areas | Mine and workshop biomes | Built, and larger than planned: meadow, pond, highlands, pine grove and lab |
-| Crafting | About eight recipes: glass, lens, frame, tube, light source, immersion oil | Recipe values tuned by hand | Full materials property system | 18 recipes, values tuned by hand |
-| Microscopes | Tiers 1 to 3, working end to end | Tier 5 as a scripted showpiece view | Tiers 4 and 6 | Tiers 0 to 3 and 5 built; tier 5 is a computed view with beam damage, not scripted |
-| Samples | About ten hand-authored discoveries in the Microdex | Atomic view drawn from a prepared image | Samples generated from a prompt | 17 discoveries; the atomic lattice is drawn procedurally |
-| AI | Guide grounded in the simulation's numbers | Prompt-to-world limited to three or four templates | Materials Project lookup, abTEM images, agent benchmark | Offline guide only; LLM features deferred |
-| Polish | Simple art, readable UI, one sound per action | Placeholder music | Tutorial and teacher mode | Procedural 3D art, synthesised sounds, demo script; no music or tutorial |
+| Area | Must ship | Stretch | Status |
+| --- | --- | --- | --- |
+| World | One small open 3D map | More biomes | A campus with a quad, lake, gorge, pine grove, greenhouse, science lab, Wilson Lab and an engineering quad |
+| Crafting | About eight recipes | Full materials property system | 70 recipes, components for every complex instrument, add-ons |
+| Microscopes | Tiers 1 to 3 end to end | Tiers 4 and 6 | Tiers 0 to 7 built, including a CHESS beamline |
+| Samples | About ten discoveries | Samples from a prompt | 170 discoveries in 45 samples |
+| Mini-games | None | | Eight: Köhler, Gram stain, progressive stain, TEM alignment, aberration corrector, ptychography, beam tuning, tomography |
+| People and goals | None | | 15 scientists with 53 requests, 113 achievements, a journal |
+| AI | Guide grounded in the simulation's numbers | Prompt-to-world, Materials Project, abTEM | Offline guide only; LLM features deferred |
+| Polish | Simple art, readable UI, one sound per action | Music, tutorial | Procedural 3D art, synthesised sounds; no music or tutorial |
 
 ## Technical architecture
 
 The game runs in the browser. A small backend for the AI calls and the world cache is planned but not built.
 
 - **Client:** TypeScript (strict) with Vite. Three.js for the 3D world, and a plain 2D canvas for the microscope view. Vitest for tests and ESLint for module boundaries; `npm run check` runs typecheck, lint and tests.
-- **Data:** recipes, materials, samples, the object catalog and the default world spec are JSON files in `data/`, validated by Zod schemas that are also the TypeScript types. Cross-references (a recipe input that does not exist, a sample on an unknown object) fail the tests.
+- **Data:** recipes, materials, samples, scientists (`npcs.json`), achievements, the object catalog and the default world spec are JSON files in `data/`, validated by Zod schemas that are also the TypeScript types. Cross-references (a recipe input that does not exist, a sample on an unknown object, a request for an unknown discovery or mini-game) fail the tests.
 - **Backend (deferred):** one small Node service that would call the LLM, validate specs with the shared validator and cache worlds as JSON files.
 - **External data (stretch):** the Materials Project for crystal structures and abTEM for simulated atomic images.
 
-**Two views, one state.** The 3D world and the 2D microscope view both read the same plain TypeScript modules for inventory, recipes, microscope tier and discoveries, and neither renderer owns that data. State changes only through a few actions (gather, craft, discover, set zoom), and each one announces itself on a small event bus. The simulation module has no 3D or DOM dependency, so the eyepiece view and the formulas are tested without a browser. Aiming at an object and pressing a key switches from the world to the eyepiece.
+**Two views, one state.** The 3D world and the 2D microscope view both read the same plain TypeScript modules for inventory, recipes, microscope tier and discoveries, and neither renderer owns that data. State changes only through a few actions (gather, craft, discover, set zoom, complete a request, record a score, visit an area), and each one announces itself on a small event bus and re-checks the achievements. The simulation module has no 3D or DOM dependency, so the eyepiece view and the formulas are tested without a browser. Aiming at an object and pressing a key switches from the world to the eyepiece.
 
 The world sits behind one function, `mountWorld(el, ctx)`. If the 3D world ever falls behind, a 2D tile world with the same signature can replace it without touching the rest.
 
@@ -215,16 +231,16 @@ The code is split into four owned modules around one shared core, so four people
 
 | Module | Folder | Owner | Exposes |
 | --- | --- | --- | --- |
-| Shared core | src/shared | Everyone; changes announced first | Schemas and types, game state and actions, event bus, simulation rules, wall explanations, Microdex view-model, world-spec validator |
-| 3D world | src/world | Person A | Terrain, procedural models, scenery, player movement, gathering, aiming, opening the eyepiece |
-| Microscope view | src/scope | Person B | 2D canvas view with zoom, focus, beam damage and drawings by feature type; also owns the simulation rules and their tests |
+| Shared core | src/shared | Everyone; changes announced first | Schemas and types, game state and actions, event bus, simulation rules and mini-game physics, wall explanations, Microdex view-model, achievements and conditions, world-spec validator |
+| 3D world | src/world | Person A | Terrain, buildings, procedural models, scenery, scientists, player movement, gathering, aiming, sample pickers, carried samples, sites and areas, tracking |
+| Microscope view | src/scope | Person B | 2D canvas view with zoom, focus, imaging modes, stains, beam damage, drawings by feature type, and one panel per mini-game; also owns the simulation rules and their tests |
 | AI and backend | src/guide, server | Person C | Guide (offline today), world-spec validator; planner, world cache and endpoints are deferred |
-| Content and UI | src/ui, data | Person D | Goal card, inventory box, crafting menu, Microdex, toasts, sound, guide box, recipe, material and sample JSON |
+| Content and UI | src/ui, data | Person D | Goal card, inventory box, tech tree, Microdex, journal, scientist dialogs, toasts, sound, guide box; recipe, material, sample, scientist and achievement JSON |
 
 **The shared contract** was written first, and every module builds on it:
 
 - Types and JSON schemas for recipes, materials, samples, game state and the world spec live in src/shared (Zod) and are checked by tests.
-- A small event layer connects the modules: openEyepiece(sampleId), closeEyepiece(), itemGathered, itemCrafted(itemId), discoveryUnlocked(id), tierChanged, zoomChanged, scopeChanged (player picked another owned microscope), guideAsked and guideReplied.
+- A small event layer connects the modules: openEyepiece(sampleId), closeEyepiece(), itemGathered, itemCrafted(itemId), discoveryUnlocked(id), tierChanged, zoomChanged, scopeChanged (player picked another owned microscope), trackItem and trackTarget, talkTo(npcId), questCompleted, achievementUnlocked, minigameScored, areaVisited, guideAsked and guideReplied.
 - src/shared imports nothing from Three.js or the DOM, so the simulation runs in tests and in the backend.
 - A change to a shared type is announced to the team before it is merged (see the README's Contributing section).
 
@@ -249,12 +265,11 @@ The team has four people and the build window is not fixed yet (see open questio
 6. **Polish and demo.** Tier 5 showpiece, sounds, open-world look, demo script. Gate: a clean five-minute run. Built; rehearsal pending.
 
 ## Build status
+Built and tested (87 automated tests across 11 files, plus checks in the browser): the shared contract with imaging modes, stains, sites and conditions; tiers 0 to 7 with zoom steps, focus, beam damage and per-instrument alignment; 70 recipes; 170 discoveries; the discovery gates for every tier; the seven mini-games with their physics; 15 scientists with 53 requests; 113 achievements and the journal; the offline guide; the goal card, inventory box, tech tree (with add-ons), Microdex (with tracking) and toasts; the campus with the greenhouse and Wilson Lab; saving progress between sessions (older saves load with the new fields empty); synthesised sounds; a demo mode (`?demo`, press K to restock materials).
 
-Built and tested (51 automated tests, plus manual checks in the browser): the shared contract; tiers 0, 1, 2, 3 and 5 with zoom steps, focus and beam damage; the wall messages; 18 recipes; 17 discoveries in the Microdex; the offline guide (including where-to-find and what-next answers); the discovery gates; a keyboard-first goal card (the next action in one line, a checklist, C to craft, an arrow to the nearest source), an always-visible inventory box (materials, parts, microscopes with the one in use marked; I toggles it), an in-eyepiece instrument picker for comparing microscopes, a Tab menu and toasts; the open world with procedural models; synthesised sounds; a demo mode (`?demo`, press K to restock materials).
+Not built: the LLM planner and guide calls, the server and world cache, music and a tutorial, stations as places in the world.
 
-Not built: the LLM planner and guide calls, the server and world cache, tiers 4 and 6, stain and contrast methods, stations as places in the world, saving progress between sessions, music and a tutorial.
-
-Not yet checked: whether the discovery gates feel like discovery or like busywork in a playtest; a playtest with someone outside the team, review of the physics numbers and the wall wording by a microscopy expert, and play with real mouse and keyboard on more than one browser.
+Not yet checked: a playtest of the full 10-hour arc (how long gathering for the TEM, STEM and beamline feels, and whether the mini-games are too hard or too easy), review of the physics numbers and the scientists' texts by experts, and play on more than one browser.
 
 ## Risks and mitigations
 
@@ -273,14 +288,16 @@ Scope is the biggest risk, because a crafting system, a world and an AI layer is
 
 ## Demo script and judging pitch
 
-The demo shows the whole idea in about five minutes: a player builds a tool and the world gets smaller. The step-by-step script with exact crafting and walking directions is in the README; this is the outline. Open the game with `?demo` so that K restocks materials.
+The demo shows the whole idea in about ten minutes: a player builds a tool and the world gets smaller. The step-by-step script with exact crafting and walking directions is in the README; this is the outline. Open the game with `?demo` so that K restocks materials.
 
 1. **Start with a blurry world.** The player holds nothing and looks at a leaf: the fine veins are blurred away.
 2. **Build a hand lens.** Gather sand and iron, smelt glass, craft the lens, then aim at a leaf and press a key to look through it and see leaf veins.
 3. **Discover to unlock, then upgrade.** The hand lens reveals copper in a plain rock, which unlocks the lamp and the compound microscope. It shows cells and pond algae, and the guide explains why more magnification alone stopped helping.
 4. **Reach the diffraction limit.** Oil found in a sunflower seed under the compound microscope unlocks the high-quality microscope. With oil immersion it shows bacteria, and the banner explains why viruses stay out of reach.
-5. **Show the electron microscope.** Tungsten spotted under the high-quality microscope unlocks it. It shows a virus (which the beam slowly destroys) and the atomic lattice of a crystal in the lab, and the guide explains why electrons see smaller than light.
-6. **Type a prompt (when built).** The presenter enters a sentence and a new world appears with its own hidden scales. This step needs the LLM work and is skipped in the current demo.
+5. **Align the light.** Köhler illumination on the diatom test slide resolves Amphipleura's 0.25 µm striae, the old test of the best lenses; Ernst Abbe asks to see them.
+6. **Electrons, part by part.** Willemite, which glows green under the fluorescence microscope, makes the TEM's screen. Aligned, the TEM resolves gold's 0.235 nm planes; the STEM's corrector makes single atoms shine; ptychography reaches the 0.39 Å record.
+7. **Synchrotron light.** Monazite and beryl unlock the CHESS beamline: tune the undulator to map cobalt in vitamin B12 for Dorothy Hodgkin, record Photo 51 for Rosalind Franklin, find the trilobite hidden in the shale.
+8. **Type a prompt (when built).** The presenter enters a sentence and a new world appears with its own hidden scales. This step needs the LLM work and is skipped in the current demo.
 
 For judges, the pitch has four points:
 
@@ -300,4 +317,6 @@ For judges, the pitch has four points:
 - [ ] What are the hackathon's tracks, judging criteria and submission format? The event page does not list them.
 - [ ] Do the discovery gates feel rewarding? Option if they feel like busywork: make the plain rocks and seeds also glimmer faintly so players know to look, or add a hint from the guide after a minute without progress.
 - [ ] Should crafting stations (furnace, bench) become places in the world, or stay a panel?
-- [ ] Should the electron wavelength use the relativistic formula? It would be about 10% more accurate at 200 kV.
+- [x] Should the electron wavelength use the relativistic formula? Yes, now relativistic.
+- [ ] Is the late-game gathering (about 12 iron and 11 copper for the STEM and beamline) satisfying or a grind? Options: more nodes, or components that drop from scientists' requests.
+- [ ] Should the scientists speak in the first person? They do now, from their documented work; every NPC is a historical figure who has died, and no living scientist is given invented words.

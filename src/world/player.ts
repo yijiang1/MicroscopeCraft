@@ -19,7 +19,7 @@ export function buildPlayer() {
     parent.add(mesh);
   };
   box(root, [0.55, 0.62, 0.3], [0, 1.15, 0], materials.shirt);
-  box(root, [0.48, 0.12, 0.3], [0, 0.82, 0], materials.boots);
+  box(root, [0.5, 0.12, 0.32], [0, 0.82, 0], materials.boots); // belt: a touch proud of the shirt so their faces don't z-fight
   box(root, [0.18, 0.12, 0.18], [0, 1.49, 0], materials.skin);
   box(root, [0.38, 0.4, 0.36], [0, 1.72, 0], materials.skin);
   box(root, [0.4, 0.12, 0.38], [0, 1.91, 0.01], materials.hair);
