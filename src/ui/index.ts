@@ -8,7 +8,7 @@ import { mountGoal } from './goal';
 import { mountInventory } from './inventory';
 import { mountJournal } from './journal';
 import { mountMicrodex } from './microdex';
-import { getGeminiKey, setGeminiKey } from './npcChat';
+import { getKey, getProvider, PROVIDERS, setKey, setProvider, type Provider } from './npcChat';
 import { mountSound } from './sound';
 import { mountTechTree } from './techtree';
 import { createToast } from './toast';
@@ -42,7 +42,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
     .mc-menu-sep{height:1px;background:#ffffff1f;margin:8px 2px}
     .mc-menu-h{font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.55;margin:4px 2px 2px}
     .mc-menu-form{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 6px;padding:8px 10px;border-radius:8px;background:#ffffff0a;font-size:12px}
-    .mc-menu-form input{flex:1;min-width:0}
+    .mc-menu-form input,.mc-menu-form select{flex:1;min-width:0}
     .mc-menu-form p{flex-basis:100%;margin:0;opacity:.65;line-height:1.35}
     .mc-menu-form a{color:#8fc8f0}`;
   const row = (icon: string, label: string, onclick: () => void, key = '') => {
@@ -66,68 +66,51 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   const mute = row('', 'Sound', () => {
     sound.toggleMute();
     syncMute();
-  // --- Gemini API key for chatting with scientists: the player's own, kept only in this browser
-  const keyForm = document.createElement('div');
-  keyForm.className = 'mc-menu-form';
-  keyForm.hidden = true;
-  const keyInput = Object.assign(document.createElement('input'), { type: 'password', placeholder: 'Paste your Gemini API key', autocomplete: 'off' });
-  const keySave = Object.assign(document.createElement('button'), { textContent: 'Save' });
-  const keyClear = Object.assign(document.createElement('button'), { textContent: 'Clear' });
-  const keyNote = document.createElement('p');
-  keyNote.innerHTML = 'Lets you chat with the scientists. The key stays in this browser and is sent only to Google. <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Get a key</a>';
-  keyForm.append(keyInput, keySave, keyClear, keyNote);
-  const keyRow = row('🔑', 'Gemini API key', () => {
-    keyForm.hidden = !keyForm.hidden;
-    if (!keyForm.hidden) keyInput.focus();
-  });
-  const syncKey = () => keyRow.set('Gemini API key', getGeminiKey() ? 'Set · chat with scientists is on' : 'Not set · needed to chat with scientists');
-  const saveKey = (key: string | null) => {
-    setGeminiKey(key);
-    keyInput.value = '';
-    keyForm.hidden = true;
-    syncKey();
-    toast.notify(key ? 'Gemini key saved' : 'Gemini key cleared', 1600);
-  };
-  keySave.onclick = () => keyInput.value.trim() && saveKey(keyInput.value.trim());
-  keyClear.onclick = () => saveKey(null);
-  keyInput.addEventListener('keydown', (e) => {
-    e.stopPropagation(); // typing must not trigger world/menu hotkeys
-    if (e.key === 'Enter' && keyInput.value.trim()) saveKey(keyInput.value.trim());
-    else if (e.key === 'Escape') keyForm.hidden = true;
-  });
-  syncKey();
   });
   const syncMute = () => {
     mute.b.querySelector('.ic')!.textContent = sound.muted() ? '🔇' : '🔊';
     mute.set(sound.muted() ? 'Sound off' : 'Sound on');
   };
   syncMute();
-  // --- Gemini API key for chatting with scientists: the player's own, kept only in this browser
+  // --- AI provider and API key for chatting with scientists: the player's own key, kept only in this browser
   const keyForm = document.createElement('div');
   keyForm.className = 'mc-menu-form';
   keyForm.hidden = true;
-  const keyInput = Object.assign(document.createElement('input'), { type: 'password', placeholder: 'Paste your Gemini API key', autocomplete: 'off' });
+  const providerPick = document.createElement('select');
+  for (const [id, p] of Object.entries(PROVIDERS)) providerPick.append(new Option(p.label, id));
+  providerPick.style.flexBasis = '100%';
+  const keyInput = Object.assign(document.createElement('input'), { type: 'password', autocomplete: 'off' });
   const keySave = Object.assign(document.createElement('button'), { textContent: 'Save' });
   const keyClear = Object.assign(document.createElement('button'), { textContent: 'Clear' });
   const keyNote = document.createElement('p');
-  keyNote.innerHTML = 'Lets you chat with the scientists. The key stays in this browser and is sent only to Google. <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Get a key</a>';
-  keyForm.append(keyInput, keySave, keyClear, keyNote);
-  const keyRow = row('🔑', 'Gemini API key', () => {
+  keyForm.append(providerPick, keyInput, keySave, keyClear, keyNote);
+  const keyRow = row('🔑', 'AI chat', () => {
     keyForm.hidden = !keyForm.hidden;
     if (!keyForm.hidden) keyInput.focus();
   });
-  const syncKey = () => keyRow.set('Gemini API key', getGeminiKey() ? 'Set · chat with scientists is on' : 'Not set · needed to chat with scientists');
+  const syncKey = () => {
+    const p = getProvider();
+    const { label, model, keyUrl } = PROVIDERS[p];
+    providerPick.value = p;
+    keyRow.set('AI chat', getKey() ? `${label} · chat with scientists is on` : 'No API key · needed to chat with scientists');
+    keyInput.placeholder = getKey() ? 'Key saved · paste to replace' : `Paste your ${label} API key`;
+    keyNote.innerHTML = `Uses ${model}. The key stays in this browser and is sent only to ${label.split(' ')[0]}. <a href="${keyUrl}" target="_blank" rel="noopener">Get a key</a>`;
+  };
+  providerPick.onchange = () => {
+    setProvider(providerPick.value as Provider);
+    syncKey();
+  };
   const saveKey = (key: string | null) => {
-    setGeminiKey(key);
+    setKey(getProvider(), key);
     keyInput.value = '';
     keyForm.hidden = true;
     syncKey();
-    toast.notify(key ? 'Gemini key saved' : 'Gemini key cleared', 1600);
+    toast.notify(key ? 'API key saved' : 'API key cleared', 1600);
   };
   keySave.onclick = () => keyInput.value.trim() && saveKey(keyInput.value.trim());
   keyClear.onclick = () => saveKey(null);
+  for (const input of [keyInput, providerPick]) input.addEventListener('keydown', (e) => e.stopPropagation()); // typing must not trigger world/menu hotkeys
   keyInput.addEventListener('keydown', (e) => {
-    e.stopPropagation(); // typing must not trigger world/menu hotkeys
     if (e.key === 'Enter' && keyInput.value.trim()) saveKey(keyInput.value.trim());
     else if (e.key === 'Escape') keyForm.hidden = true;
   });

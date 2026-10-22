@@ -1,6 +1,6 @@
 // Talking to a scientist (E): who they were, what they ask for, and a Show button for every request you can do now,
 // with your own Microdex picture of what they asked to see, and a chat box (Gemini, player's own key). Owner: Person D.
-import { askNpc, getGeminiKey, type ChatTurn } from './npcChat';
+import { askNpc, getKey, getProvider, type ChatTurn } from './npcChat';
 import { conditionMet } from '../shared/achievements';
 import { completeQuest, type GameContext } from '../shared/state';
 import { questTarget } from './journal';
@@ -24,10 +24,10 @@ export function mountDialog(ctx: GameContext, toast: Toast): () => void {
   const chatBox = (npc: NonNullable<typeof ctx.data.npcs[string]>) => {
     const wrap = styled('div', 'margin:0 0 14px;padding-bottom:12px;border-bottom:1px solid #ffffff1f');
     const first = npc.name.split(' ')[0];
-    if (!getGeminiKey()) {
+    if (!getKey()) {
       wrap.append(
         styled('div', 'font-weight:600;margin-bottom:4px', `💬 Chat with ${first}`),
-        styled('div', 'font-size:12px;color:#99a;line-height:1.4', 'To ask about their science in your own words, add a Google Gemini API key in the menu: Tab → Settings.'),
+        styled('div', 'font-size:12px;color:#99a;line-height:1.4', 'To ask about their science in your own words, add an API key (Google Gemini, OpenAI or Anthropic) in the menu: Tab → Settings.'),
       );
       return wrap;
     }
@@ -51,7 +51,7 @@ export function mountDialog(ctx: GameContext, toast: Toast): () => void {
       log.scrollTop = log.scrollHeight;
       send.disabled = true;
       try {
-        turns.push({ role: 'model', text: await askNpc(npc, turns, getGeminiKey()) });
+        turns.push({ role: 'model', text: await askNpc(npc, turns, getProvider(), getKey()) });
         thinking.remove();
         bubble(turns.at(-1)!);
       } catch (err) {

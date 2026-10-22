@@ -51,7 +51,7 @@ Simplified physics is labelled in comments next to the formula.
 | Click, WASD, mouse | Look and walk (Esc frees the mouse) |
 | Shift, Space | Run, jump |
 | V | Switch between the over-the-shoulder view (the default) and first-person |
-| E | Gather the item you are aiming at, or talk to the scientist you are aiming at (their dialog has a chat box: ask them about their own field, answered by Google Gemini once you add your own API key under Tab → Settings; it is kept only in your browser) |
+| E | Gather the item you are aiming at, or talk to the scientist you are aiming at (their dialog has a chat box: ask them about their own field, answered by Google Gemini, OpenAI or Anthropic Claude once you pick one and add your own API key under Tab → Settings; it is kept only in your browser) |
 | F | Look at the aimed sample through your newest portable instrument (F or Esc to leave). At a cabinet or table, pick a sample first (1–9). Once you own a fixed instrument this also takes a bit of the sample along; F at the electron microscope in the science lab, or at the beamline desk in Wilson Lab, puts one in |
 | C | Craft the next ready step of your goal (no mouse needed) |
 | 1, 2, 3… | In the eyepiece: switch to another instrument you own, to compare (or click its button) |
@@ -60,7 +60,7 @@ Simplified physics is labelled in comments next to the formula.
 | J | Journal: achievements with progress, and every scientist's requests with Track buttons |
 | M | Microdex (click a card you have not found to track its sample) |
 | I | Show or hide the inventory box |
-| Tab | Menu: tech tree, Microdex, journal, settings (sound, Gemini API key), save and restart |
+| Tab | Menu: tech tree, Microdex, journal, settings (sound, AI chat provider and API key), save and restart |
 | K | Restock every raw material, skipping the identifications (only when the URL ends in `?demo`) |
 
 ## Finding your way
