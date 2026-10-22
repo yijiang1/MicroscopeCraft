@@ -12,7 +12,7 @@ Built for the [LLM Hackathon](https://llmhackathon.github.io/).
 
 - **Explore** a campus laid out after Cornell's: quads, a gorge with a waterfall, a lake, an art museum, labs, an orchard, a farm, a fossil quarry and the shore of a big lake.
 - **Gather and craft** your way up seven tiers of instruments, part by part. Some materials can only be recognised under the previous instrument, so every upgrade is earned by looking.
-- **Look closer** at more than a hundred samples, from pond water and pollen to paintings, meteorites, ruby glass and trilobite eyes. Each one hides new things at every scale, and the 376 discoveries fill your Microdex.
+- **Look closer** at more than a hundred samples, from pond water and pollen to paintings, meteorites, ruby glass and trilobite eyes. Each one hides new things at every scale, and the 378 discoveries fill your Microdex.
 - **Meet the scientists** who made these discoveries, from Leeuwenhoek and Hooke to Ruska, Rosalind Franklin, Barbara McClintock and Dorothy Hodgkin. They ask to see what you find.
 - **Run the instruments for real**: align a condenser, do a Gram stain, align a TEM, tune an aberration corrector, reconstruct a ptychography image, tune an undulator and centre a tomogram.
 - **Side quests**: solve a mystery alloy by diffraction, fish, visit the campus store, ride the clock tower's lookout, take a roadster for a spin.

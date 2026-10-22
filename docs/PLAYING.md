@@ -108,7 +108,7 @@ This is an explicitly simplified, closed-set simulation: FCC plane spacings, bou
 
 Twenty-five scientists stand around campus: Leeuwenhoek, Hooke, Robert Brown, Abbe, Zernike, Cajal, Gram, Ruska, June Almeida, Albert Crewe, Röntgen, W. L. Bragg, Rosalind Franklin, Dorothy Hodgkin, Boris Batterman (CHESS's first director), Henry Clifton Sorby (rocks and steel, in the geology hall), Mildred Dresselhaus (carbon nanotubes, in the atrium), Hans Bethe and Earl Kirkland; and out in the corners, Richard Zsigmondy (the ultramicroscope), Martinus Beijerinck (root-nodule bacteria), Barbara McClintock (jumping genes), Louis Pasteur (fermentation), Willy Burgdorfer (the Lyme spirochete) and Christian Pander (conodonts). Press E to talk: each has two to five requests (77 in all), mostly "show me what you found", and every request done is an achievement. A gold **!** over a scientist means you can show them something now; **?** means they are still waiting. With 80 more achievements for discoveries, instruments, areas, mini-games and milestones, there are 157.
 
-The Microdex holds 376 discoveries in 121 samples across sixteen areas. Every corner of the map has something to look at: `npm test` checks that no walkable spot is more than 40 m from a sample or a scientist.
+The Microdex holds 378 discoveries in 122 samples across sixteen areas. Every corner of the map has something to look at: `npm test` checks that no walkable spot is more than 40 m from a sample or a scientist.
 
 ## Demo script (about 10 minutes)
 
