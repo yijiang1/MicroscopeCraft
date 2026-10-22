@@ -2,7 +2,8 @@
 // with your own Microdex picture of what they asked to see, and a chat box (Gemini, player's own key). Owner: Person D.
 import { askNpc, getKey, getProvider, type ChatTurn } from './npcChat';
 import { conditionMet } from '../shared/achievements';
-import { completeQuest, type GameContext } from '../shared/state';
+import { npcSample } from '../shared/economy';
+import { carrySample, completeQuest, type GameContext } from '../shared/state';
 import { questTarget } from './journal';
 import type { Toast } from './toast';
 import { withKeys } from './keys';
@@ -91,6 +92,14 @@ export function mountDialog(ctx: GameContext, toast: Toast): () => void {
     head.append(x);
     box.append(head, styled('div', 'color:#9fc8e8;margin:2px 0 8px', npc.role), styled('div', 'color:#bbc;font-size:13px;line-height:1.45', npc.bio));
     box.append(styled('div', 'margin:12px 0;padding:10px 12px;border-radius:10px;background:#1c2a33;font-style:italic;line-height:1.45', `“${said || npc.greeting}”`));
+    const sample = npcSample(ctx, npc.id);
+    if (sample) {
+      const gift = styled('button', 'margin-bottom:10px', `Receive sample: ${sample.name}`);
+      gift.onclick = () => { carrySample(ctx, sample.id); toast.notify(`${sample.name} added to your sample bag`, 2200); gift.textContent = 'Sample collected · bring it to a microscope'; };
+      const view = styled('button', 'margin:0 0 10px 6px', 'View sample');
+      view.onclick = () => { carrySample(ctx, sample.id); close(); ctx.bus.emit('openEyepiece', { sampleId: sample.id }); };
+      box.append(gift, view);
+    }
     if (chat) box.append(chat);
     for (const q of npc.quests) {
       const done = ctx.state.quests.includes(q.id);

@@ -6,10 +6,11 @@ export const SCIENCE_CHATS = [
   ['Could a sharper image damage our specimen?', 'More exposure can improve signal, but radiation can change the sample.', 'We should balance useful detail against dose.'],
   ['Why compare an image with a simulation?', 'It helps test how structure and instrument settings affect contrast.', 'Then we should test several explanations against the data.'],
 ];
-export const ROAM_RADIUS = 6;
+export const ROAM_RADIUS = 12;
 export interface Walker {
   id: string; x: number; z: number; homeX: number; homeZ: number;
   yaw: number; moving: boolean; speech: string; wait: number;
+  partnerId?: string;
   goal?: { x: number; z: number };
 }
 export function createScientistLife(homes: readonly { id: string; x: number; z: number; facing: number }[], random = Math.random) {
@@ -27,6 +28,7 @@ export function createScientistLife(homes: readonly { id: string; x: number; z: 
       c.a.speech = c.b.speech = '';
       if (c.elapsed >= 18) { c.a.wait = c.b.wait = 8; chats.splice(i, 1); continue; }
       busy.add(c.a); busy.add(c.b);
+      c.a.partnerId = c.b.id; c.b.partnerId = c.a.id;
       c.a.yaw = Math.atan2(c.a.x - c.b.x, c.a.z - c.b.z);
       c.b.yaw = c.a.yaw + Math.PI;
       const turn = Math.floor(c.elapsed / 6);

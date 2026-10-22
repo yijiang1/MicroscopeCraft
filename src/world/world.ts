@@ -1,3 +1,5 @@
+import { mountSpeechOverlay } from './speech-overlay';
+import { buildActivityStation, STATIONS } from './activity-stations';
 // The open world: a university campus, which you walk and jump across, and 3D models you gather or look at.
 // Fixed instruments stay where they are installed: the electron microscopes in the science lab, the CHESS beamline in
 // Wilson Lab. Look (F) at a sample to take a bit along, carry it there and press F at the instrument.
@@ -40,7 +42,8 @@ const SHADOW_SETTLE_FRAMES = 20; // keep redrawing shadows this long after a cha
 
 interface Node {
   /** 'em': the electron microscopes in the lab; 'beam': the CHESS beamline's desk; 'npc': a scientist. */
-  kind: Kind | 'em' | 'beam' | 'npc';
+  kind: Kind | 'em' | 'beam' | 'npc' | 'activity';
+  activity?: 'store' | 'lab' | 'chess';
   aim: Aim;
   npcId?: string;
   root: THREE.Object3D;
@@ -130,6 +133,10 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   };
   nodes.push(emNode, beamNode);
 
+  for (const station of STATIONS) {
+    const root = buildActivityStation(station); scene.add(root);
+    nodes.push({ kind: 'activity', activity: station.activity, aim: {}, root, x: station.x, z: station.z, radius: 1, alive: true, index: -1, center: root.position.clone().add(new THREE.Vector3(0, 1.2, 0)), aimRadius: 1 });
+  }
   // --- the scientists
   const figures = new Map<string, NpcFigure>();
   for (const npc of Object.values(ctx.data.npcs)) {
@@ -390,6 +397,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     }
     const n = aimed();
     if (!n || e.repeat) return;
+    if (k === 'e' && n.activity) { controls.unlock(); ctx.bus.emit('openCampusActivity', { activity: n.activity }); return; }
     if (k === 'e' && n.kind === 'npc') {
       controls.unlock();
       ctx.bus.emit('talkTo', { npcId: n.npcId! });
@@ -440,6 +448,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
 
   const describe = (n: Node | null) => {
     if (!n) return '';
+    if (n.activity) return `[E] ${STATIONS.find(s => s.activity === n.activity)!.name}`;
     if (n.kind === 'npc') {
       const npc = ctx.data.npcs[n.npcId!]!;
       return `[E] Talk to ${npc.name}`;
@@ -505,6 +514,11 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     return Math.hypot(p.x - x, p.z - z) < 0.001 && Math.hypot(x - camera.position.x, z - camera.position.z) > 0.9;
   };
   const minimap = mountMinimap(el, life.walkers);
+  const speech = mountSpeechOverlay(el);
+  const offActivity = ctx.bus.on('campusActivityChanged', ({ open }) => { paused = open; keys.clear(); if (open) controls.unlock(); });
+  const dress = () => { player.equip(ctx.state.economy); redrawShadows(); };
+  dress();
+  const offDress = ctx.bus.on('economyChanged', dress);
   const footsteps = createFootstepTracker();
   const loop = createFrameLoop((dt, t) => {
     const previousX = camera.position.x;
@@ -583,7 +597,8 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       n.center.set(w.x, n.root.position.y + 1.2, w.z);
       n.root.rotation.y = w.yaw;
       f.update(t, w.moving);
-      f.say(Math.hypot(w.x - px, w.z - pz) < 22 ? w.speech : '');
+      f.setSpeaking(!!w.speech && Math.hypot(w.x - px, w.z - pz) < 18);
+
       if (w.moving) redrawShadows();
     }
     updateDecor(t);
@@ -643,6 +658,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       renderer.shadowMap.needsUpdate = true;
     }
     minimap.update(px, pz, dir.x, dir.z, t, paused, targetNode);
+    speech.update(life.walkers.map(w => ({ id: w.id, name: ctx.data.npcs[w.id]!.name, text: w.speech, partnerId: w.partnerId, partnerName: w.partnerId ? ctx.data.npcs[w.partnerId]?.name : undefined, position: npcNodes.get(w.id)!.root.position })), viewCamera, campus.group, t, paused);
     renderer.render(scene, viewCamera);
   }, () => (controls.isLocked ? FRAME_MS : IDLE_FRAME_MS));
   loop.start();
@@ -682,6 +698,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       removeEventListener('pagehide', rememberPlayer);
       document.removeEventListener('visibilitychange', rememberPlayer);
       minimap.dispose();
+      speech.dispose(); offActivity(); offDress();
       player.dispose();
       controls.dispose();
       renderer.dispose();

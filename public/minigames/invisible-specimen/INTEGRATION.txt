@@ -80,3 +80,12 @@ https://histology.leeds.ac.uk/home/what-is-histology/the_light_microscope/
 Zoom regression: pointer exit, hover retention, moving target anchoring, empty-view
 zoom, and overview reset checked. Repeated 200,000× ↔ 4,000,000× zoom verified
 in the browser with the selected lattice patch remaining centered.
+
+Campus reward bridge (integrated):
+The Science Building activity console embeds the game. Each successful capture
+sends a same-origin parent message:
+  { type: 'microscopecraft:specimen', specimen: '<mission type>' }
+The host checks the origin, active iframe source and ten supported mission IDs.
+It records invisible_<mission type> with score 1. Saved reward milestones prevent
+duplicate coins/vouchers when replaying or resetting the standalone journal.
+Closing the campus activity removes the iframe; its journal remains saved.

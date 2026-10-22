@@ -2,6 +2,10 @@
 import type { Tier } from './schema';
 
 export interface GameEvents {
+  economyChanged: Record<string, never>;
+  rewardEarned: { coins: number; vouchers: number };
+  openCampusActivity: { activity: 'store' | 'lab' | 'chess' };
+  campusActivityChanged: { open: boolean };
   /** world → scope: player aimed at a sample and pressed the eyepiece key. */
   openEyepiece: { sampleId: string };
   /** scope → world: eyepiece dismissed. */

@@ -9,7 +9,7 @@ export interface NpcFigure {
   /** '!' gold: you have something to show; '?' grey: they are still waiting; none: every request done. */
   setMarker(kind: 'ready' | 'waiting' | 'done'): void;
   update(t: number, moving?: boolean): void;
-  say(text: string): void;
+  setSpeaking(speaking: boolean): void;
 }
 
 function tag(text: string, sub: string): THREE.Sprite {
@@ -137,37 +137,13 @@ export function buildNpc(npc: Npc): NpcFigure {
   const mk = marker();
   mk.sprite.position.set(0, 2.75, 0);
   root.add(name, mk.sprite);
-  const bubbleCanvas = document.createElement('canvas');
-  bubbleCanvas.width = 768; bubbleCanvas.height = 256;
-  const bubbleContext = bubbleCanvas.getContext('2d')!;
-  const bubbleTexture = new THREE.CanvasTexture(bubbleCanvas);
-  bubbleTexture.colorSpace = THREE.SRGBColorSpace;
-  const bubble = new THREE.Sprite(new THREE.SpriteMaterial({ map: bubbleTexture, depthWrite: false }));
-  bubble.scale.set(4.8, 1.6, 1); bubble.position.set(0, 3.9, 0); bubble.visible = false;
-  root.add(bubble);
-  let lastSpeech = '';
+  let markerKind: 'ready' | 'waiting' | 'done' = 'waiting';
+  let speaking = false;
   const phase = Math.random() * 6;
   return {
     root,
-    setMarker: mk.set,
-    say(text) {
-      if (text === lastSpeech) return;
-      lastSpeech = text; bubble.visible = !!text;
-      if (!text) return;
-      const g = bubbleContext;
-      g.clearRect(0, 0, 768, 256);
-      g.fillStyle = '#fffdf2'; g.beginPath(); g.roundRect(4, 4, 760, 218, 28); g.fill();
-      g.beginPath(); g.moveTo(350, 220); g.lineTo(384, 253); g.lineTo(414, 220); g.fill();
-      g.fillStyle = '#21313c'; g.font = '30px system-ui'; g.textAlign = 'center';
-      const lines: string[] = []; let line = '';
-      for (const word of text.split(' ')) {
-        const next = line ? `${line} ${word}` : word;
-        if (g.measureText(next).width > 700 && line) { lines.push(line); line = word; } else line = next;
-      }
-      lines.push(line);
-      lines.forEach((l, i) => g.fillText(l, 384, 110 - (lines.length - 1) * 19 + i * 38));
-      bubbleTexture.needsUpdate = true;
-    },
+    setMarker(kind) { markerKind = kind; mk.set(kind); mk.sprite.visible = !speaking && kind !== 'done'; },
+    setSpeaking(value) { speaking = value; name.visible = !value; mk.sprite.visible = !value && markerKind !== 'done'; },
     update(t, moving = false) {
       limbs.forEach((limb, i) => { limb.rotation.x = moving ? Math.sin(t * 0.007 + phase) * 0.4 * ([1, -1, -1, 1][i]!) : 0; });
       mk.sprite.position.y = 2.75 + 0.06 * Math.sin(t * 0.003 + phase);

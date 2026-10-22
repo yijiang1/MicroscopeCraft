@@ -1,3 +1,4 @@
+import type { Economy } from '../shared/economy';
 import * as THREE from 'three';
 
 /** A block-style explorer, with feet at the origin and his face toward -Z. */
@@ -44,9 +45,23 @@ export function buildPlayer() {
     root.add(leg);
     legs.push(leg);
   }
+  const backpack = new THREE.Group(); root.add(backpack);
+  const bagMaterial = new THREE.MeshStandardMaterial({ color: '#a92338', roughness: 0.9 });
+  box(backpack, [0.48, 0.56, 0.23], [0, 1.15, 0.27], bagMaterial);
+  for (const side of [-1, 1]) box(backpack, [0.06, 0.55, 0.05], [side * 0.19, 1.18, -0.18], materials.boots);
+  const souvenir = new THREE.Group(); root.add(souvenir);
+  box(souvenir, [0.22, 0.045, 0.18], [0.4, 0.8, 0], materials.boots);
+  box(souvenir, [0.045, 0.25, 0.05], [0.45, 0.94, 0.03], materials.shirt);
+  box(souvenir, [0.14, 0.045, 0.14], [0.39, 0.91, -0.03], materials.boots);
+  box(souvenir, [0.06, 0.15, 0.06], [0.37, 1.08, -0.03], materials.boots);
+  backpack.visible = souvenir.visible = false;
   let phase = 0;
   return {
     root,
+    equip(economy: Economy) {
+      materials.shirt.color.set(economy.shirt === 'red' ? '#b32235' : economy.shirt === 'lab' ? '#f0f2ed' : '#8ec9ee');
+      backpack.visible = economy.backpack; souvenir.visible = economy.model;
+    },
     update(distance: number, dt: number) {
       phase += distance * 2.5;
       const swing = distance > 0.001 ? Math.sin(phase) * 0.55 : 0;
@@ -56,6 +71,7 @@ export function buildPlayer() {
     },
     dispose() {
       root.traverse((obj) => { if (obj instanceof THREE.Mesh) obj.geometry.dispose(); });
+      bagMaterial.dispose();
       Object.values(materials).forEach((material) => material.dispose());
     },
   };

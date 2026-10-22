@@ -1,3 +1,4 @@
+import type { Economy } from './economy';
 // The shared contract: every type is a Zod schema, so the same definition is the TS type,
 // the runtime validator (client data loading, tests, server world-spec validator) and,
 // via z.toJSONSchema(), the JSON Schema for LLM prompts.
@@ -290,6 +291,7 @@ export const PlayerLocationSchema = z.object({
 export type PlayerLocation = z.infer<typeof PlayerLocationSchema>;
 
 export interface GameState {
+  economy: Economy;
   carriedSamples: string[];
   playerLocation: PlayerLocation | null;
   inventory: Record<string, number>;
