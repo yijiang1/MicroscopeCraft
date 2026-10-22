@@ -4,7 +4,8 @@ import { createGame, parseSave, toSave } from './state';
 import { loadGameData } from './data';
 
 describe('season cycle',()=>{
-  it('changes exactly every ten minutes and repeats after forty',()=>{
+  it('changes exactly every six minutes and repeats after twenty-four',()=>{
+    expect(SEASON_MS).toBe(360000);
     const start=1000000;
     expect(seasonAt(start,start-1)).toEqual({season:'spring',remainingMs:SEASON_MS});
     expect(seasonAt(start,start+SEASON_MS-1)).toEqual({season:'spring',remainingMs:1});

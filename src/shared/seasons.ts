@@ -1,6 +1,6 @@
 import { carrySample, gather, type GameContext } from './state';
 /** A saved real-time cycle: reopening the game does not restart spring. */
-export const SEASON_MS = 10 * 60 * 1000;
+export const SEASON_MS = 6 * 60 * 1000;
 export const SEASONS = ['spring', 'summer', 'autumn', 'winter'] as const;
 export type Season = typeof SEASONS[number];
 export function seasonAt(startedAt: number, now: number) {
