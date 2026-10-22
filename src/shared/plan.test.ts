@@ -30,7 +30,7 @@ describe('goal plan', () => {
     expect(p.nextStep?.recipe.id).toBe('lens');
   });
 
-  it('later goals list the raw totals from the README table', () => {
+  it('later goals list the raw totals from the table in docs/PLAYING.md', () => {
     const totalsAfter = (owned: string, keep: Record<string, number> = {}) => {
       const goal = nextGoalRecipe(data, { inventory: { [owned]: 1 } })!;
       return { id: goal.id, raw: totals(planFor(goal, data, keep)) };

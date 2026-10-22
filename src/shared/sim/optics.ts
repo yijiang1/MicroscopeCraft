@@ -1,4 +1,4 @@
-// Pure simulation rules from DESIGN.md "Simulation model". Owner: Person B.
+// Pure simulation rules from docs/DESIGN.md "Simulation model". Owner: Person B.
 // Simple but directionally correct; every simplification is labelled.
 import type { ContrastKey, Feature, Mode, ScopeParams, Stain } from '../schema';
 
@@ -92,7 +92,7 @@ export interface Visibility {
   detectedOnly?: boolean;
 }
 
-/** The visibility rules of DESIGN.md, checked in the order the player hits the walls:
+/** The visibility rules of docs/DESIGN.md, checked in the order the player hits the walls:
  *  right mode, resolved (or detected), big enough for the eye, enough contrast. */
 export function visibility(feature: Seen, scope: ScopeParams, stain: Stain | null = null): Visibility {
   const dEffUm = scopeResolutionUm(scope);
