@@ -54,6 +54,7 @@ export function mountCampusActivities(ctx: GameContext, toast: Toast, training: 
           clear(); content.append(button('← Store & collection', shop), text('h2', item.name));
           const body = text('p', item.text); body.style.whiteSpace = 'pre-line'; content.append(body);
         }));
+        else if (item.kind === 'car') card.append(text('p', 'Owned · Unlimited campus drives'));
         else {
           const e = ctx.state.economy;
           const worn = item.id === 'backpack' ? e.backpack : item.id === 'model' ? e.model : item.id === `shirt_${e.shirt}`;
@@ -68,6 +69,9 @@ export function mountCampusActivities(ctx: GameContext, toast: Toast, training: 
           b.disabled = ctx.state.economy[currency] < cost; card.append(b);
         }
       }
+      if (item.kind === 'car') card.append(button(owned ? 'Drive your Micro Roadster' : 'Test drive · 30 seconds · Free', () => {
+        modal.close(); ctx.bus.emit('campusActivityChanged', { open: false }); ctx.bus.emit('driveMiata', { trial: !owned });
+      }));
       return card;
     };
     for (const item of storeCatalog(ctx.data)) grid.append(itemCard(item));

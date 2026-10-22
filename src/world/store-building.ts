@@ -1,3 +1,4 @@
+import { buildMiata } from './miata';
 import * as THREE from 'three';
 import { heightAt } from './terrain';
 
@@ -79,6 +80,7 @@ export function buildScopeStore() {
     cylinder(.42,.2,x!,10.65-h!,z!,dark);
     cylinder(.3,.04,x!,10.53-h!,z!,glass);
   }
+  const displayCar = buildMiata(); displayCar.root.position.set(3.5, STORE_FLOOR_RISE, 0); group.add(displayCar.root);
   // A lit display shelf visible through the glazing.
   for (const y of [.7,1.5,2.3]) box(3.5,.12,.65,-3.6,y,-4.7,cream);
   for (let i=0;i<8;i++) box(.26,.55,.45,-5+i*.38,1.83,-4.7,i%2?red:dark);

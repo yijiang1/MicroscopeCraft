@@ -12,7 +12,9 @@ export function storePreview(item: StoreItem): SVGSVGElement {
   // Only fixed markup enters innerHTML; catalog titles are inserted as text below.
   const artwork = document.createElementNS(ns, 'g');
   const shadow = '<ellipse cx="120" cy="132" rx="56" ry="7" fill="#0a161d" opacity=".2"/>';
-  if (item.kind === 'shirt') {
+  if (item.kind === 'car') {
+    artwork.innerHTML = shadow + '<path d="M32 101L44 83L91 77L105 53H145L159 78L195 86L207 110H30Z" fill="#d42132" stroke="#721724" stroke-width="2"/><path d="M101 76L111 57H140L151 76Z" fill="#b2e3f0"/><path d="M141 57L156 77H116" fill="#213440"/><rect x="45" y="77" width="22" height="13" rx="2" fill="#ed3442"/><rect x="47" y="80" width="18" height="8" fill="#fff3c9"/><circle cx="66" cy="111" r="18" fill="#14212a"/><circle cx="66" cy="111" r="10" fill="#b9c9d0"/><circle cx="173" cy="111" r="18" fill="#14212a"/><circle cx="173" cy="111" r="10" fill="#b9c9d0"/><path d="M91 87H153" stroke="#ff7a80" stroke-width="2"/>';
+  } else if (item.kind === 'shirt') {
     const color = item.id === 'shirt_red' ? '#b32235' : '#f0f2ed';
     artwork.innerHTML = shadow + `<path d="M91 40L67 52L53 79L75 91L85 73V121H155V73L165 91L187 79L173 52L149 40L136 37H104Z" fill="${color}" stroke="#17333c" stroke-width="2" stroke-linejoin="round"/><path d="M104 37Q120 59 136 37" fill="#233b46" stroke="#17333c" stroke-width="2"/><path d="M86 74L92 113H149L155 74" fill="none" stroke="#17333c" opacity=".15"/><path d="M120 53V120" stroke="#17333c" opacity="${item.id === 'shirt_lab' ? '.4' : '0'}"/><rect x="133" y="68" width="14" height="15" rx="2" fill="#17333c" opacity=".16"/>`;
   } else if (item.kind === 'backpack') {

@@ -20,11 +20,11 @@ export function constrainTerrace(p: { x: number; z: number }) {
 }
 export function buildTowerLift() {
   const group = new THREE.Group();
-  const metal = new THREE.MeshStandardMaterial({ color: '#354b50', metalness: 0.65, roughness: 0.35 });
-  const stone = new THREE.MeshStandardMaterial({ color: '#d1c7ad', roughness: 0.8 });
-  const glass = new THREE.MeshStandardMaterial({ color: '#a5e2e4', transparent: true, opacity: 0.18, depthWrite: false });
+  const metal = new THREE.MeshStandardMaterial({ color: '#b3e0f5', transparent: true, opacity: 0.38, roughness: 0.22, depthWrite: false });
+  const stone = new THREE.MeshStandardMaterial({ color: '#a9d9f5', transparent: true, opacity: 0.24, roughness: 0.16, depthWrite: false });
+  const glass = new THREE.MeshStandardMaterial({ color: '#b3dff8', transparent: true, opacity: 0.18, depthWrite: false });
   const box = (parent: THREE.Group, x: number, y: number, z: number, w: number, h: number, d: number, material: THREE.Material) => {
-    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material); m.position.set(x,y,z); m.castShadow = true; parent.add(m);
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material); m.position.set(x,y,z); m.castShadow = false; parent.add(m);
   };
   // Separate panels leave the solid tower shaft unobstructed and avoid coplanar surfaces.
   const top = liftBase + LIFT.rise;
@@ -36,11 +36,11 @@ export function buildTowerLift() {
   for (const panel of LANDING_PANELS) box(group,panel.x,top-0.15,panel.z,panel.w,0.3,panel.d,stone);
   for (const z of [TERRACE.z0,TERRACE.z1]) {
     box(group,-37.25,top+1.15,z,10.5,0.08,0.08,metal);
-    for(let x=TERRACE.x0;x<=TERRACE.x1;x+=0.75) box(group,x,top+0.55,z,0.045,1.1,0.045,metal);
+    box(group,-37.25,top+0.55,z,10.5,1.1,0.035,glass);
   }
   for(const x of [TERRACE.x0,TERRACE.x1]) {
     box(group,x,top+1.15,-1,0.08,0.08,9,metal);
-    for(let z=TERRACE.z0;z<=TERRACE.z1;z+=0.75) box(group,x,top+0.55,z,0.045,1.1,0.045,metal);
+    box(group,x,top+0.55,-1,0.035,1.1,9,glass);
   }
   for(const z of [-2.15,0.15]) box(group,LIFT.x-1.1,liftBase+16,z,0.12,32,0.12,metal);
   const cabin = new THREE.Group(); cabin.position.set(LIFT.x,liftBase,LIFT.z); group.add(cabin);

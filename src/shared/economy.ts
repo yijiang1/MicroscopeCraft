@@ -7,9 +7,10 @@ export const EconomySchema = z.object({
   shirt: z.enum(['blue', 'red', 'lab']).default('blue'), backpack: z.boolean().default(false), model: z.boolean().default(false),
 });
 export type Economy = z.infer<typeof EconomySchema>;
-export interface StoreItem { id: string; name: string; price: number; kind: 'book' | 'shirt' | 'backpack' | 'model'; text: string }
+export interface StoreItem { id: string; name: string; price: number; kind: 'book' | 'shirt' | 'backpack' | 'model' | 'car'; text: string }
 export function storeCatalog(data: GameData): StoreItem[] {
   return [
+    { id: 'miata_na', name: 'Micro Roadster · Classic red', price: 600, kind: 'car', text: 'A red open-top roadster with pop-up headlights. Take a free 30-second campus test drive, or buy it for unlimited drives. WASD to drive; E returns to the store.' },
     { id: 'shirt_red', name: 'ScopeCraft red shirt', price: 40, kind: 'shirt', text: 'A red campus shirt. Equip it and press V to see your explorer.' },
     { id: 'shirt_lab', name: 'White lab outfit', price: 60, kind: 'shirt', text: 'A white jacket for your next microscopy session.' },
     { id: 'backpack', name: 'Field backpack', price: 50, kind: 'backpack', text: 'A red field bag with dark straps. Cosmetic; sample capacity stays at eight.' },
