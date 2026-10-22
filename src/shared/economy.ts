@@ -6,6 +6,7 @@ export const EconomySchema = z.object({
   fish: z.record(z.string(), z.number().int().nonnegative()).default({}),
   coins: z.number().int().nonnegative().default(0), vouchers: z.number().int().nonnegative().default(0),
   owned: z.array(z.string()).default([]), rewarded: z.record(z.string(), z.number().int().min(0).max(5)).default({}),
+  character: z.enum(['lena', 'explorer']).default('lena'),
   eyewear: z.enum(['none', 'glasses', 'sunglasses']).default('none'),
   shirt: z.enum(['blue', 'red', 'lab']).default('blue'), backpack: z.boolean().default(false), model: z.boolean().default(false),
 });
@@ -47,6 +48,9 @@ export function purchase(ctx: GameContext, id: string, payment: 'coins' | 'vouch
   const price = payment === 'coins' ? item.price : Math.ceil(item.price / 25);
   if (e[payment] < price) return false;
   e[payment] -= price; e.owned.push(id); ctx.bus.emit('economyChanged', {}); return true;
+}
+export function chooseCharacter(ctx: GameContext, character: Economy['character']) {
+  ctx.state.economy.character = character; ctx.bus.emit('economyChanged', {});
 }
 export function equip(ctx: GameContext, id: string) {
   const e = ctx.state.economy;

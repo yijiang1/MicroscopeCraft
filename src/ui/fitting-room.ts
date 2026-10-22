@@ -23,7 +23,7 @@ export function mountFittingRoom(host: HTMLElement, ctx: GameContext) {
   const ro=new ResizeObserver(resize);ro.observe(mirror);
   const button=(label:string,fn:()=>void)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=fn;return b;};
   controls.append(button('↶ Rotate',()=>{character.root.rotation.y-=Math.PI/4;render();}),button('Rotate ↷',()=>{character.root.rotation.y+=Math.PI/4;render();}));
-  const items:StoreItem[]=[{id:'shirt_blue',name:'Original blue shirt',kind:'shirt',price:0,text:'Always available'},...storeCatalog(ctx.data).filter(i=>['shirt','backpack','model','eyewear'].includes(i.kind)&&ctx.state.economy.owned.includes(i.id))];
+  const items:StoreItem[]=[{id:'shirt_blue',name:ctx.state.economy.character==='lena'?'Black turtleneck':'Original blue shirt',kind:'shirt',price:0,text:'Always available'},...storeCatalog(ctx.data).filter(i=>['shirt','backpack','model','eyewear'].includes(i.kind)&&ctx.state.economy.owned.includes(i.id))];
   const draw=()=>{
     wardrobe.replaceChildren();
     for(const item of items){
@@ -34,7 +34,7 @@ export function mountFittingRoom(host: HTMLElement, ctx: GameContext) {
       const b=button(worn?(item.kind==='shirt'?'Wearing':'Remove'):'Wear',()=>{equip(ctx,item.id);draw();render();});b.disabled=worn&&item.kind==='shirt';b.setAttribute('aria-pressed',String(worn));
       card.append(picture,name,b);wardrobe.append(card);
     }
-    if(items.length===1){const hint=document.createElement('p');hint.textContent='Your blue shirt is ready to wear. Buy clothing and accessories in the store to add them here.';wardrobe.append(hint);}
+    if(items.length===1){const hint=document.createElement('p');hint.textContent=`Your ${items[0]!.name.toLowerCase()} is ready to wear. Buy clothing and accessories in the store to add them here.`;wardrobe.append(hint);}
   };
   draw();resize();
   return ()=>{ro.disconnect();character.dispose();renderer.dispose();layout.remove();};

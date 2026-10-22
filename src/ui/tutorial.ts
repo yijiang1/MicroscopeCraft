@@ -2,6 +2,7 @@
 // one loop: move, gather, craft, build the hand lens, look, discover. Each step ticks off when the player does it,
 // and steps already done in a saved game are skipped. Replay from the menu. Owner: Person D.
 import { ownedScopes, setAdvanced, type GameContext } from '../shared/state';
+import { chooseCharacter } from '../shared/economy';
 import { itemIcon } from './icons';
 import { withKeys } from './keys';
 
@@ -140,6 +141,26 @@ export function mountTutorial(ctx: GameContext): TutorialHandle {
       row.append(itemIcon(icon, ctx.data, 30), text);
       card.append(row);
     }
+    // who to play as: Lena (default) or the original explorer
+    card.append(div('margin:14px 0 6px;font-weight:700', 'Choose your character'));
+    const people = div('display:flex;gap:8px;flex-wrap:wrap');
+    const person = (id: 'lena' | 'explorer', title: string, about: string) => {
+      const b = document.createElement('button');
+      b.append(div('font-weight:700;margin-bottom:2px', title), div('font-size:12px;line-height:1.35;opacity:.8', about));
+      b.onclick = () => (chooseCharacter(ctx, id), syncPeople());
+      return Object.assign(b, { person: id });
+    };
+    const persons = [
+      person('lena', '👩‍🔬 Lena', 'Inspired by Lena Kourkoutis, the Cornell electron microscopist who imaged materials atom by atom.'),
+      person('explorer', '🧑 Explorer', 'The original block-style campus explorer.'),
+    ];
+    const syncPeople = () => persons.forEach((b) => {
+      const on = b.person === ctx.state.economy.character;
+      b.style.cssText = `flex:1 1 180px;padding:8px 10px;border-radius:8px;text-align:left;cursor:pointer;color:#eee;background:${on ? '#ffd35a26' : '#ffffff0d'};border:1px solid ${on ? '#ffd35a' : '#ffffff22'}`;
+    });
+    syncPeople();
+    people.append(...persons);
+    card.append(people);
     // easy or advanced mode, picked here and switchable later in the menu
     card.append(div('margin:14px 0 6px;font-weight:700', 'How do you want to play?'));
     const modes = div('display:flex;gap:8px;flex-wrap:wrap');
