@@ -2,8 +2,11 @@
 // the Microdex (M), toasts and sound. Plain DOM; swap for anything.
 import { SAVE_KEY, toSave, type GameContext } from '../shared/state';
 import { fmtUm } from '../shared/sim/walls';
+import { allAchievements } from '../shared/achievements';
+import { mountDialog } from './dialog';
 import { mountGoal } from './goal';
 import { mountInventory } from './inventory';
+import { mountJournal } from './journal';
 import { mountMicrodex } from './microdex';
 import { mountSound } from './sound';
 import { mountTechTree } from './techtree';
@@ -19,11 +22,14 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   const sound = mountSound(ctx);
   const inventory = mountInventory(ctx);
   const techTree = mountTechTree(document.body, ctx);
+  const journal = mountJournal(document.body, ctx);
+  const closeDialog = mountDialog(ctx, toast);
 
   // --- menu panel (hidden until Tab): tech tree and microdex buttons, sound, guide
   el.style.cssText += ';background:#000d;padding:8px;box-sizing:border-box;display:none';
   const tree = document.createElement('button');
   const dex = document.createElement('button');
+  const journalBtn = document.createElement('button');
   const mute = document.createElement('button');
   const guide = document.createElement('div');
   const input = document.createElement('input');
@@ -33,6 +39,12 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   tree.onclick = () => techTree.toggle();
   dex.style.cssText = 'display:block;width:100%;margin:2px 0';
   dex.onclick = () => microdex.toggle();
+  journalBtn.style.cssText = 'display:block;width:100%;margin:2px 0';
+  journalBtn.onclick = () => journal.toggle();
+  const refsBtn = document.createElement('button');
+  refsBtn.style.cssText = 'display:block;width:100%;margin:2px 0';
+  refsBtn.textContent = 'References';
+  refsBtn.onclick = () => journal.toggle('references');
   mute.style.cssText = 'display:block;width:100%;margin:2px 0';
   const syncMute = () => (mute.textContent = sound.muted() ? 'Sound: off' : 'Sound: on');
   mute.onclick = () => {
@@ -90,7 +102,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   const title = document.createElement('h4');
   title.textContent = 'Menu (Tab to close)';
   title.style.margin = '4px 0 8px';
-  el.append(title, tree, dex, mute, saveBtn, restart, guide);
+  el.append(title, tree, dex, journalBtn, refsBtn, mute, saveBtn, restart, guide);
 
   let menuOpen = false;
   const setMenu = (open: boolean) => {
@@ -103,6 +115,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
 
   const render = () => {
     dex.textContent = `Microdex (M) · ${microdex.summary()}`;
+    journalBtn.textContent = `Journal (J) · ${journal.summary()}`;
   };
   render();
 
@@ -121,7 +134,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
 
   const name = (id: string) => ctx.data.items[id]?.name ?? id;
   const offs = [
-    ...(['itemGathered', 'itemCrafted', 'discoveryUnlocked', 'scopeChanged'] as const).map((t) => ctx.bus.on(t, save)),
+    ...(['itemGathered', 'itemCrafted', 'discoveryUnlocked', 'scopeChanged', 'questCompleted', 'achievementUnlocked', 'minigameScored', 'areaVisited', 'closeEyepiece'] as const).map((t) => ctx.bus.on(t, save)),
     ctx.bus.on('itemGathered',({ itemId, count }) => {
       render();
       toast.notify(`+${count} ${name(itemId)}`, 1200);
@@ -129,11 +142,21 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
     ctx.bus.on('itemCrafted', render),
     ctx.bus.on('tierChanged', ({ tier }) => {
       const built = ctx.data.recipes.find((r) => r.scope?.tier === tier);
-      const how = tier >= 5
+      const how = built?.scope?.site === 'chess'
+        ? 'It is in the CHESS hall of Wilson Lab (east of campus): look (F) at a sample to take some, then carry it there and press F at the control desk.'
+        : built?.scope?.site
         ? 'It is installed in the lab of the science building (south-east): look (F) at a sample to take some, then carry it there.'
+        : tier === 4
+        ? 'Aim at something and press F; switch to fluorescence in the eyepiece. Phase contrast and dark field are add-ons you can build next.'
         : 'Aim at something and press F to look closer.';
       if (built) toast.notify(`You built the ${built.name}! ${how}`, 8000, 3);
     }),
+    ctx.bus.on('achievementUnlocked', ({ id }) => {
+      render();
+      const a = allAchievements(ctx.data).find((x) => x.id === id);
+      if (a) toast.notify(`🏆 Achievement: ${a.name}`, 3500, 3);
+    }),
+    ctx.bus.on('questCompleted', () => render()),
     ctx.bus.on('discoveryUnlocked', ({ id }) => {
       render();
       const f = Object.values(ctx.data.samples).flatMap((x) => x.features).find((x) => x.id === id);
@@ -150,6 +173,8 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
       removeEventListener('keydown', onKey);
       removeEventListener('pagehide', save);
       goal.dispose();
+      journal.dispose();
+      closeDialog();
       inventory.dispose();
       techTree.dispose();
       microdex.dispose();

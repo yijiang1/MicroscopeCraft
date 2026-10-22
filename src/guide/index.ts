@@ -22,7 +22,7 @@ export function mountGuide(ctx: GameContext): () => void {
 
     if (NEXT.test(question)) {
       const goal = nextGoalRecipe(data, state);
-      if (!goal) return reply('You have built every microscope. Explore, look at everything, and fill the Microdex.');
+      if (!goal) return reply('You have built every instrument. Fill the Microdex, and help the scientists around campus: the journal (J) lists what each one asks for.');
       const plan = planFor(goal, data, state.inventory, state.discoveries);
       const action = currentAction(plan);
       const where = action && action.kind !== 'craft' ? data.materials[action.raw.itemId]?.where : undefined;

@@ -22,6 +22,20 @@ const LAB_H = 4.2;
 export const EM_SPOT = { x: 36, z: 20 };
 /** The glowing crystal stands in a little mineral garden by the lab entrance. */
 export const CRYSTAL_SPOT = { x: 16, z: 27 };
+/** The greenhouse, south of the quad, entered by a door in its north wall. */
+export const GREENHOUSE = box(2, 14, 10, 20);
+const GH_DOOR = { x0: 7, x1: 9 };
+const GH_H = 3.2;
+/** Wilson Laboratory, east of campus: its hall is the CHESS experimental hall, beside the CESR ring. Door in the west wall. */
+export const WILSON = box(50, 72, -14, 6);
+const WL_DOOR = { z0: -6, z1: -2 };
+const WL_H = 7;
+/** The ring's tunnel wall (concrete shielding) along the east side of the hall, and the hutch where the beam ends. */
+const RING_WALL_X = 68.5;
+const HUTCH = box(52, 60, -8, -1);
+const BEAM_Z = -4.5;
+/** The beamline's control desk, where you put samples in. */
+export const BEAM_SPOT = { x: 56, z: 0.5 };
 
 const FLOOR_H = 3.6;
 interface Hall {
@@ -56,8 +70,13 @@ export const FOOTPRINTS: Box[] = [
   ...STATUES.map((s) => box(s.x - 0.7, s.x + 0.7, s.z - 0.7, s.z + 0.7)),
 ];
 export const insideBuilding = (x: number, z: number, margin = 0) =>
-  FOOTPRINTS.some((b) => x > b.x0 - margin && x < b.x1 + margin && z > b.z0 - margin && z < b.z1 + margin);
-export const inLab = (x: number, z: number) => x > SCIENCE.x0 && x < SCIENCE.x1 && z > SCIENCE.z0 && z < SCIENCE.z1;
+  [...FOOTPRINTS, GREENHOUSE, WILSON].some((b) => x > b.x0 - margin && x < b.x1 + margin && z > b.z0 - margin && z < b.z1 + margin);
+const inside = (b: Box, x: number, z: number) => x > b.x0 && x < b.x1 && z > b.z0 && z < b.z1;
+export const inLab = (x: number, z: number) => inside(SCIENCE, x, z);
+export const inChess = (x: number, z: number) => inside(WILSON, x, z);
+export const inGreenhouse = (x: number, z: number) => inside(GREENHOUSE, x, z);
+/** Solid inside a building, where nothing may be placed: walls, the ring wall, the hutch, the beam pipe, benches. */
+export const INDOOR_SOLIDS: Box[] = [box(RING_WALL_X, WILSON.x1, WILSON.z0, WILSON.z1), HUTCH, box(60, RING_WALL_X, BEAM_Z - 0.6, BEAM_Z + 0.6)];
 
 const mat = (color: string, roughness = 0.85, metalness = 0) => new THREE.MeshStandardMaterial({ color, roughness, metalness });
 const SLATE = mat('#4a4e55', 0.8);
@@ -215,40 +234,94 @@ function sign(text: string, w: number, x: number, y: number, z: number, yaw: num
   return mesh;
 }
 
-/** The electron microscope: cabinet, a column of lens rings, the gun on top, and a console with two screens. */
-function electronMicroscope(): THREE.Group {
+/** The electron microscope in the lab, assembled part by part: each crafted component appears in place.
+ *  Cabinet and pumps (vacuum system), viewing chamber (screen), projector, objective with its side-entry holder,
+ *  condensers, gun; the STEM upgrade adds a corrector stack and detectors. */
+export interface EmModel {
+  group: THREE.Group;
+  /** Show the parts the player owns (an owned microscope shows all of its parts). */
+  show(has: (itemId: string) => boolean): void;
+}
+
+function electronMicroscope(): EmModel {
   const em = new THREE.Group();
   const white = mat('#e9ecef', 0.5);
   const steel = mat('#c9cfd6', 0.35, 0.5);
   const blue = mat('#3b6ea8', 0.4, 0.3);
+  const parts: Record<string, THREE.Object3D[]> = {};
+  const add = (part: string, ...objs: THREE.Object3D[]) => {
+    (parts[part] ??= []).push(...objs);
+    em.add(...objs);
+  };
   const cabinet = new THREE.Mesh(new THREE.BoxGeometry(1.3, 1.1, 1.3), white);
   cabinet.position.y = 0.55;
-  em.add(cabinet);
+  const pumps = [-0.85, 0.85].map((z) => {
+    const p = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.7, 16), mat('#8a9098', 0.4, 0.5));
+    p.position.set(0.5, 0.35, z);
+    return p;
+  });
+  add('vacuum_system', cabinet, ...pumps);
+  const chamber = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.35, 0.5), steel);
+  chamber.position.set(0, 1.05, 0.55);
+  const screen = new THREE.Mesh(new THREE.CircleGeometry(0.14, 20), new THREE.MeshStandardMaterial({ color: '#0a2a10', emissive: '#3aff6a', emissiveIntensity: 0.6 }));
+  screen.position.set(0, 1.05, 0.81);
+  add('viewing_screen', chamber, screen);
   let y = 1.1;
-  for (const [r, h, m] of [[0.5, 0.5, steel], [0.42, 0.35, blue], [0.4, 0.4, steel], [0.42, 0.35, blue], [0.36, 0.4, steel], [0.3, 0.35, blue]] as const) {
+  const rings: [number, number, THREE.Material, string][] = [
+    [0.5, 0.5, steel, 'projector_lenses'], [0.42, 0.35, blue, 'projector_lenses'], [0.4, 0.4, steel, 'objective_assembly'],
+    [0.42, 0.35, blue, 'condenser_lenses'], [0.36, 0.4, steel, 'condenser_lenses'], [0.3, 0.35, blue, 'electron_gun'],
+  ];
+  for (const [r, h, m, part] of rings) {
     const ring = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 24), m);
     ring.position.y = y + h / 2;
-    em.add(ring);
+    add(part, ring);
     y += h;
   }
+  const holder = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.7, 10), mat('#d0a050', 0.3, 0.8));
+  holder.rotation.z = Math.PI / 2;
+  holder.position.set(-0.6, 1.1 + 0.85 + 0.2, 0);
+  add('objective_assembly', holder);
   const gun = new THREE.Mesh(new THREE.SphereGeometry(0.32, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2), white);
   gun.position.y = y;
-  em.add(gun);
+  add('electron_gun', gun);
+  // the STEM upgrade: a corrector stack lifts the gun higher, and an annular detector box sits under the objective
+  const corrector = [0, 1, 2].map((i) => {
+    const c = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.28, 24), mat(i % 2 ? '#d0905a' : '#e8e0d0', 0.4, 0.4));
+    c.position.y = y + 0.32 + i * 0.3;
+    return c;
+  });
+  const stemGun = new THREE.Mesh(new THREE.SphereGeometry(0.3, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2), white);
+  stemGun.position.y = y + 1.22;
+  const detector = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.2, 0.3), mat('#e8d870', 0.4));
+  detector.position.set(0.55, 1.75, 0);
+  add('stem_microscope', ...corrector, stemGun, detector);
+  // the console: always there, waiting
   const desk = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 1.8), white);
   desk.position.set(-1.5, 0.4, 1.2);
   em.add(desk);
-  const screen = new THREE.MeshStandardMaterial({ color: '#0d1b2a', emissive: '#2f6fae', emissiveIntensity: 0.8 });
+  const glow = new THREE.MeshStandardMaterial({ color: '#0d1b2a', emissive: '#2f6fae', emissiveIntensity: 0.8 });
   for (const dz of [0.75, 1.65]) {
-    const monitor = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.5, 0.8), screen);
+    const monitor = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.5, 0.8), glow);
     monitor.position.set(-1.65, 1.1, dz);
     em.add(monitor);
   }
   em.traverse((o) => (o.castShadow = true));
-  return em;
+  return {
+    group: em,
+    show(has) {
+      const tem = has('electron_microscope') || has('stem_microscope');
+      for (const [part, objs] of Object.entries(parts)) {
+        const on = part === 'stem_microscope' ? has(part) : tem || has(part);
+        objs.forEach((o) => (o.visible = on));
+      }
+      // with the STEM built, the old gun dome gives way to the corrector stack and field-emission gun
+      if (has('stem_microscope')) parts.electron_gun!.at(-1)!.visible = false;
+    },
+  };
 }
 
 /** The science building: glass ground floor (the lab) under an opaque upper block, whose underside is the lab ceiling. */
-function scienceBuilding(group: THREE.Group, walls: Box[]): THREE.Group {
+function scienceBuilding(group: THREE.Group, walls: Box[]): EmModel {
   const { x0, x1, z0, z1 } = SCIENCE;
   const [w, d, cx, cz] = [x1 - x0, z1 - z0, (x0 + x1) / 2, (z0 + z1) / 2];
   const g = heightAt(cx, cz);
@@ -306,17 +379,218 @@ function scienceBuilding(group: THREE.Group, walls: Box[]): THREE.Group {
   const ring = new THREE.Mesh(new THREE.RingGeometry(1.7, 1.85, 40).rotateX(-Math.PI / 2), mat('#e0b400', 0.6));
   ring.position.set(EM_SPOT.x, g + 0.075, EM_SPOT.z);
   const em = electronMicroscope();
-  em.position.set(EM_SPOT.x, g + 0.06, EM_SPOT.z);
-  group.add(bay, ring, em);
+  em.group.position.set(EM_SPOT.x, g + 0.06, EM_SPOT.z);
+  group.add(bay, ring, em.group);
+
+  // the reagent shelf by the door, where the stains are kept (the bottles on it are gatherable)
+  const shelf = new THREE.Group();
+  const wood = mat('#c8ccd0', 0.5);
+  for (const h of [0.4, 0.95, 1.5]) {
+    const plank = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.04, 3.4), wood);
+    plank.position.set(0, h, 0);
+    shelf.add(plank);
+  }
+  for (const dz of [-1.7, 1.7]) {
+    const side = new THREE.Mesh(new THREE.BoxGeometry(0.45, 1.6, 0.04), wood);
+    side.position.set(0, 0.8, dz);
+    shelf.add(side);
+  }
+  shelf.position.set(SCIENCE.x0 + 0.45, g, 15.2);
+  group.add(shelf, sign('Stains and reagents', 1.8, SCIENCE.x0 + 0.2, g + 1.9, 15.2, Math.PI / 2));
+  walls.push(box(SCIENCE.x0 + 0.1, SCIENCE.x0 + 0.7, 13.5, 16.9));
   return em;
+}
+
+/** A glass greenhouse with a pitched glass roof and planters inside. */
+function greenhouse(group: THREE.Group, walls: Box[]) {
+  const { x0, x1, z0, z1 } = GREENHOUSE;
+  const g = heightAt((x0 + x1) / 2, (z0 + z1) / 2);
+  const T = 0.12;
+  const panes = [
+    box(x0, GH_DOOR.x0, z0 - T / 2, z0 + T / 2), box(GH_DOOR.x1, x1, z0 - T / 2, z0 + T / 2),
+    box(x0, x1, z1 - T / 2, z1 + T / 2), box(x0 - T / 2, x0 + T / 2, z0, z1), box(x1 - T / 2, x1 + T / 2, z0, z1),
+  ];
+  const glass = new THREE.MeshPhysicalMaterial({ color: '#cfe8dc', transparent: true, opacity: 0.22, roughness: 0.05, depthWrite: false, side: THREE.DoubleSide });
+  const frame = mat('#f2f2ee', 0.5);
+  for (const b of panes) {
+    const pane = new THREE.Mesh(new THREE.BoxGeometry(b.x1 - b.x0, GH_H, b.z1 - b.z0), glass);
+    pane.position.set((b.x0 + b.x1) / 2, g + GH_H / 2, (b.z0 + b.z1) / 2);
+    group.add(pane);
+  }
+  walls.push(...panes);
+  for (let x = x0; x <= x1 + 0.01; x += 2) {
+    for (const z of [z0, z1]) {
+      const post = new THREE.Mesh(new THREE.BoxGeometry(0.08, GH_H, 0.08), frame);
+      post.position.set(x, g + GH_H / 2, z);
+      group.add(post);
+    }
+  }
+  const roof = new THREE.Mesh(prism(z1 - z0 + 0.3, 1.6, x1 - x0 + 0.3), glass);
+  roof.rotation.y = Math.PI / 2;
+  roof.position.set((x0 + x1) / 2, g + GH_H, (z0 + z1) / 2);
+  group.add(roof);
+  // planters along the south and east walls
+  const soil = mat('#4a3626', 1);
+  const planterWood = mat('#8a6a48', 0.9);
+  for (const b of [box(x0 + 0.4, x1 - 2.2, z1 - 1.5, z1 - 0.3), box(x1 - 1.5, x1 - 0.3, z0 + 1.2, z1 - 1.6)]) {
+    const p = new THREE.Mesh(new THREE.BoxGeometry(b.x1 - b.x0, 0.35, b.z1 - b.z0), planterWood);
+    p.position.set((b.x0 + b.x1) / 2, g + 0.17, (b.z0 + b.z1) / 2);
+    const top = new THREE.Mesh(new THREE.BoxGeometry(b.x1 - b.x0 - 0.1, 0.02, b.z1 - b.z0 - 0.1), soil);
+    top.position.set(p.position.x, g + 0.35, p.position.z);
+    group.add(p, top);
+  }
+  group.add(sign('Greenhouse', 3, (x0 + x1) / 2, g + GH_H + 0.35, z0 - 0.1, Math.PI)); // faces north, toward the path
+}
+
+/** The ring diagram on the shielding wall: CESR, the CHESS-U sector and this beamline, with lamps for the parts in the tunnel. */
+function ringSign(): { mesh: THREE.Mesh; lamps: Record<string, THREE.Mesh> } {
+  const c = document.createElement('canvas');
+  c.width = 1024;
+  c.height = 768;
+  const g2 = c.getContext('2d')!;
+  g2.fillStyle = '#1e2a36';
+  g2.fillRect(0, 0, 1024, 768);
+  g2.strokeStyle = '#5aa0e0';
+  g2.lineWidth = 18;
+  g2.beginPath();
+  g2.arc(512, 400, 250, 0, Math.PI * 2);
+  g2.stroke();
+  g2.strokeStyle = '#ffd24a';
+  g2.lineWidth = 26;
+  g2.beginPath();
+  g2.arc(512, 400, 250, Math.PI * 0.42, Math.PI * 0.75);
+  g2.stroke();
+  g2.fillStyle = '#f4f1ea';
+  g2.textAlign = 'center';
+  g2.font = '600 46px Georgia, serif';
+  g2.fillText('CESR: the Cornell Electron Storage Ring', 512, 70);
+  g2.font = '30px Georgia, serif';
+  g2.fillText('768 m around, in a tunnel under the athletic fields', 512, 120);
+  g2.fillText('6 GeV positrons, 200 mA', 512, 400);
+  g2.fillStyle = '#ffd24a';
+  g2.fillText('CHESS-U: six double-bend achromats', 512, 700);
+  g2.fillText('in the south arc make room for undulators', 512, 740);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(6, 4.5), new THREE.MeshStandardMaterial({ map: t, roughness: 0.7 }));
+  const lamps: Record<string, THREE.Mesh> = {};
+  ['dba_cell', 'undulator', 'front_end'].forEach((id, i) => {
+    const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 8), new THREE.MeshStandardMaterial({ color: '#333', emissive: '#000' }));
+    lamp.position.set(-1.2 + i * 1.2, -1.6, 0.05);
+    mesh.add(lamp);
+    lamps[id] = lamp;
+  });
+  return { mesh, lamps };
+}
+
+export interface BeamlineModel {
+  show(has: (itemId: string) => boolean): void;
+}
+
+/** Wilson Laboratory: a brick hall beside the CESR tunnel, with a beamline from the ring wall to a shielded hutch. */
+function wilsonLab(group: THREE.Group, walls: Box[]): BeamlineModel {
+  const { x0, x1, z0, z1 } = WILSON;
+  const g = heightAt((x0 + x1) / 2, (z0 + z1) / 2);
+  const T = 0.4;
+  const outer = [
+    box(x0, x1, z0 - T / 2, z0 + T / 2), box(x0, x1, z1 - T / 2, z1 + T / 2), box(x1 - T / 2, x1 + T / 2, z0, z1),
+    box(x0 - T / 2, x0 + T / 2, z0, WL_DOOR.z0), box(x0 - T / 2, x0 + T / 2, WL_DOOR.z1, z1),
+  ];
+  const brick = facadeTexture('#8a5a46', '#2a3440');
+  for (const b of outer) {
+    const w = b.x1 - b.x0;
+    const d = b.z1 - b.z0;
+    const wall = facadeBox(w, WL_H, d, 2, brick, mat('#5a5048'));
+    wall.position.set((b.x0 + b.x1) / 2, g + WL_H / 2, (b.z0 + b.z1) / 2);
+    group.add(wall);
+  }
+  walls.push(...outer);
+  const roof = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0 + 0.6, 0.4, z1 - z0 + 0.6), new THREE.MeshStandardMaterial({ color: '#4a4e55', emissive: '#262a30' }));
+  roof.position.set((x0 + x1) / 2, g + WL_H + 0.2, (z0 + z1) / 2);
+  const floor = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0 - 0.4, 0.06, z1 - z0 - 0.4), mat('#9a9c98', 0.8));
+  floor.position.set((x0 + x1) / 2, g + 0.03, (z0 + z1) / 2);
+  floor.receiveShadow = true;
+  group.add(roof, floor);
+  for (const [lx, lz] of [[56, -8], [56, 2], [64, -8], [64, 2]] as const) {
+    const lamp = new THREE.PointLight('#fff4e6', 16, 22, 1.6);
+    lamp.position.set(lx, g + WL_H - 0.6, lz);
+    group.add(lamp);
+  }
+  group.add(sign('Wilson Laboratory · CHESS', 8, x0 - 0.25, g + WL_H - 1.2, (z0 + z1) / 2, -Math.PI / 2));
+
+  // the ring's shielding wall, gently curved: CESR's 122 m radius bends it by under half a metre across the hall
+  const concrete = mat('#b4b2aa', 0.95);
+  for (let z = z0; z < z1; z += 2) {
+    const zc = z + 1;
+    const bow = 122 - Math.sqrt(122 * 122 - (zc + 4) ** 2);
+    const seg = new THREE.Mesh(new THREE.BoxGeometry(1.2, WL_H, 2.02), concrete);
+    seg.position.set(RING_WALL_X + 0.6 + bow, g + WL_H / 2, zc);
+    group.add(seg);
+  }
+  walls.push(INDOOR_SOLIDS[0]!);
+  const ring = ringSign();
+  ring.mesh.position.set(RING_WALL_X - 0.02, g + 3.6, 1.5);
+  ring.mesh.rotation.y = -Math.PI / 2;
+  group.add(ring.mesh);
+
+  // the hutch: lead-lined walls with a warning sign and a door
+  const hutchMat = mat('#7a8088', 0.6, 0.2);
+  const hutch = new THREE.Mesh(new THREE.BoxGeometry(HUTCH.x1 - HUTCH.x0, 3, HUTCH.z1 - HUTCH.z0), hutchMat);
+  hutch.position.set((HUTCH.x0 + HUTCH.x1) / 2, g + 1.5, (HUTCH.z0 + HUTCH.z1) / 2);
+  const stripe = new THREE.Mesh(new THREE.BoxGeometry(HUTCH.x1 - HUTCH.x0 + 0.02, 0.25, HUTCH.z1 - HUTCH.z0 + 0.02), mat('#e0b400', 0.6));
+  stripe.position.set(hutch.position.x, g + 2.7, hutch.position.z);
+  group.add(hutch, stripe, sign('X-ray hutch · beam on when locked', 4, hutch.position.x, g + 2.2, HUTCH.z1 + 0.02, 0));
+  walls.push(HUTCH);
+
+  // the control desk outside the hutch
+  const desk = new THREE.Mesh(new THREE.BoxGeometry(2, 0.8, 0.8), mat('#e9ecef', 0.5));
+  desk.position.set(BEAM_SPOT.x, g + 0.4, BEAM_SPOT.z + 0.3);
+  const glow = new THREE.MeshStandardMaterial({ color: '#0d1b2a', emissive: '#2f6fae', emissiveIntensity: 0.8 });
+  for (const dx of [-0.5, 0.5]) {
+    const monitor = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.5, 0.05), glow);
+    monitor.position.set(BEAM_SPOT.x + dx, g + 1.1, BEAM_SPOT.z + 0.55);
+    group.add(monitor);
+  }
+  group.add(desk);
+  walls.push(box(BEAM_SPOT.x - 1, BEAM_SPOT.x + 1, BEAM_SPOT.z - 0.1, BEAM_SPOT.z + 0.7));
+
+  // the beamline from the ring wall to the hutch: pipe, front end, monochromator and focusing lens appear as they are built
+  const parts: Record<string, THREE.Object3D[]> = {};
+  const steel = mat('#c9cfd6', 0.35, 0.6);
+  const part = (id: string, geo: THREE.BufferGeometry, m: THREE.Material, x: number, y: number) => {
+    const o = new THREE.Mesh(geo, m);
+    o.position.set(x, g + y, BEAM_Z);
+    o.castShadow = true;
+    group.add(o);
+    (parts[id] ??= []).push(o);
+  };
+  part('front_end', new THREE.BoxGeometry(1.4, 1.2, 1), mat('#6a9ab8', 0.5, 0.3), RING_WALL_X - 0.8, 1.2);
+  part('monochromator', new THREE.BoxGeometry(1.2, 1.1, 1.1), mat('#7a8aa8', 0.4, 0.4), 64.6, 1.2);
+  part('crl', new THREE.CylinderGeometry(0.18, 0.18, 0.6, 16).rotateZ(Math.PI / 2), mat('#b8e0d4', 0.3, 0.4), 62, 1.2);
+  for (const [xa, xb] of [[60, 61.7], [62.3, 64], [65.2, RING_WALL_X - 1.5]] as const) {
+    part('chess_beamline', new THREE.CylinderGeometry(0.06, 0.06, xb - xa, 10).rotateZ(Math.PI / 2), steel, (xa + xb) / 2, 1.2);
+  }
+  for (const x of [61, 62, 64.6, 66.6]) part('chess_beamline', new THREE.CylinderGeometry(0.05, 0.08, 0.7, 8), steel, x, 0.35);
+  return {
+    show(has) {
+      const all = has('chess_beamline');
+      for (const [id, objs] of Object.entries(parts)) objs.forEach((o) => (o.visible = all || has(id)));
+      for (const [id, lamp] of Object.entries(ring.lamps)) {
+        const on = all || has(id);
+        (lamp.material as THREE.MeshStandardMaterial).emissive.set(on ? '#3aff6a' : '#000000');
+      }
+    },
+  };
 }
 
 export interface Campus {
   group: THREE.Group;
   /** Solid footprints the player cannot walk through. */
   walls: Box[];
-  /** The electron microscope model in the lab; hidden until the player builds one. */
-  em: THREE.Group;
+  /** The electron microscope in the lab, which shows each component as it is built. */
+  em: EmModel;
+  /** The CHESS beamline in Wilson Lab, likewise. */
+  beamline: BeamlineModel;
   /** Per frame: falling water and the tower clock. */
   update(t: number): void;
 }
@@ -360,6 +634,8 @@ export function buildCampus(): Campus {
   const hands = tower(group);
   statues(group);
   const em = scienceBuilding(group, walls);
+  greenhouse(group, walls);
+  const beamline = wilsonLab(group, walls);
 
   // The waterfall: a sheet of scrolling water where the lake spills into the gorge, foam at the foot
   const fallTex = waterfallTexture();
@@ -383,6 +659,7 @@ export function buildCampus(): Campus {
     group,
     walls,
     em,
+    beamline,
     update(t) {
       fallTex.offset.y = t * 0.0011;
       foam.scale.setScalar(1 + 0.05 * Math.sin(t * 0.004));

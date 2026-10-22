@@ -5,15 +5,38 @@
 // Units: all lengths are micrometres (µm), spelled out in field names (sizeUm, dLensUm).
 import { z } from 'zod';
 
-/** 0 naked eye · 1 hand lens · 2 compound · 3 high-quality optics · 5 electron (4 and 6 reserved, see DESIGN.md). */
-export const TierSchema = z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3), z.literal(5)]);
+/** 0 naked eye · 1 hand lens · 2 compound · 3 high-quality optics · 4 fluorescence (phase contrast, dark field)
+ *  · 5 transmission electron · 6 aberration-corrected STEM · 7 synchrotron beamline (see DESIGN.md). */
+export const TierSchema = z.union([
+  z.literal(0), z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5), z.literal(6), z.literal(7),
+]);
 export type Tier = z.infer<typeof TierSchema>;
 
 const Id = z.string().regex(/^[a-z0-9_]+$/, 'ids are lower_snake_case');
 const Color = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'color is #rrggbb');
 
+/** How a zoom step makes its picture: light (bright field, phase contrast, dark field, fluorescence), electrons (tem =
+ *  transmission bright field, ediff = electron diffraction, haadf = annular dark-field STEM, ptycho = ptychography) or
+ *  X-rays (xct = tomography, xrf = fluorescence map, xrd = diffraction). ediff and xrd record lattice spacings, not a picture. */
+export const ModeSchema = z.enum(['brightfield', 'phase', 'darkfield', 'fluorescence', 'tem', 'ediff', 'haadf', 'ptycho', 'xct', 'xrf', 'xrd']);
+export type Mode = z.infer<typeof ModeSchema>;
+/** Stains the player puts on a sample in the eyepiece (light microscopes). */
+export const StainSchema = z.enum(['iodine', 'methylene_blue', 'gram']);
+export type Stain = z.infer<typeof StainSchema>;
+/** Anything that can change how strongly a feature stands out: an imaging mode or a stain. */
+export const ContrastKeySchema = z.enum([...ModeSchema.options, ...StainSchema.options]);
+export type ContrastKey = z.infer<typeof ContrastKeySchema>;
+/** Where a fixed instrument is installed: the science lab or the CHESS hall in Wilson Lab. */
+export const SiteSchema = z.enum(['lab', 'chess']);
+export type Site = z.infer<typeof SiteSchema>;
+
 /** How the 2D scope renderer draws a feature or catalog type. Add a value here when Person B adds a drawing. */
-export const DrawingSchema = z.enum(['veins', 'grains', 'hair', 'cells', 'pollen', 'rods', 'algae', 'scales', 'virus', 'droplets', 'lattice']);
+export const DrawingSchema = z.enum([
+  'veins', 'grains', 'hair', 'cells', 'pollen', 'rods', 'algae', 'scales', 'virus', 'droplets', 'lattice',
+  'stomata', 'fibers', 'lines', 'ciliate', 'colony', 'beads', 'flagellate', 'cubes', 'prisms', 'needles', 'spots',
+  'rings', 'helix', 'glow', 'map', 'slice', 'honeycomb', 'atoms', 'dumbbells', 'discs', 'neurons', 'critter',
+  'facets', 'boxes', 'mosaic', 'cluster', 'diatoms', 'saccate', 'clubs',
+]);
 export type Drawing = z.infer<typeof DrawingSchema>;
 
 export const MaterialSchema = z.object({
@@ -30,11 +53,19 @@ export const MaterialSchema = z.object({
 });
 export type Material = z.infer<typeof MaterialSchema>;
 
-/** One selectable magnification setting (objective + eyepiece). NA belongs to the objective, so it changes with the step. */
+/** One selectable setting (objective + eyepiece, or a detector mode). NA belongs to the objective, so it changes with the step.
+ *  In the diffraction modes NA is the sine of the largest scattering angle the detector catches (Bragg's d = λ/2 sinθ). */
 export const ZoomStepSchema = z.object({
   label: z.string(),
   magnification: z.number().positive(),
   NA: z.number().positive(),
+  mode: ModeSchema.default('brightfield'),
+  /** An add-on item that unlocks this step (e.g. the phase contrast kit). Absent = always there. */
+  requires: Id.optional(),
+  /** Overrides the instrument's lens blur for this step, µm (a focused X-ray beam, a reconstruction). */
+  dLensUm: z.number().nonnegative().optional(),
+  /** Overrides the accelerating voltage for this step, volts. */
+  voltageV: z.number().positive().optional(),
 });
 export type ZoomStep = z.infer<typeof ZoomStepSchema>;
 
@@ -45,8 +76,14 @@ export const ScopeSpecSchema = z.object({
   /** Lens-defect blur on top of diffraction, µm. */
   dLensUm: z.number().nonnegative(),
   contrastBoost: z.number().positive().default(1),
-  /** Electron scopes only: accelerating voltage in volts. Absent = visible light. */
+  /** Electron scopes only: accelerating voltage in volts. */
   voltageV: z.number().positive().optional(),
+  /** X-ray scopes only: photon energy in keV. Absent (and no voltage) = visible light. */
+  xrayKeV: z.number().positive().optional(),
+  /** Fixed instruments only work where they are installed. Absent = portable. */
+  site: SiteSchema.optional(),
+  /** Has a condenser whose illumination the player aligns (Köhler), which sets the illumination NA. */
+  condenser: z.boolean().default(false),
 });
 export type ScopeSpec = z.infer<typeof ScopeSpecSchema>;
 
@@ -61,6 +98,8 @@ export const RecipeSchema = z.object({
   scope: ScopeSpecSchema.optional(),
   /** Output color in the inventory/UI. */
   color: Color.default('#cccccc'),
+  /** One line on what the part is, shown in the tech tree. */
+  about: z.string().optional(),
 });
 export type Recipe = z.infer<typeof RecipeSchema>;
 
@@ -69,11 +108,20 @@ export const FeatureSchema = z.object({
   id: Id,
   name: z.string(),
   sizeUm: z.number().positive(),
-  /** 0..1, set by sample type (stains/imaging method multiply it via ScopeParams.contrastBoost). */
+  /** 0..1 in bright field (stains and imaging modes can change it, see contrastIn). */
   contrast: z.number().min(0).max(1),
+  /** Contrast under another imaging mode or stain. The exclusive modes (fluorescence, diffraction, XRF) show only
+   *  the features listed for them; the others fall back to `contrast`. */
+  contrastIn: z.partialRecord(ContrastKeySchema, z.number().min(0).max(1)).default({}),
   drawing: DrawingSchema,
+  /** Colour for the drawing; absent = the drawing's own colour. */
+  tint: Color.optional(),
   /** Electron-beam damage: dose (electrons/nm²) that destroys most of the signal. Absent = beam-proof. */
   criticalDoseENm2: z.number().positive().optional(),
+  /** X-ray fluorescence maps: absorption edge (keV) of the element mapped; the beam must be tuned above it. */
+  edgeKeV: z.number().positive().optional(),
+  /** Bacteria: how the cell wall takes the Gram stain. */
+  gram: z.enum(['positive', 'negative']).optional(),
   /** Surface texture drawn over the larger features instead of under them (default: smaller features sit underneath). */
   onTop: z.boolean().default(false),
   /** Microdex card text: two sentences. */
@@ -81,7 +129,7 @@ export const FeatureSchema = z.object({
 });
 export type Feature = z.infer<typeof FeatureSchema>;
 
-export const BiomeSchema = z.enum(['meadow', 'pond', 'mine', 'lab']);
+export const BiomeSchema = z.enum(['meadow', 'pond', 'forest', 'garden', 'mine', 'lab', 'chess']);
 export type Biome = z.infer<typeof BiomeSchema>;
 
 export const SampleSchema = z.object({
@@ -93,6 +141,85 @@ export const SampleSchema = z.object({
   features: z.array(FeatureSchema).min(1),
 });
 export type Sample = z.infer<typeof SampleSchema>;
+
+/** Something to reach: every listed part must hold. Used by achievements and by the scientists' requests. */
+export const ConditionSchema = z
+  .object({
+    /** At least this many Microdex discoveries. */
+    discoveries: z.number().int().positive().optional(),
+    /** Every one of these discoveries. */
+    discovered: z.array(Id).min(1).optional(),
+    /** Every one of these items. */
+    owns: z.array(Id).min(1).optional(),
+    /** Every discovery of this biome. */
+    biome: BiomeSchema.optional(),
+    /** At least this many requests done for the scientists. */
+    quests: z.number().int().positive().optional(),
+    /** This request done (the achievement every request gives). */
+    quest: Id.optional(),
+    /** Every request of this scientist. */
+    questsOf: Id.optional(),
+    /** Best mini-game scores (0..1) at least these. */
+    best: z.record(Id, z.number().min(0).max(1)).optional(),
+    /** Counters (gathered, crafted, ...) at least these. */
+    stats: z.record(Id, z.number().positive()).optional(),
+    /** Every one of these areas visited. */
+    visited: z.array(Id).min(1).optional(),
+    /** At least this many achievements. */
+    achievements: z.number().int().positive().optional(),
+  })
+  .refine((c) => Object.values(c).some((v) => v !== undefined), 'a condition needs at least one part');
+export type Condition = z.infer<typeof ConditionSchema>;
+
+export const AchievementSchema = z.object({
+  id: Id,
+  name: z.string(),
+  description: z.string(),
+  when: ConditionSchema,
+});
+export type Achievement = z.infer<typeof AchievementSchema>;
+
+/** A request from a scientist: show them something you discovered (or built, or mastered). Doing it is an achievement. */
+export const QuestSchema = z.object({
+  id: Id,
+  /** The achievement's name. */
+  title: z.string(),
+  /** What they ask for, in their words. */
+  ask: z.string(),
+  /** Where and how to find it. */
+  hint: z.string(),
+  /** What they say when you show them. */
+  thanks: z.string(),
+  needs: ConditionSchema,
+});
+export type Quest = z.infer<typeof QuestSchema>;
+
+/** A scientist who made a discovery with a microscope, standing somewhere on campus. */
+export const NpcSchema = z.object({
+  id: Id,
+  name: z.string(),
+  years: z.string(),
+  /** One line: what they are known for. */
+  role: z.string(),
+  /** Two or three sentences of history, checked against sources. */
+  bio: z.string(),
+  greeting: z.string(),
+  x: z.number(),
+  z: z.number(),
+  /** Direction they face, radians (0 = north, -z). */
+  facing: z.number().default(0),
+  look: z.object({
+    skin: Color,
+    hair: Color,
+    coat: Color,
+    pants: Color,
+    hairStyle: z.enum(['short', 'long', 'wig', 'bald', 'bun', 'bob']).default('short'),
+    beard: Color.optional(),
+    glasses: z.boolean().default(false),
+  }),
+  quests: z.array(QuestSchema).min(1),
+});
+export type Npc = z.infer<typeof NpcSchema>;
 
 /** Object types the world-spec validator accepts, with allowed size range and the tiers they may appear at. */
 export const CatalogEntrySchema = z.object({
@@ -130,17 +257,24 @@ export const WorldSpecSchema = z.object({
 });
 export type WorldSpec = z.infer<typeof WorldSpecSchema>;
 
-/** Derived from the best microscope owned and the chosen zoom step; recomputed by state.ts. */
+/** Derived from the microscope in use and the chosen zoom step; recomputed by state.ts. */
 export interface ScopeParams {
   tier: Tier;
+  /** The steps available now (add-ons you have not built are left out). */
   steps: ZoomStep[];
-  /** Index into steps; magnification and NA below are steps[step]. */
+  /** Index into steps; magnification, NA and mode below are steps[step]. */
   step: number;
   magnification: number;
   NA: number;
+  mode: Mode;
   wavelengthUm: number;
   dLensUm: number;
   contrastBoost: number;
+  /** NA of the illumination; absent = matched to the objective (a well-aligned condenser), so d = λ / 2NA. */
+  illuminationNA?: number;
+  /** Has a condenser to align (Köhler). */
+  condenser: boolean;
+  site?: Site;
 }
 
 export interface GameState {
@@ -153,9 +287,21 @@ export interface GameState {
   currentSampleId: string | null;
   /** Tier of the microscope the player picked in the eyepiece; null = the best one owned. */
   scopeChoice: Tier | null;
-  /** Player is inside the lab in the science building, the only place an electron microscope can be used. */
-  inLab: boolean;
+  /** Where the player stands, if at a site with fixed instruments (the lab, the CHESS hall); null elsewhere. */
+  site: Site | null;
   scope: ScopeParams;
+  /** Achievement ids earned, in order. */
+  achievements: string[];
+  /** Scientists' requests done (quest ids). */
+  quests: string[];
+  /** Best score (0..1) of each mini-game. */
+  best: Record<string, number>;
+  /** Counters: gathered, crafted, looked, ... */
+  stats: Record<string, number>;
+  /** Areas of the campus the player has been to. */
+  visited: string[];
+  /** Knob positions the player left on aligned instruments (they keep their alignment). */
+  align: Record<string, number>;
 }
 
 /** Everything the app loads from /data, validated, with cross-references checked. */
@@ -165,6 +311,8 @@ export interface GameData {
   samples: Record<string, Sample>;
   catalog: Catalog;
   defaultWorld: WorldSpec;
+  achievements: Achievement[];
+  npcs: Record<string, Npc>;
   /** Display info for every item id: materials plus recipe outputs. */
   items: Record<string, { name: string; color: string }>;
 }

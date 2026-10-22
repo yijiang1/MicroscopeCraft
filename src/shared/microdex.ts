@@ -3,6 +3,7 @@ import { BiomeSchema, type Biome, type Feature, type GameData, type GameState } 
 
 export interface DexCard {
   feature: Feature;
+  sampleId: string;
   sampleName: string;
   found: boolean;
   snapshot?: string;
@@ -24,6 +25,7 @@ export function microdex(data: Pick<GameData, 'samples'>, state: Pick<GameState,
       .flatMap((s) =>
         s.features.map((feature) => ({
           feature,
+          sampleId: s.id,
           sampleName: s.name,
           found: state.discoveries.includes(feature.id),
           snapshot: state.snapshots[feature.id]?.image,

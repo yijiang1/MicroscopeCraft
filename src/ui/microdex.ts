@@ -3,7 +3,9 @@ import { microdex } from '../shared/microdex';
 import { fmtUm } from '../shared/sim/walls';
 import type { GameContext } from '../shared/state';
 
-const BIOME_NAMES = { meadow: 'Quad', pond: 'Lake', mine: 'Gorge and slope rocks', lab: 'Science lab' } as const;
+const BIOME_NAMES = {
+  meadow: 'Quad', pond: 'Lake', forest: 'Pine grove', garden: 'Greenhouse', mine: 'Gorge and slope rocks', lab: 'Science lab', chess: 'Wilson Lab (CHESS)',
+} as const;
 
 export interface MicrodexHandle {
   toggle(): void;
@@ -27,7 +29,7 @@ export function mountMicrodex(parent: HTMLElement, ctx: GameContext): MicrodexHa
 
   const render = () => {
     const dex = microdex(ctx.data, ctx.state);
-    overlay.replaceChildren(styled('h2', 'margin:0 0 4px', `Microdex · ${summary()}`), styled('div', 'color:#9ab;margin-bottom:16px', 'Everything you have seen through your instruments. Press M or Esc to close.'));
+    overlay.replaceChildren(styled('h2', 'margin:0 0 4px', `Microdex · ${summary()}`), styled('div', 'color:#9ab;margin-bottom:16px', 'Everything you have seen through your instruments. Click a card you have not found yet to track its sample. Press M or Esc to close.'));
     for (const b of dex) {
       const head = styled('h3', 'margin:20px 0 8px', `${BIOME_NAMES[b.biome]}${b.locked ? ' 🔒' : ` · ${b.found}/${b.cards.length}${b.complete ? ' ✓ complete' : ''}`}`);
       overlay.append(head);
@@ -49,6 +51,14 @@ export function mountMicrodex(parent: HTMLElement, ctx: GameContext): MicrodexHa
           styled('div', 'margin-top:6px', c.found ? c.feature.blurb : 'Build a better instrument to see this.'),
         );
         card.append(pic, text);
+        if (!c.found) {
+          card.style.cursor = 'pointer';
+          card.title = `Track: ${c.sampleName}`;
+          card.onclick = () => {
+            ctx.bus.emit('trackTarget', { target: { kind: 'sample', id: c.sampleId } });
+            toggle();
+          };
+        }
         grid.append(card);
       }
       overlay.append(grid);

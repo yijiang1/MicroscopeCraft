@@ -1,6 +1,6 @@
 // "What do I build next, what do I need, where do I get it, and what must I identify first?"
 // Pure, from the recipes, the inventory and the discoveries. Used by the goal panel and the guide. Owner: Person D.
-import type { Feature, GameData, GameState, Recipe, Sample } from './schema';
+import type { Feature, GameData, GameState, Recipe, Sample, Site, ZoomStep } from './schema';
 import { visibility } from './sim/optics';
 import { scopeFromInventory, scopeParamsFromSpec } from './sim/scope';
 
@@ -14,8 +14,9 @@ export interface PlanStep {
 export interface Identify {
   feature: Feature;
   sample: Sample;
-  /** The simplest microscope that can show the feature. */
+  /** The simplest microscope that can show the feature, and the step that does. */
   scope: Recipe | null;
+  step: ZoomStep | null;
   done: boolean;
 }
 
@@ -52,14 +53,16 @@ export function findFeature(data: Pick<GameData, 'samples'>, featureId: string):
   return null;
 }
 
+/** The first step of a microscope that shows the feature (in focus, aligned, every add-on built), or null. */
+export const stepThatSees = (feature: Feature, recipe: Recipe): ZoomStep | null =>
+  recipe.scope?.steps.find((_, i) => visibility(feature, scopeParamsFromSpec(recipe.scope!, i)).visible) ?? null;
+
 /** Lowest-tier microscope recipe that shows the feature (at its best zoom step, in focus). */
 export function scopeThatSees(feature: Feature, data: Pick<GameData, 'recipes'>): Recipe | null {
-  return (
-    data.recipes
-      .filter((r) => r.scope && r.scope.steps.some((_, i) => visibility(feature, scopeParamsFromSpec(r.scope!, i)).visible))
-      .sort((a, b) => a.scope!.tier - b.scope!.tier)[0] ?? null
-  );
+  return data.recipes.filter((r) => stepThatSees(feature, r)).sort((a, b) => a.scope!.tier - b.scope!.tier)[0] ?? null;
 }
+
+export const SITE_NAMES: Record<Site, string> = { lab: 'science lab', chess: 'CHESS hall in Wilson Lab' };
 
 /** The feature the player must discover before this item can be gathered, or null if it is free to gather. */
 export function lockedBy(itemId: string, data: Pick<GameData, 'materials'>, discoveries: readonly string[]): string | null {
@@ -76,6 +79,11 @@ export function nextGoalRecipe(data: Pick<GameData, 'recipes'>, state: Pick<Game
       .sort((a, b) => a.scope!.tier - b.scope!.tier)[0] ?? null
   );
 }
+
+const identifyOf = (found: { feature: Feature; sample: Sample }, data: Pick<GameData, 'recipes'>, discoveries: readonly string[]): Identify => {
+  const scope = scopeThatSees(found.feature, data);
+  return { ...found, scope, step: scope && stepThatSees(found.feature, scope), done: discoveries.includes(found.feature.id) };
+};
 
 export function planFor(
   goal: Recipe,
@@ -115,9 +123,7 @@ export function planFor(
       itemId,
       total,
       missing: now.missing.get(itemId) ?? 0,
-      identify: found
-        ? { ...found, scope: scopeThatSees(found.feature, data), done: discoveries.includes(found.feature.id) }
-        : undefined,
+      identify: found ? identifyOf(found, data, discoveries) : undefined,
     };
   });
   // Materials that must be identified under a microscope first come first: they are the new thing to learn.
@@ -147,8 +153,13 @@ export function currentAction(plan: Plan): Action | null {
 
 export function actionText(action: Action, data: Pick<GameData, 'items'>): string {
   switch (action.kind) {
-    case 'identify':
-      return `Look (F) at a ${action.identify.sample.name} with your ${action.identify.scope?.name ?? 'microscope'} to spot ${action.identify.feature.name}`;
+    case 'identify': {
+      const { sample, feature, scope, step } = action.identify;
+      const at = step && (scope?.scope?.steps.length ?? 0) > 1 ? ` at ${step.label}` : '';
+      const site = scope?.scope?.site;
+      if (site) return `Look (F) at a ${sample.name} to take a bit, then use the ${scope.name} in the ${SITE_NAMES[site]}${at} to spot ${feature.name}`;
+      return `Look (F) at a ${sample.name} with your ${scope?.name ?? 'microscope'}${at} to spot ${feature.name}`;
+    }
     case 'gather':
       return `Gather ${action.raw.missing} ${data.items[action.raw.itemId]?.name ?? action.raw.itemId} (aim and press E)`;
     case 'craft':

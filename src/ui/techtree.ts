@@ -17,10 +17,14 @@ export interface TreeLayout {
   rows: number;
 }
 
+/** Optional add-ons a microscope's steps ask for (built separately and never used up), that the recipes can make. */
+export const addOnsOf = (recipe: Recipe | undefined, recipes: Recipe[]) =>
+  [...new Set(recipe?.scope?.steps.flatMap((s) => (s.requires ? [s.requires] : [])) ?? [])].filter((id) => recipes.some((r) => r.output.itemId === id));
+
 /**
- * Rows: raw materials 0, microscopes last, each part one row above the first thing that uses it.
- * Columns: each microscope starts a lane; an input goes in its parent's column if the cells down to the parent are
- * free, else the next free column to the right. The cells a wire runs through are reserved, so wires never cross tiles.
+ * Rows: raw materials 0, microscopes (and their add-ons) last, each part one row above the first thing that uses it.
+ * Columns: each microscope starts a lane; an input goes in its parent's column if the cells down to its deepest use
+ * are free, else the next free column to the right. The cells a wire runs through are reserved, so wires never cross tiles.
  */
 export function layoutTree(data: Pick<GameData, 'recipes'>): TreeLayout {
   const producer = (id: string) => data.recipes.find((r) => r.output.itemId === id);
@@ -28,13 +32,16 @@ export function layoutTree(data: Pick<GameData, 'recipes'>): TreeLayout {
   const consumers = (id: string) => data.recipes.filter((r) => r.inputs.some((i) => i.itemId === id && !i.keep));
   const depth = (id: string): number => Math.max(-1, ...inputs(id).map((i) => depth(i.itemId))) + 1;
   const scopes = data.recipes.filter((r) => r.scope).sort((a, b) => a.scope!.tier - b.scope!.tier);
+  const addOns = new Set(scopes.flatMap((s) => addOnsOf(s, data.recipes)));
   const last = Math.max(...scopes.map((s) => depth(s.output.itemId)));
   const row = (id: string): number => {
     const p = producer(id);
     if (!p) return 0;
-    if (p.scope) return last;
+    if (p.scope || addOns.has(id)) return last;
     return Math.min(last, ...consumers(id).map((c) => row(c.output.itemId))) - 1;
   };
+  /** The lowest row an item's wires reach: one above its deepest consumer. */
+  const wireEnd = (id: string) => Math.max(row(id), ...consumers(id).map((c) => row(c.output.itemId) - 1));
 
   const cells: TreeLayout['cells'] = new Map();
   const lanes: TreeLayout['lanes'] = [];
@@ -44,21 +51,22 @@ export function layoutTree(data: Pick<GameData, 'recipes'>): TreeLayout {
     return true;
   };
   let next = 0;
-  const put = (id: string, col: number, wireTo: number, lane: number) => {
+  const put = (id: string, col: number, lane: number) => {
     const r = row(id);
     cells.set(id, { row: r, col, lane });
-    for (let y = r; y <= wireTo; y++) used.add(`${y},${col}`);
+    for (let y = r; y <= wireEnd(id); y++) used.add(`${y},${col}`);
     next = Math.max(next, col + 1);
     for (const i of inputs(id)) {
       if (cells.has(i.itemId)) continue;
       let c = col;
-      while (!free(c, row(i.itemId), r - 1)) c++;
-      put(i.itemId, c, r - 1, lane);
+      while (!free(c, row(i.itemId), wireEnd(i.itemId))) c++;
+      put(i.itemId, c, lane);
     }
   };
   for (const s of scopes) {
     const from = next;
-    put(s.output.itemId, from, last, lanes.length);
+    put(s.output.itemId, from, lanes.length);
+    for (const a of addOnsOf(s, data.recipes)) if (!cells.has(a)) put(a, next, lanes.length);
     lanes.push({ recipe: s, from, to: next - 1 });
   }
   return { cells, lanes, rows: last + 1 };
@@ -127,16 +135,24 @@ export function drawTree(ctx: GameContext, layout: TreeLayout, o: DrawOpts): HTM
   for (const list of tracks.values()) list.sort((a, b) => cells.get(a)!.col - cells.get(b)!.col);
   const paths: string[] = [];
   const badges: HTMLElement[] = [];
+  /** A dashed link between two tiles on one row: a microscope kept by the next one, or an add-on. */
+  const dashed = (ax: number, bx: number, my: number, color: string, label: string) => {
+    const [l, r] = ax < bx ? [ax, bx] : [bx, ax];
+    paths.push(`<path d="M${l + S.tile / 2} ${my} H${r - S.tile / 2}" stroke="${color}" stroke-width="2" stroke-dasharray="5 4" fill="none"/>`);
+    badges.push(styled('div', `position:absolute;left:${r - S.tile / 2 - 48}px;top:${my - 18}px;width:44px;text-align:right;color:#c9b8a4`, label)); // beside the right-hand tile, so several links don't overlap
+  };
   for (const [id, c] of cells) {
+    for (const a of addOnsOf(data.recipes.find((r) => r.output.itemId === id), data.recipes)) {
+      const s = cells.get(a);
+      if (s) dashed(x(s.col, s.lane), x(c.col, c.lane), y(c.row) + S.tile / 2, o.done(a) ? '#7ccf5a' : '#a08b74', 'add-on');
+    }
     const ins = inputsOf(id);
     for (const [k, i] of ins.entries()) {
       const s = cells.get(i.itemId)!;
       const color = o.done(i.itemId) ? '#7ccf5a' : '#a08b74';
       const sx = x(s.col, s.lane);
       if (i.keep) {
-        const my = y(c.row) + S.tile / 2;
-        paths.push(`<path d="M${sx + S.tile / 2} ${my} H${x(c.col, c.lane) - S.tile / 2}" stroke="${color}" stroke-width="2" stroke-dasharray="5 4" fill="none"/>`);
-        badges.push(styled('div', `position:absolute;left:${(sx + x(c.col, c.lane)) / 2 - 20}px;top:${my - 18}px;width:40px;text-align:center;color:#c9b8a4`, 'kept'));
+        dashed(sx, x(c.col, c.lane), y(c.row) + S.tile / 2, color, 'kept');
         continue;
       }
       const tx = x(c.col, c.lane) + (k - (ins.length - 1) / 2) * (S.tile / 6);

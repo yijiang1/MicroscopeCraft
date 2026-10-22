@@ -25,6 +25,10 @@ const SOUNDS = {
   zoomChanged: [{ freq: 600, dur: 0.04, type: 'square', gain: 0.05 }],
   tierChanged: arpeggio([392, 523, 659, 784, 1047], 0.12),
   guideReplied: [{ freq: 500, to: 560, dur: 0.12, gain: 0.1 }],
+  achievementUnlocked: arpeggio([659, 784, 988, 1319], 0.08),
+  questCompleted: arpeggio([523, 784, 1047], 0.1),
+  talkTo: [{ freq: 380, to: 460, dur: 0.1, gain: 0.08 }],
+  minigameScored: [{ freq: 700, dur: 0.08, type: 'triangle' }, { freq: 940, dur: 0.14, type: 'triangle', at: 0.09 }],
 } satisfies Record<string, Tone[]>;
 
 const MUTE_KEY = 'microscopecraft:muted';

@@ -23,6 +23,18 @@ const SHAPES: Record<string, string> = {
   chamber: '<rect x="3" y="5" width="18" height="15" rx="3" fill="C"/><circle cx="12" cy="12.5" r="4" fill="#223" stroke="#d98a3d" stroke-width="1.5"/><path d="M5 3 V5 M19 3 V5" stroke="#555" stroke-width="2"/>',
   maglens: '<rect x="4" y="6" width="16" height="12" rx="3" fill="#6b6b6b"/><g stroke="C" stroke-width="2"><path d="M7 6 V18 M10 6 V18 M14 6 V18 M17 6 V18"/></g><rect x="10" y="10" width="4" height="4" fill="#223"/>',
   column: '<rect x="8" y="2" width="8" height="15" rx="2" fill="C"/><g stroke="#b8754a" stroke-width="2"><path d="M8 6 H16 M8 10 H16"/></g><rect x="4" y="17" width="16" height="5" rx="1" fill="#8a8f99"/><circle cx="12" cy="19.5" r="1.3" fill="#5bf"/>',
+  bottle: '<rect x="8" y="2" width="8" height="4" rx="1" fill="#333"/><path d="M7 7 H17 V21 Q17 22 16 22 H8 Q7 22 7 21Z" fill="C"/><path d="M9 10 V19" stroke="#fff6" stroke-width="1.5"/>',
+  gun: '<path d="M6 12 A6 6 0 0 1 18 12 V20 H6Z" fill="C"/><path d="M12 13 V22" stroke="#ffd24a" stroke-width="2"/><circle cx="12" cy="9" r="1.5" fill="#ffd24a"/>',
+  detector: '<rect x="3" y="3" width="18" height="18" rx="2" fill="C"/><g stroke="#0005" stroke-width="1"><path d="M3 9 H21 M3 15 H21 M9 3 V21 M15 3 V21"/></g>',
+  magnet: '<rect x="3" y="6" width="18" height="12" rx="2" fill="C"/><rect x="3" y="6" width="9" height="12" fill="#0003"/><path d="M7 10 V14 M16 10 L16 14" stroke="#fff" stroke-width="2"/>',
+  wafer: '<circle cx="12" cy="12" r="9" fill="C"/><path d="M6 17 L18 17" stroke="#fff8" stroke-width="2"/><g stroke="#0003"><path d="M7 8 H17 M6 12 H18"/></g>',
+  undulator: '<g fill="C"><rect x="2" y="4" width="4" height="6"/><rect x="10" y="4" width="4" height="6"/><rect x="18" y="4" width="4" height="6"/><rect x="6" y="14" width="4" height="6"/><rect x="14" y="14" width="4" height="6"/></g><path d="M2 12 Q6 9 10 12 T18 12 T22 12" stroke="#ffd24a" fill="none" stroke-width="1.5"/>',
+  hutch: '<path d="M3 21 V9 L12 3 L21 9 V21Z" fill="C"/><rect x="9" y="13" width="6" height="8" fill="#e0b400"/>',
+  beamline: '<circle cx="12" cy="12" r="9" fill="none" stroke="C" stroke-width="3"/><path d="M12 3 L22 3" stroke="#ffd24a" stroke-width="2.5"/><circle cx="12" cy="12" r="2" fill="C"/>',
+  tip: '<path d="M12 2 L15 20 H9Z" fill="C"/><circle cx="12" cy="3" r="1.5" fill="#ffd24a"/>',
+  strip: '<rect x="2" y="9" width="20" height="6" rx="1" fill="C"/><g fill="#223"><circle cx="7" cy="12" r="1.5"/><circle cx="12" cy="12" r="1"/><circle cx="17" cy="12" r="0.6"/></g>',
+  cube: '<path d="M12 3 L20 7 V17 L12 21 L4 17 V7Z" fill="C"/><path d="M4 7 L12 11 L20 7 M12 11 V21" stroke="#0004" fill="none"/>',
+  ingot: '<path d="M3 17 L6 9 H18 L21 17Z" fill="C"/><path d="M6 9 L8 13 H16 L18 9" stroke="#fff5" fill="none"/>',
 };
 
 const SHAPE_OF: Record<string, string> = {
@@ -32,6 +44,16 @@ const SHAPE_OF: Record<string, string> = {
   tube: 'tube', focus_knob: 'knob', light_source: 'bulb', compound_microscope: 'scope', hq_microscope: 'scope',
   condenser: 'condenser', filament: 'coil', vacuum_seal: 'ring', vacuum_chamber: 'chamber', magnetic_lens: 'maglens',
   electron_microscope: 'column',
+  fluorite: 'crystal', willemite: 'ore', monazite: 'pile', beryl: 'crystal', galena: 'cube',
+  iodine_stain: 'bottle', methylene_blue: 'bottle', gram_kit: 'bottle',
+  fluorite_objective: 'lens', arc_lamp: 'bulb', filter_cube: 'cube', fluorescence_microscope: 'scope', phase_kit: 'ring', darkfield_condenser: 'condenser',
+  wehnelt: 'ring', hv_tank: 'chamber', electron_gun: 'gun', aperture_strip: 'strip', condenser_lenses: 'maglens', goniometer: 'knob',
+  objective_assembly: 'maglens', projector_lenses: 'maglens', vacuum_pump: 'chamber', vacuum_system: 'chamber', viewing_screen: 'pane',
+  fe_tip: 'tip', fe_gun: 'gun', multipole: 'magnet', corrector: 'magnet', scan_coils: 'coil', scintillator: 'ring', pmt: 'tube',
+  haadf_detector: 'detector', silicon: 'wafer', empad: 'detector', stem_microscope: 'column',
+  dipole_magnet: 'magnet', quadrupole: 'magnet', dba_cell: 'magnet', nd_magnets: 'magnet', undulator: 'undulator', be_window: 'pane',
+  front_end: 'chamber', mono_crystals: 'wafer', monochromator: 'wafer', crl: 'lens', lead: 'ingot', hutch: 'hutch', sdd: 'detector',
+  xray_pad: 'detector', chess_beamline: 'beamline',
 };
 
 /** An inline SVG icon for the item, `size` px square. */

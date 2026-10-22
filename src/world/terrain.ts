@@ -13,6 +13,8 @@ export const FALLS_X = LAKE.x - LAKE.r - 3;
 const SLOPE_X = -44; // the slope starts falling west of here...
 const SLOPE_DROP = 8; // ...by this much over 30 m
 const GORGE = { bed: 3, top: 10 }; // half-widths of the creek bed and of the gorge at its rim
+/** Flat building pads off the hilltop: Wilson Lab, east of the campus. */
+const PADS = [{ x0: 47, x1: 74, z0: -17, z1: 9 }];
 
 /** Centre line of the gorge (a z) at x: a gentle meander that starts at the falls. */
 export const gorgeZ = (x: number) => LAKE.z + 3 * Math.sin((x - FALLS_X) * 0.06);
@@ -25,6 +27,8 @@ const PATHS: [number, number, number, number][] = [
   [0, -38, 0, 6], [-22, -19, 22, -19], // and its cross
   [-36, 5, 22, 5], // south walkway, the clock tower to the east
   [22, -2, 22, 20], [22, 20, 25, 20], // down to the science building door
+  [8, 5, 8, 10], // to the greenhouse door
+  [36, -20, 47, -4], [47, -4, 50, -4], // east to Wilson Lab's door
 ];
 
 const perlin = new ImprovedNoise();
@@ -80,8 +84,9 @@ export function heightAt(x: number, z: number): number {
   // flat hilltop for the quads and buildings, and flat ground around the lake
   const outside = (lo: number, hi: number, v: number) => Math.max(lo - v, v - hi, 0);
   const core = (1 - smoothstep(0, 8, outside(-46, 48, x))) * (1 - smoothstep(0, 8, outside(-54, 34, z)));
+  const pad = Math.max(0, ...PADS.map((p) => 1 - smoothstep(0, 6, outside(p.x0, p.x1, x) + outside(p.z0, p.z1, z))));
   const dLake = Math.hypot(x - LAKE.x, z - LAKE.z);
-  h = mix(h, CAMPUS_Y, Math.max(core, 1 - smoothstep(LAKE.r + 8, LAKE.r + 18, dLake)));
+  h = mix(h, CAMPUS_Y, Math.max(core, pad, 1 - smoothstep(LAKE.r + 8, LAKE.r + 18, dLake)));
   h -= SLOPE_DROP * smoothstep(SLOPE_X, SLOPE_X - 30, x); // the west slope
   h -= 3.4 * (1 - smoothstep(LAKE.r - 2, LAKE.r + 5, dLake)); // lake bowl
   if (x < LAKE.x) {

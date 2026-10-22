@@ -1,17 +1,22 @@
 // The open world: a university campus, which you walk and jump across, and 3D models you gather or look at.
-// The electron microscope stays in the lab in the science building: look (F) at a sample to take some, carry it there.
-// Click to lock the mouse; WASD move, Shift run, Space jump, E gather the aimed item, F look at the aimed sample.
+// Fixed instruments stay where they are installed: the electron microscopes in the science lab, the CHESS beamline in
+// Wilson Lab. Look (F) at a sample to take a bit along, carry it there and press F at the instrument.
+// Scientists stand around campus: press E to talk to them. Cabinets hold several samples: F, then pick one.
+// Click to lock the mouse; WASD move, Shift run, Space jump, E gather or talk, F look at the aimed sample.
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
-import { lockedBy } from '../shared/plan';
-import { gather, ownedScopes, selectScope, setInLab, type GameContext } from '../shared/state';
-import { buildCampus, CRYSTAL_SPOT, EM_SPOT, inLab, SCIENCE, type Box } from './campus';
+import { conditionMet } from '../shared/achievements';
+import { lockedBy, SITE_NAMES } from '../shared/plan';
+import type { Site } from '../shared/schema';
+import { gather, ownedScopes, selectScope, setSite, visit, type GameContext } from '../shared/state';
+import { BEAM_SPOT, buildCampus, CRYSTAL_SPOT, EM_SPOT, inChess, inGreenhouse, inLab, SCIENCE, WILSON, type Box } from './campus';
 import { buildDecor, buildSky, FOG_COLOR, SUN_DIRECTION, type Blocker } from './decor';
 import type { WorldHandle } from './index';
 import { buildModel } from './models';
+import { buildNpc, type NpcFigure } from './npc';
 import { buildPlayer } from './player';
-import { AIMS, PLACEMENTS, RADIUS, SPAWN, type Aim, type Kind } from './placements';
-import { buildTerrain, buildWater, heightAt, LAKE, waterLevelAt, WATER_LEVEL, WORLD_RADIUS } from './terrain';
+import { AIMS, PLACEMENTS, RADIUS, samplesOf, SPAWN, type Aim, type Kind, type Placement } from './placements';
+import { buildTerrain, buildWater, FALLS_X, gorgeZ, heightAt, LAKE, waterLevelAt, WATER_LEVEL, WORLD_RADIUS } from './terrain';
 
 const EYE_HEIGHT = 1.7;
 const PLAYER_RADIUS = 0.35;
@@ -24,11 +29,13 @@ const RESPAWN_MS = 15_000; // no scarcity: gathered things grow back
 const ANIM_MS = 260;
 const LOCKED_TEXT = 'Not identified yet: look at it first (F) through a microscope';
 const MARKER_RANGE = 30; // the floating marker only shows when you are this close; the arrow always shows
+const BAG_SIZE = 8; // samples you can carry to the fixed instruments at once
 
 interface Node {
-  /** 'em': the electron microscope in the lab. */
-  kind: Kind | 'em';
+  /** 'em': the electron microscopes in the lab; 'beam': the CHESS beamline's desk; 'npc': a scientist. */
+  kind: Kind | 'em' | 'beam' | 'npc';
   aim: Aim;
+  npcId?: string;
   root: THREE.Object3D;
   x: number;
   z: number;
@@ -74,21 +81,27 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     const item = AIMS[kind].gather;
     return !item || !lockedBy(item, ctx.data, ctx.state.discoveries);
   };
-  const spawnNode = (kind: Kind, x: number, z: number, index: number) => {
-    const root = buildModel(kind, index, isRevealed(kind));
-    root.position.set(x, heightAt(x, z), z);
+  const place = (n: Node, p: Placement, root: THREE.Object3D) => {
+    root.position.set(p.x, heightAt(p.x, p.z) + (p.y ?? 0), p.z);
+    if (p.yaw !== undefined) root.rotation.y = p.yaw;
     root.updateMatrixWorld(true);
-    const box = new THREE.Box3().setFromObject(root);
-    const aimRadius = Math.min(1.3, Math.max(0.35, box.getSize(new THREE.Vector3()).length() * 0.4));
-    const node: Node = { kind, aim: AIMS[kind], root, x, z, radius: RADIUS[kind], alive: true, index, center: box.getCenter(new THREE.Vector3()), aimRadius };
-    root.userData.node = node;
-    scene.add(root);
+    n.root = root;
+  };
+  const spawnNode = (p: Placement, index: number) => {
+    const node: Node = { kind: p.kind, aim: AIMS[p.kind], root: new THREE.Group(), x: p.x, z: p.z, radius: RADIUS[p.kind], alive: true, index, center: new THREE.Vector3(), aimRadius: 0 };
+    place(node, p, buildModel(p.kind, index, isRevealed(p.kind)));
+    const box = new THREE.Box3().setFromObject(node.root);
+    node.aimRadius = Math.min(1.3, Math.max(0.35, box.getSize(new THREE.Vector3()).length() * 0.4));
+    box.getCenter(node.center);
+    node.root.userData.node = node;
+    scene.add(node.root);
     nodes.push(node);
     return node;
   };
+  const placementOf = new Map<Node, Placement>();
   PLACEMENTS.forEach((p, i) => {
     if (p.kind === 'pond') return;
-    spawnNode(p.kind, p.x, p.z, i);
+    placementOf.set(spawnNode(p, i), p);
   });
   const pondNode: Node = {
     kind: 'pond', aim: AIMS.pond, root: water, x: LAKE.x, z: LAKE.z, radius: 0, alive: true, index: -1,
@@ -96,22 +109,64 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   };
   const emY = heightAt(EM_SPOT.x, EM_SPOT.z);
   const emNode: Node = {
-    kind: 'em', aim: {}, root: campus.em, x: EM_SPOT.x, z: EM_SPOT.z, radius: 0.9, alive: true, index: -1,
+    kind: 'em', aim: {}, root: campus.em.group, x: EM_SPOT.x, z: EM_SPOT.z, radius: 0.9, alive: true, index: -1,
     center: new THREE.Vector3(EM_SPOT.x, emY + 1.5, EM_SPOT.z), aimRadius: 1.2,
   };
-  nodes.push(emNode);
-  const emTier = () => ownedScopes(ctx.state.inventory, ctx.data).find((r) => r.scope.tier >= 5)?.scope.tier;
-  campus.em.visible = !!emTier();
-  /** Sample the player has taken along for the electron microscope. */
-  let carried: string | null = null;
+  const beamNode: Node = {
+    kind: 'beam', aim: {}, root: campus.group, x: BEAM_SPOT.x, z: BEAM_SPOT.z + 0.3, radius: 0, alive: true, index: -1,
+    center: new THREE.Vector3(BEAM_SPOT.x, heightAt(BEAM_SPOT.x, BEAM_SPOT.z) + 1, BEAM_SPOT.z + 0.3), aimRadius: 1.1,
+  };
+  nodes.push(emNode, beamNode);
+
+  // --- the scientists
+  const figures = new Map<string, NpcFigure>();
+  for (const npc of Object.values(ctx.data.npcs)) {
+    const fig = buildNpc(npc);
+    const y = heightAt(npc.x, npc.z);
+    fig.root.position.set(npc.x, y, npc.z);
+    fig.root.rotation.y = npc.facing;
+    scene.add(fig.root);
+    figures.set(npc.id, fig);
+    nodes.push({
+      kind: 'npc', aim: {}, npcId: npc.id, root: fig.root, x: npc.x, z: npc.z, radius: 0.35, alive: true, index: -1,
+      center: new THREE.Vector3(npc.x, y + 1.2, npc.z), aimRadius: 0.75,
+    });
+  }
+  const updateMarkers = () => {
+    for (const [id, fig] of figures) {
+      const open = ctx.data.npcs[id]!.quests.filter((q) => !ctx.state.quests.includes(q.id));
+      fig.setMarker(!open.length ? 'done' : open.some((q) => conditionMet(q.needs, ctx.data, ctx.state)) ? 'ready' : 'waiting');
+    }
+  };
+  updateMarkers();
+
+  // --- fixed instruments: the best one installed at a site, and the parts of each model on show
+  const has = (id: string) => (ctx.state.inventory[id] ?? 0) > 0;
+  const fixedAt = (site: Site) => ownedScopes(ctx.state.inventory, ctx.data, site).filter((r) => r.scope.site === site).at(-1);
+  const ownsFixed = () => ownedScopes(ctx.state.inventory, ctx.data).some((r) => r.scope.site);
+  const showModels = () => {
+    campus.em.show(has);
+    campus.beamline.show(has);
+  };
+  showModels();
+  /** Samples the player has taken along for the fixed instruments, newest first. */
+  const bag: string[] = [];
+  const carry = (sampleId: string) => {
+    const i = bag.indexOf(sampleId);
+    if (i >= 0) bag.splice(i, 1);
+    bag.unshift(sampleId);
+    bag.length = Math.min(bag.length, BAG_SIZE);
+  };
 
   const offDiscovery = ctx.bus.on('discoveryUnlocked', ({ id }) => {
     for (const n of nodes) {
       const item = n.aim.gather;
-      if (!item || n.kind === 'em' || ctx.data.materials[item]?.unlockedBy !== id) continue;
+      const p = placementOf.get(n);
+      if (!item || !p || ctx.data.materials[item]?.unlockedBy !== id) continue;
       const old = n.root;
-      const fresh = buildModel(n.kind, n.index, true);
+      const fresh = buildModel(p.kind, n.index, true);
       fresh.position.copy(old.position);
+      fresh.rotation.y = p.yaw ?? fresh.rotation.y;
       fresh.scale.copy(old.scale);
       fresh.userData.node = n;
       if (old.parent) {
@@ -120,6 +175,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       }
       n.root = fresh;
     }
+    updateMarkers();
   });
 
   const crystal = nodes.find((n) => n.kind === 'crystal');
@@ -127,7 +183,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   crystalLight.position.set(CRYSTAL_SPOT.x, heightAt(CRYSTAL_SPOT.x, CRYSTAL_SPOT.z) + 2.6, CRYSTAL_SPOT.z);
   scene.add(crystalLight);
 
-  const { group: decor, blockers } = buildDecor(PLACEMENTS.map((p) => ({ x: p.x, z: p.z })));
+  const { group: decor, blockers } = buildDecor([...PLACEMENTS, ...Object.values(ctx.data.npcs)].map((p) => ({ x: p.x, z: p.z })));
   scene.add(decor);
 
   // --- aim ring
@@ -140,16 +196,29 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   ring.visible = false;
   scene.add(ring);
 
-  // --- tracking: an arrow with distance at the top of the screen, plus a small floating marker once you are close
+  // --- tracking: an arrow with distance at the top of the screen, plus a small floating marker once you are close.
+  // Two things can be tracked: the material the goal needs (yellow) and a sample or scientist picked in a list (blue).
   let tracked: string | null = null;
-  const marker = new THREE.Mesh(
-    new THREE.OctahedronGeometry(0.11),
-    new THREE.MeshBasicMaterial({ color: '#fff1b8', transparent: true, opacity: 0.85, depthWrite: false, fog: false }),
-  );
-  marker.visible = false;
-  scene.add(marker);
+  let target: { kind: 'sample' | 'npc'; id: string } | null = null;
+  const makeMarker = (color: string) => {
+    const m = new THREE.Mesh(
+      new THREE.OctahedronGeometry(0.11),
+      new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.85, depthWrite: false, fog: false }),
+    );
+    m.visible = false;
+    scene.add(m);
+    return m;
+  };
+  const marker = makeMarker('#fff1b8');
+  const targetMarker = makeMarker('#9fdcff');
   const offTrack = ctx.bus.on('trackItem', ({ itemId }) => (tracked = itemId));
-  const offCrafted = ctx.bus.on('itemCrafted', () => (campus.em.visible = !!emTier()));
+  const offTarget = ctx.bus.on('trackTarget', ({ target: t }) => (target = t));
+  const offCrafted = ctx.bus.on('itemCrafted', () => {
+    showModels();
+    updateMarkers();
+  });
+  const offQuest = ctx.bus.on('questCompleted', updateMarkers);
+  const offScore = ctx.bus.on('minigameScored', updateMarkers);
 
   // --- player
   const camera = new THREE.PerspectiveCamera(70, 1, 0.1, 1500);
@@ -193,18 +262,55 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const css = 'position:fixed;color:#fff;text-shadow:0 0 3px #000;pointer-events:none';
   const hint = document.createElement('div');
   hint.style.cssText = `${css};left:12px;bottom:12px`;
-  hint.textContent = 'Click to look · WASD move · Shift run · Space jump · E gather · F look closer · C craft · T tech tree · I inventory · Tab menu · G guide · M Microdex · V view';
+  hint.style.maxWidth = 'calc(100% - 340px)';
+  hint.textContent = 'Click to look · WASD move · Shift run · Space jump · E gather/talk · F look · C craft · T tree · I inventory · J journal · Tab menu · G guide · M Microdex · V view';
   const prompt = document.createElement('div');
-  prompt.style.cssText = `${css};left:calc(50% - 150px);width:300px;text-align:center;top:calc(50% + 18px)`;
+  prompt.style.cssText = `${css};left:calc(50% - 170px);width:340px;text-align:center;top:calc(50% + 18px)`;
   const trackHud = document.createElement('div');
-  trackHud.style.cssText = `${css};left:50%;transform:translateX(-50%);top:14px;font-size:18px;font-weight:600;color:#ffd24a`;
+  trackHud.style.cssText = `${css};left:50%;transform:translateX(-50%);top:14px;font-size:18px;font-weight:600;color:#ffd24a;white-space:nowrap`;
+  const targetHud = document.createElement('div');
+  targetHud.style.cssText = `${css};left:50%;transform:translateX(-50%);top:40px;font-size:16px;font-weight:600;color:#9fdcff;white-space:nowrap`;
   const carryHud = document.createElement('div');
-  carryHud.style.cssText = `${css};left:50%;transform:translateX(-50%);top:42px;font-size:15px;color:#bfe3ff`;
+  carryHud.style.cssText = `${css};left:50%;transform:translateX(-50%);top:64px;font-size:15px;color:#bfe3ff;max-width:80vw;text-align:center`;
   const compass = document.createElement('div');
   compass.style.cssText = `${css};left:12px;top:12px;font-size:13px`;
   const cross = document.createElement('div');
   cross.style.cssText = 'position:fixed;left:50%;top:50%;width:6px;height:6px;margin:-3px;background:#fff;mix-blend-mode:difference;pointer-events:none';
-  el.append(hint, prompt, compass, trackHud, carryHud, cross);
+  // a list to pick one sample from: a cabinet's slides, or the samples you carry, at an instrument (keys 1-9)
+  const picker = document.createElement('div');
+  picker.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:12;display:none;min-width:300px;max-width:90vw;padding:12px 16px;border-radius:12px;background:#000d;color:#eee;font:14px system-ui';
+  el.append(hint, prompt, compass, trackHud, targetHud, carryHud, cross, picker);
+
+  let pick: { ids: string[]; then: (sampleId: string) => void } | null = null;
+  const closePicker = () => {
+    pick = null;
+    picker.style.display = 'none';
+  };
+  const openPicker = (title: string, ids: string[], then: (sampleId: string) => void) => {
+    pick = { ids, then };
+    picker.replaceChildren();
+    const h = document.createElement('div');
+    h.style.cssText = 'font-weight:600;margin-bottom:6px';
+    h.textContent = `${title} (press a number, Esc to cancel)`;
+    picker.append(h);
+    ids.slice(0, 9).forEach((id, i) => {
+      const s = ctx.data.samples[id];
+      const found = s ? s.features.filter((f) => ctx.state.discoveries.includes(f.id)).length : 0;
+      const total = s?.features.length ?? 0;
+      const row = document.createElement('button');
+      row.style.cssText = 'display:block;width:100%;margin:2px 0;text-align:left;cursor:pointer';
+      row.textContent = `${i + 1}  ${s?.name ?? id}  ·  ${found}/${total} found${found === total ? ' ✓' : ''}`;
+      row.onclick = () => choose(i);
+      picker.append(row);
+    });
+    picker.style.display = 'block';
+  };
+  const choose = (i: number) => {
+    const p = pick;
+    const id = p?.ids[i];
+    closePicker();
+    if (p && id) p.then(id);
+  };
 
   const keys = new Set<string>();
   const ray = new THREE.Raycaster();
@@ -266,14 +372,29 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   };
 
   const sampleName = (id: string) => ctx.data.samples[id]?.name ?? id;
-  /** F at the electron microscope: put the carried sample in and look. */
-  const useEM = () => {
-    const tier = emTier();
-    if (!tier) return flash('The electron microscope goes here once you build it');
-    if (!carried) return flash('Bring a sample: look (F) at something outside, and you take a bit of it along');
-    selectScope(ctx, tier);
+  const look = (sampleId: string) => {
     controls.unlock();
-    ctx.bus.emit('openEyepiece', { sampleId: carried });
+    ctx.bus.emit('openEyepiece', { sampleId });
+  };
+  /** F at a sample: take a bit along if you own a fixed instrument, and look through your best portable microscope. */
+  const lookAt = (sampleId: string) => {
+    if (ownsFixed()) carry(sampleId);
+    const portable = ownedScopes(ctx.state.inventory, ctx.data, null).at(-1);
+    if (ctx.state.scope.site && portable) selectScope(ctx, portable.scope.tier);
+    look(sampleId);
+  };
+  /** F at a fixed instrument: put one of the samples you carry in. */
+  const useInstrument = (site: Site) => {
+    const r = fixedAt(site);
+    const what = site === 'lab' ? 'electron microscope' : 'beamline';
+    if (!r) return flash(`The ${what} goes here once you build it`);
+    if (!bag.length) return flash('Bring a sample: look (F) at something, and you take a bit of it along');
+    const go = (id: string) => {
+      selectScope(ctx, r.scope.tier);
+      look(id);
+    };
+    if (bag.length === 1) go(bag[0]!);
+    else openPicker(`Put a sample in the ${r.name}`, bag, go);
   };
 
   const onKey = (e: KeyboardEvent, down: boolean) => {
@@ -285,28 +406,36 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       else keys.delete(' ');
       if (controls.isLocked) e.preventDefault();
     }
-    if (!down || paused || !controls.isLocked) return;
+    if (!down) return;
+    if (pick) {
+      if (/^[1-9]$/.test(e.key)) choose(+e.key - 1);
+      else if (e.key === 'Escape' || k === 'f') closePicker();
+      return;
+    }
+    if (paused || !controls.isLocked) return;
     if (k === 'v' && !e.repeat) {
       thirdPerson = !thirdPerson;
       updateView();
       return;
     }
     const n = aimed();
-    if (!n) return;
-    if (k === 'e' && n.aim.gather) {
+    if (!n || e.repeat) return;
+    if (k === 'e' && n.kind === 'npc') {
+      controls.unlock();
+      ctx.bus.emit('talkTo', { npcId: n.npcId! });
+    } else if (k === 'e' && n.aim.gather) {
       if (lockedBy(n.aim.gather, ctx.data, ctx.state.discoveries)) flash(LOCKED_TEXT);
       else gatherNode(n);
     }
-    if (k === 'f' && n === emNode) useEM();
-    if (k === 'f' && n.aim.sample) {
-      if (emTier()) carried = n.aim.sample; // take a bit along for the electron microscope
-      controls.unlock();
-      ctx.bus.emit('openEyepiece', { sampleId: n.aim.sample });
-    }
+    if (k !== 'f') return;
+    if (n === emNode) useInstrument('lab');
+    else if (n === beamNode) useInstrument('chess');
+    else if (n.aim.samples) openPicker(n.kind === 'picnic' ? 'On the table' : n.kind === 'pine_branch' ? 'From the branch' : 'Pick a sample', n.aim.samples, lookAt);
+    else if (n.aim.sample) lookAt(n.aim.sample);
   };
   const onDown = (e: KeyboardEvent) => onKey(e, true);
   const onUp = (e: KeyboardEvent) => onKey(e, false);
-  const onClick = () => !paused && controls.lock();
+  const onClick = () => !paused && !pick && controls.lock();
   addEventListener('keydown', onDown);
   addEventListener('keyup', onUp);
   renderer.domElement.addEventListener('click', onClick);
@@ -326,16 +455,23 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
 
   const describe = (n: Node | null) => {
     if (!n) return '';
-    if (n === emNode) {
-      if (!emTier()) return 'Electron microscope bay: build one and it is installed here';
-      return carried ? `F put the ${sampleName(carried)} in the electron microscope` : 'Electron microscope: bring a sample first';
+    if (n.kind === 'npc') {
+      const npc = ctx.data.npcs[n.npcId!]!;
+      return `E talk to ${npc.name}`;
+    }
+    if (n === emNode || n === beamNode) {
+      const site: Site = n === emNode ? 'lab' : 'chess';
+      const r = fixedAt(site);
+      if (!r) return site === 'lab' ? 'Electron microscope bay: its parts are installed here as you build them' : 'Beamline control desk: build the beamline and it runs from here';
+      return bag.length ? `F put a sample in the ${r.name} (${bag.length} carried)` : `${r.name}: bring a sample first`;
     }
     const parts: string[] = [];
     if (n.aim.gather) {
       const locked = lockedBy(n.aim.gather, ctx.data, ctx.state.discoveries);
       parts.push(locked ? 'E locked until identified' : `E gather ${ctx.data.items[n.aim.gather]?.name ?? n.aim.gather}`);
     }
-    if (n.aim.sample) parts.push(`F look at ${ctx.data.samples[n.aim.sample]?.name ?? n.aim.sample}`);
+    if (n.aim.samples) parts.push(`F look at one of ${n.aim.samples.length} samples`);
+    else if (n.aim.sample) parts.push(`F look at ${sampleName(n.aim.sample)}`);
     return parts.join(' · ');
   };
 
@@ -380,6 +516,50 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     return ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.round((((deg % 360) + 360) % 360) / 45) % 8]!;
   };
 
+  /** The part of campus the player is in, for the explorer achievement. */
+  const areaAt = (x: number, z: number): string | null => {
+    if (inLab(x, z)) return 'lab';
+    if (inChess(x, z)) return 'chess';
+    if (inGreenhouse(x, z)) return 'garden';
+    if (Math.hypot(x + 38, z + 1) < 7) return 'tower';
+    if (x < FALLS_X && Math.abs(z - gorgeZ(x)) < 7 && heightAt(x, z) < -5) return 'gorge';
+    if (Math.hypot(x - LAKE.x, z - LAKE.z) < LAKE.r + 9) return 'lake';
+    if (Math.hypot(x + 58, z - 22) < 15) return 'forest';
+    if (x < -46) return 'slope';
+    if (x > -23 && x < 23 && z > -38 && z < 1) return 'quad';
+    return null;
+  };
+  let areaCheck = 0;
+
+  /** An arrow relative to where the player looks, then the distance. */
+  const arrowTo = (x: number, z: number) => {
+    const dx = x - camera.position.x;
+    const dz = z - camera.position.z;
+    camera.getWorldDirection(dir);
+    const angle = (Math.atan2(-dir.z * dx + dir.x * dz, dir.x * dx + dir.z * dz) * 180) / Math.PI; // 0 = straight ahead, 90 = right
+    const arrow = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'][((Math.round(angle / 45) % 8) + 8) % 8]!;
+    return `${arrow} ${Math.hypot(dx, dz).toFixed(0)} m`;
+  };
+  const nearest = (match: (n: Node) => boolean): Node | null => {
+    let best = Infinity;
+    let found: Node | null = null;
+    for (const n of nodes) {
+      const d = Math.hypot(n.x - camera.position.x, n.z - camera.position.z);
+      if (n.alive && match(n) && d < best) {
+        best = d;
+        found = n;
+      }
+    }
+    return found;
+  };
+  const showMarker = (m: THREE.Mesh, n: Node | null, t: number) => {
+    m.visible = !!n && Math.hypot(n.x - camera.position.x, n.z - camera.position.z) < MARKER_RANGE;
+    if (!n) return;
+    m.position.set(n.x, n.center.y + n.aimRadius + 0.4 + 0.06 * Math.sin(t * 0.004), n.z);
+    m.rotation.y = t * 0.002;
+  };
+  const doors: Record<Site, { x: number; z: number }> = { lab: { x: SCIENCE.x0 - 1, z: EM_SPOT.z }, chess: { x: WILSON.x0 - 1, z: -4 } };
+
   const clock = new THREE.Clock();
   let raf = requestAnimationFrame(function frame() {
     raf = requestAnimationFrame(frame);
@@ -388,7 +568,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     const previousX = camera.position.x;
     const previousZ = camera.position.z;
 
-    if (controls.isLocked && !paused) {
+    if (controls.isLocked && !paused && !pick) {
       const p = camera.position;
       const ground = heightAt(p.x, p.z);
       const wading = ground < waterLevelAt(p.x, p.z);
@@ -412,9 +592,16 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       camera.position.y = Math.max(camera.position.y, heightAt(camera.position.x, camera.position.z) + EYE_HEIGHT);
     }
 
-    setInLab(ctx, inLab(camera.position.x, camera.position.z));
+    const { x: px, z: pz } = camera.position;
+    setSite(ctx, inLab(px, pz) ? 'lab' : inChess(px, pz) ? 'chess' : null);
+    if (t > areaCheck) {
+      areaCheck = t + 500;
+      const area = areaAt(px, pz);
+      if (area) visit(ctx, area);
+    }
     campus.update(t);
-    player.update(Math.hypot(camera.position.x - previousX, camera.position.z - previousZ), dt);
+    player.update(Math.hypot(px - previousX, pz - previousZ), dt);
+    figures.forEach((f) => f.update(t));
     updateView();
 
     // sun and its shadow follow the player
@@ -432,55 +619,40 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     }
     if (crystal) crystalLight.intensity = 12 + 4 * Math.sin(t * 0.0021);
 
-    const n = controls.isLocked && !paused ? aimed() : null;
+    const n = controls.isLocked && !paused && !pick ? aimed() : null;
     const flashing = performance.now() < flashUntil;
     prompt.textContent = flashing ? flashText : describe(n);
     prompt.style.color = flashing ? '#ffb27a' : '#fff';
     ring.visible = !!n;
     if (n) {
       const radius = n.radius > 0 ? n.radius + 0.2 : 0.8;
-      const rx = n.radius > 0 ? n.x : hitPoint.x;
-      const rz = n.radius > 0 ? n.z : hitPoint.z;
-      ring.position.set(rx, n.radius > 0 ? heightAt(rx, rz) + 0.05 : hitPoint.y + 0.03, rz);
+      const rx = n === pondNode ? hitPoint.x : n.x;
+      const rz = n === pondNode ? hitPoint.z : n.z;
+      ring.position.set(rx, n === pondNode ? hitPoint.y + 0.03 : heightAt(rx, rz) + 0.05, rz);
       ring.scale.setScalar(radius * (1 + 0.04 * Math.sin(t * 0.006)));
     }
-    // nearest live source of the tracked item
-    let target: Node | null = null;
-    if (tracked) {
-      let best = Infinity;
-      for (const n of nodes) {
-        const d = Math.hypot(n.x - camera.position.x, n.z - camera.position.z);
-        if (n.alive && n.aim.gather === tracked && d < best) {
-          best = d;
-          target = n;
-        }
-      }
-    }
-    marker.visible = !!target && Math.hypot(target.x - camera.position.x, target.z - camera.position.z) < MARKER_RANGE;
-    /** An arrow relative to where the player looks, then the distance. */
-    const arrowTo = (x: number, z: number) => {
-      const dx = x - camera.position.x;
-      const dz = z - camera.position.z;
-      camera.getWorldDirection(dir);
-      const angle = (Math.atan2(-dir.z * dx + dir.x * dz, dir.x * dx + dir.z * dz) * 180) / Math.PI; // 0 = straight ahead, 90 = right
-      const arrow = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'][((Math.round(angle / 45) % 8) + 8) % 8]!;
-      return `${arrow} ${Math.hypot(dx, dz).toFixed(0)} m`;
-    };
-    trackHud.textContent = '';
-    if (target) {
-      marker.position.set(target.x, target.center.y + target.aimRadius + 0.4 + 0.06 * Math.sin(t * 0.004), target.z);
-      marker.rotation.y = t * 0.002;
-      trackHud.textContent = `${ctx.data.items[tracked!]?.name ?? tracked} ${arrowTo(target.x, target.z)}`;
-    }
-    const doorX = SCIENCE.x0 - 1;
-    carryHud.textContent = !emTier()
+    // nearest live source of the tracked item, and the tracked sample or scientist
+    const itemNode = tracked ? nearest((m) => m.aim.gather === tracked) : null;
+    showMarker(marker, itemNode, t);
+    trackHud.textContent = itemNode ? `${ctx.data.items[tracked!]?.name ?? tracked} ${arrowTo(itemNode.x, itemNode.z)}` : '';
+    const tgt = target;
+    const targetNode = !tgt ? null : tgt.kind === 'npc' ? nearest((m) => m.npcId === tgt.id) : nearest((m) => samplesOf(m.aim).includes(tgt.id));
+    showMarker(targetMarker, targetNode, t);
+    targetHud.textContent = targetNode && tgt
+      ? `${tgt.kind === 'npc' ? ctx.data.npcs[tgt.id]?.name : sampleName(tgt.id)} ${arrowTo(targetNode.x, targetNode.z)}`
+      : '';
+    // what you carry, and where to take it
+    const sites = (['lab', 'chess'] as const).filter((s) => fixedAt(s));
+    const here = ctx.state.site;
+    const names = bag.slice(0, 3).map(sampleName).join(', ') + (bag.length > 3 ? ` and ${bag.length - 3} more` : '');
+    carryHud.textContent = !sites.length
       ? ''
-      : ctx.state.inLab
-      ? carried ? `Carrying ${sampleName(carried)}: aim at the electron microscope and press F` : 'No sample: look (F) at something outside to take some'
-      : carried
-      ? `Carrying ${sampleName(carried)} to the electron microscope, science lab ${arrowTo(doorX, EM_SPOT.z)}`
-      : 'Electron microscope in the science lab: look (F) at a sample to take some there';
-    compass.textContent = `${heading()} · ${camera.position.x.toFixed(0)}, ${camera.position.z.toFixed(0)}`;
+      : here && sites.includes(here)
+      ? bag.length ? `Carrying ${names}: aim at the ${fixedAt(here)!.name} and press F` : 'No sample yet: look (F) at something to take a bit along'
+      : bag.length
+      ? `Carrying ${names} · ${sites.map((s) => `${SITE_NAMES[s]} ${arrowTo(doors[s].x, doors[s].z)}`).join(' · ')}`
+      : `Your ${sites.map((s) => fixedAt(s)!.name).join(' and ')}: look (F) at a sample to take some along`;
+    compass.textContent = `${heading()} · ${px.toFixed(0)}, ${pz.toFixed(0)}`;
     renderer.render(scene, viewCamera);
   });
 
@@ -494,10 +666,11 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       camera,
       controls,
       teleport,
-      nodes: nodes.map((n) => ({ kind: n.kind, x: n.x, z: n.z })),
-      /** Stand `dist` m south of the first node of a kind, looking at it. */
+      nodes: nodes.map((n) => ({ kind: n.kind, x: n.x, z: n.z, npc: n.npcId })),
+      bag,
+      /** Stand `dist` m south of the first node of a kind (or a scientist's id), looking at it. */
       lookAtKind(kind: string, dist = 2.5) {
-        const n = nodes.find((m) => m.kind === kind);
+        const n = nodes.find((m) => m.kind === kind || m.npcId === kind);
         if (n) teleport(n.x, n.z + dist, 0, -12);
         return !!n;
       },
@@ -509,11 +682,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       cancelAnimationFrame(raf);
       timers.forEach((id) => clearTimeout(id));
       ro.disconnect();
-      offOpen();
-      offClose();
-      offTrack();
-      offCrafted();
-      offDiscovery();
+      [offOpen, offClose, offTrack, offTarget, offCrafted, offQuest, offScore, offDiscovery].forEach((off) => off());
       removeEventListener('keydown', onDown);
       removeEventListener('keyup', onUp);
       player.dispose();

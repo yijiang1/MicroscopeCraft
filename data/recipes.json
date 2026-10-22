@@ -1,11 +1,13 @@
 [
   {
     "id": "glass", "name": "Glass", "station": "furnace", "color": "#bfe3ea",
+    "about": "Sand melted in a furnace. Real glass makers add soda and lime so it melts at a lower temperature.",
     "inputs": [{ "itemId": "beach_sand", "count": 2 }],
     "output": { "itemId": "glass", "count": 1 }
   },
   {
     "id": "lens", "name": "Glass lens", "station": "bench", "color": "#9fd0e0",
+    "about": "Glass ground and polished into a curve, so it bends light to a focus.",
     "inputs": [{ "itemId": "glass", "count": 1 }],
     "output": { "itemId": "lens", "count": 1 }
   },
@@ -16,6 +18,7 @@
   },
   {
     "id": "hand_lens", "name": "Hand lens", "station": "bench", "color": "#7fb2c4",
+    "about": "One lens in a frame: about 10 times bigger.",
     "inputs": [{ "itemId": "lens", "count": 1 }, { "itemId": "frame", "count": 1 }],
     "output": { "itemId": "hand_lens", "count": 1 },
     "scope": { "tier": 1, "dLensUm": 30, "steps": [{ "label": "10×", "magnification": 10, "NA": 0.1 }] }
@@ -38,6 +41,7 @@
   },
   {
     "id": "compound_microscope", "name": "Compound microscope", "station": "bench", "color": "#5b8fd0",
+    "about": "An objective lens makes a magnified image, and the eyepiece magnifies it again.",
     "inputs": [
       { "itemId": "lens", "count": 2 },
       { "itemId": "tube", "count": 1 },
@@ -68,11 +72,13 @@
   },
   {
     "id": "condenser", "name": "Condenser", "station": "bench", "color": "#c8d8e0",
+    "about": "Lenses under the stage that light the sample with a wide cone of light, so the objective can reach its full resolution.",
     "inputs": [{ "itemId": "quartz_glass", "count": 1 }, { "itemId": "copper_ore", "count": 1 }],
     "output": { "itemId": "condenser", "count": 1 }
   },
   {
     "id": "immersion_oil", "name": "Immersion oil", "station": "bench", "color": "#e0cf55",
+    "about": "A drop between lens and slide bends light almost like glass, so steep rays still reach the objective.",
     "inputs": [{ "itemId": "plant_oil", "count": 1 }],
     "output": { "itemId": "immersion_oil", "count": 1 }
   },
@@ -86,7 +92,7 @@
     ],
     "output": { "itemId": "hq_microscope", "count": 1 },
     "scope": {
-      "tier": 3, "dLensUm": 0.05,
+      "tier": 3, "dLensUm": 0.05, "condenser": true,
       "steps": [
         { "label": "100× (10× objective)", "magnification": 100, "NA": 0.25 },
         { "label": "400× (40× objective)", "magnification": 400, "NA": 0.75 },
@@ -96,9 +102,119 @@
   },
 
   {
+    "id": "fluorite_objective", "name": "Fluorite objective", "station": "bench", "color": "#b9a3e6",
+    "about": "Fluorite (calcium fluoride) bends every colour of light almost equally, so these objectives stay sharp in every colour.",
+    "inputs": [{ "itemId": "precision_lens", "count": 1 }, { "itemId": "fluorite", "count": 1 }],
+    "output": { "itemId": "fluorite_objective", "count": 1 }
+  },
+  {
+    "id": "arc_lamp", "name": "Arc lamp", "station": "bench", "color": "#d8d0ff",
+    "about": "An electric arc between tungsten electrodes in a quartz bulb: intense ultraviolet and blue light to make samples glow.",
+    "inputs": [{ "itemId": "quartz_glass", "count": 1 }, { "itemId": "tungsten_ore", "count": 1 }],
+    "output": { "itemId": "arc_lamp", "count": 1 }
+  },
+  {
+    "id": "filter_cube", "name": "Filter cube", "station": "bench", "color": "#7ac8a8",
+    "about": "An excitation filter, a dichroic mirror and an emission filter: ultraviolet or blue goes in, and only the glow comes back.",
+    "inputs": [{ "itemId": "quartz_glass", "count": 1 }, { "itemId": "fluorite", "count": 1 }],
+    "output": { "itemId": "filter_cube", "count": 1 }
+  },
+  {
+    "id": "fluorescence_microscope", "name": "Fluorescence microscope", "station": "bench", "color": "#6a4fc0",
+    "about": "The high-quality microscope with fluorite optics and an arc lamp shining down through the objective. Add-ons give phase contrast and dark field.",
+    "inputs": [
+      { "itemId": "hq_microscope", "count": 1, "keep": true },
+      { "itemId": "fluorite_objective", "count": 1 },
+      { "itemId": "arc_lamp", "count": 1 },
+      { "itemId": "filter_cube", "count": 1 }
+    ],
+    "output": { "itemId": "fluorescence_microscope", "count": 1 },
+    "scope": {
+      "tier": 4, "dLensUm": 0.03, "condenser": true,
+      "steps": [
+        { "label": "400× bright field", "magnification": 400, "NA": 0.75 },
+        { "label": "1000× bright field (oil)", "magnification": 1000, "NA": 1.4 },
+        { "label": "400× fluorescence", "magnification": 400, "NA": 0.75, "mode": "fluorescence" },
+        { "label": "1000× fluorescence (oil)", "magnification": 1000, "NA": 1.4, "mode": "fluorescence" },
+        { "label": "100× phase contrast (Ph1)", "magnification": 100, "NA": 0.25, "mode": "phase", "requires": "phase_kit" },
+        { "label": "400× phase contrast (Ph2)", "magnification": 400, "NA": 0.65, "mode": "phase", "requires": "phase_kit" },
+        { "label": "1000× phase contrast (Ph3, oil)", "magnification": 1000, "NA": 1.25, "mode": "phase", "requires": "phase_kit" },
+        { "label": "400× dark field", "magnification": 400, "NA": 0.65, "mode": "darkfield", "requires": "darkfield_condenser" }
+      ]
+    }
+  },
+  {
+    "id": "phase_kit", "name": "Phase contrast kit", "station": "bench", "color": "#9fc0e8",
+    "about": "Rings of light from the condenser and matching phase rings in the objectives turn the invisible delays of light in clear cells into contrast (Zernike, 1930s). Add-on for the fluorescence microscope.",
+    "inputs": [{ "itemId": "quartz_glass", "count": 1 }, { "itemId": "copper_ore", "count": 1 }],
+    "output": { "itemId": "phase_kit", "count": 1 }
+  },
+  {
+    "id": "darkfield_condenser", "name": "Dark-field condenser", "station": "bench", "color": "#4a5260",
+    "about": "A condenser with a central stop: only light that the sample scatters reaches the objective, so things shine on black. Add-on for the fluorescence microscope.",
+    "inputs": [{ "itemId": "quartz_glass", "count": 1 }, { "itemId": "iron_ore", "count": 1 }],
+    "output": { "itemId": "darkfield_condenser", "count": 1 }
+  },
+
+  {
     "id": "filament", "name": "Tungsten filament", "station": "furnace", "color": "#9aa3b0",
+    "about": "A hairpin of tungsten wire heated white-hot, so electrons boil off its tip.",
     "inputs": [{ "itemId": "tungsten_ore", "count": 1 }],
     "output": { "itemId": "filament", "count": 1 }
+  },
+  {
+    "id": "wehnelt", "name": "Wehnelt cap", "station": "bench", "color": "#8c96a2",
+    "about": "A metal cap around the filament, held slightly negative, that squeezes the electrons into a beam.",
+    "inputs": [{ "itemId": "iron_ore", "count": 1 }],
+    "output": { "itemId": "wehnelt", "count": 1 }
+  },
+  {
+    "id": "hv_tank", "name": "High-voltage tank", "station": "bench", "color": "#c9a46a",
+    "about": "Makes the 200,000 volts that accelerate the electrons; resin insulation keeps sparks from jumping.",
+    "inputs": [{ "itemId": "copper_ore", "count": 2 }, { "itemId": "resin", "count": 1 }],
+    "output": { "itemId": "hv_tank", "count": 1 }
+  },
+  {
+    "id": "electron_gun", "name": "Electron gun", "station": "bench", "color": "#d8dde4",
+    "about": "Filament, Wehnelt cap and accelerating voltage: the source of the beam.",
+    "inputs": [{ "itemId": "filament", "count": 1 }, { "itemId": "wehnelt", "count": 1 }, { "itemId": "hv_tank", "count": 1 }],
+    "output": { "itemId": "electron_gun", "count": 1 }
+  },
+  {
+    "id": "magnetic_lens", "name": "Magnetic lens", "station": "bench", "color": "#b8754a",
+    "about": "A copper coil in an iron case: its magnetic field focuses electrons the way glass focuses light.",
+    "inputs": [{ "itemId": "copper_ore", "count": 1 }, { "itemId": "iron_ore", "count": 1 }],
+    "output": { "itemId": "magnetic_lens", "count": 1 }
+  },
+  {
+    "id": "aperture_strip", "name": "Aperture strip", "station": "bench", "color": "#a8acb4",
+    "about": "A strip of heat-proof, non-magnetic metal with tiny holes that let only the central electrons through.",
+    "inputs": [{ "itemId": "tungsten_ore", "count": 1 }],
+    "output": { "itemId": "aperture_strip", "count": 1 }
+  },
+  {
+    "id": "condenser_lenses", "name": "Condenser lens system", "station": "bench", "color": "#c08a5a",
+    "about": "Two magnetic lenses and an aperture that shape the beam lighting the sample.",
+    "inputs": [{ "itemId": "magnetic_lens", "count": 2 }, { "itemId": "aperture_strip", "count": 1 }],
+    "output": { "itemId": "condenser_lenses", "count": 1 }
+  },
+  {
+    "id": "goniometer", "name": "Goniometer stage", "station": "bench", "color": "#9a8a70",
+    "about": "Moves the sample in nanometre steps and tilts it to any angle.",
+    "inputs": [{ "itemId": "iron_ore", "count": 1 }, { "itemId": "copper_ore", "count": 1 }],
+    "output": { "itemId": "goniometer", "count": 1 }
+  },
+  {
+    "id": "objective_assembly", "name": "Objective lens and stage", "station": "bench", "color": "#a86a3a",
+    "about": "The strongest lens, with the sample sitting right inside its magnetic field; its errors set the resolution.",
+    "inputs": [{ "itemId": "magnetic_lens", "count": 1 }, { "itemId": "aperture_strip", "count": 1 }, { "itemId": "goniometer", "count": 1 }],
+    "output": { "itemId": "objective_assembly", "count": 1 }
+  },
+  {
+    "id": "projector_lenses", "name": "Projector lens system", "station": "bench", "color": "#c89a6a",
+    "about": "Two more magnetic lenses magnify the image again, up to millions of times, or project the diffraction pattern instead.",
+    "inputs": [{ "itemId": "magnetic_lens", "count": 2 }],
+    "output": { "itemId": "projector_lenses", "count": 1 }
   },
   {
     "id": "vacuum_seal", "name": "Vacuum seal", "station": "bench", "color": "#d98a3d",
@@ -111,25 +227,236 @@
     "output": { "itemId": "vacuum_chamber", "count": 1 }
   },
   {
-    "id": "magnetic_lens", "name": "Magnetic lens", "station": "bench", "color": "#b8754a",
-    "inputs": [{ "itemId": "copper_ore", "count": 2 }, { "itemId": "iron_ore", "count": 1 }],
-    "output": { "itemId": "magnetic_lens", "count": 1 }
+    "id": "vacuum_pump", "name": "Vacuum pump", "station": "bench", "color": "#6f7884",
+    "about": "Pumps the air out, so the electrons fly without bumping into gas molecules.",
+    "inputs": [{ "itemId": "iron_ore", "count": 1 }, { "itemId": "copper_ore", "count": 1 }],
+    "output": { "itemId": "vacuum_pump", "count": 1 }
   },
   {
-    "id": "electron_microscope", "name": "Electron microscope", "station": "bench", "color": "#e8eef8",
+    "id": "vacuum_system", "name": "Vacuum system", "station": "bench", "color": "#7f8894",
+    "about": "The sealed column and its pumps.",
+    "inputs": [{ "itemId": "vacuum_chamber", "count": 1 }, { "itemId": "vacuum_pump", "count": 1 }],
+    "output": { "itemId": "vacuum_system", "count": 1 }
+  },
+  {
+    "id": "viewing_screen", "name": "Viewing screen", "station": "bench", "color": "#7dff8a",
+    "about": "Glass coated with willemite, which glows green wherever electrons land.",
+    "inputs": [{ "itemId": "willemite", "count": 1 }, { "itemId": "glass", "count": 1 }],
+    "output": { "itemId": "viewing_screen", "count": 1 }
+  },
+  {
+    "id": "electron_microscope", "name": "Transmission electron microscope", "station": "bench", "color": "#e8eef8",
+    "about": "Electrons pass through a thin sample and magnetic lenses form the image. Installed in the science lab.",
     "inputs": [
-      { "itemId": "filament", "count": 1 },
-      { "itemId": "vacuum_chamber", "count": 1 },
-      { "itemId": "magnetic_lens", "count": 2 }
+      { "itemId": "electron_gun", "count": 1 },
+      { "itemId": "condenser_lenses", "count": 1 },
+      { "itemId": "objective_assembly", "count": 1 },
+      { "itemId": "projector_lenses", "count": 1 },
+      { "itemId": "vacuum_system", "count": 1 },
+      { "itemId": "viewing_screen", "count": 1 }
     ],
     "output": { "itemId": "electron_microscope", "count": 1 },
     "scope": {
-      "tier": 5, "dLensUm": 0.0002, "voltageV": 200000,
+      "tier": 5, "dLensUm": 0.00018, "voltageV": 200000, "site": "lab",
       "steps": [
-        { "label": "50,000×", "magnification": 50000, "NA": 0.01 },
-        { "label": "150,000×", "magnification": 150000, "NA": 0.01 },
-        { "label": "500,000×", "magnification": 500000, "NA": 0.01 },
-        { "label": "2,000,000×", "magnification": 2000000, "NA": 0.01 }
+        { "label": "50,000×", "magnification": 50000, "NA": 0.01, "mode": "tem" },
+        { "label": "150,000×", "magnification": 150000, "NA": 0.01, "mode": "tem" },
+        { "label": "500,000×", "magnification": 500000, "NA": 0.01, "mode": "tem" },
+        { "label": "2,000,000×", "magnification": 2000000, "NA": 0.01, "mode": "tem" },
+        { "label": "Electron diffraction", "magnification": 1, "NA": 0.04, "mode": "ediff" }
+      ]
+    }
+  },
+
+  {
+    "id": "fe_tip", "name": "Field-emission tip", "station": "furnace", "color": "#c0c8d4",
+    "about": "A single-crystal tungsten needle etched to a sharp point; a strong electric field pulls electrons straight out of it.",
+    "inputs": [{ "itemId": "tungsten_ore", "count": 1 }],
+    "output": { "itemId": "fe_tip", "count": 1 }
+  },
+  {
+    "id": "fe_gun", "name": "Field-emission gun", "station": "bench", "color": "#e0e6ee",
+    "about": "A tiny, very bright and coherent source in ultra-high vacuum, so the probe can be focused smaller than an atom.",
+    "inputs": [{ "itemId": "fe_tip", "count": 1 }, { "itemId": "vacuum_pump", "count": 1 }, { "itemId": "hv_tank", "count": 1 }],
+    "output": { "itemId": "fe_gun", "count": 1 }
+  },
+  {
+    "id": "multipole", "name": "Multipole lens", "station": "bench", "color": "#b07a4a",
+    "about": "A ring of magnetic poles that bends the beam in patterns no round lens can.",
+    "inputs": [{ "itemId": "copper_ore", "count": 1 }, { "itemId": "iron_ore", "count": 1 }],
+    "output": { "itemId": "multipole", "count": 1 }
+  },
+  {
+    "id": "corrector", "name": "Aberration corrector", "station": "bench", "color": "#d0905a",
+    "about": "Multipole lenses that cancel the objective's spherical aberration, which Scherzer proved no round lens can avoid.",
+    "inputs": [{ "itemId": "multipole", "count": 4 }],
+    "output": { "itemId": "corrector", "count": 1 }
+  },
+  {
+    "id": "scan_coils", "name": "Scan coils", "station": "bench", "color": "#c87a3a",
+    "about": "Sweep the focused probe across the sample, line by line.",
+    "inputs": [{ "itemId": "copper_ore", "count": 2 }],
+    "output": { "itemId": "scan_coils", "count": 1 }
+  },
+  {
+    "id": "scintillator", "name": "Scintillator ring", "station": "furnace", "color": "#f0e08a",
+    "about": "A cerium-doped crystal that flashes with light when electrons hit it; the cerium comes from monazite.",
+    "inputs": [{ "itemId": "monazite", "count": 1 }, { "itemId": "quartz_glass", "count": 1 }],
+    "output": { "itemId": "scintillator", "count": 1 }
+  },
+  {
+    "id": "pmt", "name": "Photomultiplier tube", "station": "bench", "color": "#a0b8d0",
+    "about": "Turns each faint flash of light into a strong pulse of current.",
+    "inputs": [{ "itemId": "glass", "count": 1 }, { "itemId": "copper_ore", "count": 1 }],
+    "output": { "itemId": "pmt", "count": 1 }
+  },
+  {
+    "id": "haadf_detector", "name": "Annular dark-field detector", "station": "bench", "color": "#e8d870",
+    "about": "A ring that catches electrons scattered to high angles: heavier atoms scatter more and shine brighter.",
+    "inputs": [{ "itemId": "scintillator", "count": 1 }, { "itemId": "pmt", "count": 1 }],
+    "output": { "itemId": "haadf_detector", "count": 1 }
+  },
+  {
+    "id": "silicon", "name": "Silicon", "station": "furnace", "color": "#8a96a8",
+    "about": "Quartz reduced to pure silicon in a furnace (real furnaces burn carbon to pull the oxygen out).",
+    "inputs": [{ "itemId": "quartz_sand", "count": 2 }],
+    "output": { "itemId": "silicon", "count": 1 }
+  },
+  {
+    "id": "empad", "name": "Pixel array detector (EMPAD)", "station": "bench", "color": "#5a6a8a",
+    "about": "Records the whole diffraction pattern at every probe position, fast and without saturating. Built at Cornell; it made electron ptychography practical.",
+    "inputs": [{ "itemId": "silicon", "count": 1 }, { "itemId": "copper_ore", "count": 1 }],
+    "output": { "itemId": "empad", "count": 1 }
+  },
+  {
+    "id": "stem_microscope", "name": "Aberration-corrected STEM", "station": "bench", "color": "#f4f0e0",
+    "about": "The electron microscope rebuilt to scan a corrected probe smaller than an atom across the sample. Installed in the science lab.",
+    "inputs": [
+      { "itemId": "electron_microscope", "count": 1, "keep": true },
+      { "itemId": "fe_gun", "count": 1 },
+      { "itemId": "corrector", "count": 1 },
+      { "itemId": "scan_coils", "count": 1 },
+      { "itemId": "haadf_detector", "count": 1 },
+      { "itemId": "empad", "count": 1 }
+    ],
+    "output": { "itemId": "stem_microscope", "count": 1 },
+    "scope": {
+      "tier": 6, "dLensUm": 0.00005, "voltageV": 300000, "site": "lab",
+      "steps": [
+        { "label": "2,000,000× annular dark field", "magnification": 2000000, "NA": 0.025, "mode": "haadf" },
+        { "label": "8,000,000× annular dark field", "magnification": 8000000, "NA": 0.025, "mode": "haadf" },
+        { "label": "20,000,000× ptychography (80 kV)", "magnification": 20000000, "NA": 0.054, "mode": "ptycho", "voltageV": 80000, "dLensUm": 0 },
+        { "label": "Electron diffraction", "magnification": 1, "NA": 0.04, "mode": "ediff" }
+      ]
+    }
+  },
+
+  {
+    "id": "dipole_magnet", "name": "Bending magnet", "station": "bench", "color": "#4a7ab8",
+    "about": "Bends the positron beam around the ring; every bend throws off a fan of X-rays.",
+    "inputs": [{ "itemId": "iron_ore", "count": 1 }, { "itemId": "copper_ore", "count": 1 }],
+    "output": { "itemId": "dipole_magnet", "count": 1 }
+  },
+  {
+    "id": "quadrupole", "name": "Quadrupole magnet", "station": "bench", "color": "#c84a4a",
+    "about": "Four poles that focus the beam like a lens, squeezing it in one direction while it spreads in the other.",
+    "inputs": [{ "itemId": "iron_ore", "count": 1 }, { "itemId": "copper_ore", "count": 1 }],
+    "output": { "itemId": "quadrupole", "count": 1 }
+  },
+  {
+    "id": "dba_cell", "name": "Double-bend achromat cell", "station": "bench", "color": "#6a8ac8",
+    "about": "Two bending magnets and focusing magnets that leave a straight section for an undulator. The CHESS-U upgrade put six in one sixth of the ring.",
+    "inputs": [{ "itemId": "dipole_magnet", "count": 2 }, { "itemId": "quadrupole", "count": 2 }],
+    "output": { "itemId": "dba_cell", "count": 1 }
+  },
+  {
+    "id": "nd_magnets", "name": "NdFeB magnet blocks", "station": "furnace", "color": "#6a6a78",
+    "about": "Neodymium-iron-boron, the strongest permanent magnets; the neodymium comes from monazite (the boron is not tracked here).",
+    "inputs": [{ "itemId": "monazite", "count": 1 }, { "itemId": "iron_ore", "count": 1 }],
+    "output": { "itemId": "nd_magnets", "count": 1 }
+  },
+  {
+    "id": "undulator", "name": "CHESS Compact Undulator", "station": "bench", "color": "#d0b040",
+    "about": "Rows of magnets with a 28.4 mm period wiggle the positrons so their X-rays add up at one colour. Sliding one row along the other tunes that colour.",
+    "inputs": [{ "itemId": "nd_magnets", "count": 2 }, { "itemId": "vacuum_chamber", "count": 1 }],
+    "output": { "itemId": "undulator", "count": 1 }
+  },
+  {
+    "id": "be_window", "name": "Beryllium window", "station": "bench", "color": "#c8e8dc",
+    "about": "Beryllium is so light that X-rays pass straight through, yet a thin sheet holds back the air.",
+    "inputs": [{ "itemId": "beryl", "count": 1 }],
+    "output": { "itemId": "be_window", "count": 1 }
+  },
+  {
+    "id": "front_end", "name": "Front end", "station": "bench", "color": "#8aa0b0",
+    "about": "Shutters, slits and a beryllium window between the ring's vacuum and the beamline.",
+    "inputs": [{ "itemId": "be_window", "count": 1 }, { "itemId": "vacuum_pump", "count": 1 }],
+    "output": { "itemId": "front_end", "count": 1 }
+  },
+  {
+    "id": "mono_crystals", "name": "Silicon (111) crystal pair", "station": "bench", "color": "#9aa8bc",
+    "about": "Two perfect silicon crystals that reflect only the X-ray wavelength that fits Bragg's law at their angle.",
+    "inputs": [{ "itemId": "silicon", "count": 2 }],
+    "output": { "itemId": "mono_crystals", "count": 1 }
+  },
+  {
+    "id": "monochromator", "name": "Double-crystal monochromator", "station": "bench", "color": "#7a8aa8",
+    "about": "Turns the two crystals together to pick the X-ray energy; the second crystal sends the beam on parallel to the first.",
+    "inputs": [{ "itemId": "mono_crystals", "count": 1 }, { "itemId": "goniometer", "count": 1 }],
+    "output": { "itemId": "monochromator", "count": 1 }
+  },
+  {
+    "id": "crl", "name": "Compound refractive lens", "station": "bench", "color": "#b8e0d4",
+    "about": "X-rays bend only very slightly, so a stack of tiny beryllium lenses is needed to focus them to about a micrometre.",
+    "inputs": [{ "itemId": "beryl", "count": 1 }],
+    "output": { "itemId": "crl", "count": 1 }
+  },
+  {
+    "id": "lead", "name": "Lead", "station": "furnace", "color": "#6a6f78",
+    "about": "Smelted from galena.",
+    "inputs": [{ "itemId": "galena", "count": 1 }],
+    "output": { "itemId": "lead", "count": 1 }
+  },
+  {
+    "id": "hutch", "name": "Shielded hutch", "station": "bench", "color": "#5a6070",
+    "about": "A room with lead-lined steel walls that stop stray X-rays; the beam opens only when the door is locked.",
+    "inputs": [{ "itemId": "lead", "count": 3 }, { "itemId": "iron_ore", "count": 1 }],
+    "output": { "itemId": "hutch", "count": 1 }
+  },
+  {
+    "id": "sdd", "name": "Fluorescence detector", "station": "bench", "color": "#a0a8b8",
+    "about": "A silicon drift detector: it measures the energy of every X-ray a sample gives off, which tells which element made it.",
+    "inputs": [{ "itemId": "silicon", "count": 1 }, { "itemId": "copper_ore", "count": 1 }],
+    "output": { "itemId": "sdd", "count": 1 }
+  },
+  {
+    "id": "xray_pad", "name": "X-ray pixel array detector", "station": "bench", "color": "#4a5a7a",
+    "about": "Counts X-rays in every pixel to record diffraction patterns and images; Cornell groups pioneered these detectors.",
+    "inputs": [{ "itemId": "silicon", "count": 2 }, { "itemId": "copper_ore", "count": 1 }],
+    "output": { "itemId": "xray_pad", "count": 1 }
+  },
+  {
+    "id": "chess_beamline", "name": "CHESS beamline", "station": "bench", "color": "#ffd24a",
+    "about": "An X-ray beamline on CESR, the 768 m storage ring under Wilson Lab: 6 GeV positrons, an undulator, optics, a hutch and detectors. Installed in the CHESS hall.",
+    "inputs": [
+      { "itemId": "dba_cell", "count": 1 },
+      { "itemId": "undulator", "count": 1 },
+      { "itemId": "front_end", "count": 1 },
+      { "itemId": "monochromator", "count": 1 },
+      { "itemId": "crl", "count": 1 },
+      { "itemId": "hutch", "count": 1 },
+      { "itemId": "sdd", "count": 1 },
+      { "itemId": "xray_pad", "count": 1 },
+      { "itemId": "goniometer", "count": 1 }
+    ],
+    "output": { "itemId": "chess_beamline", "count": 1 },
+    "scope": {
+      "tier": 7, "dLensUm": 2, "xrayKeV": 12, "site": "chess",
+      "steps": [
+        { "label": "Tomography 20×", "magnification": 20, "NA": 0.001, "mode": "xct" },
+        { "label": "Tomography 200×", "magnification": 200, "NA": 0.001, "mode": "xct" },
+        { "label": "X-ray fluorescence map (1 µm beam)", "magnification": 400, "NA": 0.001, "mode": "xrf", "dLensUm": 1 },
+        { "label": "X-ray diffraction", "magnification": 1, "NA": 0.5, "mode": "xrd" }
       ]
     }
   }

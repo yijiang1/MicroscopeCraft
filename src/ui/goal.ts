@@ -47,7 +47,7 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void):
 
     // --- header: the one thing to do now
     const head = div('display:flex;gap:8px;align-items:flex-start');
-    const now = div('flex:1;font-size:14px;font-weight:600;color:#ffe08a', plan ? (action ? actionText(action, data) : 'Look around') : 'You built every microscope!');
+    const now = div('flex:1;font-size:14px;font-weight:600;color:#ffe08a', plan ? (action ? actionText(action, data) : 'Look around') : 'You built every instrument!');
     const toggle = document.createElement('button');
     toggle.textContent = expanded ? '▾' : '▸';
     toggle.title = 'Show or hide the tree';
@@ -64,7 +64,7 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void):
 
     if (!plan) {
       track(null);
-      card.append(div('color:#9ab;margin-top:4px', 'Explore, look at everything, and fill the Microdex (M).'));
+      card.append(div('color:#9ab;margin-top:4px', 'Fill the Microdex (M), and help the scientists around campus: J shows what each one asks for.'));
     } else {
       const trackedRaw = plan.raw.find((r) => r.itemId === pinned && r.missing > 0) ?? plan.raw.find((r) => r.missing > 0);
       if (pinned && trackedRaw?.itemId !== pinned) pinned = null;
@@ -114,6 +114,8 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void):
     ctx.bus.on('itemGathered', render),
     ctx.bus.on('itemCrafted', render),
     ctx.bus.on('discoveryUnlocked', render),
+    ctx.bus.on('openEyepiece', () => (card.style.display = 'none')), // the eyepiece has its own panels there
+    ctx.bus.on('closeEyepiece', () => (card.style.display = '')),
   ];
   return {
     render,

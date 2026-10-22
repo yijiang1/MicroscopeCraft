@@ -2,7 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { loadGameData } from './data';
 import type { GameEvents } from './events';
 import { scopeFromInventory } from './sim/scope';
-import { craft, createGame, discover, gather, parseSave, selectScope, setInLab, setZoom, toSave } from './state';
+import {
+  completeQuest, craft, createGame, discover, gather, parseSave, recordScore, selectScope, setSite, setZoom, toSave, visit,
+} from './state';
+
+const gatherAll = (ctx: ReturnType<typeof createGame>, have: Record<string, number>) => {
+  for (const [id, n] of Object.entries(have)) gather(ctx, id, n);
+};
 
 describe('state actions', () => {
   it('sand → glass → lens, iron → frame → hand lens raises the tier and emits events', () => {
@@ -35,11 +41,10 @@ describe('state actions', () => {
   });
 });
 
-describe('tier 2 and 3 crafting', () => {
+describe('tier 2 to 4 crafting', () => {
   it('upgrading to the high-quality microscope keeps the compound one so the two can be compared', () => {
     const ctx = createGame(loadGameData());
-    const have = { beach_sand: 6, iron_ore: 3, copper_ore: 2, quartz_sand: 6, plant_oil: 1 };
-    for (const [id, n] of Object.entries(have)) gather(ctx, id, n);
+    gatherAll(ctx, { beach_sand: 6, iron_ore: 3, copper_ore: 2, quartz_sand: 6, plant_oil: 1 });
     const chain = [
       'glass', 'glass', 'glass', 'lens', 'lens', 'tube', 'focus_knob', 'light_source', 'compound_microscope',
       'quartz_glass', 'quartz_glass', 'quartz_glass', 'precision_lens', 'precision_lens', 'condenser', 'immersion_oil', 'hq_microscope',
@@ -56,6 +61,21 @@ describe('tier 2 and 3 crafting', () => {
     expect(selectScope(ctx, 5)).toBe(false); // not owned
     expect(selectScope(ctx, 3)).toBe(true);
     expect(ctx.state.scope.tier).toBe(3);
+  });
+
+  it('the fluorescence microscope gains phase contrast and dark field steps as its add-ons are built', () => {
+    const ctx = createGame(loadGameData());
+    ctx.state.inventory.hq_microscope = 1;
+    gatherAll(ctx, { quartz_sand: 10, fluorite: 2, tungsten_ore: 1, copper_ore: 1, iron_ore: 1 });
+    for (const id of ['quartz_glass', 'quartz_glass', 'quartz_glass', 'precision_lens', 'fluorite_objective', 'arc_lamp', 'filter_cube', 'fluorescence_microscope']) {
+      expect(craft(ctx, id), id).toBe(true);
+    }
+    expect(ctx.state.scope.tier).toBe(4);
+    const modes = () => ctx.state.scope.steps.map((s) => s.mode);
+    expect(modes()).not.toContain('phase');
+    for (const id of ['quartz_glass', 'phase_kit', 'quartz_glass', 'darkfield_condenser']) expect(craft(ctx, id), id).toBe(true);
+    expect(modes().filter((m) => m === 'phase')).toHaveLength(3);
+    expect(modes()).toContain('darkfield');
   });
 
   it('setZoom picks a step, clamps it, and emits only on change', () => {
@@ -86,38 +106,86 @@ describe('event order', () => {
 });
 
 describe('tier 5 crafting', () => {
-  it('tungsten, resin, iron and copper make an electron microscope at tier 5, usable only in the lab', () => {
+  it('the electron microscope is built from six components and works only in the lab', () => {
     const ctx = createGame(loadGameData());
     ctx.state.inventory.hand_lens = 1;
-    const have = { tungsten_ore: 1, resin: 2, iron_ore: 4, copper_ore: 4 };
-    for (const [id, n] of Object.entries(have)) gather(ctx, id, n);
+    gatherAll(ctx, { tungsten_ore: 3, resin: 3, iron_ore: 10, copper_ore: 9, willemite: 1, beach_sand: 2 });
     const tiers: number[] = [];
     ctx.bus.on('tierChanged', ({ tier }) => tiers.push(tier));
-    for (const id of ['filament', 'vacuum_seal', 'vacuum_chamber', 'magnetic_lens', 'magnetic_lens', 'electron_microscope']) {
-      expect(craft(ctx, id), id).toBe(true);
-    }
+    const chain = [
+      'filament', 'wehnelt', 'hv_tank', 'electron_gun',
+      'magnetic_lens', 'magnetic_lens', 'magnetic_lens', 'magnetic_lens', 'magnetic_lens', 'aperture_strip', 'aperture_strip',
+      'condenser_lenses', 'goniometer', 'objective_assembly', 'projector_lenses',
+      'vacuum_seal', 'vacuum_chamber', 'vacuum_pump', 'vacuum_system', 'glass', 'viewing_screen', 'electron_microscope',
+    ];
+    for (const id of chain) expect(craft(ctx, id), id).toBe(true);
+    expect(Object.entries(ctx.state.inventory).filter(([id, n]) => n !== 0 && id !== 'hand_lens' && id !== 'electron_microscope')).toEqual([]);
     expect(tiers).toEqual([5]); // built, even though it is far away in the lab
     expect(ctx.state.scope.tier).toBe(1); // outside the lab you still look through the hand lens
     expect(selectScope(ctx, 5)).toBe(false);
-    setInLab(ctx, true);
+    setSite(ctx, 'lab');
     expect(ctx.state.scope.tier).toBe(5);
-    setInLab(ctx, false);
+    setSite(ctx, 'chess');
+    expect(ctx.state.scope.tier).toBe(1); // the CHESS hall is not the lab
+    setSite(ctx, null);
     expect(ctx.state.scope.tier).toBe(1);
-    setInLab(ctx, true);
-    expect(ctx.state.scope.steps.map((s) => s.magnification)).toEqual([50_000, 150_000, 500_000, 2_000_000]);
+    setSite(ctx, 'lab');
+    expect(ctx.state.scope.steps.map((s) => s.magnification)).toEqual([50_000, 150_000, 500_000, 2_000_000, 1]);
+    expect(ctx.state.scope.steps.at(-1)?.mode).toBe('ediff');
   });
 
-  it('a save round-trips progress and the microscope; a bad save starts fresh', () => {
+  it('a save round-trips progress and the microscope; an old save gets the new fields; a bad save starts fresh', () => {
     const ctx = createGame(loadGameData());
     gather(ctx, 'beach_sand', 2);
     gather(ctx, 'iron_ore');
     for (const id of ['glass', 'lens', 'frame', 'hand_lens']) craft(ctx, id);
     discover(ctx, 'leaf_veins');
+    recordScore(ctx, 'koehler', 0.7);
     const back = createGame(loadGameData(), undefined, parseSave(JSON.stringify(toSave(ctx.state))));
     expect(back.state.inventory).toEqual(ctx.state.inventory);
     expect(back.state.discoveries).toEqual(['leaf_veins']);
+    expect(back.state.best).toEqual({ koehler: 0.7 });
+    expect(back.state.achievements).toEqual(ctx.state.achievements);
     expect(back.state.scope.tier).toBe(1);
+    const old = parseSave(JSON.stringify({ inventory: { hand_lens: 1 }, discoveries: [], snapshots: {}, scopeChoice: null }));
+    expect(old).toMatchObject({ achievements: [], quests: [], best: {}, stats: {}, visited: [], align: {} });
     expect(parseSave('{"inventory":5}')).toBeNull();
     expect(parseSave(null)).toBeNull();
+  });
+});
+
+describe('achievements and requests', () => {
+  it('achievements unlock once, as soon as their condition holds, and one can unlock the next', () => {
+    const ctx = createGame(loadGameData());
+    const got: string[] = [];
+    ctx.bus.on('achievementUnlocked', ({ id }) => got.push(id));
+    discover(ctx, 'leaf_veins');
+    expect(got).toEqual(['first_look']);
+    discover(ctx, 'leaf_cells');
+    expect(got).toEqual(['first_look']);
+    visit(ctx, 'gorge');
+    visit(ctx, 'gorge');
+    expect(got).toEqual(['first_look', 'visit_gorge']);
+  });
+
+  it('a scientist accepts a request only once it is done, and doing it is an achievement', () => {
+    const ctx = createGame(loadGameData());
+    const got: string[] = [];
+    ctx.bus.on('achievementUnlocked', ({ id }) => got.push(id));
+    expect(completeQuest(ctx, 'leeuwenhoek', 'lw_animalcules')).toBe(false);
+    discover(ctx, 'paramecium');
+    expect(completeQuest(ctx, 'leeuwenhoek', 'lw_animalcules')).toBe(true);
+    expect(completeQuest(ctx, 'leeuwenhoek', 'lw_animalcules')).toBe(false); // already shown
+    expect(completeQuest(ctx, 'hooke', 'lw_animalcules')).toBe(false); // someone else's request
+    expect(got).toContain('quest_lw_animalcules');
+    expect(ctx.state.quests).toEqual(['lw_animalcules']);
+  });
+
+  it('mini-game scores keep the best, and a good enough score passes a request', () => {
+    const ctx = createGame(loadGameData());
+    recordScore(ctx, 'koehler', 0.9);
+    recordScore(ctx, 'koehler', 0.4);
+    expect(ctx.state.best.koehler).toBe(0.9);
+    expect(completeQuest(ctx, 'abbe', 'ab_koehler')).toBe(true);
   });
 });
