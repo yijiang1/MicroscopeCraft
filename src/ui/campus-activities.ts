@@ -1,3 +1,4 @@
+import { mountFittingRoom } from './fitting-room';
 import { storePreview } from './store-preview';
 import { equip, purchase, SPECIMEN_IDS, storeCatalog, type StoreItem } from '../shared/economy';
 import { recordScore, type GameContext } from '../shared/state';
@@ -32,7 +33,7 @@ export function mountCampusActivities(ctx: GameContext, toast: Toast, training: 
   const shop = () => {
     clear(); title.textContent = 'ScopeCraft Store · Microscope House';
     content.append(text('p', 'Earn coins and vouchers in campus mini-games. Purchases and outfits are saved automatically. Books are readable in-game souvenirs.'));
-    content.append(button('Wear original blue shirt', () => { equip(ctx, 'shirt_blue'); shop(); }));
+    content.append(button('Fitting room · Change outfit', fitting));
     const grid = document.createElement('div'); grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fit,minmax(225px,1fr));gap:10px';
     const itemCard = (item: StoreItem, expanded = false) => {
       const card = document.createElement('article');
@@ -78,6 +79,11 @@ export function mountCampusActivities(ctx: GameContext, toast: Toast, training: 
     for (const item of storeCatalog(ctx.data)) grid.append(itemCard(item));
     content.append(grid); sync();
   };
+  const fitting = () => {
+    clear(); title.textContent = 'Fitting Room · Your wardrobe';
+    content.append(button('← Store & collection', shop), text('p', 'Choose from your available clothing and purchased accessories. Changes apply immediately; rotate the preview to see your outfit.'));
+    cleanup = mountFittingRoom(content, ctx);
+  };
   const games = (location: 'lab' | 'chess') => {
     clear(); title.textContent = location === 'lab' ? 'Science Building · Field Lab' : 'Wilson Lab · CHESS Challenges';
     content.append(text('p', 'Earn 10 coins at each new 20% score milestone, plus 1 voucher at 80%. Each milestone pays once per game. Replays let you improve your score. Each console opens once you have built the instrument it trains on.'));
@@ -109,11 +115,11 @@ export function mountCampusActivities(ctx: GameContext, toast: Toast, training: 
       trainer('Tomography', 'tomo');
     }
   };
-  const open = (where: 'store' | 'lab' | 'chess') => {
+  const open = (where: 'store' | 'lab' | 'chess' | 'fitting') => {
     activity = where; document.exitPointerLock?.();
     ctx.bus.emit('campusActivityChanged', { open: true });
     if (!modal.open) modal.showModal();
-    sync(); if (where === 'store') shop(); else games(where);
+    sync(); if (where === 'store') shop(); else if (where === 'fitting') fitting(); else games(where);
   };
   const message = (event: MessageEvent) => {
     if (!modal.open || activity !== 'lab' || !iframe || event.source !== iframe.contentWindow || event.origin !== location.origin) return;

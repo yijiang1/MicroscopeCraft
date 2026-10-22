@@ -1,3 +1,4 @@
+import { buildStoreInterior } from './store-interior';
 import { buildMiata } from './miata';
 import * as THREE from 'three';
 import { heightAt } from './terrain';
@@ -81,9 +82,7 @@ export function buildScopeStore() {
     cylinder(.3,.04,x!,10.53-h!,z!,glass);
   }
   const displayCar = buildMiata(); displayCar.root.position.set(3.5, STORE_FLOOR_RISE, 0); group.add(displayCar.root);
-  // A lit display shelf visible through the glazing.
-  for (const y of [.7,1.5,2.3]) box(3.5,.12,.65,-3.6,y,-4.7,cream);
-  for (let i=0;i<8;i++) box(.26,.55,.45,-5+i*.38,1.83,-4.7,i%2?red:dark);
+  group.add(buildStoreInterior());
   const c=document.createElement('canvas');c.width=1024;c.height=192;
   const g=c.getContext('2d')!;g.fillStyle='#aa3444';g.fillRect(0,0,1024,192);g.fillStyle='#fff8e6';g.textAlign='center';g.font='700 68px system-ui';g.fillText('ScopeCraft Store',512,85);g.font='27px system-ui';g.fillText('BOOKS  ·  FIELD GEAR  ·  SCIENCE SOUVENIRS',512,143);
   const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;

@@ -1,3 +1,4 @@
+import { freeLookStep } from './free-look';
 import { mountSeasons } from './seasons';
 import { collectSnow, snowAvailable } from '../shared/seasons';
 import { binocularFov, mountBinoculars } from './binoculars';
@@ -53,7 +54,7 @@ const NPC_SHADOW_MS = 200; // a strolling scientist's shadow catches up five tim
 interface Node {
   /** 'em': the electron microscopes in the lab; 'beam': the CHESS beamline's desk; 'npc': a scientist. */
   kind: Kind | 'em' | 'beam' | 'npc' | 'activity';
-  activity?: 'store' | 'lab' | 'chess';
+  activity?: 'store' | 'lab' | 'chess' | 'fitting';
   aim: Aim;
   npcId?: string;
   root: THREE.Object3D;
@@ -288,6 +289,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   let driveTimer: ReturnType<typeof setTimeout> | undefined;
   let savedThirdPerson = true;
   let thirdPerson = start?.thirdPerson ?? true;
+  let freeLook = false, lockedHeading = 0;
   const facing = new THREE.Euler();
   const rememberPlayer = () => {
     facing.setFromQuaternion(camera.quaternion, 'YXZ');
@@ -304,7 +306,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     player.root.position.copy(camera.position);
     player.root.position.y -= EYE_HEIGHT;
     camera.getWorldDirection(viewDirection);
-    player.root.rotation.y = Math.atan2(-viewDirection.x, -viewDirection.z); // yaw only: camera.rotation is XYZ order, not YXZ
+    player.root.rotation.y = freeLook ? lockedHeading : Math.atan2(-viewDirection.x, -viewDirection.z); // yaw only: camera.rotation is XYZ order, not YXZ
     player.root.visible = thirdPerson && !binoculars.active();
     viewCamera.position.copy(camera.position);
     viewCamera.quaternion.copy(camera.quaternion);
@@ -449,6 +451,12 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     }
     if (paused || (!controls.isLocked && !driving)) return;
     if (driving) { if (k === 'e' && !e.repeat) finishDrive(); return; }
+    if (k === 'z' && !e.repeat && fishingAction === 'idle') {
+      freeLook = !freeLook; lockedHeading = player.root.rotation.y;
+      if (freeLook) thirdPerson = true;
+      hud.flash(freeLook ? 'Free look · Mouse orbits; walking direction fixed · Z to release' : 'Normal view · Mouse steers your character');
+      return;
+    }
     if (k === 'v' && !e.repeat) {
       thirdPerson = !thirdPerson;
       updateView();
@@ -616,7 +624,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const offBinoculars=ctx.bus.on('toggleBinoculars',()=>{if(!binoculars.active()&&!paused&&!driving&&fishingAction==='idle')binoculars.toggle();});
   const offDrive = ctx.bus.on('driveMiata', ({ trial }) => {
     if (driving || (!trial && !ctx.state.economy.owned.includes('miata_na'))) return;
-    binoculars.close(); ridingLift = false; onTerrace = false; paused = false; keys.clear(); vy = 0;
+    freeLook = false; binoculars.close(); ridingLift = false; onTerrace = false; paused = false; keys.clear(); vy = 0;
     driver.equip(ctx.state.economy);
     savedThirdPerson = thirdPerson; thirdPerson = true;
     driving = true; driveSpeed = 0; driveYaw = -Math.PI / 2;
@@ -630,7 +638,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   });
   const fishing = mountFishing(ctx, lookAt, (action,color) => {
     if(action==='ready'&&fishingAction==='idle'){
-      fishingView=thirdPerson;thirdPerson=true;
+      freeLook=false;fishingView=thirdPerson;thirdPerson=true;
       const water=fishingWaterPoint(camera.position.x,camera.position.z,camera.position.y-EYE_HEIGHT);
       if(water) camera.rotation.set(-.15,Math.atan2(camera.position.x-water.x,camera.position.z-water.z),0,'YXZ');
     }
@@ -677,8 +685,13 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       const right = (keys.has('d') ? 1 : 0) - (keys.has('a') ? 1 : 0);
       // divide by the input length so diagonals aren't √2 faster
       const speed = ((keys.has('shift') ? RUN : WALK) * (wading ? 0.55 : 1) * dt) / (Math.hypot(fwd, right) || 1);
-      controls.moveForward(fwd * speed);
-      controls.moveRight(right * speed);
+      if (freeLook) {
+        const step = freeLookStep(lockedHeading, fwd, right, speed);
+        p.x += step.x; p.z += step.z;
+      } else {
+        controls.moveForward(fwd * speed);
+        controls.moveRight(right * speed);
+      }
       // up on the bridge its side screens are walls too; down in the gorge you walk under it
       collide(p, onDeck(p.x, p.z, p.y - EYE_HEIGHT) ? [...campus.walls, ...BRIDGE_RAILS] : campus.walls, onTerrace ? [] : solids);
       if (onTerrace) constrainTerrace(p);

@@ -167,3 +167,9 @@ Microdex (**M**) includes a fish collection for all six species. Catches stay re
 Spring → summer → autumn → winter, **6 real-time minutes per season** (24-minute cycle). The season and countdown appear at the upper left. The cycle starts in spring and is saved, so time away also advances it. Trees and lawns change color; winter adds snow cover and snowfall without adding overlapping ground surfaces.
 
 In winter, find snow on outdoor picnic tables, bench and chair seats, tree crowns, and snowbanks throughout campus. **E** collects snow and a chilled slide; **F** examines it. At the picnic table, use its ordinary **F** sample picker to choose snow crystals. The slide stays available after winter, with six-armed crystals and hexagonal plates to discover in Microdex. These are idealized educational drawings; see [NOAA's explanation of snow-crystal symmetry](https://www.noaa.gov/stories/how-do-snowflakes-form-science-behind-snow).
+
+### Store fitting room and free look
+
+The ScopeCraft Store has clothing rails, field backpacks, bookshelves and science souvenir displays. Enter the fitting booth at the back right and press **E**, or choose **Fitting room** at the store counter. Rotate the character preview and equip your original blue shirt or purchased shirts, backpack and miniature microscope. Unpurchased items cannot be equipped.
+
+Press **Z** to toggle free look while on foot. Mouse movement turns the camera without changing your character’s facing or WASD movement direction. Press Z again to restore mouse steering. Driving and fishing return to their normal camera controls.

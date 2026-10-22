@@ -9,7 +9,7 @@ export interface GameEvents {
   musicScene: { distance: number; indoors: boolean };
   economyChanged: Record<string, never>;
   rewardEarned: { coins: number; vouchers: number };
-  openCampusActivity: { activity: 'store' | 'lab' | 'chess' };
+  openCampusActivity: { activity: 'store' | 'lab' | 'chess' | 'fitting' };
   campusActivityChanged: { open: boolean };
   /** world → scope: player aimed at a sample and pressed the eyepiece key. */
   openEyepiece: { sampleId: string };

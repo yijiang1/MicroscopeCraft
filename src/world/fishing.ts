@@ -59,6 +59,9 @@ export function mountFishing(ctx: GameContext, view: (id: string) => void, anima
   const collection=document.createElement('div');
   let casting=false, biteAt=0, phase=0, hits=0, misses=0, cooldown=0, available=false, nextProbe=0;
   let pendingView:string|null=null;
+  let viewing = false;
+  const offView = ctx.bus.on('openEyepiece', () => { viewing = true; available = false; prompt.hidden = true; });
+  const offViewClose = ctx.bus.on('closeEyepiece', () => { viewing = false; nextProbe = 0; });
   const renderCollection=()=>{
     collection.replaceChildren();
     const h=document.createElement('h3');h.textContent='Fish collection & samples';collection.append(h);
@@ -86,14 +89,14 @@ export function mountFishing(ctx: GameContext, view: (id: string) => void, anima
     }
   });reel.disabled=true;
   modal.append(title,info,trophy,meter,cast,reel,button('Close',()=>modal.close()),collection);document.body.append(prompt,modal);
-  const open=()=>{if(!available||modal.open)return;document.exitPointerLock?.();ctx.bus.emit('campusActivityChanged',{open:true});animate('ready');renderCollection();modal.showModal();};
+  const open=()=>{if(viewing||!available||modal.open)return;document.exitPointerLock?.();ctx.bus.emit('campusActivityChanged',{open:true});animate('ready');renderCollection();modal.showModal();};
   prompt.onclick=open;
   const key=(e:KeyboardEvent)=>{if(e.key.toLowerCase()==='r'&&!e.repeat&&!(e.target instanceof HTMLInputElement)&&!(e.target instanceof HTMLTextAreaElement))open();};
   addEventListener('keydown',key);modal.addEventListener('keydown',e=>e.stopPropagation());
   modal.addEventListener('close',()=>{animate('idle');casting=false;cast.disabled=false;reel.disabled=true;meter.hidden=true;ctx.bus.emit('campusActivityChanged',{open:false});if(pendingView){const id=pendingView;pendingView=null;view(id);}});
   return {update(x:number,z:number,feet:number,enabled:boolean,t:number) {
-    if(t>=nextProbe){nextProbe=t+250;available=enabled&&ctx.state.economy.owned.includes('fishing_rod')&&fishingWaterNear(x,z,feet);}
-    prompt.hidden=!available||!enabled||modal.open;
+    if(t>=nextProbe){nextProbe=t+250;available=!viewing&&enabled&&ctx.state.economy.owned.includes('fishing_rod')&&fishingWaterNear(x,z,feet);}
+    prompt.hidden=viewing||!available||!enabled||modal.open;
     if(modal.open&&casting){const now=performance.now();phase=(Math.sin((now-biteAt)*.0024)+1)/2;marker.style.left=`${phase*98}%`;if(now>=biteAt&&reel.disabled){reel.disabled=false;info.textContent='A bite! Reel while the marker is in the green zone.';}}
-  },dispose(){removeEventListener('keydown',key);prompt.remove();modal.remove();}};
+  },dispose(){offView();offViewClose();removeEventListener('keydown',key);prompt.remove();modal.remove();}};
 }
