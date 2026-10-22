@@ -56,7 +56,7 @@ export function mountInventory(ctx: GameContext): InventoryHandle {
     box.append(head);
     if (collapsed) return;
     if (ctx.state.economy.owned.includes('binoculars')) {
-      const use=el('button','margin:4px 0;padding:7px 10px;border:1px solid #638b95;border-radius:7px;background:#203c47;color:#eef8f4;cursor:pointer','🔭 Binoculars · 4× · [=]');
+      const use=el('button','margin:4px 0;padding:7px 10px;border:1px solid #638b95;border-radius:7px;background:#203c47;color:#eef8f4;cursor:pointer','🔭 Binoculars · 2×–8× · [=]');
       use.onclick=()=>ctx.bus.emit('toggleBinoculars',{});group('FIELD GEAR',[use]);
     }
     if (!have.length && !ctx.state.economy.owned.includes('binoculars')) return void box.append(el('div', 'color:#9ab;margin-top:4px', 'Empty. Gather materials with [E].'));

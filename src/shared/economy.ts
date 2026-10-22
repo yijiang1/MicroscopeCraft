@@ -12,7 +12,7 @@ export type Economy = z.infer<typeof EconomySchema>;
 export interface StoreItem { id: string; name: string; price: number; kind: 'book' | 'shirt' | 'backpack' | 'model' | 'car' | 'tool'; text: string }
 export function storeCatalog(data: GameData): StoreItem[] {
   return [
-    { id: 'binoculars', name: 'Field binoculars · 4×', price: 75, kind: 'tool', text: 'Survey the campus with a four-times magnified view. After purchase, press = to raise or lower them. Kept in your field gear inventory.' },
+    { id: 'binoculars', name: 'Field binoculars · 2×–8×', price: 75, kind: 'tool', text: 'Survey the campus with adjustable 2×–8× magnification. After purchase, press = to raise or lower them and scroll to zoom. Kept in your field gear inventory.' },
     { id: 'fishing_rod', name: 'Field fishing rod', price: 0, kind: 'tool', text: 'Free field equipment. Approach a lake or stream, then select Fish to catch specimens. Convert your catches into microscope samples.' },
     { id: 'miata_na', name: 'Micro Roadster · Classic red', price: 600, kind: 'car', text: 'A red open-top roadster with pop-up headlights. Take a free 30-second campus test drive, or buy it for unlimited drives. WASD to drive; E returns to the store.' },
     { id: 'shirt_red', name: 'ScopeCraft red shirt', price: 40, kind: 'shirt', text: 'A red campus shirt. Equip it and press V to see your explorer.' },

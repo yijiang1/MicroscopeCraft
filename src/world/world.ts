@@ -312,7 +312,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       viewCamera.position.set(camera.position.x + Math.sin(driveYaw) * 6, camera.position.y + 2.5, camera.position.z + Math.cos(driveYaw) * 6);
       viewCamera.lookAt(camera.position.x - Math.sin(driveYaw) * 4, camera.position.y - 0.3, camera.position.z - Math.cos(driveYaw) * 4);
     }
-    const fov=binoculars.active()?binocularFov(camera.fov):camera.fov;
+    const fov=binoculars.active()?binocularFov(camera.fov,binoculars.zoom()):camera.fov;
     if(viewCamera.fov!==fov){viewCamera.fov=fov;viewCamera.updateProjectionMatrix();}
     viewCamera.updateMatrixWorld();
   };
@@ -593,8 +593,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     camera.rotation.set(0,0,0,'YXZ'); rememberPlayer(); redrawShadows();
     controls.unlock(); ctx.bus.emit('openCampusActivity', { activity: 'store' });
   };
-  const offBinoculars=ctx.bus.on('toggleBinoculars',()=>{if(!paused&&!driving&&fishingAction==='idle')binoculars.toggle();});
-  const lowerBinoculars=()=>binoculars.close();controls.addEventListener('unlock',lowerBinoculars);
+  const offBinoculars=ctx.bus.on('toggleBinoculars',()=>{if(!binoculars.active()&&!paused&&!driving&&fishingAction==='idle')binoculars.toggle();});
   const offDrive = ctx.bus.on('driveMiata', ({ trial }) => {
     if (driving || (!trial && !ctx.state.economy.owned.includes('miata_na'))) return;
     binoculars.close(); ridingLift = false; onTerrace = false; paused = false; keys.clear(); vy = 0;
@@ -829,7 +828,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       removeEventListener('keyup', onUp);
       removeEventListener('pagehide', rememberPlayer);
       document.removeEventListener('visibilitychange', rememberPlayer);
-      offBinoculars();controls.removeEventListener('unlock',lowerBinoculars);binoculars.dispose();
+      offBinoculars();binoculars.dispose();
       fishing.dispose(); fishingRod.dispose(); minimap.dispose();
       speech.dispose(); offActivity(); offDress(); offDrive(); clearTimeout(driveTimer);
       driver.dispose(); player.dispose();
