@@ -21,7 +21,7 @@ const Color = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'color is #rrggbb');
 export const ModeSchema = z.enum(['brightfield', 'phase', 'darkfield', 'fluorescence', 'tem', 'ediff', 'haadf', 'ptycho', 'xct', 'xrf', 'xrd']);
 export type Mode = z.infer<typeof ModeSchema>;
 /** Stains the player puts on a sample in the eyepiece (light microscopes). */
-export const StainSchema = z.enum(['iodine', 'methylene_blue', 'gram']);
+export const StainSchema = z.enum(['iodine', 'methylene_blue', 'gram', 'hematoxylin']);
 export type Stain = z.infer<typeof StainSchema>;
 /** Anything that can change how strongly a feature stands out: an imaging mode or a stain. */
 export const ContrastKeySchema = z.enum([...ModeSchema.options, ...StainSchema.options]);

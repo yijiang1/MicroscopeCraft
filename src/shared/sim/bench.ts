@@ -116,3 +116,27 @@ export function gram(steps: GramStep[]): Gram {
   const negative = clamp01((0.3 - violetNeg) / 0.25) * clamp01((pink - 0.3) / 0.4);
   return { positive, negative, score: Math.min(positive, negative), notes };
 }
+
+// ---------------------------------------------------------------- Progressive stain (soak and rinse)
+
+/** Dye uptake time constants for a progressive stain (hematoxylin, methylene blue), in game seconds: nuclei take up
+ *  dye 4× faster than the cytoplasm around them, so you stop when the nuclei stand out and before the rest catches up.
+ *  Simplification: first-order uptake, 1 − e^(−t/τ); real selectivity also comes from binding strength and from
+ *  rinsing and differentiating (washing loosely held dye back out). Real soaks take minutes; these are tuned for play. */
+export const SOAK_TAU_TARGET_S = 1.5;
+export const SOAK_TAU_BACKGROUND_S = 6;
+
+/** Fraction of its dye capacity a tissue has taken up after soaking t seconds. */
+export const uptake = (tSec: number, tauSec: number) => (tSec <= 0 ? 0 : 1 - Math.exp(-tSec / tauSec));
+
+/** Contrast the dye adds after t seconds: target uptake − background uptake = e^(−t/τb) − e^(−t/τt). */
+export const soakContrast = (tSec: number, tauTarget = SOAK_TAU_TARGET_S, tauBackground = SOAK_TAU_BACKGROUND_S) =>
+  uptake(tSec, tauTarget) - uptake(tSec, tauBackground);
+
+/** Soak time with the most contrast (where the derivative is zero): t* = ln(τb/τt) · τt·τb / (τb − τt). */
+export const bestSoakTime = (tauTarget = SOAK_TAU_TARGET_S, tauBackground = SOAK_TAU_BACKGROUND_S) =>
+  (Math.log(tauBackground / tauTarget) * tauTarget * tauBackground) / (tauBackground - tauTarget);
+
+/** How good the stain is, 0..1: the contrast at rinse time ÷ the best this dye can give. */
+export const soakQuality = (tSec: number, tauTarget = SOAK_TAU_TARGET_S, tauBackground = SOAK_TAU_BACKGROUND_S) =>
+  clamp01(soakContrast(tSec, tauTarget, tauBackground) / soakContrast(bestSoakTime(tauTarget, tauBackground), tauTarget, tauBackground));

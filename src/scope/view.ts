@@ -9,7 +9,7 @@ import { dose, featureContrast, isDiffraction, scopeResolutionUm, survivingSigna
 import { explainWall, fmtUm, nearestWall, resolutionLabel } from '../shared/sim/walls';
 import { bump, discover, ownedScopes, selectScope, setZoom, type GameContext } from '../shared/state';
 import type { Feature, Mode, ScopeParams, Stain } from '../shared/schema';
-import { koehlerTuning, openGram } from './bench';
+import { koehlerTuning, openGram, openSoak } from './bench';
 import { beamTuning } from './beam';
 import { correctorTuning } from './corrector';
 import { button, type Tuning } from './kit';
@@ -56,9 +56,16 @@ const STAINS: { id: Stain; item: string; name: string }[] = [
   { id: 'iodine', item: 'iodine_stain', name: 'Iodine' },
   { id: 'methylene_blue', item: 'methylene_blue', name: 'Methylene blue' },
   { id: 'gram', item: 'gram_kit', name: 'Gram stain' },
+  { id: 'hematoxylin', item: 'hematoxylin', name: 'Hematoxylin' },
 ];
-/** Stain colours, lightened to read on the eyepiece's dark field: iodine turns starch blue-black, methylene blue stains DNA blue. */
-const STAIN_COLORS: Record<Exclude<Stain, 'gram'>, string> = { iodine: '#7a6ad0', methylene_blue: '#5a8ae0' };
+/** Stain colours, lightened to read on the eyepiece's dark field: iodine turns starch blue-black, methylene blue stains
+ *  DNA blue, hematoxylin (with its alum mordant) turns nuclei blue-purple. */
+const STAIN_COLORS: Record<Exclude<Stain, 'gram'>, string> = { iodine: '#7a6ad0', methylene_blue: '#5a8ae0', hematoxylin: '#8a6ad8' };
+/** Progressive stains go on with the soak-and-rinse mini-game; how well it went scales the stain's contrast.
+ *  Iodine binds starch almost at once, so it goes straight on. */
+const SOAKED: readonly Stain[] = ['methylene_blue', 'hematoxylin'];
+/** Slide colour of each soaked dye in the mini-game (the real dye, not lightened). */
+const DYE_COLORS: Partial<Record<Stain, string>> = { methylene_blue: '#2f5fb0', hematoxylin: '#4b3a8c' };
 /** The visibility reasons in plain words, for the feature list. */
 const REASONS: Record<string, string> = {
   unresolved: 'too fine to resolve', 'empty-magnification': 'empty magnification', 'too-small-to-see': 'too small to see',
@@ -135,7 +142,9 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
   let doseTimer = 0;
   let stain: Stain | null = null;
   let gramResult: Gram | null = null;
-  let closeGram: (() => void) | null = null;
+  /** How well the progressive stain on the slide went, 0..1 (SOAKED stains only). */
+  let soak = 1;
+  let closeStain: (() => void) | null = null;
   let tuning: Tuning | null = null;
   let tuningKey = '';
   /** A panel draws while it is being built; the eyepiece must not render (and discover things) before it is in place. */
@@ -148,8 +157,8 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
     const { scope } = ctx.state;
     const key = open() && sampleId ? `${scope.tier}:${scope.mode}:${sampleId}` : '';
     if (key === tuningKey) return;
-    closeGram?.();
-    closeGram = null;
+    closeStain?.();
+    closeStain = null;
     tuning?.dispose();
     tuning = null;
     tuningKey = key;
@@ -191,7 +200,10 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
       return { f: { ...seen, contrastIn: { ...seen.contrastIn, gram: right ? seen.contrastIn.gram! * ok : 0 } }, draw: { ...seen, tint: color } };
     }
     if (stain === 'gram' && !gramResult) return { f: { ...seen, contrastIn: { ...seen.contrastIn, gram: 0 } }, draw: seen };
-    if (stain && stain !== 'gram' && f.contrastIn[stain] !== undefined) return { f: seen, draw: { ...seen, tint: STAIN_COLORS[stain] } };
+    if (stain && stain !== 'gram' && seen.contrastIn[stain] !== undefined) {
+      const f2 = SOAKED.includes(stain) ? { ...seen, contrastIn: { ...seen.contrastIn, [stain]: seen.contrastIn[stain]! * soak } } : seen;
+      return { f: f2, draw: { ...f2, tint: STAIN_COLORS[stain] } };
+    }
     return { f: seen, draw: seen };
   };
 
@@ -234,12 +246,27 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
       stainBox.append(
         button(s.name, () => {
           if (s.id === 'gram') {
-            closeGram?.();
-            closeGram = openGram(el, ctx, (result) => {
-              closeGram = null;
+            closeStain?.();
+            closeStain = openGram(el, ctx, (result) => {
+              closeStain = null;
               if (result) {
                 stain = 'gram';
                 gramResult = result;
+                bump(ctx, 'stained');
+              }
+              syncControls();
+              render();
+            });
+            return;
+          }
+          if (SOAKED.includes(s.id)) {
+            closeStain?.();
+            closeStain = openSoak(el, ctx, { name: s.name, color: DYE_COLORS[s.id]! }, (q) => {
+              closeStain = null;
+              if (q !== null) {
+                stain = s.id;
+                gramResult = null;
+                soak = q;
                 bump(ctx, 'stained');
               }
               syncControls();
@@ -420,8 +447,8 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
   };
 
   const openSample = (id: string) => {
-    closeGram?.();
-    closeGram = null;
+    closeStain?.();
+    closeStain = null;
     sampleId = id;
     openedAt = performance.now();
     doseENm2 = 0;
@@ -486,8 +513,8 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
     dispose() {
       clearInterval(doseTimer);
       cancelAnimationFrame(raf);
-      closeGram?.();
-      closeGram = null;
+      closeStain?.();
+      closeStain = null;
       tuning?.dispose();
       removeEventListener('keydown', onKey);
       offs.forEach((off) => off());

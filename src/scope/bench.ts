@@ -1,7 +1,12 @@
 // The light-microscope mini-games. Köhler illumination: focus, centre and size the field diaphragm's image, then set
 // the aperture diaphragm; the result sets the illumination NA the eyepiece uses from then on. The Gram stain: four
 // reagents in order, timed with a stopwatch that runs ten times fast; the alcohol rinse takes only a few seconds.
-import { gram, koehler, KOEHLER_START, REAGENTS, UNALIGNED_ILLUMINATION, type Gram, type GramStep, type KoehlerKnobs } from '../shared/sim/bench';
+// Progressive stains (hematoxylin, methylene blue): add a drop, watch the nuclei darken before the rest of the cell,
+// and rinse at the peak; the contrast meter only shows after the rinse, so you judge the slide by eye.
+import {
+  bestSoakTime, gram, koehler, KOEHLER_START, REAGENTS, SOAK_TAU_BACKGROUND_S, SOAK_TAU_TARGET_S, soakContrast, soakQuality,
+  UNALIGNED_ILLUMINATION, uptake, type Gram, type GramStep, type KoehlerKnobs,
+} from '../shared/sim/bench';
 import { recordScore, setAlign, type GameContext } from '../shared/state';
 import { button, canvas, el, panel, pct, slider, steps, type Tuning } from './kit';
 
@@ -201,6 +206,150 @@ export function openGram(host: HTMLElement, ctx: GameContext, done: (result: Gra
   return () => {
     current = null;
     cancelAnimationFrame(raf);
+    box.remove();
+  };
+}
+
+/** Each soak varies both uptake speeds by up to ±25%, so the peak can't be timed by memory: watch the slide. */
+const SOAK_JITTER = 0.25;
+/** Left this long, the slide is rinsed anyway (it is dark all over by then). */
+const SOAK_MAX_S = 20;
+/** Contrast at the right end of the meter; a perfect soak reaches about 0.45 to 0.6. */
+const SOAK_METER_MAX = 0.7;
+
+function mix(a: string, b: string, t: number) {
+  const ch = (hex: string, i: number) => parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16);
+  return `rgb(${[0, 1, 2].map((i) => Math.round(ch(a, i) + (ch(b, i) - ch(a, i)) * t)).join(',')})`;
+}
+
+/** A progressive stain as a modal: returns the stain quality (0..1 of the best possible contrast) to `done`,
+ *  null if cancelled. Space adds the drop, rinses, and accepts. */
+export function openSoak(host: HTMLElement, ctx: GameContext, dye: { name: string; color: string }, done: (quality: number | null) => void) {
+  const box = modal(host, `${dye.name} stain`);
+  const slide = canvas(240);
+  slide.style.cssText += ';display:block;margin:6px auto;border-radius:50%';
+  const meter = el('div', 'height:10px;border-radius:5px;background:#2a332d;overflow:hidden;margin:4px 0');
+  const fill = el('div', `height:100%;width:0;background:${dye.color}`);
+  meter.append(fill);
+  const meterRow = el('div', 'visibility:hidden');
+  const meterText = el('div', 'font-size:12px;color:#aab');
+  meterRow.append(meterText, meter);
+  const status = el('div', 'min-height:36px;margin:6px 0;line-height:1.4');
+  const primary = button('', () => onPrimary(), 'width:100%;font-weight:600');
+  let phase: 'ready' | 'soaking' | 'done' = 'ready';
+  let tauT = SOAK_TAU_TARGET_S;
+  let tauB = SOAK_TAU_BACKGROUND_S;
+  let start = 0;
+  let quality = 0;
+  let raf = 0;
+
+  /** The slide at soak time t: a sheet of cells, one nucleus each; the dye darkens the nuclei fast and the rest slowly. */
+  const draw = (t: number) => {
+    const g = slide.getContext('2d')!;
+    const W = slide.width;
+    g.fillStyle = mix('#e9efe9', dye.color, uptake(t, tauB) * 0.9);
+    g.fillRect(0, 0, W, W);
+    g.strokeStyle = '#0000001f';
+    g.lineWidth = 1.5;
+    g.fillStyle = mix('#e9efe9', dye.color, uptake(t, tauT) * 0.9);
+    const n = 5;
+    const cell = W / n;
+    for (let i = 0; i < n; i++) {
+      for (let k = 0; k < n; k++) {
+        g.strokeRect(i * cell + 2, k * cell + 2, cell - 4, cell - 4);
+        g.beginPath();
+        g.arc(i * cell + cell * (0.4 + ((i * 7 + k * 3) % 5) * 0.05), k * cell + cell * (0.45 + ((i * 3 + k) % 3) * 0.05), cell * 0.17, 0, Math.PI * 2);
+        g.fill();
+      }
+    }
+    if (phase === 'soaking' && t < 0.6) {
+      // the drop, while it is still sitting on the slide
+      g.globalAlpha = 1 - t / 0.6;
+      g.fillStyle = dye.color;
+      g.beginPath();
+      g.arc(W / 2, W / 2, (W / 2) * (0.2 + t), 0, Math.PI * 2);
+      g.fill();
+      g.globalAlpha = 1;
+    }
+  };
+
+  const ready = () => {
+    cancelAnimationFrame(raf);
+    phase = 'ready';
+    meterRow.style.visibility = 'hidden';
+    draw(0);
+    status.textContent = 'The nuclei are almost as clear as the rest of the cell.';
+    primary.textContent = 'Add a drop (Space)';
+  };
+
+  const tick = () => {
+    const t = (performance.now() - start) / 1000;
+    draw(t);
+    status.textContent = `Soaking… ${t.toFixed(1)} s`;
+    if (t >= SOAK_MAX_S) rinse();
+    else raf = requestAnimationFrame(tick);
+  };
+
+  const rinse = () => {
+    cancelAnimationFrame(raf);
+    const t = (performance.now() - start) / 1000;
+    const tBest = bestSoakTime(tauT, tauB);
+    const c = soakContrast(t, tauT, tauB);
+    quality = soakQuality(t, tauT, tauB);
+    phase = 'done';
+    draw(t);
+    recordScore(ctx, 'soak', quality);
+    meterRow.style.visibility = '';
+    meterText.textContent = `Contrast (nuclei − cytoplasm): ${c.toFixed(2)} of a possible ${soakContrast(tBest, tauT, tauB).toFixed(2)}`;
+    fill.style.width = `${Math.min(100, (c / SOAK_METER_MAX) * 100)}%`;
+    const grade = quality >= 0.9 ? 'Textbook stain!' : quality >= 0.7 ? 'Good stain.'
+      : t < tBest ? 'Too pale: you rinsed before the dye had soaked in.'
+      : 'Overstained: the cytoplasm took up dye too, so the nuclei blend in again.';
+    status.textContent = `${grade} ${pct(quality)} of the best contrast. The peak was at ${tBest.toFixed(1)} s; you rinsed at ${t.toFixed(1)} s.`;
+    primary.textContent = 'Look at the slide (Space)';
+  };
+
+  const finish = (q: number | null) => {
+    cancelAnimationFrame(raf);
+    removeEventListener('keydown', onKey, true);
+    box.remove();
+    done(q);
+  };
+
+  function onPrimary() {
+    if (phase === 'ready') {
+      const jitter = () => 1 + (Math.random() * 2 - 1) * SOAK_JITTER;
+      tauT = SOAK_TAU_TARGET_S * jitter();
+      tauB = SOAK_TAU_BACKGROUND_S * jitter();
+      phase = 'soaking';
+      start = performance.now();
+      primary.textContent = 'Rinse now (Space)';
+      raf = requestAnimationFrame(tick);
+    } else if (phase === 'soaking') rinse();
+    else finish(quality);
+  }
+
+  const onKey = (e: KeyboardEvent) => {
+    if (e.code !== 'Space' || (e.target as HTMLElement).tagName === 'INPUT') return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    if (!e.repeat) onPrimary();
+  };
+  addEventListener('keydown', onKey, true);
+
+  box.append(
+    el('div', 'color:#aab;margin-bottom:6px', `A progressive stain: ${dye.name.toLowerCase()} colours the nuclei faster than the cytoplasm around them. Watch the slide and rinse when the nuclei stand out most. Too early and they stay pale; too late and the whole cell darkens. Real soaks take minutes; here, seconds.`),
+    slide,
+    meterRow,
+    status,
+    primary,
+    button('Try again', ready, 'margin-top:8px'),
+    button('Cancel', () => finish(null), 'margin:8px 0 0 6px'),
+  );
+  ready();
+  return () => {
+    cancelAnimationFrame(raf);
+    removeEventListener('keydown', onKey, true);
     box.remove();
   };
 }

@@ -14,5 +14,6 @@
   {"id": "galena", "name": "Galena", "color": "#8c939c", "properties": {"density": 7.6}, "where": "Heavy silver-grey cubes on the gorge rim, east of the iron rocks near the waterfall"},
   {"id": "iodine_stain", "name": "Iodine stain", "color": "#8a4a1a", "properties": {}, "where": "The reagent shelf by the west door of the science lab"},
   {"id": "methylene_blue", "name": "Methylene blue", "color": "#2f5fb0", "properties": {}, "where": "The reagent shelf by the west door of the science lab"},
-  {"id": "gram_kit", "name": "Gram stain kit", "color": "#7a3aa0", "properties": {}, "where": "The reagent shelf by the west door of the science lab"}
+  {"id": "gram_kit", "name": "Gram stain kit", "color": "#7a3aa0", "properties": {}, "where": "The reagent shelf by the west door of the science lab"},
+  {"id": "hematoxylin", "name": "Hematoxylin", "color": "#4b3a8c", "properties": {}, "where": "Felled logwood on the east edge of the quad lawn: its dark red heartwood gives hematoxylin, the classic stain for cell nuclei"}
 ]

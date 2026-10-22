@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { beamTune, CCU, harmonicKeV, monoKeV, monoThetaDeg, undulatorK } from './beamline';
-import { gram, koehler, KOEHLER_START, KOEHLER_TRUTH } from './bench';
+import { bestSoakTime, gram, koehler, KOEHLER_START, KOEHLER_TRUTH, soakContrast, soakQuality } from './bench';
 import { correctorScore, CORRECTOR_TRUTH, flatRadius, probeNm, residual, ronchigram, STEM_LAMBDA_NM, ZERO, type Aberrations } from './corrector';
 import { epieIteration, field, makeProbe, overlap, ptychoScore, scanPositions, simulate, startReconstruction, truePhase } from './ptycho';
 import { scherzerNm, sampleHeightUm, TEM_START, TEM_TRUTH, temState, thonRings } from './tem';
@@ -164,4 +164,17 @@ describe('Köhler illumination and the Gram stain', () => {
     const soaked = gram([{ reagent: 'crystal_violet', seconds: 60 }, { reagent: 'iodine', seconds: 60 }, { reagent: 'alcohol', seconds: 60 }, { reagent: 'safranin', seconds: 60 }]);
     expect(soaked.positive).toBeLessThan(0.5);
   });
+});
+
+describe('progressive stain', () => {
+  it('contrast rises, peaks at t*, then fades as the background catches up', () => {
+    const t = bestSoakTime();
+    expect(soakContrast(0)).toBe(0);
+    expect(soakContrast(t)).toBeGreaterThan(soakContrast(t * 0.5));
+    expect(soakContrast(t)).toBeGreaterThan(soakContrast(t * 2));
+    near(soakQuality(t), 1, 1e-6);
+    expect(soakQuality(30)).toBeLessThan(0.1); // left far too long: everything is dark
+  });
+
+  it('a slower background moves the peak later', () => expect(bestSoakTime(1.5, 9)).toBeGreaterThan(bestSoakTime(1.5, 6)));
 });

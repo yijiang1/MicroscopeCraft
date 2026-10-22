@@ -117,6 +117,7 @@ Seven mini-games, each scored 0-100%, change what the eyepiece shows:
 | Mini-game | Where | What you do | Physics |
 | --- | --- | --- | --- |
 | Köhler illumination | High-quality and fluorescence microscopes, transmitted light | Focus, centre and size the field diaphragm, set the aperture diaphragm | Resolution is λ / (NA objective + NA illumination); an unaligned condenser loses the finest detail (Amphipleura's 0.25 µm striae) |
+| Progressive stain | Light microscopes, with hematoxylin (felled logwood on the quad lawn) or methylene blue | Add a drop, watch the nuclei darken before the cytoplasm, rinse at the peak; the contrast meter only shows after the rinse | First-order uptake, nuclei 4× faster than cytoplasm: contrast e^(−t/τb) − e^(−t/τt) peaks at t* = ln(τb/τt)·τtτb/(τb − τt); how close you rinse scales the stain's contrast |
 | Gram stain | Light microscopes, with the kit | Crystal violet, iodine, a few seconds of alcohol, safranin, on a 10× stopwatch | Dye kinetics: thin walls lose the violet in seconds, thick iodine-locked walls keep it |
 | TEM alignment | TEM | Beam shift, eucentric height with the α wobbler, stigmators against the live FFT, Scherzer focus | Contrast transfer function χ(k), Thon rings; leftover defocus and astigmatism blur the atoms |
 | Aberration corrector | STEM, annular dark field | Tune C1, A1, B2, A2, C3 until the Ronchigram's centre is flat, then choose the aperture | Krivanek's χ(θ, φ) to fifth order; probe = diffraction limit ⊕ ray blur |

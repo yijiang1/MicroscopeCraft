@@ -34,6 +34,8 @@
   { "id": "koehler_master", "name": "Köhler's pupil", "description": "Align a condenser almost perfectly (95% or better).", "when": { "best": { "koehler": 0.95 } } },
   { "id": "gram_done", "name": "Purple and pink", "description": "Do a Gram stain.", "when": { "best": { "gram": 0.5 } } },
   { "id": "gram_master", "name": "Textbook stain", "description": "Do a Gram stain almost perfectly (95% or better).", "when": { "best": { "gram": 0.95 } } },
+  { "id": "soak_done", "name": "Rinse at the peak", "description": "Stain nuclei with hematoxylin or methylene blue.", "when": { "best": { "soak": 0.5 } } },
+  { "id": "soak_master", "name": "Progressive perfection", "description": "Rinse a progressive stain almost exactly at the peak (95% or better).", "when": { "best": { "soak": 0.95 } } },
   { "id": "tem_align_done", "name": "Column aligned", "description": "Align the transmission electron microscope.", "when": { "best": { "tem_align": 0.5 } } },
   { "id": "tem_align_master", "name": "Scherzer focus", "description": "Align the TEM almost perfectly (95% or better).", "when": { "best": { "tem_align": 0.95 } } },
   { "id": "ronchigram_done", "name": "Flat in the middle", "description": "Tune the aberration corrector.", "when": { "best": { "ronchigram": 0.5 } } },

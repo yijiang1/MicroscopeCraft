@@ -3,7 +3,7 @@ import { CRYSTAL_SPOT, SCIENCE } from './campus';
 import { gorgeZ, LAKE, mulberry32 } from './terrain';
 
 export type Kind =
-  | 'sand' | 'quartz' | 'iron' | 'copper' | 'tungsten' | 'sunflower' | 'resin' // gatherable
+  | 'sand' | 'quartz' | 'iron' | 'copper' | 'tungsten' | 'sunflower' | 'resin' | 'logwood' // gatherable
   | 'fluorite' | 'willemite' | 'monazite' | 'beryl' | 'galena' | 'iodine' | 'methylene' | 'gramkit'
   | 'leaf' | 'flower' | 'wing' | 'pond' | 'crystal' // samples to look at
   | 'bee' | 'picnic' | 'algae_mat' | 'mud' | 'feather' | 'pine_branch' | 'log' | 'mushroom' | 'moss' | 'lichen' | 'web'
@@ -33,6 +33,7 @@ export const AIMS: Record<Kind, Aim> = {
   beryl: { gather: 'beryl', sample: 'beryl_crystal' },
   galena: { gather: 'galena', sample: 'galena_rock' },
   resin: { gather: 'resin' },
+  logwood: { gather: 'hematoxylin' },
   iodine: { gather: 'iodine_stain' },
   methylene: { gather: 'methylene_blue' },
   gramkit: { gather: 'gram_kit' },
@@ -71,7 +72,7 @@ export const samplesOf = (aim: Aim) => aim.samples ?? (aim.sample ? [aim.sample]
 
 /** Collision / highlight radius in metres. */
 export const RADIUS: Record<Kind, number> = {
-  sand: 0.8, quartz: 0.7, iron: 0.6, copper: 0.6, tungsten: 0.55, sunflower: 0.3, resin: 0.4,
+  sand: 0.8, quartz: 0.7, iron: 0.6, copper: 0.6, tungsten: 0.55, sunflower: 0.3, resin: 0.4, logwood: 0.5,
   fluorite: 0.6, willemite: 0.6, monazite: 0.6, beryl: 0.5, galena: 0.4, iodine: 0, methylene: 0, gramkit: 0,
   leaf: 0.55, flower: 0.35, wing: 0.4, pond: 0, crystal: 1.1,
   bee: 0.3, picnic: 0.9, algae_mat: 0, mud: 0.6, feather: 0, pine_branch: 0.5, log: 0.7, mushroom: 0.3, moss: 0.45,
@@ -122,6 +123,8 @@ export const PLACEMENTS: Placement[] = [
   { kind: 'wing', x: 2, z: -11 },
   ...cluster('sunflower', -3, -14, 3, 2.2, 3),
   { kind: 'picnic', x: 13, z: -13, yaw: 0.4 },
+  // Felled logwood on the east edge of the lawn: its dark red heartwood gives hematoxylin
+  { kind: 'logwood', x: 9.5, z: -8.5, yaw: 0.7 },
   // The lake, sand on its south shore right ahead of the spawn; scum and mud at the water's edge, a feather nearby
   { kind: 'pond', x: LAKE.x, z: LAKE.z },
   ...cluster('sand', 46, -47, 9, 3.2, 4, 1.3),

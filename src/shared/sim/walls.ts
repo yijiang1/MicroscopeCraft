@@ -32,6 +32,7 @@ const HOW: Record<ContrastKey, string> = {
   iodine: 'an iodine stain (from the reagent shelf in the lab)',
   methylene_blue: 'a methylene blue stain (from the reagent shelf in the lab)',
   gram: 'a Gram stain (from the reagent shelf in the lab)',
+  hematoxylin: 'a hematoxylin stain (from the felled logwood on the quad lawn)',
 };
 
 /** Lengths for humans: 0.24 nm, 210 nm, 30 µm, 1.4 mm. */

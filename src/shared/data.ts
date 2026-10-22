@@ -22,7 +22,7 @@ import { validateWorldSpec } from './worldspec';
 const byId = <T extends { id: string }>(list: T[]) => Object.fromEntries(list.map((x) => [x.id, x]));
 
 /** The mini-games that report scores (recordScore). */
-export const GAMES = ['koehler', 'gram', 'tem_align', 'ronchigram', 'ptycho', 'beam_tune', 'tomo_center'] as const;
+export const GAMES = ['koehler', 'gram', 'soak', 'tem_align', 'ronchigram', 'ptycho', 'beam_tune', 'tomo_center'] as const;
 /** Areas of the campus the world reports visits to. */
 export const AREAS = ['lake', 'quad', 'gorge', 'slope', 'forest', 'garden', 'lab', 'chess', 'tower'] as const;
 

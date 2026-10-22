@@ -241,9 +241,9 @@
     "features": [
       { "id": "onion_cells", "name": "Onion skin cells", "sizeUm": 50, "contrast": 0.25, "drawing": "boxes", "tint": "#e8e0d0",
         "blurb": "The thin skin inside an onion layer is one cell thick, a sheet of long brick-shaped cells. It is the classic first slide in a school biology lab." },
-      { "id": "onion_nuclei", "name": "Cell nuclei", "sizeUm": 15, "contrast": 0.06, "contrastIn": { "methylene_blue": 0.6, "iodine": 0.4, "phase": 0.4 }, "drawing": "droplets", "tint": "#d8d0c0", "onTop": true,
+      { "id": "onion_nuclei", "name": "Cell nuclei", "sizeUm": 15, "contrast": 0.06, "contrastIn": { "methylene_blue": 0.6, "hematoxylin": 0.6, "iodine": 0.4, "phase": 0.4 }, "drawing": "droplets", "tint": "#d8d0c0", "onTop": true,
         "blurb": "Each onion cell has one nucleus, which holds its DNA. Unstained it is almost invisible; a drop of stain turns it dark." },
-      { "id": "onion_chromosomes", "name": "Chromosomes", "sizeUm": 1.5, "contrast": 0.05, "contrastIn": { "methylene_blue": 0.5 }, "drawing": "needles", "tint": "#8a8ae0", "onTop": true,
+      { "id": "onion_chromosomes", "name": "Chromosomes", "sizeUm": 1.5, "contrast": 0.05, "contrastIn": { "methylene_blue": 0.5, "hematoxylin": 0.5 }, "drawing": "needles", "tint": "#8a8ae0", "onTop": true,
         "blurb": "In the tip of an onion root, cells divide all the time, and the DNA in dividing cells packs into rod-shaped chromosomes. An onion cell has 16 of them." }
     ]
   },
@@ -412,7 +412,7 @@
     "features": [
       { "id": "cheek_cells", "name": "Cheek cells", "sizeUm": 60, "contrast": 0.06, "contrastIn": { "phase": 0.5, "methylene_blue": 0.6 }, "drawing": "mosaic", "tint": "#9ab0e0",
         "blurb": "The inside of your cheek is lined with flat cells that rub off all the time, and a gentle swab picks up thousands. Unstained they are almost invisible, so biology classes add a drop of methylene blue." },
-      { "id": "cheek_nucleus", "name": "Cheek cell nucleus", "sizeUm": 8, "contrast": 0.05, "contrastIn": { "phase": 0.4, "methylene_blue": 0.7 }, "drawing": "droplets", "tint": "#c8c8d0", "onTop": true,
+      { "id": "cheek_nucleus", "name": "Cheek cell nucleus", "sizeUm": 8, "contrast": 0.05, "contrastIn": { "phase": 0.4, "methylene_blue": 0.7, "hematoxylin": 0.7 }, "drawing": "droplets", "tint": "#c8c8d0", "onTop": true,
         "blurb": "Each cheek cell has a single nucleus near its middle, about a tenth of the cell's width. The dye binds to its DNA and turns it deep blue." },
       { "id": "mouth_bacteria", "name": "Mouth bacteria", "sizeUm": 1, "contrast": 0.05, "contrastIn": { "methylene_blue": 0.5, "phase": 0.4 }, "drawing": "rods", "tint": "#d0d0e0", "onTop": true,
         "blurb": "Small rods and balls cling to the cells: bacteria from your mouth. In 1683 Antonie van Leeuwenhoek scraped his own teeth and saw these little animals swimming." }

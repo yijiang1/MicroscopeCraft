@@ -483,6 +483,20 @@ function fallenLog(): THREE.Group {
   return g;
 }
 
+/** Felled logwood: a short log whose cut ends show the dark red heartwood that hematoxylin is extracted from. */
+function logwoodLog(): THREE.Group {
+  const g = new THREE.Group();
+  const bark = memo('mat:logbark', () => {
+    const t = barkTexture();
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.repeat.set(4, 2);
+    return new THREE.MeshStandardMaterial({ map: t, roughness: 1 });
+  });
+  g.add(mesh(cyl(0.2, 0.22, 1.1, 14), bark, 0, 0.21, 0, 0, 0, Math.PI / 2));
+  for (const side of [1, -1]) g.add(mesh(memo('logwoodend', () => new THREE.CircleGeometry(0.21, 14)), std('#7a1f2b', 0.8), side * 0.55, 0.21, 0, 0, side * Math.PI / 2, 0));
+  return g;
+}
+
 /** Three mushrooms: pale stems under brown caps. */
 function mushrooms(rng: () => number): THREE.Group {
   const g = new THREE.Group();
@@ -732,6 +746,7 @@ export function buildModel(kind: Kind, seed: number, revealed = true): THREE.Gro
     case 'feather': g = feather(); break;
     case 'pine_branch': g = pineBranch(rng); break;
     case 'log': g = fallenLog(); break;
+    case 'logwood': g = logwoodLog(); break;
     case 'mushroom': g = mushrooms(rng); break;
     case 'moss': g = mossyStone(rng); break;
     case 'web': g = spiderWeb(); break;

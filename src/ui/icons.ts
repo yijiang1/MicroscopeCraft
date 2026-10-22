@@ -45,7 +45,7 @@ const SHAPE_OF: Record<string, string> = {
   condenser: 'condenser', filament: 'coil', vacuum_seal: 'ring', vacuum_chamber: 'chamber', magnetic_lens: 'maglens',
   electron_microscope: 'column',
   fluorite: 'crystal', willemite: 'ore', monazite: 'pile', beryl: 'crystal', galena: 'cube',
-  iodine_stain: 'bottle', methylene_blue: 'bottle', gram_kit: 'bottle',
+  iodine_stain: 'bottle', methylene_blue: 'bottle', gram_kit: 'bottle', hematoxylin: 'bottle',
   fluorite_objective: 'lens', arc_lamp: 'bulb', filter_cube: 'cube', fluorescence_microscope: 'scope', phase_kit: 'ring', darkfield_condenser: 'condenser',
   wehnelt: 'ring', hv_tank: 'chamber', electron_gun: 'gun', aperture_strip: 'strip', condenser_lenses: 'maglens', goniometer: 'knob',
   objective_assembly: 'maglens', projector_lenses: 'maglens', vacuum_pump: 'chamber', vacuum_system: 'chamber', viewing_screen: 'pane',
