@@ -37,7 +37,6 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
     .mc-menu-row .ic{font-size:18px;width:22px;text-align:center}
     .mc-menu-row .lb{flex:1;display:flex;flex-direction:column;line-height:1.2}
     .mc-menu-row .sub{font-size:11px;opacity:.6}
-    .mc-menu-row kbd{font:11px ui-monospace,monospace;padding:1px 6px;border:1px solid #ffffff40;border-radius:4px;opacity:.7}
     .mc-menu-row.danger{color:#ff9a8a}
     .mc-menu-sep{height:1px;background:#ffffff1f;margin:8px 2px}
     .mc-menu-h{font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.55;margin:4px 2px 2px}
@@ -160,7 +159,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   const saveWhenHidden = () => { if (document.hidden) save(); };
   document.addEventListener('visibilitychange', saveWhenHidden);
   const title = document.createElement('h4');
-  title.innerHTML = 'Menu <kbd style="font:11px ui-monospace,monospace;opacity:.6">Tab</kbd>';
+  title.innerHTML = 'Menu <kbd>Tab</kbd>';
   title.style.margin = '2px 2px 10px';
   const heading = (text: string) => Object.assign(document.createElement('div'), { className: 'mc-menu-h', textContent: text });
   el.append(css, title, tree.b, dex.b, journalBtn.b, refsBtn.b, sep(), heading('Settings'), mute.b, keyRow.b, keyForm, sep(), tutorialBtn.b, saveBtn.b, restart.b);
@@ -204,12 +203,12 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
     ctx.bus.on('tierChanged', ({ tier }) => {
       const built = ctx.data.recipes.find((r) => r.scope?.tier === tier);
       const how = built?.scope?.site === 'chess'
-        ? 'It is in the CHESS hall of Wilson Lab (east of campus): look (F) at a sample to take some, then carry it there and press F at the control desk.'
+        ? 'It is in the CHESS hall of Wilson Lab (east of campus): look [F] at a sample to take some, then carry it there and press [F] at the control desk.'
         : built?.scope?.site
-        ? 'It is installed in the lab of the science building (south-east): look (F) at a sample to take some, then carry it there.'
+        ? 'It is installed in the lab of the science building (south-east): look [F] at a sample to take some, then carry it there.'
         : tier === 4
-        ? 'Aim at something and press F; switch to fluorescence in the eyepiece. Phase contrast and dark field are add-ons you can build next.'
-        : 'Aim at something and press F to look closer.';
+        ? 'Aim at something and press [F]; switch to fluorescence in the eyepiece. Phase contrast and dark field are add-ons you can build next.'
+        : 'Aim at something and press [F] to look closer.';
       if (built) toast.notify(`You built the ${built.name}! ${how}`, 8000, 3);
     }),
     ctx.bus.on('achievementUnlocked', ({ id }) => {
@@ -221,7 +220,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
     ctx.bus.on('discoveryUnlocked', ({ id }) => {
       render();
       const f = Object.values(ctx.data.samples).flatMap((x) => x.features).find((x) => x.id === id);
-      toast.notify(`New discovery: ${f?.name ?? id}${f ? ` (${fmtUm(f.sizeUm)})` : ''}. Open the Microdex (M)`, 4000, 2);
+      toast.notify(`New discovery: ${f?.name ?? id}${f ? ` (${fmtUm(f.sizeUm)})` : ''}. Open the Microdex [M]`, 4000, 2);
     }),
     ctx.bus.on('guideReplied', ({ text }) => goal.say(text)),
   ];

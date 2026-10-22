@@ -5,11 +5,12 @@ import { conditionMet } from '../shared/achievements';
 import { completeQuest, type GameContext } from '../shared/state';
 import { questTarget } from './journal';
 import type { Toast } from './toast';
+import { withKeys } from './keys';
 
 const styled = (tag: string, css: string, text = '') => {
   const e = document.createElement(tag);
   e.style.cssText = css;
-  e.textContent = text;
+  withKeys(e, text);
   return e;
 };
 
@@ -127,7 +128,7 @@ export function mountDialog(ctx: GameContext, toast: Toast): () => void {
       }
       box.append(row);
     }
-    box.append(styled('div', 'color:#778;font-size:12px;margin-top:8px', 'Enter shows the first thing you can show · Esc closes · J opens the journal'));
+    box.append(styled('div', 'color:#778;font-size:12px;margin-top:8px', '[Enter] shows the first thing you can show · [Esc] closes · [J] opens the journal'));
   };
 
   const onKey = (e: KeyboardEvent) => {

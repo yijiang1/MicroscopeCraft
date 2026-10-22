@@ -5,6 +5,7 @@ import { lockedBy, nextGoalRecipe } from '../shared/plan';
 import type { GameData, Recipe } from '../shared/schema';
 import { canCraft, craft, type GameContext } from '../shared/state';
 import { itemIcon } from './icons';
+import { withKeys } from './keys';
 
 export interface TechTreeHandle {
   toggle(): void;
@@ -96,7 +97,7 @@ export interface DrawOpts {
 const styled = (tag: string, css: string, text = '') => {
   const e = document.createElement(tag);
   e.style.cssText = css;
-  e.textContent = text;
+  withKeys(e, text);
   return e;
 };
 
@@ -227,7 +228,7 @@ export function mountTechTree(parent: HTMLElement, ctx: GameContext): TechTreeHa
     const have = (id: string) => ctx.state.inventory[id] ?? 0;
     overlay.replaceChildren(
       styled('h2', 'margin:0 0 4px', 'Tech tree'),
-      styled('div', 'color:#c9b8a4', 'Raw materials at the top flow down into parts and microscopes. Green: you have it or what it makes. Glowing parts are ready: click to craft. Hover a part for details. T or Esc closes.'),
+      styled('div', 'color:#c9b8a4', 'Raw materials at the top flow down into parts and microscopes. Green: you have it or what it makes. Glowing parts are ready: click to craft. Hover a part for details. [T] or [Esc] closes.'),
       drawTree(ctx, layout, { size: 'big', done: owned, badge: (id) => (have(id) ? `${have(id)}` : null), goal: nextGoalRecipe(ctx.data, ctx.state) }),
     );
   };

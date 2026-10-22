@@ -5,6 +5,7 @@ import { findFeature } from '../shared/plan';
 import type { Quest } from '../shared/schema';
 import type { GameContext } from '../shared/state';
 import { REFERENCES } from './references';
+import { withKeys } from './keys';
 
 type Tab = 'achievements' | 'scientists' | 'references';
 
@@ -17,7 +18,7 @@ export interface JournalHandle {
 const styled = (tag: string, css: string, text = '') => {
   const e = document.createElement(tag);
   e.style.cssText = css;
-  e.textContent = text;
+  withKeys(e, text);
   return e;
 };
 
@@ -86,7 +87,7 @@ export function mountJournal(parent: HTMLElement, ctx: GameContext): JournalHand
         const text = styled('div', 'flex:1');
         text.append(
           styled('div', `font-weight:600;color:${isDone ? '#9be59b' : ready ? '#ffd24a' : '#ddd'}`, `${isDone ? '✓' : ready ? '★' : '•'} ${q.title}`),
-          styled('div', 'font-size:12px;color:#aab', isDone ? q.thanks : ready ? `Ready! Talk to ${npc.name.split(' ').at(-1)} (E) to show it.` : q.ask),
+          styled('div', 'font-size:12px;color:#aab', isDone ? q.thanks : ready ? `Ready! Talk to ${npc.name.split(' ').at(-1)} [E] to show it.` : q.ask),
         );
         if (!isDone && !ready) text.append(styled('div', 'font-size:12px;color:#8fb8d8;margin-top:1px', q.hint));
         row.append(text);
@@ -136,7 +137,7 @@ export function mountJournal(parent: HTMLElement, ctx: GameContext): JournalHand
     }
     overlay.replaceChildren(
       styled('h2', 'margin:0 0 2px', 'Journal'),
-      styled('div', 'color:#aab', 'Every request a scientist makes is an achievement too. Track shows the way on screen. J or Esc closes.'),
+      styled('div', 'color:#aab', 'Every request a scientist makes is an achievement too. Track shows the way on screen. [J] or [Esc] closes.'),
       tabs,
       tab === 'achievements' ? renderAchievements() : tab === 'scientists' ? renderScientists() : renderReferences(),
     );

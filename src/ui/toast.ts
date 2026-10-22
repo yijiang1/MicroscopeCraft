@@ -1,4 +1,6 @@
 // One short message at the top of the screen. A message never replaces a more important one that is still showing.
+import { withKeys } from './keys';
+
 export interface Toast {
   /** priority: 1 routine (gathered, crafted), 2 discovery, 3 milestone (new microscope). */
   notify(text: string, ms?: number, priority?: 1 | 2 | 3): void;
@@ -16,7 +18,7 @@ export function createToast(): Toast {
   return {
     notify(text, ms = 1600, priority = 1) {
       if (performance.now() < until && priority < level) return;
-      el.textContent = text;
+      withKeys(el, text);
       el.style.display = 'block';
       until = performance.now() + ms;
       level = priority;

@@ -2,6 +2,7 @@
 import { microdex } from '../shared/microdex';
 import { fmtUm } from '../shared/sim/walls';
 import type { GameContext } from '../shared/state';
+import { withKeys } from './keys';
 
 const BIOME_NAMES = {
   meadow: 'Quad', pond: 'Lake', forest: 'Pine grove', garden: 'Greenhouse', mine: 'Gorge and slope rocks', lab: 'Science lab', chess: 'Wilson Lab (CHESS)', eng: 'Engineering quad',
@@ -23,13 +24,13 @@ export function mountMicrodex(parent: HTMLElement, ctx: GameContext): MicrodexHa
   const styled = (tag: string, css: string, text = '') => {
     const e = document.createElement(tag);
     e.style.cssText = css;
-    e.textContent = text;
+    withKeys(e, text);
     return e;
   };
 
   const render = () => {
     const dex = microdex(ctx.data, ctx.state);
-    overlay.replaceChildren(styled('h2', 'margin:0 0 4px', `Microdex · ${summary()}`), styled('div', 'color:#9ab;margin-bottom:16px', 'Everything you have seen through your instruments. Click a card you have not found yet to track its sample. Press M or Esc to close.'));
+    overlay.replaceChildren(styled('h2', 'margin:0 0 4px', `Microdex · ${summary()}`), styled('div', 'color:#9ab;margin-bottom:16px', 'Everything you have seen through your instruments. Click a card you have not found yet to track its sample. [M] or [Esc] closes.'));
     for (const b of dex) {
       const head = styled('h3', 'margin:20px 0 8px', `${BIOME_NAMES[b.biome]}${b.locked ? ' 🔒' : ` · ${b.found}/${b.cards.length}${b.complete ? ' ✓ complete' : ''}`}`);
       overlay.append(head);

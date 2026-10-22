@@ -2,6 +2,7 @@
 // Three groups: raw materials, crafted parts, microscopes (the one in use is marked). I collapses it. Owner: Person D.
 import { ownedScopes, type GameContext } from '../shared/state';
 import { itemIcon } from './icons';
+import { withKeys } from './keys';
 
 export interface InventoryHandle {
   /** The box, so the goal card above can take the height that is left. */
@@ -12,7 +13,7 @@ export interface InventoryHandle {
 const el = (tag: string, css = '', text = '') => {
   const e = document.createElement(tag);
   e.style.cssText = css;
-  e.textContent = text;
+  withKeys(e, text);
   return e;
 };
 
@@ -54,7 +55,7 @@ export function mountInventory(ctx: GameContext): InventoryHandle {
     head.append(toggle);
     box.append(head);
     if (collapsed) return;
-    if (!have.length) return void box.append(el('div', 'color:#9ab;margin-top:4px', 'Empty. Gather materials with E.'));
+    if (!have.length) return void box.append(el('div', 'color:#9ab;margin-top:4px', 'Empty. Gather materials with [E].'));
 
     const inUse = ctx.state.scope.tier;
     group('MATERIALS', have.filter(([id]) => ctx.data.materials[id]).map(([id, n]) => chip(id, n)));

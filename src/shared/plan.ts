@@ -159,11 +159,11 @@ export function actionText(action: Action, data: Pick<GameData, 'items'>): strin
       const { sample, feature, scope, step } = action.identify;
       const at = step && (scope?.scope?.steps.length ?? 0) > 1 ? ` at ${step.label}` : '';
       const site = scope?.scope?.site;
-      if (site) return `Look (F) at a ${sample.name} to take a bit, then use the ${scope.name} in the ${SITE_NAMES[site]}${at} to spot ${feature.name}`;
-      return `Look (F) at a ${sample.name} with your ${scope?.name ?? 'microscope'}${at} to spot ${feature.name}`;
+      if (site) return `Look [F] at a ${sample.name} to take a bit, then use the ${scope.name} in the ${SITE_NAMES[site]}${at} to spot ${feature.name}`;
+      return `Look [F] at a ${sample.name} with your ${scope?.name ?? 'microscope'}${at} to spot ${feature.name}`;
     }
     case 'gather':
-      return `Gather ${action.raw.missing} ${data.items[action.raw.itemId]?.name ?? action.raw.itemId} (aim and press E)`;
+      return `Gather ${action.raw.missing} ${data.items[action.raw.itemId]?.name ?? action.raw.itemId} (aim and press [E])`;
     case 'craft':
       return `Press C to craft ${action.step.recipe.name}`;
   }
@@ -184,7 +184,7 @@ export function howToGet(
     const locked = lockedBy(itemId, data, discoveries);
     const found = locked ? findFeature(data, locked) : null;
     const scope = found ? scopeThatSees(found.feature, data) : null;
-    return `${name}: ${where}.${locked && scope ? ` You can only gather it after you have looked at it with a ${scope.name} and spotted ${found!.feature.name}.` : ' Aim at it and press E.'}`;
+    return `${name}: ${where}.${locked && scope ? ` You can only gather it after you have looked at it with a ${scope.name} and spotted ${found!.feature.name}.` : ' Aim at it and press [E].'}`;
   }
   const parts = recipe.inputs.map((i) => `${i.count} ${data.items[i.itemId]?.name ?? i.itemId}`);
   return `${name} is crafted, not found in the world. Make it in the crafting panel from ${parts.join(' and ')}.`;

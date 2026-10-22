@@ -29,7 +29,7 @@ const JUMP = 6.2;
 const REACH = 6;
 const RESPAWN_MS = 15_000; // no scarcity: gathered things grow back
 const ANIM_MS = 260;
-const LOCKED_TEXT = 'Not identified yet: look at it first (F) through a microscope';
+const LOCKED_TEXT = 'Not identified yet: look at it first [F] through a microscope';
 const MARKER_RANGE = 30; // the floating marker only shows when you are this close; the arrow always shows
 const FRAME_MS = 1000 / 60; // walking: 60 fps is plenty, and a 120 Hz display would otherwise double the work
 const IDLE_FRAME_MS = 1000 / 20; // mouse free (a menu, a dialog, the journal): only water and markers move
@@ -353,7 +353,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     const r = fixedAt(site);
     const what = site === 'lab' ? 'electron microscope' : 'beamline';
     if (!r) return hud.flash(`The ${what} goes here once you build it`);
-    if (!bag.length) return hud.flash('Bring a sample: look (F) at something, and you take a bit of it along');
+    if (!bag.length) return hud.flash('Bring a sample: look [F] at something, and you take a bit of it along');
     const go = (id: string) => {
       selectScope(ctx, r.scope.tier);
       look(id);
@@ -439,22 +439,22 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     if (!n) return '';
     if (n.kind === 'npc') {
       const npc = ctx.data.npcs[n.npcId!]!;
-      return `E talk to ${npc.name}`;
+      return `[E] Talk to ${npc.name}`;
     }
     if (n === emNode || n === beamNode) {
       const site: Site = n === emNode ? 'lab' : 'chess';
       const r = fixedAt(site);
       if (!r) return site === 'lab' ? 'Electron microscope bay: its parts are installed here as you build them' : 'Beamline control desk: build the beamline and it runs from here';
-      return bag.length ? `F put a sample in the ${r.name} (${bag.length} carried)` : `${r.name}: bring a sample first`;
+      return bag.length ? `[F] Put a sample in the ${r.name} (${bag.length} carried)` : `${r.name}: bring a sample first`;
     }
     const parts: string[] = [];
     if (n.aim.gather) {
       const locked = lockedBy(n.aim.gather, ctx.data, ctx.state.discoveries);
-      parts.push(locked ? 'E locked until identified' : `E gather ${ctx.data.items[n.aim.gather]?.name ?? n.aim.gather}`);
+      parts.push(locked ? '🔒 Identify it first to gather' : `[E] Gather ${ctx.data.items[n.aim.gather]?.name ?? n.aim.gather}`);
     }
-    if (n.aim.samples) parts.push(`F look at one of ${n.aim.samples.length} samples`);
-    else if (n.aim.sample) parts.push(`F look at ${sampleName(n.aim.sample)}`);
-    return parts.join(' · ');
+    if (n.aim.samples) parts.push(`[F] Look at one of ${n.aim.samples.length} samples`);
+    else if (n.aim.sample) parts.push(`[F] Look at ${sampleName(n.aim.sample)}`);
+    return parts.join('   ');
   };
 
   /** Everything round and solid: scenery, and the nodes (a gathered one is walkable until it grows back). */
@@ -600,10 +600,10 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     hud.carry(!sites.length
       ? ''
       : here && sites.includes(here)
-      ? bag.length ? `Carrying ${names}: aim at the ${fixedAt(here)!.name} and press F` : 'No sample yet: look (F) at something to take a bit along'
+      ? bag.length ? `Carrying ${names}: aim at the ${fixedAt(here)!.name} and press [F]` : 'No sample yet: look [F] at something to take a bit along'
       : bag.length
       ? `Carrying ${names} · ${sites.map((s) => `${SITE_NAMES[s]} ${pointTo(doors[s].x, doors[s].z)}`).join(' · ')}`
-      : `Your ${sites.map((s) => fixedAt(s)!.name).join(' and ')}: look (F) at a sample to take some along`);
+      : `Your ${sites.map((s) => fixedAt(s)!.name).join(' and ')}: look [F] at a sample to take some along`);
     camera.getWorldDirection(dir);
     hud.compass(`${heading(dir.x, dir.z)} · ${px.toFixed(0)}, ${pz.toFixed(0)}`);
     if (shadowFrames > 0) {

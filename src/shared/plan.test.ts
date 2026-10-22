@@ -95,7 +95,7 @@ describe('hidden materials: each tier needs something found with the tier below'
     const stem = goals.find((g) => g.id === 'stem_microscope')!;
     const action = currentAction(planFor(stem, data, { electron_microscope: 1 }, ['copper_veins', 'tungsten_grains']))!;
     expect(actionText(action, data)).toBe(
-      'Look (F) at a Dark creek sand to take a bit, then use the Transmission electron microscope in the science lab at Electron diffraction to spot Monazite diffraction',
+      'Look [F] at a Dark creek sand to take a bit, then use the Transmission electron microscope in the science lab at Electron diffraction to spot Monazite diffraction',
     );
   });
 });
@@ -120,7 +120,7 @@ describe('where to find things', () => {
     expect(howToGet('beach_sand', data)).toMatch(/the lake/);
     expect(howToGet('glass', data)).toMatch(/crafted.*2 Beach sand/);
     expect(howToGet('copper_ore', data)).toMatch(/only gather it after you have looked at it with a Hand lens and spotted Copper veins/);
-    expect(howToGet('copper_ore', data, ['copper_veins'])).toMatch(/press E/);
+    expect(howToGet('copper_ore', data, ['copper_veins'])).toMatch(/press \[E\]/);
     expect(itemsMentioned('where do i find glass lens?', data)).toEqual(['lens']);
     expect(itemsMentioned('how do I get glass', data)).toEqual(['glass']);
     expect(itemsMentioned('why is it blurry?', data)).toEqual([]);
