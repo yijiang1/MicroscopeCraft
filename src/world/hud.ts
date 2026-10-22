@@ -34,11 +34,23 @@ const setText = (e: HTMLElement, text: string) => {
   e.replaceChildren(...text.split(/\[([^\]\s]{1,6})\]/).map((s, i) => (i % 2 ? Object.assign(document.createElement('kbd'), { textContent: s }) : s)));
 };
 
-const HINTS = '[Click] look around · [WASD] move · [Shift] run · [Space] jump · [E] gather / talk · [F] look closer · [C] craft · [T] tech tree · [I] inventory · [J] journal · [M] Microdex · [V] view · [Tab] menu';
+/** Moving and acting, then the panels: when both do not fit on one line, they break between the groups. */
+const HINTS = [
+  ['[Click] look', '[WASD] move', '[Shift] run', '[Space] jump', '[E] gather/talk', '[F] look closer', '[V] view'],
+  ['[C] craft', '[T] tree', '[I] inventory', '[J] journal', '[M] Microdex', '[Tab] menu'],
+];
 
 export function createHud(el: HTMLElement): Hud {
-  const hint = div(`${CSS};left:12px;bottom:12px;max-width:calc(100% - 340px);padding:6px 10px;border-radius:10px;background:#0009;font-size:12px;line-height:2;word-spacing:1px;color:#dde`);
-  setText(hint, HINTS);
+  const hint = div(`${CSS};left:12px;bottom:12px;max-width:calc(100% - 340px);display:flex;flex-wrap:wrap;gap:4px 20px;padding:6px 12px;border-radius:10px;background:#0009;font-size:12px;line-height:1.6;color:#dde`);
+  hint.append(...HINTS.map((group) => {
+    const g = div('display:flex;flex-wrap:wrap;gap:4px 10px');
+    g.append(...group.map((h) => {
+      const chip = div('white-space:nowrap');
+      setText(chip, h);
+      return chip;
+    }));
+    return g;
+  }));
   const prompt = div(`${CSS};left:50%;transform:translateX(-50%);max-width:min(420px,90vw);text-align:center;top:calc(50% + 22px);padding:5px 12px;border-radius:10px;background:#000a;font-size:15px;font-weight:600;line-height:1.7;text-shadow:none`);
   const track = div(`${CSS};left:50%;transform:translateX(-50%);top:14px;font-size:18px;font-weight:600;color:#ffd24a;white-space:nowrap`);
   const target = div(`${CSS};left:50%;transform:translateX(-50%);top:40px;font-size:16px;font-weight:600;color:#9fdcff;white-space:nowrap`);
