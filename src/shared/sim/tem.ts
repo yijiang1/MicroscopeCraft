@@ -53,13 +53,14 @@ export interface TemState {
   score: number;
 }
 
-export function temState(k: TemKnobs, sampleId: string): TemState {
+/** lam: the electron wavelength, nm (a hand-built column may run at another voltage than 200 kV). */
+export function temState(k: TemKnobs, sampleId: string, lam = TEM_LAMBDA_NM): TemState {
   const beam: [number, number] = [TEM_TRUTH.beam[0] + k.beamX, TEM_TRUTH.beam[1] + k.beamY];
   const dzUm = k.z + sampleHeightUm(sampleId);
   const defocusNm = k.focus - dzUm * 1000;
   const astigNm: [number, number] = [TEM_TRUTH.astig[0] - k.stigX, TEM_TRUTH.astig[1] - k.stigY];
   const astig = Math.hypot(...astigNm);
-  const off = defocusNm - scherzerNm();
+  const off = defocusNm - scherzerNm(CS_NM, lam);
   // Simplification: leftover defocus and astigmatism add a blur that grows linearly with the error, calibrated so a
   // well-aligned column (within ~10 nm) just resolves gold's 0.235 nm planes.
   const blurNm = Math.hypot(0.004 * off, 0.006 * astig);
@@ -74,8 +75,7 @@ export function temState(k: TemKnobs, sampleId: string): TemState {
 
 /** The live diffractogram of thin amorphous carbon: Thon rings sin²χ under a damping envelope, n×n pixels out to kMax (nm⁻¹).
  *  Round rings mean no astigmatism; their spacing shows the defocus. */
-export function thonRings(n: number, kMax: number, defocusNm: number, astigNm: readonly [number, number], out = new Float32Array(n * n)) {
-  const lam = TEM_LAMBDA_NM;
+export function thonRings(n: number, kMax: number, defocusNm: number, astigNm: readonly [number, number], out = new Float32Array(n * n), lam = TEM_LAMBDA_NM) {
   for (let j = 0; j < n; j++) {
     const ky = ((j + 0.5) / n - 0.5) * 2 * kMax;
     for (let i = 0; i < n; i++) {

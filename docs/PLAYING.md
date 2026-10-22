@@ -11,15 +11,15 @@ A guide to the game: controls, where things are, what to build, and every system
 | V | Switch between the over-the-shoulder view (the default) and first-person |
 | E | Gather the item you are aiming at, or talk to the scientist you are aiming at (their dialog has a chat box: ask them about their own field, answered by Google Gemini, OpenAI or Anthropic Claude once you pick one and add your own API key under Tab → Settings; it is kept only in your browser) |
 | F | Look at the aimed sample through your newest portable instrument (F or Esc to leave). At a cabinet or table, pick a sample first (1–9). Once you own a fixed instrument this also takes a bit of the sample along; F at the electron microscope in the science lab, or at the beamline desk in Wilson Lab, puts one in |
-| C | Craft the next ready step of your goal (no mouse needed). In advanced mode, for the compound microscope it opens the workbench |
-| Shift+B | Workbench (advanced mode, Tab → Settings → Mode): build the compound microscope by hand. Grind the lenses, put the parts together, focus it, style it. Without the parts it opens in practice mode |
+| C | Craft the next ready step of your goal (no mouse needed). In advanced mode, for the compound microscope it opens the workbench, and for the TEM the electron bench |
+| Shift+B | Workbench (advanced mode, Tab → Settings → Mode): build the compound microscope by hand. Grind the lenses, put the parts together, focus it, style it. Once you have a fluorescence microscope it opens the electron bench instead: stack the TEM's column, pump it down, choose the voltage, saturate the filament and pick an objective aperture. Without the parts either bench opens in practice mode |
 | 1, 2, 3… | In the eyepiece: switch to another instrument you own, to compare (or click its button) |
 | Wheel or slider | Focus (light microscopes) |
 | T | Tech tree: every part, with add-ons shown by dashed links |
 | J | Journal: achievements with progress, and every scientist's requests with Track buttons |
 | M | Microdex (click a card you have not found to track its sample) |
 | I | Show or hide the inventory box |
-| Tab | Menu: tech tree, workbench, Microdex, journal, settings (sound, AI chat provider and API key), save and restart |
+| Tab | Menu: tech tree, workbench, electron bench, Microdex, journal, settings (sound, AI chat provider and API key), save and restart |
 | K | Restock every raw material, skipping the identifications (only when the URL ends in `?demo`) |
 
 ## Finding your way
@@ -71,7 +71,7 @@ A university campus about 300 m across (north is up the quad, -z), laid out afte
 | Compound microscope (tier 2) | 6 beach sand, 2 iron, 1 copper | 2 glass lenses, iron tube, focus knob, lamp. Put together by hand at the workbench; each objective after the first takes one more glass lens |
 | High-quality microscope (tier 3) | 6 quartz sand, 1 copper, 1 plant oil, plus the compound microscope | 2 precision lenses, condenser, immersion oil |
 | Fluorescence microscope (tier 4) | 6 quartz sand, 2 fluorite, 1 tungsten, plus the high-quality microscope | Fluorite objective, arc lamp, filter cube. Add-ons: phase contrast kit, dark-field condenser |
-| Transmission electron microscope (tier 5) | 3 tungsten, 10 iron, 9 copper, 3 resin, 1 willemite, 2 beach sand | Electron gun (filament, Wehnelt cap, high-voltage tank); condenser lens system; objective lens and stage; projector lens system; vacuum system; viewing screen |
+| Transmission electron microscope (tier 5) | 3 tungsten, 10 iron, 9 copper, 3 resin, 1 willemite, 2 beach sand | Electron gun (filament, Wehnelt cap, high-voltage tank); condenser lens system; objective lens and stage; projector lens system; vacuum system; viewing screen. In advanced mode it is built at the electron bench, where the voltage and the objective aperture you choose set its resolution and contrast |
 | Aberration-corrected STEM (tier 6) | 1 tungsten, 5 iron, 11 copper, 1 resin, 1 monazite, 4 quartz sand, 2 beach sand, plus the TEM | Field-emission gun, aberration corrector (4 multipoles), scan coils, annular dark-field detector, pixel array detector (EMPAD) |
 | CHESS beamline (tier 7) | 12 iron, 9 copper, 2 monazite, 2 resin, 2 beryl, 10 quartz sand, 3 galena | Double-bend achromat cell, CHESS Compact Undulator, front end, double-crystal monochromator, compound refractive lens, shielded hutch, fluorescence detector, X-ray pixel array detector, rotation stage |
 

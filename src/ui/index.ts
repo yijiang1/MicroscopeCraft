@@ -84,15 +84,18 @@ export function mountUI(el: HTMLElement, ctx: GameContext, training: TrainingGam
     setMenu(false);
     tutorial.replay();
   });
-  const benchBtn = row('🛠️', 'Workbench', () => ctx.bus.emit('openWorkbench', { recipeId: null }), 'Shift+B');
+  const benchBtn = row('🛠️', 'Workbench', () => ctx.bus.emit('openWorkbench', { recipeId: ctx.data.recipes.find((r) => r.assembly === 'compound')?.id ?? null }), 'Shift+B');
   benchBtn.set('Workbench', 'Build a microscope by hand');
+  const emBenchBtn = row('⚡', 'Electron bench', () => ctx.bus.emit('openWorkbench', { recipeId: ctx.data.recipes.find((r) => r.assembly === 'tem')?.id ?? null }));
+  emBenchBtn.set('Electron bench', 'Build the electron microscope by hand');
   const modeRow = row('', 'Mode', () => setAdvanced(ctx, !ctx.state.advanced));
   const syncMode = () => {
     const { advanced } = ctx.state;
     modeRow.b.querySelector('.ic')!.textContent = advanced ? '🛠️' : '🌱';
     modeRow.set(advanced ? 'Advanced' : 'Easy', 'mode');
-    modeRow.b.title = advanced ? 'You build the compound microscope by hand at the workbench. Click for easy mode.' : 'C crafts every microscope. Click for advanced mode.';
+    modeRow.b.title = advanced ? 'You build the compound microscope at the workbench and the electron microscope at the electron bench, by hand. Click for easy mode.' : 'C crafts every microscope. Click for advanced mode.';
     benchBtn.b.hidden = !advanced;
+    emBenchBtn.b.hidden = !advanced;
   };
   syncMode();
   const mute = row('', 'Sound', () => {
@@ -199,7 +202,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext, training: TrainingGam
   const heading = (text: string) => Object.assign(document.createElement('div'), { className: 'mc-menu-h', textContent: text });
   el.append(
     css, title,
-    tree.b, benchBtn.b, dex.b, journalBtn.b, mysteryBtn.b,
+    tree.b, benchBtn.b, emBenchBtn.b, dex.b, journalBtn.b, mysteryBtn.b,
     heading('On campus'), grid(storeBtn, labBtn, chessBtn),
     heading('Settings'), grid(modeRow, mute, keyRow), keyForm,
     heading('Game'), grid(tutorialBtn, saveBtn, restart),
@@ -252,7 +255,9 @@ export function mountUI(el: HTMLElement, ctx: GameContext, training: TrainingGam
     ctx.bus.on('itemCrafted', render),
     ctx.bus.on('tierChanged', ({ tier }) => {
       const built = ctx.data.recipes.find((r) => r.scope?.tier === tier);
-      const how = built?.assembly && ctx.state.advanced
+      const how = built?.assembly === 'tem' && ctx.state.advanced
+        ? 'You put it together yourself. It is installed in the lab of the science building (south-east): look [F] at a sample to take some, then carry it there. [Shift+B] takes you back to the electron bench to change it.'
+        : built?.assembly && ctx.state.advanced
         ? 'You put it together yourself: aim at something and press [F]. [Shift+B] takes you back to the workbench to change it.'
         : built?.scope?.site === 'chess'
         ? 'It is in the CHESS hall of Wilson Lab (east of campus): look [F] at a sample to take some, then carry it there and press [F] at the control desk.'

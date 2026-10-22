@@ -170,7 +170,7 @@
   },
   {
     "id": "hv_tank", "name": "High-voltage tank", "station": "bench", "color": "#c9a46a",
-    "about": "Makes the 200,000 volts that accelerate the electrons; resin insulation keeps sparks from jumping.",
+    "about": "Makes the 80,000 to 300,000 volts that accelerate the electrons; resin insulation keeps sparks from jumping.",
     "inputs": [{ "itemId": "copper_ore", "count": 2 }, { "itemId": "resin", "count": 1 }],
     "output": { "itemId": "hv_tank", "count": 1 }
   },
@@ -245,8 +245,8 @@
     "output": { "itemId": "viewing_screen", "count": 1 }
   },
   {
-    "id": "electron_microscope", "name": "Transmission electron microscope", "station": "bench", "color": "#e8eef8",
-    "about": "Electrons pass through a thin sample and magnetic lenses form the image. Installed in the science lab.",
+    "id": "electron_microscope", "name": "Transmission electron microscope", "station": "bench", "assembly": "tem", "color": "#e8eef8",
+    "about": "Electrons pass through a thin sample and magnetic lenses form the image. Installed in the science lab. In advanced mode you put the column together at the electron bench, and the voltage and the objective aperture you choose decide what it can see.",
     "inputs": [
       { "itemId": "electron_gun", "count": 1 },
       { "itemId": "condenser_lenses", "count": 1 },

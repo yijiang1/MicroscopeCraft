@@ -68,6 +68,8 @@ export const ZoomStepSchema = z.object({
   dLensUm: z.number().nonnegative().optional(),
   /** Overrides the accelerating voltage for this step, volts. */
   voltageV: z.number().positive().optional(),
+  /** Overrides the instrument's contrast factor for this step (a hand-built TEM's objective aperture). */
+  contrastBoost: z.number().positive().optional(),
 });
 export type ZoomStep = z.infer<typeof ZoomStepSchema>;
 
@@ -113,12 +115,29 @@ export const CompoundBuildSchema = z.object({
 });
 export type CompoundBuild = z.infer<typeof CompoundBuildSchema>;
 
+/** A transmission electron microscope the player put together at the electron bench. The voltage and the objective
+ *  aperture set its image steps (sim/column.ts); the name is only a look. */
+export const TemBuildSchema = z.object({
+  kind: z.literal('tem'),
+  /** Accelerating voltage, kV. */
+  kV: z.number().min(60).max(300),
+  /** Diameter of the hole in the objective aperture strip, µm. */
+  apertureUm: z.number().positive().max(500),
+  name: z.string().max(24).default(''),
+});
+export type TemBuild = z.infer<typeof TemBuildSchema>;
+/** Any microscope built by hand. */
+export const BuildSchema = z.union([TemBuildSchema, CompoundBuildSchema]);
+export type Build = z.infer<typeof BuildSchema>;
+export const isTemBuild = (b: Build | undefined): b is TemBuild => (b as TemBuild | undefined)?.kind === 'tem';
+
 export const RecipeSchema = z.object({
   id: Id,
   name: z.string(),
   station: z.enum(['hand', 'furnace', 'bench']),
-  /** Put together by hand at the workbench instead of crafted with C: the player's build sets the zoom steps. */
-  assembly: z.literal('compound').optional(),
+  /** Put together by hand instead of crafted with C (advanced mode): at the workbench (compound) or the electron
+   *  bench (tem). The player's build sets the zoom steps. */
+  assembly: z.enum(['compound', 'tem']).optional(),
   /** keep = needed to craft but not used up (a scope you build on stays in your inventory so you can compare). */
   inputs: z.array(z.object({ itemId: Id, count: z.number().int().positive(), keep: z.boolean().optional() })).min(1),
   output: z.object({ itemId: Id, count: z.number().int().positive() }),
@@ -353,7 +372,7 @@ export interface GameState {
   /** Knob positions the player left on aligned instruments (they keep their alignment). */
   align: Record<string, number>;
   /** Microscopes the player built by hand at the workbench, by item id. */
-  builds: Record<string, CompoundBuild>;
+  builds: Record<string, Build>;
   /** Advanced mode: the compound microscope is built by hand at the workbench. Easy mode (the default) crafts it with
    *  C like every other instrument, and any hand-built optics are set aside. */
   advanced: boolean;

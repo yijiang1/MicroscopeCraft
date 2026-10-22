@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { conditionMet, newlyEarned } from './achievements';
 import { createBus, type Bus } from './events';
 import {
-  CompoundBuildSchema, PlayerLocationSchema, SiteSchema, TierSchema, type CompoundBuild, type GameData, type GameState, type PlayerLocation,
+  BuildSchema, CompoundBuildSchema, isTemBuild, PlayerLocationSchema, SiteSchema, TemBuildSchema, TierSchema, type Build, type CompoundBuild, type GameData, type GameState, type PlayerLocation,
   type Site, type Tier,
 } from './schema';
 import { buildIssue } from './sim/assembly';
@@ -48,7 +48,7 @@ const SaveSchema = z.object({
   align: z.record(z.string(), z.number()).default({}),
   carriedSamples: z.array(z.string()).catch([]).default([]),
   playerLocation: PlayerLocationSchema.nullable().catch(null).default(null),
-  builds: z.record(z.string(), CompoundBuildSchema).catch({}).default({}),
+  builds: z.record(z.string(), BuildSchema).catch({}).default({}),
   advanced: z.boolean().catch(false).default(false),
 });
 export type SaveData = z.infer<typeof SaveSchema>;
@@ -211,26 +211,32 @@ export function craft(ctx: GameContext, recipeId: string): boolean {
 export const LENS_ITEM = 'lens';
 export const extraLenses = (build: Pick<CompoundBuild, 'objectives'>) => Math.max(0, build.objectives.length - 1);
 
-/** Finish a microscope built by hand at the workbench. The first time it is crafted like any recipe, plus one glass
- *  lens for each extra objective; a microscope you already own only takes the new build (an objective added costs a
- *  lens, one taken off goes back to the inventory). Returns false, and changes nothing, if the build cannot form a
- *  focusable image or parts are missing. */
-export function assemble(ctx: GameContext, recipeId: string, build: CompoundBuild): boolean {
+/** Finish a microscope built by hand. The first time it is crafted like any recipe; a compound microscope also takes
+ *  one glass lens for each extra objective. A microscope you already own only takes the new build (an objective added
+ *  costs a lens, one taken off goes back to the inventory). Returns false, and changes nothing, if the build does not
+ *  fit the recipe, cannot form a focusable image or parts are missing. */
+export function assemble(ctx: GameContext, recipeId: string, build: Build): boolean {
   const recipe = ctx.data.recipes.find((r) => r.id === recipeId);
   if (!recipe?.assembly || !recipe.scope) return false;
-  const parsed = CompoundBuildSchema.safeParse(build);
-  if (!parsed.success || buildIssue(parsed.data)) return false;
   const { inventory, builds } = ctx.state;
   const item = recipe.output.itemId;
   const owned = (inventory[item] ?? 0) > 0;
-  const previous = owned ? builds[item] : undefined;
-  // A microscope crafted before the workbench came with the recipe's objectives: its first rebuild is free.
-  const before = previous ? extraLenses(previous) : owned ? extraLenses(parsed.data) : 0;
-  const extra = extraLenses(parsed.data) - before;
-  const lenses = Math.max(0, extra) + (owned ? 0 : recipe.inputs.find((i) => i.itemId === LENS_ITEM)?.count ?? 0);
-  if ((inventory[LENS_ITEM] ?? 0) < lenses || (!owned && !canCraft(ctx, recipeId))) return false;
-  builds[item] = parsed.data;
-  if (extra) inventory[LENS_ITEM] = (inventory[LENS_ITEM] ?? 0) - extra;
+  if (recipe.assembly === 'tem') {
+    const parsed = TemBuildSchema.safeParse(build);
+    if (!parsed.success || (!owned && !canCraft(ctx, recipeId))) return false;
+    builds[item] = parsed.data;
+  } else {
+    const parsed = CompoundBuildSchema.safeParse(build);
+    if (!parsed.success || buildIssue(parsed.data)) return false;
+    const previous = owned ? builds[item] : undefined;
+    // A microscope crafted before the workbench came with the recipe's objectives: its first rebuild is free.
+    const before = previous && !isTemBuild(previous) ? extraLenses(previous) : owned ? extraLenses(parsed.data) : 0;
+    const extra = extraLenses(parsed.data) - before;
+    const lenses = Math.max(0, extra) + (owned ? 0 : recipe.inputs.find((i) => i.itemId === LENS_ITEM)?.count ?? 0);
+    if ((inventory[LENS_ITEM] ?? 0) < lenses || (!owned && !canCraft(ctx, recipeId))) return false;
+    builds[item] = parsed.data;
+    if (extra) inventory[LENS_ITEM] = (inventory[LENS_ITEM] ?? 0) - extra;
+  }
   if (owned) {
     ctx.state.scope = usableScope(ctx, ctx.state.scope.step);
     ctx.bus.emit('scopeChanged', { tier: ctx.state.scope.tier });

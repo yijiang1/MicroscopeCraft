@@ -39,7 +39,7 @@ Every session repeats one loop, at smaller and smaller scales:
 
 1. **Explore and gather.** Walk the campus and collect sand, ores, oil, resin, minerals and lab reagents. The goal panel names the next instrument and what it still needs; an arrow with the distance points to the nearest source.
 2. **Identify.** Some materials look like plain rock or seeds until you look at them through the instrument you already have. Spotting what is inside unlocks gathering them (see "Discovery gates").
-3. **Craft and assemble.** Smelt sand into glass, grind lenses, wind coils, build each component of an instrument separately, then assemble it. The goal card lists the steps and C crafts the next ready one. Fixed instruments show each component in place as you build it. The compound microscope is put together by hand at the workbench (prototype; see "The workbench").
+3. **Craft and assemble.** Smelt sand into glass, grind lenses, wind coils, build each component of an instrument separately, then assemble it. The goal card lists the steps and C crafts the next ready one. Fixed instruments show each component in place as you build it. In advanced mode the compound microscope is put together by hand at the workbench and the TEM at the electron bench (see "The workbench" and "The electron bench").
 4. **Look and align.** Aim at a sample and press F; at a cabinet, pick a slide. Choose an imaging mode, stain the sample, and align the instrument with its mini-game; the view shows only what it can resolve.
 5. **Hit a wall.** The view is blurry, empty, too dark or shows nothing in this mode, and the game explains the limit in plain words, using the simulation's own numbers.
 6. **Show a scientist.** Take what you found to the scientist who asked for it; every request done is an achievement.
@@ -149,6 +149,21 @@ Crafting with C is quick, but a notice that the microscope is built does not mak
 **Looks.** Shapes for the base (horseshoe, round, square, tripod), arm (curved, pillar, swan) and stage (square, round); a finish for every part (brass, black, nickel, iron, wood, white, red, blue, green, a gilded leather tube like Hooke's, or any paint); a name engraved on the base, which the eyepiece shows in its instrument picker.
 
 **Open questions.** Two glass lenses give one objective, so a first build has one zoom step instead of the recipe's four: is that the right pressure to grind more? Should the hand lens, the condenser and immersion oil also be built here, and should the workbench become a place in the world? A fresh blank is free in the prototype; should starting over cost glass? Should a second lens on the objective (Lister's doublet) be the way past a singlet's spherical aberration? For the electron tiers, assembling the column could become the electron shooting contest: place and tune coils so the beam reaches the screen.
+
+## The electron bench
+
+The same idea for tier 5, in advanced mode: the transmission electron microscope is built by hand at the electron bench (Shift+B once the player has a fluorescence microscope or the TEM's parts, the menu, or C when the goal says to build the TEM). Its 3D column is ported from the TEM explorer of My First Microscope: revolved outlines cut away toward the viewer, so the coils, pole pieces, apertures and the beam show inside.
+
+**What you do.** Stack the six column parts from the base up (vacuum system, viewing chamber, projector lenses, objective lens and stage, condenser lenses, electron gun); pump the column down (roughing pump to 1 Pa, then the high-vacuum pump; the high voltage and the filament are locked out above 10⁻⁴ Pa); choose a voltage (80, 120, 200 or 300 kV); heat the filament to saturation, past the false peak, and no further; slide in an objective aperture (10–120 µm). The green screen shows the filament's own image (a halo and a hot spot) until it is saturated, then an even disc. A contrast-transfer plot, the optics and a list of what the build will show on a test sample update as you go.
+
+**Physics** (`src/shared/sim/column.ts`):
+
+- $\lambda$ from the voltage, relativistic (optics.ts). The aperture in the back focal plane of an $f = 2.3$ mm objective (a JEM-2100F HR pole piece) passes $lpha = D/2f$; the game keeps Cs 1.2 mm (sim/tem.ts).
+- The finest detail is the coarser of Scherzer's point resolution $0.66\,C_s^{1/4}\lambda^{3/4}$ (0.245 nm at 200 kV, 0.204 nm at 300 kV) and the aperture's cutoff $\lambda/lpha$. Gold's 0.235 nm planes therefore need 300 kV and an aperture that does not cut them (40 µm or more).
+- Contrast is the share of electrons the aperture stops. Screened Rutherford scattering, $d\sigma/d\Omega \propto 1/(	heta^2+	heta_0^2)^2$ with $	heta_0 = \lambda/2\pi a$ (carbon, Thomas–Fermi $a = 0.885\,a_0 Z^{-1/3}$), puts $1/(1+(lpha/	heta_0)^2)$ of it outside $lpha$, and the total cross-section goes as $1/eta^2$. So a small hole and slow electrons give contrast, a big hole and fast electrons give resolution. It is relative to the recipe's TEM (200 kV, 10 mrad). Simplification: one contrast factor for every feature, though lattice fringes are phase contrast.
+- The emission curve (false peak, then saturation) and the filament's life past saturation are illustrative shapes, not a model of one gun.
+
+**How it plugs in.** The recipe says `"assembly": "tem"`; the build is `{ kind: 'tem', kV, apertureUm, name }` in `state.builds`. `compileColumn()` gives the image steps NA = α, a lens blur that makes the game's resolution equal the column's, and a per-step contrast; the electron diffraction step stays the recipe's, so no build can block the monazite diffraction that unlocks the next tier (tested for every voltage and aperture). The eyepiece's TEM alignment aims for the Scherzer defocus of the build's own voltage.
 
 ## Simulation model
 A few formulas decide what the player sees. They are simplified but directionally correct, so a better material, a smaller wavelength or a better alignment always helps for the right reason. All lengths are in micrometres in the code.
@@ -266,7 +281,7 @@ The code is split into four owned modules around one shared core, so four people
 | Microscope view | src/scope | Person B | 2D canvas view with zoom, focus, imaging modes, stains, beam damage, drawings by feature type, and one panel per mini-game; also owns the simulation rules and their tests |
 | AI and backend | src/guide, server | Person C | Guide (offline today), world-spec validator; planner, world cache and endpoints are deferred |
 | Content and UI | src/ui, data | Person D | Goal card, inventory box, tech tree, Microdex, journal, scientist dialogs, toasts, sound, guide box; recipe, material, sample, scientist and achievement JSON |
-| Workbench (prototype) | src/workbench | (open) | The 3D bench, lens grinding, assembly, focus, looks and the live eyepiece view; the optics of a build are in src/shared/sim/assembly.ts |
+| Workbench (prototype) | src/workbench | (open) | The 3D bench, lens grinding, assembly, focus, looks and the live eyepiece view; the optics of a build are in src/shared/sim/assembly.ts. The electron bench (electron.ts, column.ts, column-scene.ts) builds the TEM; its optics are in src/shared/sim/column.ts |
 
 **The shared contract** was written first, and every module builds on it:
 

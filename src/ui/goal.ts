@@ -150,7 +150,9 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void, 
     const btn = document.createElement('button');
     const handBuilt = recipe.assembly && ctx.state.advanced;
     withKeys(btn, handBuilt ? 'Build it [C]' : 'Craft [C]');
-    btn.title = handBuilt ? 'Opens the workbench: you grind the lenses and put the microscope together yourself' : '';
+    btn.title = !handBuilt ? '' : recipe.assembly === 'tem'
+      ? 'Opens the electron bench: you stack the column, pump it down and set the voltage, filament and aperture yourself'
+      : 'Opens the workbench: you grind the lenses and put the microscope together yourself';
     btn.disabled = !ready;
     btn.style.cssText = `margin-left:auto;padding:3px 10px;border-radius:6px;border:0;font-weight:700;${ready ? 'background:#ffd35a;color:#222;cursor:pointer;box-shadow:0 0 8px #ffd35a88' : 'background:#444;color:#999'}`;
     btn.onclick = () => doCraft(recipe.id);

@@ -3,7 +3,7 @@
 // drop in the eyepiece, then focus it yourself. The build is yours: shapes, finishes and a name engraved on the base.
 // What it can see comes from how you built it: shared/sim/assembly.ts turns the build into the zoom steps the
 // eyepiece uses. Open it with B, from the menu, or with C when the goal card says to build the microscope.
-import type { CompoundBuild, Feature, Sample, ScopeParams } from '../shared/schema';
+import { isTemBuild, type CompoundBuild, type Feature, type Sample, type ScopeParams } from '../shared/schema';
 import {
   buildIssue, buildOptics, compileBuild, FOCUS_RANGE_MM, focalLengthMm, issueText, MAX_OBJECTIVES, objectiveOptics, sharpestNA, STOP_MIN_MM,
   TUBE_MM, type ObjectiveOptics,
@@ -11,7 +11,7 @@ import {
 import { GREEN_LIGHT_UM, usefulMagnificationMax, visibility } from '../shared/sim/optics';
 import { findFeature, scopeThatSees } from '../shared/plan';
 import { explainWall, fmtUm } from '../shared/sim/walls';
-import { assemble, canCraft, LENS_ITEM, scopeParamsFromSpec, type GameContext } from '../shared/state';
+import { assemble, canCraft, LENS_ITEM, ownedScopes, scopeParamsFromSpec, type GameContext } from '../shared/state';
 import {
   blank, canMount, canPlace, draftFromBuild, FINISHES, freshBlank, grind, live, mountEyepiece, mountObjective, moveFocus,
   newDraft, noteFocus, partDef, PARTS, place, roleOf, setStop, setTube, SHAPES, steps, toBuild, unmount, finishable, type Draft, type Live, type PartId,
@@ -20,6 +20,7 @@ import { drawPreview, verdicts } from './preview';
 import { createBenchScene, type BenchScene, type GhostId, type Pick } from './scene';
 import { createBenchSound } from './sound';
 import { btn, fmtMag, fmtMm, h, icon, injectStyle, keyed, slider } from './dom';
+import { mountElectronBench } from './electron';
 
 export interface WorkbenchHandle {
   dispose(): void;
@@ -156,7 +157,8 @@ export function mountWorkbench(el: HTMLElement, ctx: GameContext): WorkbenchHand
   /** The bench for this mode: your own microscope as saved, or the build you left, with as many blanks as you have lenses. */
   const draftFor = (m: Mode): Draft => {
     if (m === 'edit') {
-      const build = ctx.state.builds[item] ?? LEGACY_BUILD;
+      const saved = ctx.state.builds[item];
+      const build = saved && !isTemBuild(saved) ? saved : LEGACY_BUILD;
       return draftFromBuild(build, Math.min(MAX_OBJECTIVES - build.objectives.length, lensCount()));
     }
     const want = m === 'practice' ? MAX_OBJECTIVES + 1 : Math.min(MAX_OBJECTIVES + 1, lensCount());
@@ -886,7 +888,19 @@ export function mountWorkbench(el: HTMLElement, ctx: GameContext): WorkbenchHand
   preview.addEventListener('wheel', onWheel, { passive: false });
   bigCanvas.addEventListener('wheel', onWheel, { passive: false });
   addEventListener('keydown', onOpenKey);
-  const offs = [ctx.bus.on('openWorkbench', () => open())];
+  // The electron bench lives beside this one. A request names its recipe; Shift+B (no recipe) opens the electron
+  // bench once the player has a fluorescence microscope or more, or the parts for the TEM.
+  const temRecipe = ctx.data.recipes.find((r) => r.assembly === 'tem');
+  const emHost = document.createElement('div');
+  el.after(emHost);
+  const electron = mountElectronBench(emHost, ctx, temRecipe ? gateTargets(ctx, temRecipe.id) : []);
+  const benchFor = (recipeId: string | null) => {
+    const named = recipeId ? ctx.data.recipes.find((r) => r.id === recipeId)?.assembly : undefined;
+    if (named) return named;
+    const tier = ownedScopes(ctx.state.inventory, ctx.data).at(-1)?.scope.tier ?? 0;
+    return temRecipe && (tier >= 4 || canCraft(ctx, temRecipe.id)) ? 'tem' : 'compound';
+  };
+  const offs = [ctx.bus.on('openWorkbench', ({ recipeId }) => (benchFor(recipeId) === 'tem' ? electron.open() : open()))];
 
   return {
     dispose() {
@@ -896,6 +910,8 @@ export function mountWorkbench(el: HTMLElement, ctx: GameContext): WorkbenchHand
       scene?.dispose();
       sound.dispose();
       el.replaceChildren();
+      electron.dispose();
+      emHost.remove();
     },
   };
 }

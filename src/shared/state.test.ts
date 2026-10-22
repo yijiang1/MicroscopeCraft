@@ -297,6 +297,20 @@ describe('microscopes built by hand at the workbench', () => {
     expect(ctx.state.builds).toEqual({});
   });
 
+  it('the electron bench crafts the TEM from its column parts, and a rebuild only changes voltage and aperture', () => {
+    const ctx = advancedGame();
+    const tem = { kind: 'tem' as const, kV: 300, apertureUm: 40, name: 'Ruska' };
+    expect(assemble(ctx, 'electron_microscope', tem)).toBe(false); // no parts yet
+    gatherAll(ctx, { electron_gun: 1, condenser_lenses: 1, objective_assembly: 1, projector_lenses: 1, vacuum_system: 1, viewing_screen: 1 });
+    expect(assemble(ctx, 'electron_microscope', build([16]))).toBe(false); // a compound build does not fit
+    expect(assemble(ctx, 'electron_microscope', tem)).toBe(true);
+    expect(ctx.state.inventory).toMatchObject({ electron_microscope: 1, electron_gun: 0, viewing_screen: 0 });
+    expect(ctx.state.builds.electron_microscope).toEqual(tem);
+    expect(assemble(ctx, 'electron_microscope', { ...tem, kV: 120 })).toBe(true); // owned: no parts needed again
+    expect(ctx.state.builds.electron_microscope).toMatchObject({ kV: 120 });
+    expect(assemble(ctx, 'compound_microscope', tem)).toBe(false);
+  });
+
   it('rebuilding one you own swaps in the new optics: an added objective costs a lens, a removed one comes back', () => {
     const ctx = advancedGame();
     gatherAll(ctx, { ...parts, lens: 2 });

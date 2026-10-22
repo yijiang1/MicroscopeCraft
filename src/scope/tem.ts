@@ -1,13 +1,14 @@
 // TEM alignment panel (tier 5): centre the beam, find eucentric height with the α wobbler, correct the objective
 // astigmatism by making the Thon rings round, and set Scherzer defocus. Modelled on the TEM explorer's console.
 // The knobs stay where you leave them; each new sample sits at its own height, so the height (and focus) need redoing.
-import { scherzerNm, TEM_START, temState, thonRings, type TemKnobs } from '../shared/sim/tem';
+import { CS_NM, scherzerNm, TEM_LAMBDA_NM, TEM_START, temState, thonRings, type TemKnobs } from '../shared/sim/tem';
 import { recordScore, setAlign, type GameContext } from '../shared/state';
 import { button, canvas, el, paint, panel, pct, slider, steps, type Tuning } from './kit';
 
 const KEYS: (keyof TemKnobs)[] = ['beamX', 'beamY', 'z', 'focus', 'stigX', 'stigY'];
 
-export function temTuning(host: HTMLElement, ctx: GameContext, sampleId: string, redraw: () => void): Tuning {
+/** lamNm: the column's electron wavelength (a hand-built TEM sets its own voltage). */
+export function temTuning(host: HTMLElement, ctx: GameContext, sampleId: string, redraw: () => void, lamNm = TEM_LAMBDA_NM): Tuning {
   const k: TemKnobs = { ...TEM_START };
   for (const key of KEYS) k[key] = ctx.state.align[`tem_${key}`] ?? TEM_START[key];
   let wobbler = false;
@@ -17,14 +18,14 @@ export function temTuning(host: HTMLElement, ctx: GameContext, sampleId: string,
     'Centre the beam (beam shift): the bright disc fills the screen evenly.',
     'Eucentric height: turn on the α wobbler and change Z until the image stops swinging.',
     'Astigmatism: make the rings in the live FFT round (stigmator X and Y).',
-    `Focus: set about ${Math.round(scherzerNm())} nm, Scherzer defocus, where atoms show best.`,
+    `Focus: set about ${Math.round(scherzerNm(CS_NM, lamNm))} nm, Scherzer defocus, where atoms show best.`,
   ]);
-  let s = temState(k, sampleId);
+  let s = temState(k, sampleId, lamNm);
   const update = () => {
-    s = temState(k, sampleId);
+    s = temState(k, sampleId, lamNm);
     status.textContent = pct(s.score);
     [s.parts.beam, s.parts.height, s.parts.astig, s.parts.focus].forEach((p, i) => list.tick(i, p >= 0.8));
-    paint(fft, thonRings(96, 6, s.defocusNm, s.astigNm), 96, 0.8, [190, 255, 200]);
+    paint(fft, thonRings(96, 6, s.defocusNm, s.astigNm, undefined, lamNm), 96, 0.8, [190, 255, 200]);
     redraw();
   };
   const knob = (label: string, key: keyof TemKnobs, min: number, max: number, step: number, unit: string) =>

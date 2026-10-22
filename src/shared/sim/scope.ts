@@ -1,14 +1,16 @@
 import { compileBuild } from './assembly';
+import { compileColumn } from './column';
 import { electronWavelengthNm, EYE_LIMIT_UM, GREEN_LIGHT_UM, xrayWavelengthNm } from './optics';
-import type { CompoundBuild, GameData, Recipe, ScopeParams, ScopeSpec, Site, ZoomStep } from '../schema';
+import { isTemBuild, type Build, type GameData, type Recipe, type ScopeParams, type ScopeSpec, type Site, type ZoomStep } from '../schema';
 
-/** Microscopes built by hand at the workbench, by item id. */
-export type Builds = Readonly<Record<string, CompoundBuild>>;
+/** Microscopes built by hand at the workbench or the electron bench, by item id. */
+export type Builds = Readonly<Record<string, Build>>;
 
-/** A microscope as the player has it: built by hand at the workbench, or as its recipe makes it. */
+/** A microscope as the player has it: built by hand, or as its recipe makes it. */
 export const specOf = (recipe: Recipe & { scope: ScopeSpec }, builds: Builds = {}): ScopeSpec => {
   const build = recipe.assembly ? builds[recipe.output.itemId] : undefined;
-  return build ? compileBuild(build, recipe.scope) : recipe.scope;
+  if (!build) return recipe.scope;
+  return isTemBuild(build) ? compileColumn(build, recipe.scope) : compileBuild(build, recipe.scope);
 };
 
 /** The recipes with every hand-built microscope's own steps, for anything that asks "which step shows this?". */
@@ -52,7 +54,7 @@ export function scopeParamsFromSpec(spec: ScopeSpec, step = 0, inventory?: Recor
     mode: s.mode,
     wavelengthUm: volts ? electronWavelengthNm(volts) / 1000 : spec.xrayKeV ? xrayWavelengthNm(spec.xrayKeV) / 1000 : GREEN_LIGHT_UM,
     dLensUm: s.dLensUm ?? spec.dLensUm,
-    contrastBoost: spec.contrastBoost,
+    contrastBoost: s.contrastBoost ?? spec.contrastBoost,
     condenser: spec.condenser,
     site: spec.site,
   };

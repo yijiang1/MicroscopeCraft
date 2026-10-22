@@ -170,7 +170,7 @@ export function mountEyepiece(el: HTMLElement, ctx: GameContext): ScopeHandle {
     const sample = missionSample(ctx, sampleId)!;
     building = true;
     if (scope.condenser && TRANSMITTED.includes(scope.mode)) tuning = koehlerTuning(el, ctx, scope.tier, render);
-    else if (scope.tier === 5 && scope.mode === 'tem') tuning = temTuning(el, ctx, sampleId, render);
+    else if (scope.tier === 5 && scope.mode === 'tem') tuning = temTuning(el, ctx, sampleId, render, scope.wavelengthUm * 1000);
     else if (scope.tier === 6 && scope.mode === 'haadf') tuning = correctorTuning(el, ctx, render);
     else if (scope.mode === 'ptycho') tuning = ptychoTuning(el, ctx, sampleId, render);
     else if (scope.mode === 'xrf') tuning = beamTuning(el, ctx, sample, render);
