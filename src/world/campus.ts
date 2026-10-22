@@ -463,7 +463,7 @@ function ringSign(): { mesh: THREE.Mesh; lamps: Record<string, THREE.Mesh> } {
   g2.fillStyle = '#f4f1ea';
   g2.textAlign = 'center';
   g2.font = '600 46px Georgia, serif';
-  g2.fillText('CESR: the Cornell Electron Storage Ring', 512, 70);
+  g2.fillText('The Electron Storage Ring', 512, 70);
   g2.font = '30px Georgia, serif';
   g2.fillText('768 m around, in a tunnel under the athletic fields', 512, 120);
   g2.fillText('6 GeV positrons, 200 mA', 512, 400);
@@ -516,7 +516,7 @@ function wilsonLab(group: THREE.Group, walls: Box[]): BeamlineModel {
     lamp.position.set(lx, g + WL_H - 0.6, lz);
     group.add(lamp);
   }
-  group.add(sign('Wilson Laboratory · CHESS', 8, x0 - 0.25, g + WL_H - 1.2, (z0 + z1) / 2, -Math.PI / 2));
+  group.add(sign('Synchrotron Laboratory', 8, x0 - 0.25, g + WL_H - 1.2, (z0 + z1) / 2, -Math.PI / 2));
 
   // the ring's shielding wall, gently curved: CESR's 122 m radius bends it by under half a metre across the hall
   const concrete = mat('#b4b2aa', 0.95);
