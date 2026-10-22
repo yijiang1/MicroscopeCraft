@@ -345,5 +345,47 @@
         "thanks": "No smeared arcs. Now the slices show what is really inside.",
         "needs": { "best": { "tomo_center": 0.8 } } }
     ]
+  },
+  {
+    "id": "sorby", "name": "Henry Clifton Sorby", "years": "1826–1908", "role": "Founder of petrography and metallography",
+    "bio": "A Sheffield scientist of independent means who in 1849 ground a slice of rock thin enough to see through under the microscope, founding the microscopic study of rocks. In 1863 he polished and etched steel and examined it by reflected light, the start of metallography, and in 1861 he argued that the tiny bodies filling chalk are the remains of living things, not crystals.",
+    "greeting": "Grind a rock thin enough and light passes through it, and then it tells you how it was made. Shall we look?",
+    "x": -18.5, "z": 73.5, "facing": -1.5708,
+    "look": { "skin": "#ecc8b0", "hair": "#d8d4cc", "coat": "#3a3a34", "pants": "#2e2e2a", "hairStyle": "short", "beard": "#e4e0d8" },
+    "quests": [
+      { "id": "so_feldspar", "title": "Rock you can see through", "ask": "In 1849 I ground a slice of rock so thin that light shone through it. Show me the twinned stripes inside granite's feldspar.",
+        "hint": "The granite boulder in the rock garden, in front of the geology hall on the engineering quad. A compound microscope shows the stripes.",
+        "thanks": "Each stripe is the same crystal turned over on itself. From slices like this you can read how a rock cooled and how hard it was squeezed.",
+        "needs": { "discovered": ["feldspar_twins"] } },
+      { "id": "so_chalk", "title": "Shields in the chalk", "ask": "Chalk looks like plain white powder, but it is made of the remains of living things. Find the coccoliths.",
+        "hint": "The chalk in the rock garden, with a compound microscope at 400×.",
+        "thanks": "Tiny calcite shields, each shed by a single-celled alga. A whole white cliff, built one shield at a time.",
+        "needs": { "discovered": ["coccoliths"] } },
+      { "id": "so_pearlite", "title": "The pearly constituent", "ask": "In 1863 I polished and etched steel and looked at it by reflected light. Show me the pearly layers I found in it.",
+        "hint": "The rusty steel beam in the materials yard, east of the south hall. The plates are under half a micrometre apart: use the high-quality microscope at 400× or more.",
+        "thanks": "Plates of soft iron and hard carbide side by side, shimmering like mother-of-pearl. That is why I called it the pearly constituent.",
+        "needs": { "discovered": ["pearlite"] } }
+    ]
+  },
+  {
+    "id": "dresselhaus", "name": "Mildred Dresselhaus", "years": "1930–2017", "role": "The Queen of Carbon: graphite, carbon fibres and nanotubes",
+    "bio": "A physicist and electrical engineer at MIT who spent decades working out how electrons behave in graphite and other forms of carbon. In 1992, with Riichiro Saito, Mitsutaka Fujita and Gene Dresselhaus, she predicted that whether a carbon nanotube conducts like a metal depends on how its honeycomb is rolled.",
+    "greeting": "Carbon is my favourite element: soft graphite, hard diamond, and tubes far thinner than a virus. Let's look at it atom by atom.",
+    "x": 19, "z": 50.5, "facing": 3.1416,
+    "look": { "skin": "#f0d0b8", "hair": "#b8b4ae", "coat": "#8a3a4a", "pants": "#2e3040", "hairStyle": "short", "glasses": true },
+    "quests": [
+      { "id": "md_walls", "title": "Tubes of carbon", "ask": "Show me the walls of a carbon nanotube, sheets of carbon 0.34 nanometres apart.",
+        "hint": "Take a bit of the nanotubes from the display case in the atrium to the electron microscope in the science lab, and look at 500,000× or more.",
+        "thanks": "Nested walls, like the rings of a tree. Sumio Iijima saw tubes like these in his electron microscope in 1991.",
+        "needs": { "discovered": ["cnt_walls"] } },
+      { "id": "md_honeycomb", "title": "How the honeycomb rolls", "ask": "We worked out that the angle of the honeycomb decides whether a tube is a metal or a semiconductor. Show me the honeycomb on a nanotube.",
+        "hint": "The nanotubes from the atrium, under the aberration-corrected STEM in annular dark field.",
+        "thanks": "There is the lattice, wrapped around the tube. Roll it one way and it conducts like a metal, another way and it is a semiconductor.",
+        "needs": { "discovered": ["cnt_honeycomb"] } },
+      { "id": "md_graphene", "title": "One flat sheet", "ask": "Unroll a nanotube and you get graphene, a single sheet of carbon atoms. Show me its honeycomb.",
+        "hint": "The graphene sample in the materials cabinet in the science lab, with the aberration-corrected STEM.",
+        "thanks": "Each atom 0.142 nanometres from its neighbours. I studied graphite for decades before anyone peeled off a single sheet.",
+        "needs": { "discovered": ["graphene_lattice"] } }
+    ]
   }
 ]

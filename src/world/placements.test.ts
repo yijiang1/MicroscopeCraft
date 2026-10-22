@@ -52,7 +52,7 @@ describe('world layout', () => {
       const at = `${npc.id} at ${npc.x},${npc.z}`;
       expect(heightAt(npc.x, npc.z), at).toBeGreaterThan(waterLevelAt(npc.x, npc.z) + 0.15);
       expect(Math.hypot(npc.x, npc.z), at).toBeLessThan(WORLD_RADIUS - 8);
-      const indoors = inLab(npc.x, npc.z) || inChess(npc.x, npc.z) || inGreenhouse(npc.x, npc.z);
+      const indoors = inLab(npc.x, npc.z) || inChess(npc.x, npc.z) || inGreenhouse(npc.x, npc.z) || inAtrium(npc.x, npc.z);
       if (!indoors) expect(insideBuilding(npc.x, npc.z, 0.5), at).toBe(false);
       for (const b of INDOOR_SOLIDS) expect(npc.x > b.x0 - 0.5 && npc.x < b.x1 + 0.5 && npc.z > b.z0 - 0.5 && npc.z < b.z1 + 0.5, at).toBe(false);
     }
