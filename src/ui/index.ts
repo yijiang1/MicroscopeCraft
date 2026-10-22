@@ -37,16 +37,19 @@ export function mountUI(el: HTMLElement, ctx: GameContext, training: TrainingGam
   el.style.cssText += ';background:#101418ee;padding:10px;box-sizing:border-box;display:none;font:14px system-ui,sans-serif;color:#e8eef2';
   const css = document.createElement('style');
   css.textContent = `
-    .mc-menu-row{display:flex;align-items:center;gap:10px;width:100%;margin:3px 0;padding:8px 10px;border:1px solid #ffffff1a;border-radius:8px;background:#ffffff0d;color:inherit;font:inherit;text-align:left;cursor:pointer}
+    .mc-menu-row{display:flex;align-items:center;gap:10px;width:100%;margin:3px 0;padding:7px 10px;border:1px solid #ffffff1a;border-radius:8px;background:#ffffff0d;color:inherit;font:inherit;text-align:left;cursor:pointer}
     .mc-menu-row[hidden]{display:none}
     .mc-menu-row:hover,.mc-menu-row:focus-visible{background:#ffffff24;outline:none}
     .mc-menu-row .ic{font-size:18px;width:22px;text-align:center}
     .mc-menu-row .lb{flex:1;display:flex;flex-direction:column;line-height:1.2}
     .mc-menu-row .sub{font-size:11px;opacity:.6}
     .mc-menu-row.danger{color:#ff9a8a}
-    .mc-menu-sep{height:1px;background:#ffffff1f;margin:8px 2px}
-    .mc-menu-h{font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.55;margin:4px 2px 2px}
+    .mc-menu-grid{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:6px;margin:3px 0}
+    .mc-menu-grid .mc-menu-row{flex-direction:column;gap:3px;margin:0;padding:8px 4px;text-align:center}
+    .mc-menu-grid .mc-menu-row .lb{align-items:center;font-size:12px}
+    .mc-menu-h{font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.55;margin:12px 2px 4px}
     .mc-menu-form{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 6px;padding:8px 10px;border-radius:8px;background:#ffffff0a;font-size:12px}
+    .mc-menu-form[hidden]{display:none}
     .mc-menu-form input,.mc-menu-form select{flex:1;min-width:0}
     .mc-menu-form p{flex-basis:100%;margin:0;opacity:.65;line-height:1.35}
     .mc-menu-form a{color:#8fc8f0}`;
@@ -59,15 +62,24 @@ export function mountUI(el: HTMLElement, ctx: GameContext, training: TrainingGam
     b.onclick = onclick;
     return { b, set: (text: string, detail = '') => ((main.textContent = text), (sub.textContent = detail)) };
   };
-  const sep = () => Object.assign(document.createElement('div'), { className: 'mc-menu-sep' });
+  /** Small tiles side by side, for the places on campus, the settings and the game actions. */
+  const grid = (...rows: { b: HTMLButtonElement }[]) => {
+    const g = document.createElement('div');
+    g.className = 'mc-menu-grid';
+    g.style.setProperty('--n', String(rows.length));
+    g.append(...rows.map((x) => x.b));
+    return g;
+  };
   const tree = row('🌳', 'Tech tree', () => techTree.toggle(), 'T');
   const dex = row('🔬', 'Microdex', () => microdex.toggle(), 'M');
   const journalBtn = row('📓', 'Journal', () => journal.toggle(), 'J');
   const mysteryBtn = row('🧩', 'Mystery samples', () => { setMenu(false); mystery.open(); });
-  const storeBtn = row('🛍️', 'ScopeCraft Store & wardrobe', () => { setMenu(false); campusActivities.open('store'); });
-  const labBtn = row('🧪', 'Science Building activities', () => { setMenu(false); campusActivities.open('lab'); });
-  const chessBtn = row('🔬', 'Wilson Lab activities', () => { setMenu(false); campusActivities.open('chess'); });
-  const refsBtn = row('📚', 'References', () => journal.toggle('references'));
+  const storeBtn = row('🛍️', 'Store', () => { setMenu(false); campusActivities.open('store'); });
+  storeBtn.b.title = 'ScopeCraft Store & wardrobe';
+  const labBtn = row('🧪', 'Science lab', () => { setMenu(false); campusActivities.open('lab'); });
+  labBtn.b.title = 'Science Building activities';
+  const chessBtn = row('🧲', 'Wilson Lab', () => { setMenu(false); campusActivities.open('chess'); });
+  chessBtn.b.title = 'Wilson Lab activities';
   const tutorialBtn = row('🎓', 'Tutorial', () => {
     setMenu(false);
     tutorial.replay();
@@ -78,7 +90,8 @@ export function mountUI(el: HTMLElement, ctx: GameContext, training: TrainingGam
   const syncMode = () => {
     const { advanced } = ctx.state;
     modeRow.b.querySelector('.ic')!.textContent = advanced ? '🛠️' : '🌱';
-    modeRow.set(advanced ? 'Mode: advanced' : 'Mode: easy', advanced ? 'You build the compound microscope by hand at the workbench' : 'C crafts every microscope · click for advanced');
+    modeRow.set(advanced ? 'Advanced' : 'Easy', 'mode');
+    modeRow.b.title = advanced ? 'You build the compound microscope by hand at the workbench. Click for easy mode.' : 'C crafts every microscope. Click for advanced mode.';
     benchBtn.b.hidden = !advanced;
   };
   syncMode();
@@ -88,7 +101,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext, training: TrainingGam
   });
   const syncMute = () => {
     mute.b.querySelector('.ic')!.textContent = sound.muted() ? '🔇' : '🔊';
-    mute.set(sound.muted() ? 'Sound off' : 'Sound on');
+    mute.set(sound.muted() ? 'Off' : 'On', 'sound');
   };
   syncMute();
   // --- AI provider and API key for chatting with scientists: the player's own key, kept only in this browser
@@ -111,7 +124,8 @@ export function mountUI(el: HTMLElement, ctx: GameContext, training: TrainingGam
     const p = getProvider();
     const { label, model, keyUrl } = PROVIDERS[p];
     providerPick.value = p;
-    keyRow.set('AI chat', getKey() ? `${label} · chat with scientists is on` : 'No API key · needed to chat with scientists');
+    keyRow.set('AI chat', getKey() ? label.split(' ').at(-1)! : 'no key');
+    keyRow.b.title = getKey() ? `${label}: chat with scientists is on` : 'Add an API key to chat with scientists';
     keyInput.placeholder = getKey() ? 'Key saved · paste to replace' : `Paste your ${label} API key`;
     keyNote.innerHTML = `Uses ${model}. The key stays in this browser and is sent only to ${label.split(' ')[0]}. <a href="${keyUrl}" target="_blank" rel="noopener">Get a key</a>`;
   };
@@ -161,8 +175,8 @@ export function mountUI(el: HTMLElement, ctx: GameContext, training: TrainingGam
     }
     return true;
   };
-  const saveBtn = row('💾', 'Save game', () => toast.notify(save() ? 'Game saved' : 'Could not save (browser storage blocked)', 1600, 2));
-  const restart = row('↺', 'Restart game', () => {
+  const saveBtn = row('💾', 'Save', () => toast.notify(save() ? 'Game saved' : 'Could not save (browser storage blocked)', 1600, 2));
+  const restart = row('↺', 'Restart', () => {
     if (!confirm('Restart from scratch? Your inventory, microscopes and Microdex will be erased.')) return;
     resetting = true;
     try {
@@ -183,7 +197,13 @@ export function mountUI(el: HTMLElement, ctx: GameContext, training: TrainingGam
   title.innerHTML = 'Menu <kbd>Tab</kbd>';
   title.style.margin = '2px 2px 10px';
   const heading = (text: string) => Object.assign(document.createElement('div'), { className: 'mc-menu-h', textContent: text });
-  el.append(css, title, tree.b, benchBtn.b, dex.b, journalBtn.b, mysteryBtn.b, refsBtn.b, storeBtn.b, labBtn.b, chessBtn.b, sep(), heading('Settings'), modeRow.b, mute.b, keyRow.b, keyForm, sep(), tutorialBtn.b, saveBtn.b, restart.b);
+  el.append(
+    css, title,
+    tree.b, benchBtn.b, dex.b, journalBtn.b, mysteryBtn.b,
+    heading('On campus'), grid(storeBtn, labBtn, chessBtn),
+    heading('Settings'), grid(modeRow, mute, keyRow), keyForm,
+    heading('Game'), grid(tutorialBtn, saveBtn, restart),
+  );
 
   let menuOpen = false;
   const setMenu = (open: boolean) => {
@@ -200,7 +220,8 @@ export function mountUI(el: HTMLElement, ctx: GameContext, training: TrainingGam
     const mission = ctx.state.mystery;
     mysteryBtn.b.hidden = !mission;
     mysteryBtn.set('Mission notebook', mission?.conclusion ? 'The unlabelled alloy · complete' : mission ? `The unlabelled alloy · ${mission.scans.length}/${SCANS.length} scans` : 'Accept a mystery sample from Bragg');
-    storeBtn.set('ScopeCraft Store & wardrobe', `${ctx.state.economy.coins} coins · ${ctx.state.economy.vouchers} vouchers`);
+    storeBtn.set('Store', `${ctx.state.economy.coins} coins`);
+    storeBtn.b.title = `ScopeCraft Store & wardrobe · ${ctx.state.economy.coins} coins · ${ctx.state.economy.vouchers} vouchers`;
   };
   render();
 

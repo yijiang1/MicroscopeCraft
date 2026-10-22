@@ -1,4 +1,4 @@
-// The validator is the only path from LLM output into the game (DESIGN.md). Owner: Person C.
+// The validator is the only path from LLM output into the game (docs/DESIGN.md). Owner: Person C.
 // Errors are plain sentences so they can be sent back to the model for the one retry.
 import { WorldSpecSchema, type Catalog, type WorldSpec } from './schema';
 

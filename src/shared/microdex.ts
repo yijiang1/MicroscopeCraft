@@ -14,7 +14,7 @@ export interface DexBiome {
   biome: Biome;
   cards: DexCard[];
   found: number;
-  /** A biome with no authored samples is a locked area (DESIGN.md: other biomes are shown locked). */
+  /** A biome with no authored samples is a locked area (docs/DESIGN.md: other biomes are shown locked). */
   locked: boolean;
   complete: boolean;
 }

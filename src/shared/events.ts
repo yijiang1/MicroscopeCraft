@@ -1,4 +1,4 @@
-// The only way modules talk to each other. Names mirror the contract in DESIGN.md.
+// The only way modules talk to each other. Names mirror the contract in docs/DESIGN.md.
 import type { Tier } from './schema';
 
 export interface GameEvents {

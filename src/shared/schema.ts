@@ -2,13 +2,13 @@ import type { Economy } from './economy';
 // The shared contract: every type is a Zod schema, so the same definition is the TS type,
 // the runtime validator (client data loading, tests, server world-spec validator) and,
 // via z.toJSONSchema(), the JSON Schema for LLM prompts.
-// Change these only after telling the team (see README → Contributing).
+// Change these only after telling the team (see docs/DEVELOPMENT.md → Contributing).
 // Units: all lengths are micrometres (µm), spelled out in field names (sizeUm, dLensUm).
 import { z } from 'zod';
 import type { MysteryRun } from './mystery';
 
 /** 0 naked eye · 1 hand lens · 2 compound · 3 high-quality optics · 4 fluorescence (phase contrast, dark field)
- *  · 5 transmission electron · 6 aberration-corrected STEM · 7 synchrotron beamline (see DESIGN.md). */
+ *  · 5 transmission electron · 6 aberration-corrected STEM · 7 synchrotron beamline (see docs/DESIGN.md). */
 export const TierSchema = z.union([
   z.literal(0), z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5), z.literal(6), z.literal(7),
 ]);
@@ -266,7 +266,7 @@ export const CatalogEntrySchema = z.object({
 export const CatalogSchema = z.record(Id, CatalogEntrySchema);
 export type Catalog = z.infer<typeof CatalogSchema>;
 
-/** The only thing the LLM produces. Shape matches the example in DESIGN.md. */
+/** The only thing the LLM produces. Shape matches the example in docs/DESIGN.md. */
 export const WorldSpecSchema = z.object({
   name: z.string().min(1),
   scales: z
