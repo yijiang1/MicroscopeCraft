@@ -171,3 +171,9 @@ Pitch points: the instrument is earned by building it, part by part; every upgra
 Run `npm run dev`, then open `/minigames/invisible-specimen/index.html` on the local server. The standalone game includes ten assignments, optical and electron imaging, magnification, specimen-locked zoom, and a saved discovery journal. You can also open its HTML file directly without a server.
 
 See [integration notes](public/minigames/invisible-specimen/INTEGRATION.txt) for the completion event and iframe setup. Building entry points and inventory rewards are not wired into the main world yet.
+
+### New visitors and footsteps
+
+Hans Bethe stands outside the science building at (20, 20); Earl Kirkland is nearby at (20, 32). Press **E** to talk, or track them from the scientists journal. Each has two requests. Their dialogue and block-style appearances are fictionalized.
+
+Walking and running play quiet, synthesized footsteps, with grass, stone, and water variations. Steps stop in the air, when movement stops, and when controls are unlocked. Use **Tab → Sound** to mute them along with the other game sounds.

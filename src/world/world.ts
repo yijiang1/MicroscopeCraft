@@ -15,8 +15,9 @@ import type { WorldHandle } from './index';
 import { buildModel } from './models';
 import { buildNpc, type NpcFigure } from './npc';
 import { buildPlayer } from './player';
+import { createFootstepTracker } from './footsteps';
 import { AIMS, PLACEMENTS, RADIUS, samplesOf, SPAWN, type Aim, type Kind, type Placement } from './placements';
-import { buildTerrain, buildWater, FALLS_X, gorgeZ, heightAt, LAKE, waterLevelAt, WATER_LEVEL, WORLD_RADIUS } from './terrain';
+import { buildTerrain, buildWater, FALLS_X, gorgeZ, heightAt, LAKE, pathAt, waterLevelAt, WATER_LEVEL, WORLD_RADIUS } from './terrain';
 
 const EYE_HEIGHT = 1.7;
 const PLAYER_RADIUS = 0.35;
@@ -561,6 +562,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   };
   const doors: Record<Site, { x: number; z: number }> = { lab: { x: SCIENCE.x0 - 1, z: EM_SPOT.z }, chess: { x: WILSON.x0 - 1, z: -4 } };
 
+  const footsteps = createFootstepTracker();
   const clock = new THREE.Clock();
   let raf = requestAnimationFrame(function frame() {
     raf = requestAnimationFrame(frame);
@@ -601,7 +603,16 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       if (area) visit(ctx, area);
     }
     campus.update(t);
-    player.update(Math.hypot(px - previousX, pz - previousZ), dt);
+    const distance = Math.hypot(px - previousX, pz - previousZ);
+    const active = controls.isLocked && !paused && !pick;
+    const grounded = vy === 0 && camera.position.y <= heightAt(px, pz) + EYE_HEIGHT + 0.02;
+    const running = keys.has('shift');
+    if (footsteps.update(distance, !!active && grounded, running)) {
+      const surface = heightAt(px, pz) < waterLevelAt(px, pz) ? 'water'
+        : pathAt(px, pz) > 0.5 || inLab(px, pz) || inChess(px, pz) || inGreenhouse(px, pz) ? 'stone' : 'grass';
+      ctx.bus.emit('footstep', { surface, running });
+    }
+    player.update(distance, dt);
     figures.forEach((f) => f.update(t));
     updateView();
 

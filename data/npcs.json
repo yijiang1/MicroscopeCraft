@@ -345,5 +345,95 @@
         "thanks": "No smeared arcs. Now the slices show what is really inside.",
         "needs": { "best": { "tomo_center": 0.8 } } }
     ]
+  },
+  {
+    "id": "bethe",
+    "name": "Hans Bethe",
+    "years": "1906–2005",
+    "role": "Theorist of electron diffraction in crystals",
+    "bio": "Hans Bethe developed a dynamical theory of electron diffraction in crystals, published in 1928. His work describes electron waves interacting with a periodic crystal potential; this game uses fictionalized dialogue.",
+    "greeting": "A crystal can scatter an electron wave more than once. Let us start by looking at its diffraction pattern.",
+    "x": 20,
+    "z": 20,
+    "facing": -1.5708,
+    "look": {
+      "skin": "#efcdb6",
+      "hair": "#b9b8b4",
+      "coat": "#665747",
+      "pants": "#3d3b39",
+      "hairStyle": "bald",
+      "glasses": true
+    },
+    "quests": [
+      {
+        "id": "hb_diffraction",
+        "title": "Waves in a crystal",
+        "ask": "Show me the diffraction peaks of salt.",
+        "hint": "Collect salt from the picnic table in the quad, then use electron diffraction at the science lab TEM or X-ray diffraction at CHESS.",
+        "thanks": "The positions reveal periodic order. Electron diffraction intensities can also depend on multiple scattering inside the crystal.",
+        "needs": {
+          "discovered": [
+            "salt_bragg"
+          ]
+        }
+      },
+      {
+        "id": "hb_lattice",
+        "title": "From pattern to lattice",
+        "ask": "Now resolve an atomic lattice in the crystal sample.",
+        "hint": "Take the glowing crystal by the science lab entrance to the TEM and use its atomic-resolution step.",
+        "thanks": "A periodic lattice and a diffraction pattern describe related information. Interpreting the image still requires a model of the microscope.",
+        "needs": {
+          "discovered": [
+            "crystal_lattice"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "kirkland",
+    "name": "Earl Kirkland",
+    "years": "Computational electron microscopy",
+    "role": "Author of Advanced Computing in Electron Microscopy",
+    "bio": "Earl J. Kirkland is the author of Advanced Computing in Electron Microscopy and has worked on computation in electron microscopy at Cornell. His work covers electron scattering and image simulation; this game uses fictionalized dialogue.",
+    "greeting": "A good simulation helps explain what the microscope shows. First align the instrument, then examine the crystal.",
+    "x": 20,
+    "z": 32,
+    "facing": 3.1416,
+    "look": {
+      "skin": "#efd1ba",
+      "hair": "#b6b1a8",
+      "coat": "#7399b5",
+      "pants": "#b6a17c",
+      "hairStyle": "short",
+      "glasses": true
+    },
+    "quests": [
+      {
+        "id": "ek_align",
+        "title": "Know your instrument",
+        "ask": "Align the TEM and achieve a score of at least 80 percent.",
+        "hint": "At the science lab TEM, open the alignment mini-game and adjust the controls until the alignment score reaches 80 percent.",
+        "thanks": "Alignment is part of the imaging model. Compare images only after you know the instrument conditions.",
+        "needs": {
+          "best": {
+            "tem_align": 0.8
+          }
+        }
+      },
+      {
+        "id": "ek_columns",
+        "title": "Read the atomic columns",
+        "ask": "Show me the strontium and titanium columns in strontium titanate.",
+        "hint": "Use the strontium titanate sample on the lab materials bench with the STEM in annular dark field.",
+        "thanks": "Different column intensities carry structural information. Quantitative interpretation needs scattering simulations and known specimen conditions.",
+        "needs": {
+          "discovered": [
+            "sto_zcontrast"
+          ]
+        }
+      }
+    ]
   }
 ]

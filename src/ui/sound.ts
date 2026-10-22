@@ -1,5 +1,6 @@
 // One short WebAudio sound per game action, synthesised (no asset files). Owner: Person D.
 // Browsers only allow audio after a user gesture, so the AudioContext starts on the first click or key.
+import type { GameEvents } from '../shared/events';
 import type { GameContext } from '../shared/state';
 
 interface Tone {
@@ -73,6 +74,37 @@ export function mountSound(ctx: GameContext): SoundHandle {
     }
   };
 
+  let noise: AudioBuffer | null = null;
+  const step = ({ surface, running }: GameEvents['footstep']) => {
+    if (muted || !ac || ac.state !== 'running') return;
+    // Reuse a noise buffer; a filtered crunch accompanies a quiet low thud.
+    if (!noise) {
+      noise = ac.createBuffer(1, Math.ceil(ac.sampleRate * 0.2), ac.sampleRate);
+      const samples = noise.getChannelData(0);
+      for (let i = 0; i < samples.length; i++) samples[i] = Math.random() * 2 - 1;
+    }
+    const water = surface === 'water';
+    const stone = surface === 'stone';
+    const duration = water ? 0.16 : stone ? 0.065 : 0.1;
+    const t = ac.currentTime;
+    const source = ac.createBufferSource();
+    const filter = ac.createBiquadFilter();
+    const gain = ac.createGain();
+    source.buffer = noise;
+    source.playbackRate.value = 0.9 + Math.random() * 0.2;
+    filter.type = 'lowpass';
+    filter.frequency.value = water ? 1900 : stone ? 1000 : 650;
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.linearRampToValueAtTime((running ? 0.13 : 0.09) * (water ? 1.3 : 1), t + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+    source.connect(filter).connect(gain).connect(ac.destination);
+    source.onended = () => { source.disconnect(); filter.disconnect(); gain.disconnect(); };
+    source.start(t);
+    source.stop(t + duration + 0.01);
+    play([{ freq: stone ? 150 : 95, to: 45, dur: 0.07, type: 'sine', gain: running ? 0.09 : 0.06 }]);
+  };
+  const offStep = ctx.bus.on('footstep', step);
+
   const offs = (Object.keys(SOUNDS) as (keyof typeof SOUNDS)[]).map((event) =>
     ctx.bus.on(event, () => play(SOUNDS[event])),
   );
@@ -89,6 +121,7 @@ export function mountSound(ctx: GameContext): SoundHandle {
     },
     muted: () => muted,
     dispose() {
+      offStep();
       offs.forEach((off) => off());
       removeEventListener('pointerdown', start);
       removeEventListener('keydown', start);

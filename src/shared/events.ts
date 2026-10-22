@@ -8,6 +8,8 @@ export interface GameEvents {
   closeEyepiece: Record<string, never>;
   /** scope → guide: advice from the rendered image, including focus, alignment, stains and damage. */
   eyepieceStatus: { sampleId: string; text: string };
+  /** Grounded player movement; consumed by the shared audio controller. */
+  footstep: { surface: 'grass' | 'stone' | 'water'; running: boolean };
   itemGathered: { itemId: string; count: number };
   itemCrafted: { itemId: string };
   discoveryUnlocked: { id: string };
