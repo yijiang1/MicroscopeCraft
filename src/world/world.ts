@@ -408,8 +408,10 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
 
   const onKey = (e: KeyboardEvent, down: boolean) => {
     const k = e.key.toLowerCase();
-    if (down) keys.add(k);
-    else keys.delete(k);
+    const move = { arrowup: 'w', arrowdown: 's', arrowleft: 'a', arrowright: 'd' }[k] ?? k;
+    if (move !== k && controls.isLocked) e.preventDefault(); // no page scroll
+    if (down) keys.add(move);
+    else keys.delete(move);
     if (e.code === 'Space') {
       if (down) keys.add(' ');
       else keys.delete(' ');
@@ -600,9 +602,12 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       const p = camera.position;
       const ground = heightAt(p.x, p.z);
       const wading = ground < waterLevelAt(p.x, p.z);
-      const speed = (keys.has('shift') ? RUN : WALK) * (wading ? 0.55 : 1) * dt;
-      controls.moveForward(((keys.has('w') ? 1 : 0) - (keys.has('s') ? 1 : 0)) * speed);
-      controls.moveRight(((keys.has('d') ? 1 : 0) - (keys.has('a') ? 1 : 0)) * speed);
+      const fwd = (keys.has('w') ? 1 : 0) - (keys.has('s') ? 1 : 0);
+      const right = (keys.has('d') ? 1 : 0) - (keys.has('a') ? 1 : 0);
+      // divide by the input length so diagonals aren't √2 faster
+      const speed = ((keys.has('shift') ? RUN : WALK) * (wading ? 0.55 : 1) * dt) / (Math.hypot(fwd, right) || 1);
+      controls.moveForward(fwd * speed);
+      controls.moveRight(right * speed);
       collide(p);
       const r = Math.hypot(p.x, p.z);
       if (r > WORLD_RADIUS - 2) p.multiplyScalar((WORLD_RADIUS - 2) / r); // keeps x, z; y is reset below
