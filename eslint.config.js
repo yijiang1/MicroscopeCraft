@@ -1,11 +1,11 @@
 import tseslint from 'typescript-eslint';
 
-// Module boundaries: shared imports no renderer; world/scope/ui/guide never import each other.
+// Module boundaries: shared imports no renderer; world/scope/ui/guide/workbench never import each other.
 const ban = (patterns, message) => ({
   'no-restricted-imports': ['error', { patterns: [{ group: patterns, message }] }],
 });
 const others = (self) =>
-  ['world', 'scope', 'ui', 'guide'].filter((m) => m !== self).flatMap((m) => [`**/${m}`, `**/${m}/**`]);
+  ['world', 'scope', 'ui', 'guide', 'workbench'].filter((m) => m !== self).flatMap((m) => [`**/${m}`, `**/${m}/**`]);
 
 export default tseslint.config(
   { ignores: ['dist', 'node_modules'] },
@@ -13,11 +13,11 @@ export default tseslint.config(
   {
     files: ['src/shared/**/*.ts'],
     rules: ban(
-      ['three', 'three/*', '**/world/**', '**/scope/**', '**/ui/**', '**/guide/**'],
+      ['three', 'three/*', '**/world/**', '**/scope/**', '**/ui/**', '**/guide/**', '**/workbench/**'],
       'src/shared must stay pure: no Three.js, no DOM, no feature modules.',
     ),
   },
-  ...['world', 'scope', 'ui', 'guide'].map((m) => ({
+  ...['world', 'scope', 'ui', 'guide', 'workbench'].map((m) => ({
     files: [`src/${m}/**/*.ts`],
     rules: ban(others(m), 'Modules never import each other; talk through src/shared (state + bus).'),
   })),
