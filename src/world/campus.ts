@@ -2,11 +2,13 @@
 // the science building with the electron microscopy lab on its glass ground floor, and the waterfall; to the south,
 // the engineering quad (after Cornell's): the materials, geology, east and south halls and a glass atrium. Every hall
 // has a door and a ground-floor room. East are the athletic fields over the storage ring and the chemistry building;
-// north, over the gorge, a suspension footbridge leads to the residence halls.
+// north, over the gorge, a suspension footbridge leads to the residence halls; west, down the slope, the Gothic west
+// campus halls and a tower. An iron railing runs along both rims of the gorge, open only at the trails down to the creek.
 // Boxes, prisms and canvas textures only. Walls are axis-aligned boxes the player collides with.
 import * as THREE from 'three';
 import { booksTexture, facadeTexture, fieldTexture, labelTexture, meshTexture, waterfallTexture } from './textures';
-import { creekY, FALLS_X, gorgeZ, heightAt, WATER_LEVEL } from './terrain';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { CAYUGA_X, creekY, FALLS_X, gorgeZ, heightAt, TRAILS, WATER_LEVEL } from './terrain';
 
 /** An axis-aligned footprint, x0 < x1, z0 < z1 (north is -z). */
 export interface Box {
@@ -55,6 +57,8 @@ interface Hall {
   floors: number;
   wall: string;
   flat?: boolean;
+  /** Collegiate Gothic: a crenellated parapet around the flat roof. */
+  gothic?: boolean;
   /** The door: which wall, and where along it (an x on the north or south wall, a z on the east or west wall). */
   door: { side: 'n' | 's' | 'e' | 'w'; at: number };
   /** The ground-floor room: bookshelves, a lab bench with glassware, or a blackboard over a long table, on the wall facing the door. */
@@ -80,6 +84,11 @@ const HALLS: Hall[] = [
   // north campus, over the gorge: two residence halls
   { box: box(14, 38, -104, -94), floors: 4, wall: '#b9ad9a', flat: true, door: { side: 's', at: 26 }, room: 'books' },
   { box: box(-8, 6, -108, -92), floors: 3, wall: '#a69c8c', door: { side: 's', at: -1 }, room: 'books' },
+  // west campus, at the foot of the slope: Gothic stone residence halls and a tower (after the Baker group)
+  { box: box(-110, -90, -26, -16), floors: 4, wall: '#8a8173', flat: true, gothic: true, door: { side: 'e', at: -21 }, room: 'books' },
+  { box: box(-110, -90, 0, 10), floors: 4, wall: '#857c6f', flat: true, gothic: true, door: { side: 'e', at: 5 }, room: 'books' },
+  { box: box(-86, -80, -12, -6), floors: 7, wall: '#7d766a', flat: true, gothic: true, door: { side: 'e', at: -9 }, room: 'class' },
+  { box: box(-118, -112, -14, -4), floors: 3, wall: '#8f8578', flat: true, gothic: true, door: { side: 'e', at: -9 }, room: 'class' },
 ];
 /** The clock tower, where the bells hang. */
 export const TOWER = { x: -38, z: -1, half: 2.5 };
@@ -209,6 +218,21 @@ function hall(h: Hall, group: THREE.Group, walls: Box[]) {
   floor.receiveShadow = true;
   group.add(upper, floor);
   room(h, ground, group, walls);
+  if (h.gothic) {
+    // merlons a metre apart all round the roof edge, merged into one mesh
+    const merlons: THREE.BufferGeometry[] = [];
+    const top = ground + h.floors * FLOOR_H;
+    for (const [ax, az, bx, bz] of [[x0, z0, x1, z0], [x1, z0, x1, z1], [x1, z1, x0, z1], [x0, z1, x0, z0]] as const) {
+      const n = Math.round(Math.hypot(bx - ax, bz - az));
+      for (let i = 0; i < n; i += 2) {
+        const k = (i + 0.5) / n;
+        merlons.push(new THREE.BoxGeometry(0.55, 0.7, 0.55).translate(ax + (bx - ax) * k, top + 0.35, az + (bz - az) * k));
+      }
+    }
+    const parapet = new THREE.Mesh(mergeGeometries(merlons)!, mat(h.wall, 0.95));
+    parapet.castShadow = true;
+    group.add(parapet);
+  }
   if (h.flat) return;
   const alongX = w >= d;
   const span = (alongX ? d : w) + 0.6;
@@ -834,6 +858,46 @@ function fields(group: THREE.Group, walls: Box[]) {
   walls.push(STANDS);
 }
 
+/** An iron railing along both rims of the gorge, wherever the drop to the creek is more than 3 m, with gaps at the tops
+ *  of the trails and at the bridge; a stone dam across the lip of the falls keeps waders in the lake. */
+function gorgeRailing(group: THREE.Group, walls: Box[]) {
+  const post = new THREE.CylinderGeometry(0.045, 0.045, 1.1, 6).translate(0, 0.55, 0);
+  const rail = new THREE.BoxGeometry(0.05, 0.05, 2.02);
+  const posts: THREE.Matrix4[] = [];
+  const rails: THREE.Matrix4[] = [];
+  const q = new THREE.Quaternion();
+  for (const side of [-1, 1]) {
+    for (let xa = FALLS_X; xa > CAYUGA_X; xa -= 2) {
+      const xb = xa - 2;
+      const mid = xa - 1;
+      const [za, zb] = [gorgeZ(xa) + side * 10.8, gorgeZ(xb) + side * 10.8];
+      const zm = (za + zb) / 2;
+      if (heightAt(mid, zm) - creekY(mid) < 3) continue;
+      if (xb < BRIDGE.x + 1 && xa > BRIDGE.x - 1) continue;
+      if (TRAILS.some((t) => t.side === side && Math.abs(mid - (t.top + Math.sign(t.bottom - t.top))) < 2.2)) continue;
+      const [ya, yb] = [heightAt(xa, za), heightAt(xb, zb)];
+      posts.push(new THREE.Matrix4().makeTranslation(xa, ya, za));
+      q.setFromUnitVectors(new THREE.Vector3(0, 0, 1), new THREE.Vector3(xb - xa, yb - ya, zb - za).normalize());
+      for (const y of [0.55, 1.05]) rails.push(new THREE.Matrix4().compose(new THREE.Vector3(mid, (ya + yb) / 2 + y, zm), q, new THREE.Vector3(1, 1, 1)));
+      walls.push(box(xb, xa, Math.min(za, zb) - 0.08, Math.max(za, zb) + 0.08));
+    }
+  }
+  const iron = mat('#26292b', 0.6, 0.5);
+  for (const [geo, list] of [[post, posts], [rail, rails]] as const) {
+    const mesh = new THREE.InstancedMesh(geo, iron, list.length);
+    list.forEach((m, i) => mesh.setMatrixAt(i, m));
+    mesh.computeBoundingSphere();
+    mesh.castShadow = true;
+    group.add(mesh);
+  }
+  const z0 = gorgeZ(FALLS_X) - 10.8;
+  const z1 = gorgeZ(FALLS_X) + 10.8;
+  const dam = new THREE.Mesh(new THREE.BoxGeometry(0.8, 3, z1 - z0), mat('#8d877c', 0.95));
+  dam.position.set(FALLS_X + 0.3, WATER_LEVEL + 0.04 - 1.5, (z0 + z1) / 2);
+  group.add(dam);
+  walls.push(box(FALLS_X - 0.1, FALLS_X + 0.7, z0, z1));
+}
+
 /** The suspension footbridge: steel portal towers on each rim, two main cables sagging between them with hangers down to
  *  the deck, and a mesh screen along both sides; the cables run on past the towers down to concrete anchor blocks. */
 function bridge(group: THREE.Group, walls: Box[]) {
@@ -956,6 +1020,7 @@ export function buildCampus(): Campus {
   atrium(group, walls);
   fields(group, walls);
   bridge(group, walls);
+  gorgeRailing(group, walls);
   const hallSign = (i: number, text: string, side: 'south' | 'east') => {
     const b = HALLS[i]!.box;
     const y = heightAt((b.x0 + b.x1) / 2, (b.z0 + b.z1) / 2) + FLOOR_H + 0.6;

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { BRIDGE_RAILS, groundAt } from './campus';
 import { areaAt, arrowTo, collide, heading, PLAYER_RADIUS } from './navigation';
-import { LAKE } from './terrain';
+import { deepWater, gorgeZ, heightAt, LAKE, TRAILS } from './terrain';
 
 describe('walking around', () => {
   const wall = { x0: 0, x1: 4, z0: 0, z1: 2 };
@@ -40,5 +40,15 @@ describe('walking around', () => {
     const p = { x: 26.8, z: -67 };
     collide(p, BRIDGE_RAILS, []);
     expect(p.x).toBeLessThan(26.61);
+  });
+
+  it('the creek is off limits, but the ledge beside it is dry and the trails lead down to it', () => {
+    expect(deepWater(0, gorgeZ(0))).toBe(true);
+    expect(deepWater(0, gorgeZ(0) + 5)).toBe(false);
+    expect(deepWater(LAKE.x, LAKE.z)).toBe(false); // the small lake can be waded
+    for (const t of TRAILS) {
+      expect(deepWater(t.bottom, t.z1)).toBe(false);
+      expect(heightAt(t.bottom, t.z1)).toBeLessThan(-8);
+    }
   });
 });

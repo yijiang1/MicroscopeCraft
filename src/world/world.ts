@@ -19,7 +19,7 @@ import { buildPlayer } from './player';
 import { createFrameLoop } from './loop';
 import { areaAt, arrowTo, collide, heading, type Solid } from './navigation';
 import { PLACEMENTS, SPAWN, type Placement } from './placements';
-import { buildTerrain, buildWater, heightAt, LAKE, waterLevelAt, WATER_LEVEL, WORLD_RADIUS } from './terrain';
+import { buildTerrain, buildWater, deepWater, heightAt, LAKE, waterLevelAt, WATER_LEVEL, WORLD_RADIUS } from './terrain';
 
 const EYE_HEIGHT = 1.7;
 const WALK = 5;
@@ -187,7 +187,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   crystalLight.position.set(CRYSTAL_SPOT.x, heightAt(CRYSTAL_SPOT.x, CRYSTAL_SPOT.z) + 2.6, CRYSTAL_SPOT.z);
   scene.add(crystalLight);
 
-  const { group: decor, blockers } = buildDecor([...PLACEMENTS, ...Object.values(ctx.data.npcs)].map((p) => ({ x: p.x, z: p.z })));
+  const { group: decor, blockers, update: updateDecor } = buildDecor([...PLACEMENTS, ...Object.values(ctx.data.npcs)].map((p) => ({ x: p.x, z: p.z })));
   scene.add(decor);
 
   // --- aim ring
@@ -511,6 +511,13 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       controls.moveRight(right * speed);
       // up on the bridge its side screens are walls too; down in the gorge you walk under it
       collide(p, onDeck(p.x, p.z, p.y - EYE_HEIGHT) ? [...campus.walls, ...BRIDGE_RAILS] : campus.walls, solids);
+      // the creek and the big lake are off limits: slide along the water's edge instead (an old save may start in it)
+      const inWater = (x: number, z: number) => deepWater(x, z) && !onDeck(x, z, p.y - EYE_HEIGHT);
+      if (inWater(p.x, p.z) && !inWater(previousX, previousZ)) {
+        if (!inWater(previousX, p.z)) p.x = previousX;
+        else if (!inWater(p.x, previousZ)) p.z = previousZ;
+        else p.set(previousX, p.y, previousZ);
+      }
       const r = Math.hypot(p.x, p.z);
       if (r > WORLD_RADIUS - 2) p.multiplyScalar((WORLD_RADIUS - 2) / r); // keeps x, z; y is reset below
       const feet = groundAt(p.x, p.z, p.y - EYE_HEIGHT);
@@ -547,6 +554,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     }
     player.update(Math.hypot(px - previousX, pz - previousZ), dt);
     figures.forEach((f) => f.update(t));
+    updateDecor(t);
     updateView();
     if (px !== previousX || pz !== previousZ || camera.position.y !== previousY || player.root.rotation.y !== previousYaw || anims.length) redrawShadows();
 

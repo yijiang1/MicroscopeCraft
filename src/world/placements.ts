@@ -57,7 +57,7 @@ export const PLACEMENTS: Placement[] = [
   ...cluster('iron', 23, -46.5, 8, 3.5, 5),
   ...cluster('galena', 14, -53, 4, 2.5, 21, 1.2),
   ...cluster('quartz', -26, -48, 10, 4.5, 6, 1.5),
-  ...cluster('fluorite', -40, -50, 4, 2.5, 22),
+  ...cluster('fluorite', -40, -48.5, 4, 2.5, 22),
   // Down at the creek: pale willemite rocks and dark heavy sand on the bank, a shale slab full of fossils
   ...creekBank('willemite', [2, 6, 10], 5.6),
   ...creekBank('monazite', [-12, -8, -4], 5.6),
