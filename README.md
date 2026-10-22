@@ -226,4 +226,6 @@ Press **U** to open the full campus map; press **U** or **Esc** to close it. Fis
 
 ### Field binoculars
 
-Buy **Field binoculars** for **75 coins** in ScopeCraft Store. Once acquired, they appear in the bottom-right inventory with **B** to raise/lower the 4× view. The shortcut is hidden until purchase. The advanced microscope workbench uses **Shift+B** (or its menu button).
+Buy **Field binoculars** for **75 coins** in ScopeCraft Store. Once acquired, they appear in the bottom-right inventory with **=** to raise/lower the 4× view. The shortcut is hidden until purchase. The advanced microscope workbench uses **Shift+B** (or its menu button).
+
+Microdex (**M**) includes a fish collection for all six species. Catches stay recorded after preparing their scales; prepare and view samples directly from the collection, and track microscopic discoveries separately.

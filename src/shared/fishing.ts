@@ -10,6 +10,7 @@ export const FISH = [
 export function catchFish(ctx: GameContext, roll: number) {
   if (!Number.isFinite(roll) || !ctx.state.economy.owned.includes('fishing_rod')) return null;
   const fish = FISH[Math.min(FISH.length - 1, Math.max(0, Math.floor(roll * FISH.length)))]!;
+  if (!ctx.state.economy.caughtFish.includes(fish.id)) ctx.state.economy.caughtFish.push(fish.id);
   const stock = ctx.state.economy.fish;
   stock[fish.id] = (stock[fish.id] ?? 0) + 1;
   ctx.bus.emit('economyChanged', {});
@@ -19,6 +20,7 @@ export function prepareFish(ctx: GameContext, id: string) {
   if (!FISH.some(f => f.id === id) || !((ctx.state.economy.fish[id] ?? 0) > 0)) return false;
   const sample = `fish_${id}`;
   if (!ctx.data.samples[sample]) return false;
+  if (!ctx.state.economy.caughtFish.includes(id)) ctx.state.economy.caughtFish.push(id);
   ctx.state.economy.fish[id]!--;
   carrySample(ctx,sample); ctx.bus.emit('economyChanged', {}); return true;
 }

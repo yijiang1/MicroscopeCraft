@@ -423,7 +423,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       picker.key(e);
       return;
     }
-    if (k==='b'&&!e.shiftKey&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.repeat) {
+    if (k==='='&&!e.shiftKey&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.repeat) {
       if (!paused&&!driving&&fishingAction==='idle'&&!document.querySelector('dialog[open]')&&!(e.target instanceof HTMLInputElement)&&!(e.target instanceof HTMLTextAreaElement)&&!(e.target instanceof HTMLSelectElement)&&!(e.target as HTMLElement).isContentEditable) binoculars.toggle();
       return;
     }

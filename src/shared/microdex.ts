@@ -1,3 +1,4 @@
+import { FISH } from './fishing';
 // Microdex view-model: one card per feature, grouped by biome. Pure so the UI and tests share it. Owner: Person D.
 import { BiomeSchema, type Biome, type Feature, type GameData, type GameState } from './schema';
 
@@ -33,5 +34,17 @@ export function microdex(data: Pick<GameData, 'samples'>, state: Pick<GameState,
       );
     const found = cards.filter((c) => c.found).length;
     return { biome, cards, found, locked: cards.length === 0, complete: cards.length > 0 && found === cards.length };
+  });
+}
+
+/** Older saves also identify catches from existing stock, samples and discoveries. */
+export function fishMicrodex(data: Pick<GameData, 'samples'>, state: Pick<GameState, 'economy' | 'carriedSamples' | 'discoveries'>) {
+  return FISH.map(fish => {
+    const sampleId = `fish_${fish.id}`;
+    const sample = data.samples[sampleId];
+    const stock = state.economy.fish[fish.id] ?? 0;
+    const prepared = state.carriedSamples.includes(sampleId);
+    const found = sample?.features.filter(f => state.discoveries.includes(f.id)).length ?? 0;
+    return { ...fish, sampleId, stock, prepared, caught: state.economy.caughtFish.includes(fish.id) || stock > 0 || prepared || found > 0, found, total: sample?.features.length ?? 0 };
   });
 }
