@@ -1027,7 +1027,7 @@ export function buildCampus(): Campus {
   const group = new THREE.Group();
   const walls: Box[] = [];
   HALLS.forEach((h) => hall(h, group, walls));
-  group.add(buildScopeStore()); walls.push(...STORE_WALLS, ...STORE_FURNITURE, box(-9.35,-7.65,30.1,33.9));
+  group.add(buildScopeStore()); walls.push(...STORE_WALLS, ...STORE_FURNITURE, box(-9.35,-7.65,30.9,34.7));
   // solid outside: the tower, the statues and the portico's columns (the halls and the lab build their own walls)
   walls.push(...FOOTPRINTS.filter((b) => b !== STORE_FOOTPRINT && b !== SCIENCE && b !== MUSEUM && b !== PORTICO && !HALLS.some((h) => h.box === b)));
   walls.push(...PORTICO_COLUMNS.map((c) => box(c.x - 0.35, c.x + 0.35, c.z - 0.35, c.z + 0.35)));

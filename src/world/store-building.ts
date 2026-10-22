@@ -81,7 +81,9 @@ export function buildScopeStore() {
     cylinder(.42,.2,x!,10.65-h!,z!,dark);
     cylinder(.3,.04,x!,10.53-h!,z!,glass);
   }
-  const displayCar = buildMiata(); displayCar.root.position.set(3.5, STORE_FLOOR_RISE, 0); group.add(displayCar.root);
+  const displayCar = buildMiata(); displayCar.root.position.set(3.5, STORE_FLOOR_RISE, 0.8);
+  displayCar.root.rotation.y = Math.PI; // Front (-Z) faces the south entrance (+Z).
+  group.add(displayCar.root);
   group.add(buildStoreInterior());
   const c=document.createElement('canvas');c.width=1024;c.height=192;
   const g=c.getContext('2d')!;g.fillStyle='#aa3444';g.fillRect(0,0,1024,192);g.fillStyle='#fff8e6';g.textAlign='center';g.font='700 68px system-ui';g.fillText('ScopeCraft Store',512,85);g.font='27px system-ui';g.fillText('BOOKS  ·  FIELD GEAR  ·  SCIENCE SOUVENIRS',512,143);

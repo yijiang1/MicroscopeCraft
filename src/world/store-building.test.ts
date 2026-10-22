@@ -15,7 +15,7 @@ describe('microscope store', () => {
     }
   });
   it('leaves a route around the counter and car into the fitting booth', () => {
-    const walls = [...STORE_WALLS, ...STORE_FURNITURE, {x0:-9.35,x1:-7.65,z0:30.1,z1:33.9}];
+    const walls = [...STORE_WALLS, ...STORE_FURNITURE, {x0:-9.35,x1:-7.65,z0:30.9,z1:34.7}];
     const route = [[-14,36],[-14,29.55],[-8.6,29.55],[-8.6,28.8]];
     for(let i=1;i<route.length;i++) {
       const a=route[i-1]!,b=route[i]!;
