@@ -50,6 +50,7 @@ export function purchase(ctx: GameContext, id: string, payment: 'coins' | 'vouch
   e[payment] -= price; e.owned.push(id); ctx.bus.emit('economyChanged', {}); return true;
 }
 export function chooseCharacter(ctx: GameContext, character: Economy['character']) {
+  if (character === 'lena' && ctx.state.economy.character !== 'lena') ctx.state.economy.eyewear = 'none';
   ctx.state.economy.character = character; ctx.bus.emit('economyChanged', {});
 }
 export function equip(ctx: GameContext, id: string) {

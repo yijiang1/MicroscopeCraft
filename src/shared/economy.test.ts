@@ -4,18 +4,21 @@ import { chooseCharacter, equip, npcSample, purchase, SPECIMEN_IDS, storeCatalog
 import { createGame, parseSave, recordScore, toSave } from './state';
 const game = () => createGame(loadGameData());
 describe('campus economy', () => {
-  it('switches character models without losing progress or purchased equipment and saves the choice', () => {
+  it('switches character models without losing progress or purchases, starting Lena without eyewear', () => {
     const ctx = game(); recordScore(ctx, 'gram', 1);
     purchase(ctx, 'glasses', 'coins'); equip(ctx, 'glasses');
     const before = JSON.parse(JSON.stringify(ctx.state.economy));
     for (const model of ['explorer', 'lena'] as const) {
       chooseCharacter(ctx, model);
-      expect(ctx.state.economy).toEqual({ ...before, character: model });
+      expect(ctx.state.economy).toEqual({ ...before, character: model, eyewear: model === 'lena' ? 'none' : 'glasses' });
       const restored = createGame(ctx.data, undefined, parseSave(JSON.stringify(toSave(ctx.state))));
       expect(restored.state.economy.character).toBe(model);
-      expect(restored.state.economy.eyewear).toBe('glasses');
+      expect(restored.state.economy.eyewear).toBe(model === 'lena' ? 'none' : 'glasses');
       expect(restored.state.best.gram).toBe(1);
     }
+    expect(equip(ctx, 'glasses')).toBe(true);
+    chooseCharacter(ctx, 'lena');
+    expect(ctx.state.economy.eyewear).toBe('glasses');
   });
   it('pays new score milestones once and adds one voucher at 80 percent', () => {
     const ctx = game();

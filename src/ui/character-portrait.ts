@@ -10,7 +10,7 @@ export const characterPortrait = (ctx: GameContext, character: Economy['characte
   const scene = new THREE.Scene();
   scene.add(new THREE.HemisphereLight('#fff7e4', '#547277', 2.6));
   const light = new THREE.DirectionalLight('#ffffff', 3); light.position.set(-3, 5, 4); scene.add(light);
-  const model = buildPlayer(); model.equip({ ...ctx.state.economy, character }); model.root.rotation.y = Math.PI + 0.3; scene.add(model.root);
+  const model = buildPlayer(); model.equip({ ...ctx.state.economy, character, eyewear: character === 'lena' ? 'none' : ctx.state.economy.eyewear }); model.root.rotation.y = Math.PI + 0.3; scene.add(model.root);
   const camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 20); camera.position.set(0, 1.1, 4.2); camera.lookAt(0, 1, 0);
   renderer.render(scene, camera);
   const img = document.createElement('img');

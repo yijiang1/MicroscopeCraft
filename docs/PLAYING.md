@@ -178,4 +178,4 @@ Classic glasses cost **30 coins** and Campus sunglasses cost **45 coins**. Both 
 
 ### Change character
 
-Open **Tab → Character** to preview **David** and **Lena** and choose either at any time. Selection applies immediately and saves automatically, including the seated driver model. Purchases, equipped accessories and scientific progress are preserved. Close with **Done** or **Esc**.
+Open **Tab → Character** to preview **David** and **Lena** and choose either at any time. Selection applies immediately and saves automatically, including the seated driver model. Purchases and scientific progress are preserved. Switching to Lena removes eyewear by default; you can equip purchased glasses again in the fitting room. Close with **Done** or **Esc**.
