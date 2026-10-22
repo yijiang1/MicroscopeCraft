@@ -3,8 +3,8 @@ import type { GameContext } from '../shared/state';
 import { characterPortrait } from './character-portrait';
 
 const MODELS: { id: Economy['character']; name: string; description: string }[] = [
-  { id: 'explorer', name: 'Male · David', description: 'Grey hair, light-blue shirt and khaki trousers.' },
-  { id: 'lena', name: 'Female · Lena', description: 'Long brown hair and a dark outfit.' },
+  { id: 'explorer', name: 'David', description: 'Grey hair, light-blue shirt and khaki trousers.' },
+  { id: 'lena', name: 'Lena', description: 'Long brown hair and a dark outfit.' },
 ];
 
 export function mountCharacterSelector(ctx: GameContext) {

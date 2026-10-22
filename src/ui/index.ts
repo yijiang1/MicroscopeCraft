@@ -83,7 +83,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext, training: TrainingGam
   const chessBtn = row('🧲', 'Synchrotron', () => { setMenu(false); campusActivities.open('chess'); });
   chessBtn.b.title = 'Synchrotron Lab activities';
   const characterBtn = row('👤', 'Character', () => { setMenu(false); characters.open(); });
-  characterBtn.set('Character', 'Choose male or female');
+  characterBtn.set('Character', 'Choose David or Lena');
   const tutorialBtn = row('🎓', 'Tutorial', () => {
     setMenu(false);
     tutorial.replay();
