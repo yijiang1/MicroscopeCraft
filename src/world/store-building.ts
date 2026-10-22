@@ -3,6 +3,13 @@ import { heightAt } from './terrain';
 
 /** South-facing entrance on the path between the two quads. */
 export const STORE_FOOTPRINT = { x0: -18, x1: -6, z0: 26, z1: 38 };
+// A small raised slab separates the rendered floor from the terrain depth surface.
+export const STORE_FLOOR_RISE = 0.06;
+export const STORE_FLOOR_HALF = 6.3;
+export const storeFloorAt = (x: number, z: number): number | null =>
+  x >= -12 - STORE_FLOOR_HALF && x <= -12 + STORE_FLOOR_HALF &&
+  z >= 32 - STORE_FLOOR_HALF && z <= 32 + STORE_FLOOR_HALF
+    ? heightAt(-12, 32) + STORE_FLOOR_RISE : null;
 export const STORE_COUNTER = { x: -12, z: 33 };
 export const STORE_WALLS = [
   { x0: -18, x1: -17.7, z0: 26, z1: 38 },
@@ -27,7 +34,7 @@ export function buildScopeStore() {
   const box = (w: number,h: number,d: number,x: number,y: number,z: number,material: THREE.Material) => mesh(new THREE.BoxGeometry(w,h,d),material,x,y,z);
   const cylinder = (r: number,h: number,x: number,y: number,z: number,material: THREE.Material) => mesh(new THREE.CylinderGeometry(r,r,h,32),material,x,y,z);
   // The microscope foot is an actual shop room, with a four-metre-wide open doorway.
-  box(12.6,0.15,12.6,0,-0.075,0,cream);
+  box(STORE_FLOOR_HALF * 2,0.15,STORE_FLOOR_HALF * 2,0,STORE_FLOOR_RISE - 0.075,0,cream);
   box(12.6,0.65,12.6,0,3.55,0,cream);
   box(12.7,0.16,12.7,0,3.2,0,red);
   for (const wall of STORE_WALLS) {

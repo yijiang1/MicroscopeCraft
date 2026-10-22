@@ -1,4 +1,4 @@
-import { buildScopeStore, STORE_FOOTPRINT, STORE_WALLS } from './store-building';
+import { buildScopeStore, storeFloorAt, STORE_FOOTPRINT, STORE_WALLS } from './store-building';
 // Campus buildings on the hilltop: the halls and statues around the quad, a clock tower with a working clock,
 // the science building with the electron microscopy lab on its glass ground floor, and the waterfall; to the south,
 // the engineering quad (after Cornell's): the materials, geology, east and south halls and a glass atrium. Every hall
@@ -142,8 +142,8 @@ export const indoors = (x: number, z: number) =>
 /** Up on the bridge deck, rather than down in the gorge under it, with the feet at `feet`. */
 export const onDeck = (x: number, z: number, feet = Infinity) =>
   Math.abs(x - BRIDGE.x) < BRIDGE.half && z > BRIDGE.z0 && z < BRIDGE.z1 && feet > BRIDGE.y - 1;
-/** Where the feet rest: the deck for someone on the bridge, else the ground. */
-export const groundAt = (x: number, z: number, feet = Infinity) => (onDeck(x, z, feet) ? Math.max(heightAt(x, z), BRIDGE.y) : heightAt(x, z));
+/** Feet rest on the bridge deck, the raised shop floor, or the terrain. */
+export const groundAt = (x: number, z: number, feet = Infinity) => (onDeck(x, z, feet) ? Math.max(heightAt(x, z), BRIDGE.y) : storeFloorAt(x, z) ?? heightAt(x, z));
 /** The bridge's side screens, solid only to someone on the deck. */
 export const BRIDGE_RAILS: Box[] = [-1, 1].map((s) => box(BRIDGE.x + s * BRIDGE.half - 0.05, BRIDGE.x + s * BRIDGE.half + 0.05, BRIDGE.z0, BRIDGE.z1));
 
