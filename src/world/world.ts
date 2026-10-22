@@ -1,4 +1,4 @@
-import { buildMiata, driveStep, TEST_DRIVE_MS } from './miata';
+import { blocksRoadster, buildMiata, driveStep, roadsterGradeOK, TEST_DRIVE_MS } from './miata';
 import { advanceLift, buildTowerLift, constrainTerrace, LIFT, liftBase, nearLift } from './tower-lift';
 import { mountSpeechOverlay } from './speech-overlay';
 import { buildActivityStation, STATIONS } from './activity-stations';
@@ -257,7 +257,8 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const player = buildPlayer();
   scene.add(player.root);
   const viewCamera = camera.clone();
-  const roadster = buildMiata(); roadster.root.visible = false; scene.add(roadster.root);
+  const driver = buildPlayer(); driver.seated(); driver.root.scale.setScalar(0.72); driver.root.position.set(-0.39,0.24,0.4);
+  const roadster = buildMiata(); roadster.root.add(driver.root); roadster.root.visible = false; scene.add(roadster.root);
   let driving = false, driveSpeed = 0, driveYaw = 0, driveDeadline = 0;
   let driveTimer: ReturnType<typeof setTimeout> | undefined;
   let savedThirdPerson = true;
@@ -518,7 +519,9 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   };
 
   /** Everything round and solid: scenery, and the nodes (a gathered one is walkable until it grows back). */
-  const solids: Solid[] = [...blockers.map((b) => ({ x: b.x, z: b.z, radius: b.r })), ...nodes];
+  const scenerySolids = blockers.map((b) => ({ x: b.x, z: b.z, radius: b.r }));
+  const solids: Solid[] = [...scenerySolids, ...nodes];
+  const carSolids: Solid[] = [...scenerySolids, ...nodes.filter(n => blocksRoadster(n.kind))];
   let areaCheck = 0;
   let lastQuarter = -1;
   /** The arrow and distance from the player to (x, z), relative to where they look. */
@@ -578,6 +581,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const offDrive = ctx.bus.on('driveMiata', ({ trial }) => {
     if (driving || (!trial && !ctx.state.economy.owned.includes('miata_na'))) return;
     ridingLift = false; onTerrace = false; paused = false; keys.clear(); vy = 0;
+    driver.equip(ctx.state.economy);
     savedThirdPerson = thirdPerson; thirdPerson = true;
     driving = true; driveSpeed = 0; driveYaw = -Math.PI / 2;
     driveDeadline = trial ? performance.now() + TEST_DRIVE_MS : Infinity;
@@ -601,12 +605,12 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       else if (!paused) {
         const step = driveStep(driveSpeed, (keys.has('w') ? 1 : 0) - (keys.has('s') ? 1 : 0), (keys.has('a') ? 1 : 0) - (keys.has('d') ? 1 : 0), driveYaw, dt);
         const x = camera.position.x + step.dx, z = camera.position.z + step.dz;
-        let blocked = Math.hypot(x,z) > WORLD_RADIUS - 4;
+        let blocked = Math.hypot(x,z) > WORLD_RADIUS - 4 || !roadsterGradeOK(groundAt(x,z) - groundAt(camera.position.x,camera.position.z), Math.hypot(step.dx,step.dz));
         // Check the car's full footprint, including corners, against buildings and people.
         for (const side of [-0.8,0,0.8]) for (const front of [-1.7,0,1.7]) {
           const q = { x: x + side * Math.cos(step.yaw) + front * Math.sin(step.yaw), z: z - side * Math.sin(step.yaw) + front * Math.cos(step.yaw) };
-          const before = { ...q }; collide(q, campus.walls, solids);
-          if (Math.hypot(q.x-before.x,q.z-before.z) > 0.001 || deepWater(before.x,before.z) || Math.abs(groundAt(before.x,before.z) - (camera.position.y-EYE_HEIGHT)) > 0.65) blocked = true;
+          const before = { ...q }; collide(q, campus.walls, carSolids);
+          if (Math.hypot(q.x-before.x,q.z-before.z) > 0.001 || deepWater(before.x,before.z) || !roadsterGradeOK(groundAt(before.x,before.z) - groundAt(x,z), Math.hypot(side,front))) blocked = true;
         }
         if (blocked) driveSpeed = 0;
         else { driveSpeed = step.speed; driveYaw = step.yaw; camera.position.set(x,groundAt(x,z)+EYE_HEIGHT,z); }
@@ -796,7 +800,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       document.removeEventListener('visibilitychange', rememberPlayer);
       minimap.dispose();
       speech.dispose(); offActivity(); offDress(); offDrive(); clearTimeout(driveTimer);
-      player.dispose();
+      driver.dispose(); player.dispose();
       controls.dispose();
       renderer.dispose();
       el.replaceChildren();

@@ -31,6 +31,7 @@ export function buildPlayer() {
   box(root, [0.08, 0.08, 0.07], [0, 1.67, -0.2], materials.skin);
   const arms: THREE.Group[] = [];
   const legs: THREE.Group[] = [];
+  const knees: THREE.Group[] = [];
   for (const side of [-1, 1]) {
     const arm = new THREE.Group();
     arm.position.set(side * 0.38, 1.4, 0);
@@ -40,8 +41,10 @@ export function buildPlayer() {
     arms.push(arm);
     const leg = new THREE.Group();
     leg.position.set(side * 0.14, 0.8, 0);
-    box(leg, [0.23, 0.65, 0.28], [0, -0.31, 0], materials.pants);
-    box(leg, [0.25, 0.16, 0.39], [0, -0.72, -0.05], materials.boots);
+    box(leg, [0.23, 0.34, 0.28], [0, -0.15, 0], materials.pants);
+    const knee = new THREE.Group(); knee.position.y = -0.32; leg.add(knee); knees.push(knee);
+    box(knee, [0.23, 0.32, 0.28], [0, -0.15, 0], materials.pants);
+    box(knee, [0.25, 0.16, 0.39], [0, -0.4, -0.05], materials.boots);
     root.add(leg);
     legs.push(leg);
   }
@@ -58,6 +61,11 @@ export function buildPlayer() {
   let phase = 0;
   return {
     root,
+    seated() {
+      arms.forEach(arm => { arm.rotation.x = 1.05; });
+      legs.forEach(leg => { leg.rotation.x = Math.PI / 2; });
+      knees.forEach(knee => { knee.rotation.x = -Math.PI / 2; });
+    },
     equip(economy: Economy) {
       materials.shirt.color.set(economy.shirt === 'red' ? '#b32235' : economy.shirt === 'lab' ? '#f0f2ed' : '#8ec9ee');
       backpack.visible = economy.backpack; souvenir.visible = economy.model;

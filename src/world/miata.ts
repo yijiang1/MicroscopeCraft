@@ -1,9 +1,16 @@
 import * as THREE from 'three';
 
 export const TEST_DRIVE_MS = 30_000;
+// Full-lock turning radius in metres: tight enough for campus paths.
+const TURN_RADIUS = 6;
+/** Low plants and loose surface samples do not stop a vehicle; trees and rocks still do. */
+const SOFT_SURFACES = new Set(['sunflower', 'leaf', 'flower', 'bee', 'fern', 'mushroom', 'sand', 'mud', 'monazite', 'algae_mat', 'feather', 'pine_branch', 'web', 'bone']);
+export const blocksRoadster = (kind: string) => !SOFT_SURFACES.has(kind);
+/** Permit small curbs and grades up to roughly 33 degrees, but reject ledges and cliffs. */
+export const roadsterGradeOK = (rise: number, run: number) => Math.abs(rise) <= 0.18 + Math.max(0, run) * 0.65;
 export function driveStep(speed: number, throttle: number, steer: number, yaw: number, dt: number) {
   const nextSpeed = THREE.MathUtils.clamp(speed + (throttle * 9 - speed * (throttle ? 0.65 : 2.5)) * dt, -5, 15);
-  const nextYaw = yaw + steer * nextSpeed * 0.055 * dt;
+  const nextYaw = yaw + steer * nextSpeed / TURN_RADIUS * dt;
   return { speed: nextSpeed, yaw: nextYaw, dx: -Math.sin(nextYaw) * nextSpeed * dt, dz: -Math.cos(nextYaw) * nextSpeed * dt };
 }
 /** A compact NA-inspired roadster: open cockpit, pop-up lamps and round rear lights. Front is -Z. */
