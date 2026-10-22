@@ -50,6 +50,17 @@ describe('world layout', () => {
     }
   });
 
+  it('no corner of the map is empty: every walkable spot is within 40 m of something to look at or someone to talk to', () => {
+    const spots = [...PLACEMENTS, ...Object.values(data.npcs)];
+    for (let x = -135; x <= 135; x += 5) {
+      for (let z = -135; z <= 135; z += 5) {
+        if (Math.hypot(x, z) > WORLD_RADIUS - 12 || heightAt(x, z) < waterLevelAt(x, z)) continue;
+        const nearest = Math.min(...spots.map((p) => Math.hypot(p.x - x, p.z - z)));
+        expect(nearest, `${x},${z}`).toBeLessThan(40);
+      }
+    }
+  });
+
   it('every scientist stands somewhere reachable: on dry ground, out of walls and furniture', () => {
     for (const npc of Object.values(data.npcs)) {
       const at = `${npc.id} at ${npc.x},${npc.z}`;

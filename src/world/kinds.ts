@@ -6,6 +6,9 @@ import {
   deviceCase, fallenLog, feather, fern, flowerPatch, galenaCubes, gramKit, leafPlant, logwoodLog, materialsBench, mergeByMaterial,
   mossyStone, mushrooms, nanoCase, nettlePlant, onionPlant, orchidPlant, oreNode, picnicTable, pineBranch, potatoPlant, resinStump,
   painting, rustyBeam, sampleRack, sandNode, shaleSlab, slideCabinet, solarPanel, spiderWeb, sunflower, wingOnStone,
+  acidSieve, appleTree, beehive, cloverPatch, cornStalks, cow, dairyStand, dormDesk, dustBunnies, fallenApples, limestoneLedge, observatory,
+  owlPellet, plankDock, saltPile, slimeLog, stainedGlass, tallGrass, trilobiteSlab, trophyCase, turfRoll,
+  cattails, dandelions, hornCorals, hornetNest, sheep,
 } from './models';
 import { mulberry32 } from './terrain';
 
@@ -148,6 +151,42 @@ const kinds = {
   },
   nanocase: { aim: { samples: ['quantum_dots', 'nanotubes', 'zeolite', 'mof'] }, radius: 0.8, indoors: true, fixedYaw: true, model: () => nanoCase() },
   devicecase: { aim: { samples: ['superconductor', 'blue_led'] }, radius: 0.8, indoors: true, fixedYaw: true, model: () => deviceCase() },
+
+  // the corners of the bigger campus. North campus: a dorm room's desk and bed, and the observatory's gutter
+  desk: { aim: { samples: ['data_disc', 'phone_screen'] }, radius: 0.6, indoors: true, fixedYaw: true, model: () => dormDesk() },
+  bed: { aim: { sample: 'dust_bunny' }, radius: 0.9, indoors: true, fixedYaw: true, model: (rng) => dustBunnies(rng) },
+  observatory: { aim: { sample: 'micrometeorites' }, radius: 2, fixedYaw: true, model: () => observatory() },
+  // the north woods
+  tick_grass: { aim: { sample: 'deer_tick' }, radius: 0, model: (rng) => tallGrass(rng) },
+  slime_log: { aim: { sample: 'slime_mold' }, radius: 0.7, fixedYaw: true, model: (rng) => slimeLog(rng) },
+  pellet: { aim: { sample: 'owl_pellet' }, radius: 0.4, model: (rng) => owlPellet(rng) },
+  // the orchard and apiary
+  apple_tree: { aim: { sample: 'apple' }, radius: 0.5, model: (rng) => appleTree(rng) },
+  hive: { aim: { sample: 'beehive' }, radius: 0.45, model: () => beehive() },
+  windfall: { aim: { sample: 'fruit_flies' }, radius: 0, model: (rng) => fallenApples(rng) },
+  // the farm, the dairy and the cornfield
+  dairy_stand: { aim: { samples: ['ice_cream', 'yogurt'] }, radius: 1, fixedYaw: true, model: () => dairyStand() },
+  cow: { aim: { sample: 'rumen_fluid' }, radius: 0.9, model: () => cow() },
+  corn: { aim: { sample: 'maize_ear' }, radius: 0.9, model: (rng) => cornStalks(rng) },
+  // the athletic fields and the field house
+  clover: { aim: { sample: 'clover' }, radius: 0, model: (rng) => cloverPatch(rng) },
+  turf: { aim: { sample: 'turf_infill' }, radius: 0.8, model: (rng) => turfRoll(rng) },
+  trophy: { aim: { sample: 'medal' }, radius: 0.8, indoors: true, fixedYaw: true, model: () => trophyCase() },
+  // west campus and the Cayuga shore
+  dock: { aim: { sample: 'lake_plankton' }, radius: 0.8, fixedYaw: true, model: () => plankDock() },
+  salt_pile: { aim: { sample: 'road_salt' }, radius: 1.1, model: (rng) => saltPile(rng) },
+  window: { aim: { sample: 'stained_glass' }, radius: 0.4, indoors: true, fixedYaw: true, model: () => stainedGlass() },
+  // the fossil quarry
+  ledge: { aim: { sample: 'crinoid_limestone' }, radius: 0.9, model: (rng) => limestoneLedge(rng) },
+  trilobite: { aim: { sample: 'trilobite' }, radius: 0.6, model: (rng) => trilobiteSlab(rng) },
+  sieve: { aim: { sample: 'conodonts' }, radius: 0.5, model: () => acidSieve() },
+  // the edges of the map: cattails at the creek mouth, dandelions past the fields, horn corals beyond the quarry,
+  // sheep at the far end of the farm, a hornet nest past the orchard
+  cattail: { aim: { sample: 'cattails' }, radius: 0, model: (rng) => cattails(rng) },
+  dandelion: { aim: { sample: 'dandelion' }, radius: 0, model: (rng) => dandelions(rng) },
+  horn_coral: { aim: { sample: 'horn_coral' }, radius: 0.6, model: (rng) => hornCorals(rng) },
+  sheep: { aim: { sample: 'sheep_wool' }, radius: 0.6, model: () => sheep() },
+  hornet_nest: { aim: { sample: 'hornet_nest' }, radius: 0.4, fixedYaw: true, model: () => hornetNest() },
 } satisfies Record<string, KindSpec>;
 
 export type Kind = keyof typeof kinds;

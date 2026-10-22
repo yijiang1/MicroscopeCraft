@@ -6,7 +6,8 @@
   { "id": "discover_100", "name": "Microdex scholar", "description": "Make 100 discoveries.", "when": { "discoveries": 100 } },
   { "id": "discover_150", "name": "Microdex master", "description": "Make 150 discoveries.", "when": { "discoveries": 150 } },
   { "id": "discover_200", "name": "Microdex sage", "description": "Make 200 discoveries.", "when": { "discoveries": 200 } },
-  { "id": "discover_all", "name": "Everything, seen", "description": "Fill the whole Microdex: all 276 discoveries.", "when": { "discoveries": 276 } },
+  { "id": "discover_300", "name": "Microdex legend", "description": "Make 300 discoveries.", "when": { "discoveries": 300 } },
+  { "id": "discover_all", "name": "Everything, seen", "description": "Fill the whole Microdex: all 378 discoveries.", "when": { "discoveries": 378 } },
   { "id": "naked_eye", "name": "No lens needed", "description": "With your bare eyes, spot salt cubes, a Volvox ball and a Paramecium.", "when": { "discovered": ["salt_cubes", "volvox", "paramecium"] } },
   { "id": "leaf_scales", "name": "A leaf at every scale", "description": "See a leaf's veins, its cells, their chloroplasts and the stacks inside them.", "when": { "discovered": ["leaf_veins", "leaf_cells", "chloroplasts", "grana_stacks"] } },
   { "id": "all_gates", "name": "Hidden in plain sight", "description": "Identify every material that only a microscope can recognise.", "when": { "discovered": ["copper_veins", "pressed_oil", "tungsten_grains", "fluorite_cubes", "willemite_glow", "monazite_diffraction", "beryllium_atoms"] } },
@@ -32,6 +33,22 @@
   { "id": "biome_chess", "name": "Wilson Lab, complete", "description": "Make every discovery at Wilson Lab.", "when": { "biome": "chess" } },
   { "id": "biome_eng", "name": "The engineering quad, complete", "description": "Make every discovery in the rock garden, the materials yard and the atrium.", "when": { "biome": "eng" } },
   { "id": "biome_museum", "name": "Art detective", "description": "Make every discovery in the paintings of the art museum, from brushstrokes to X-ray maps.", "when": { "biome": "museum" } },
+  { "id": "biome_north", "name": "North campus, complete", "description": "Make every discovery in the residence halls and at the observatory, across the gorge.", "when": { "biome": "north" } },
+  { "id": "biome_woods", "name": "The north woods, complete", "description": "Make every discovery in the woods west of the residence halls.", "when": { "biome": "woods" } },
+  { "id": "biome_orchard", "name": "The orchard, complete", "description": "Make every discovery in the orchard and apiary beyond the lake.", "when": { "biome": "orchard" } },
+  { "id": "biome_farm", "name": "The farm, complete", "description": "Make every discovery at the dairy, in the barn and in the cornfield.", "when": { "biome": "farm" } },
+  { "id": "biome_fields", "name": "The athletic fields, complete", "description": "Make every discovery on the athletic fields and in the field house.", "when": { "biome": "fields" } },
+  { "id": "biome_shore", "name": "West campus, complete", "description": "Make every discovery in west campus and on the Cayuga shore.", "when": { "biome": "shore" } },
+  { "id": "biome_quarry", "name": "The quarry, complete", "description": "Make every discovery in the fossil quarry.", "when": { "biome": "quarry" } },
+
+  { "id": "shrinking_tracks", "name": "Shrinking tracks", "description": "See the tracks of a CD, a DVD and a Blu-ray disc: 1.6, 0.74 and 0.32 micrometres apart.", "when": { "discovered": ["cd_tracks", "dvd_tracks", "bluray_tracks"] } },
+  { "id": "pixel_peeper", "name": "Pixel peeper", "description": "Look into a phone screen down to the transistors behind its pixels.", "when": { "discovered": ["phone_pixels", "phone_subpixels", "phone_tft"] } },
+  { "id": "stardust", "name": "Stardust on the roof", "description": "Find a micrometeorite in gutter dust and map its nickel.", "when": { "discovered": ["olivine_bars", "spherule_nickel"] } },
+  { "id": "free_fertiliser", "name": "Free fertiliser", "description": "Follow nitrogen fixation into a clover root: the nodule, the bacteroids and the membrane around them.", "when": { "discovered": ["clover_nodules", "bacteroids", "symbiosome_membrane"] } },
+  { "id": "blue_black", "name": "Blue-black", "description": "Stain starch with iodine in an apple and in a corn kernel.", "when": { "discovered": ["apple_starch", "maize_starch"] } },
+  { "id": "burp_chemistry", "name": "Where the methane comes from", "description": "See methanogens glow in rumen fluid.", "when": { "discovered": ["methanogen_glow"] } },
+  { "id": "stone_lenses", "name": "Lenses of stone", "description": "Study a trilobite eye: its lenses, the doublet inside them and their aligned calcite.", "when": { "discovered": ["trilobite_eye", "lens_bowl", "lens_c_axis"] } },
+  { "id": "below_the_limit", "name": "Ultramicroscopist", "description": "Find gold nanoparticles in ruby glass and Lyme spirochetes in a tick, both thinner than light can resolve.", "when": { "discovered": ["ruby_gold", "lyme_spirochetes"] } },
 
   { "id": "koehler_done", "name": "Even light", "description": "Align a condenser (Köhler illumination).", "when": { "best": { "koehler": 0.5 } } },
   { "id": "koehler_master", "name": "Köhler's pupil", "description": "Align a condenser almost perfectly (95% or better).", "when": { "best": { "koehler": 0.95 } } },
@@ -62,10 +79,11 @@
 
   { "id": "visit_gorge", "name": "Down to the creek", "description": "Climb down to the creek at the bottom of the gorge.", "when": { "visited": ["gorge"] } },
   { "id": "visit_all", "name": "Campus explorer", "description": "Visit the lake, the quad, the gorge, the west slope, the pine grove, the greenhouse, the science lab, Wilson Lab, the clock tower, the engineering quad, the athletic fields and the suspension bridge.", "when": { "visited": ["lake", "quad", "gorge", "slope", "forest", "garden", "lab", "chess", "tower", "engquad", "fields", "bridge"] } },
+  { "id": "visit_corners", "name": "Every corner", "description": "Reach the far corners: north campus, the north woods, the orchard, the farm, west campus and the fossil quarry.", "when": { "visited": ["north", "woods", "orchard", "farm", "shore", "quarry"] } },
 
   { "id": "quests_10", "name": "Helpful", "description": "Do 10 requests for the scientists.", "when": { "quests": 10 } },
   { "id": "quests_25", "name": "Lab assistant", "description": "Do 25 requests for the scientists.", "when": { "quests": 25 } },
-  { "id": "quests_all", "name": "Colleague of giants", "description": "Do all 64 requests for the scientists.", "when": { "quests": 64 } },
+  { "id": "quests_all", "name": "Colleague of giants", "description": "Do all 77 requests for the scientists.", "when": { "quests": 77 } },
   { "id": "achievements_25", "name": "Achiever", "description": "Earn 25 achievements.", "when": { "achievements": 25 } },
   { "id": "achievements_75", "name": "Hall of fame", "description": "Earn 75 achievements.", "when": { "achievements": 75 } }
 ]
