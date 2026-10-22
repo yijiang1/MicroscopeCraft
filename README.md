@@ -4,6 +4,8 @@
 
 **▶ [Play it in your browser](https://yijiang1.github.io/MicroscopeCraft/)**: no install needed.
 
+[![Watch the MicroscopeCraft video](docs/thumbnail.png)](https://www.youtube.com/watch?v=dAQLDst3Eng)
+
 You start on a university campus with nothing but your own eyes. Gather sand, iron and copper, craft your first hand lens, and look again: the leaf in front of you suddenly has veins. Keep building, from a compound microscope to fluorescence, a transmission electron microscope, an aberration-corrected STEM and finally a synchrotron beamline modelled on Cornell's CHESS, until you can see single atoms.
 
 Built for the [LLM Hackathon](https://llmhackathon.github.io/).
