@@ -2,6 +2,8 @@
 
 **A Minecraft-style browser game about seeing smaller and smaller things.**
 
+**▶ [Play it in your browser](https://yijiang1.github.io/MicroscopeCraft/)**: no install needed.
+
 You start on a university campus with nothing but your own eyes. Gather sand, iron and copper, craft your first hand lens, and look again: the leaf in front of you suddenly has veins. Keep building, from a compound microscope to fluorescence, a transmission electron microscope, an aberration-corrected STEM and finally a synchrotron beamline modelled on Cornell's CHESS, until you can see single atoms.
 
 Built for the [LLM Hackathon](https://llmhackathon.github.io/).
@@ -20,6 +22,8 @@ Built for the [LLM Hackathon](https://llmhackathon.github.io/).
 Everything you see follows real physics, with simplifications labelled in the code. Resolution comes from wavelength and numerical aperture, magnification past what the optics resolve only gives a bigger blur, electron beams damage delicate samples, and X-ray maps only work above an element's absorption edge. Sample sizes, dates and history are checked against published sources, which are listed in the game's journal.
 
 ## Play it
+
+Play online at **https://yijiang1.github.io/MicroscopeCraft/**, or run it locally:
 
 ```bash
 npm install
