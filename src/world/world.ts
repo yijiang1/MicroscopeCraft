@@ -610,7 +610,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const minimap = mountMinimap(el, life.walkers, open => ctx.bus.emit('campusActivityChanged', { open }));
   const speech = mountSpeechOverlay(el);
   const offActivity = ctx.bus.on('campusActivityChanged', ({ open }) => { paused = open; keys.clear(); if (open) { binoculars.close(); controls.unlock(); } });
-  const dress = () => { player.equip(ctx.state.economy); redrawShadows(); };
+  const dress = () => { player.equip(ctx.state.economy); driver.equip(ctx.state.economy); redrawShadows(); };
   dress();
   const offDress = ctx.bus.on('economyChanged', dress);
   const finishDrive = () => {

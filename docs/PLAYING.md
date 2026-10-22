@@ -175,3 +175,7 @@ The ScopeCraft Store has clothing rails, field backpacks, bookshelves and scienc
 Press **Z** to toggle free look while on foot. Mouse movement turns the camera without changing your character’s facing or WASD movement direction. Press Z again to restore mouse steering. Driving and fishing return to their normal camera controls.
 
 Classic glasses cost **30 coins** and Campus sunglasses cost **45 coins**. Both appear on the store souvenir shelf and in the catalog. Purchased pairs are available in the fitting room: wear one pair at a time, or choose Remove to go without. Eyewear is cosmetic and saved with your outfit.
+
+### Change character
+
+Open **Tab → Character** to preview **Male · David** and **Female · Lena** and choose either at any time. Selection applies immediately and saves automatically, including the seated driver model. Purchases, equipped accessories and scientific progress are preserved. Close with **Done** or **Esc**.

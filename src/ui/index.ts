@@ -1,3 +1,4 @@
+import { mountCharacterSelector } from './character-selector';
 import { mountCampusActivities, type TrainingGames } from './campus-activities';
 // Person D. The goal card (always visible, keyboard-first), a menu panel (Tab), the tech tree (T),
 // the Microdex (M), toasts and sound. Plain DOM; swap for anything.
@@ -32,6 +33,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext, training: TrainingGam
   const mystery = mountMystery(document.body, ctx);
   const closeDialog = mountDialog(ctx, toast, () => mystery.open(true));
   const tutorial = mountTutorial(ctx);
+  const characters = mountCharacterSelector(ctx);
 
   // --- menu panel (hidden until Tab): one icon row per action, key hint on the right
   el.style.cssText += ';background:#101418ee;padding:10px;box-sizing:border-box;display:none;font:14px system-ui,sans-serif;color:#e8eef2';
@@ -80,6 +82,8 @@ export function mountUI(el: HTMLElement, ctx: GameContext, training: TrainingGam
   labBtn.b.title = 'Science Building activities';
   const chessBtn = row('🧲', 'Synchrotron', () => { setMenu(false); campusActivities.open('chess'); });
   chessBtn.b.title = 'Synchrotron Lab activities';
+  const characterBtn = row('👤', 'Character', () => { setMenu(false); characters.open(); });
+  characterBtn.set('Character', 'Choose male or female');
   const tutorialBtn = row('🎓', 'Tutorial', () => {
     setMenu(false);
     tutorial.replay();
@@ -204,7 +208,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext, training: TrainingGam
     css, title,
     tree.b, benchBtn.b, emBenchBtn.b, dex.b, journalBtn.b, mysteryBtn.b,
     heading('On campus'), grid(storeBtn, labBtn, chessBtn),
-    heading('Settings'), grid(modeRow, mute, keyRow), keyForm,
+    heading('Settings'), characterBtn.b, grid(modeRow, mute, keyRow), keyForm,
     heading('Game'), grid(tutorialBtn, saveBtn, restart),
   );
 
@@ -294,6 +298,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext, training: TrainingGam
       mystery.dispose();
       closeDialog();
       tutorial.dispose();
+      characters.dispose();
       inventory.dispose();
       techTree.dispose();
       microdex.dispose();

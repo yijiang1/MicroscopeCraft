@@ -1,9 +1,22 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameData } from './data';
-import { equip, npcSample, purchase, SPECIMEN_IDS, storeCatalog } from './economy';
+import { chooseCharacter, equip, npcSample, purchase, SPECIMEN_IDS, storeCatalog } from './economy';
 import { createGame, parseSave, recordScore, toSave } from './state';
 const game = () => createGame(loadGameData());
 describe('campus economy', () => {
+  it('switches character models without losing progress or purchased equipment and saves the choice', () => {
+    const ctx = game(); recordScore(ctx, 'gram', 1);
+    purchase(ctx, 'glasses', 'coins'); equip(ctx, 'glasses');
+    const before = JSON.parse(JSON.stringify(ctx.state.economy));
+    for (const model of ['explorer', 'lena'] as const) {
+      chooseCharacter(ctx, model);
+      expect(ctx.state.economy).toEqual({ ...before, character: model });
+      const restored = createGame(ctx.data, undefined, parseSave(JSON.stringify(toSave(ctx.state))));
+      expect(restored.state.economy.character).toBe(model);
+      expect(restored.state.economy.eyewear).toBe('glasses');
+      expect(restored.state.best.gram).toBe(1);
+    }
+  });
   it('pays new score milestones once and adds one voucher at 80 percent', () => {
     const ctx = game();
     recordScore(ctx, 'tem_align', 0.6);
