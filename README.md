@@ -60,7 +60,7 @@ Simplified physics is labelled in comments next to the formula.
 | J | Journal: achievements with progress, and every scientist's requests with Track buttons |
 | M | Microdex (click a card you have not found to track its sample) |
 | I | Show or hide the inventory box |
-| Tab | Menu: tech tree, Microdex, journal, sound, save and restart, guide (G jumps straight to the guide box) |
+| Tab | Menu: tech tree, Microdex, journal, sound, save and restart |
 | K | Restock every raw material, skipping the identifications (only when the URL ends in `?demo`) |
 
 ## Finding your way
@@ -78,7 +78,6 @@ The goal card at the top right is always on screen. Its bold line is the one thi
 | Aberration-corrected STEM | Monazite (cerium for the scintillator) | TEM, electron diffraction: its 0.286 nm reflection | Dark heavy sand by the creek |
 | CHESS beamline | Beryl (beryllium windows and X-ray lenses) | STEM, ptychography: beryllium atoms, too light for annular dark field | Pale six-sided crystals at the foot of the west slope |
 
-Ask the guide with **G**: "where do I find quartz sand?", "how do I make glass?" or "what next?".
 
 ## The world
 

@@ -1,4 +1,4 @@
-// Person D. The goal card (always visible, keyboard-first), a menu panel (Tab) with the guide, the tech tree (T),
+// Person D. The goal card (always visible, keyboard-first), a menu panel (Tab), the tech tree (T),
 // the Microdex (M), toasts and sound. Plain DOM; swap for anything.
 import { SAVE_KEY, toSave, type GameContext } from '../shared/state';
 import { fmtUm } from '../shared/sim/walls';
@@ -27,46 +27,46 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   const closeDialog = mountDialog(ctx, toast);
   const tutorial = mountTutorial(ctx);
 
-  // --- menu panel (hidden until Tab): tech tree and microdex buttons, sound, guide
-  el.style.cssText += ';background:#000d;padding:8px;box-sizing:border-box;display:none';
-  const tree = document.createElement('button');
-  const dex = document.createElement('button');
-  const journalBtn = document.createElement('button');
-  const mute = document.createElement('button');
-  const guide = document.createElement('div');
-  const input = document.createElement('input');
-  const reply = document.createElement('p');
-  tree.style.cssText = 'display:block;width:100%;margin:8px 0 2px';
-  tree.textContent = 'Tech tree (T)';
-  tree.onclick = () => techTree.toggle();
-  dex.style.cssText = 'display:block;width:100%;margin:2px 0';
-  dex.onclick = () => microdex.toggle();
-  journalBtn.style.cssText = 'display:block;width:100%;margin:2px 0';
-  journalBtn.onclick = () => journal.toggle();
-  const tutorialBtn = document.createElement('button');
-  tutorialBtn.style.cssText = 'display:block;width:100%;margin:2px 0';
-  tutorialBtn.textContent = 'Tutorial';
-  tutorialBtn.onclick = () => {
+  // --- menu panel (hidden until Tab): one icon row per action, key hint on the right
+  el.style.cssText += ';background:#101418ee;padding:10px;box-sizing:border-box;display:none;font:14px system-ui,sans-serif;color:#e8eef2';
+  const css = document.createElement('style');
+  css.textContent = `
+    .mc-menu-row{display:flex;align-items:center;gap:10px;width:100%;margin:3px 0;padding:8px 10px;border:1px solid #ffffff1a;border-radius:8px;background:#ffffff0d;color:inherit;font:inherit;text-align:left;cursor:pointer}
+    .mc-menu-row:hover,.mc-menu-row:focus-visible{background:#ffffff24;outline:none}
+    .mc-menu-row .ic{font-size:18px;width:22px;text-align:center}
+    .mc-menu-row .lb{flex:1;display:flex;flex-direction:column;line-height:1.2}
+    .mc-menu-row .sub{font-size:11px;opacity:.6}
+    .mc-menu-row kbd{font:11px ui-monospace,monospace;padding:1px 6px;border:1px solid #ffffff40;border-radius:4px;opacity:.7}
+    .mc-menu-row.danger{color:#ff9a8a}
+    .mc-menu-sep{height:1px;background:#ffffff1f;margin:8px 2px}`;
+  const row = (icon: string, label: string, onclick: () => void, key = '') => {
+    const b = document.createElement('button');
+    b.className = 'mc-menu-row';
+    b.innerHTML = `<span class="ic">${icon}</span><span class="lb"><span></span><span class="sub"></span></span>${key ? `<kbd>${key}</kbd>` : ''}`;
+    const [main, sub] = b.querySelectorAll<HTMLSpanElement>('.lb span') as unknown as [HTMLSpanElement, HTMLSpanElement];
+    main.textContent = label;
+    b.onclick = onclick;
+    return { b, set: (text: string, detail = '') => ((main.textContent = text), (sub.textContent = detail)) };
+  };
+  const sep = () => Object.assign(document.createElement('div'), { className: 'mc-menu-sep' });
+  const tree = row('🌳', 'Tech tree', () => techTree.toggle(), 'T');
+  const dex = row('🔬', 'Microdex', () => microdex.toggle(), 'M');
+  const journalBtn = row('📓', 'Journal', () => journal.toggle(), 'J');
+  const refsBtn = row('📚', 'References', () => journal.toggle('references'));
+  const tutorialBtn = row('🎓', 'Tutorial', () => {
     setMenu(false);
     tutorial.replay();
-  };
-  const refsBtn = document.createElement('button');
-  refsBtn.style.cssText = 'display:block;width:100%;margin:2px 0';
-  refsBtn.textContent = 'References';
-  refsBtn.onclick = () => journal.toggle('references');
-  mute.style.cssText = 'display:block;width:100%;margin:2px 0';
-  const syncMute = () => (mute.textContent = sound.muted() ? 'Sound: off' : 'Sound: on');
-  mute.onclick = () => {
+  });
+  const mute = row('', 'Sound', () => {
     sound.toggleMute();
     syncMute();
+  });
+  const syncMute = () => {
+    mute.b.querySelector('.ic')!.textContent = sound.muted() ? '🔇' : '🔊';
+    mute.set(sound.muted() ? 'Sound off' : 'Sound on');
   };
   syncMute();
   // --- save (also automatic after every change and on leaving the page) and restart
-  const saveBtn = document.createElement('button');
-  const restart = document.createElement('button');
-  saveBtn.style.cssText = restart.style.cssText = 'display:block;width:100%;margin:2px 0';
-  saveBtn.textContent = 'Save game';
-  restart.textContent = 'Restart game';
   let resetting = false;
   let travelSave = 0;
   const save = (): boolean => {
@@ -85,8 +85,8 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
     }
     return true;
   };
-  saveBtn.onclick = () => toast.notify(save() ? 'Game saved' : 'Could not save (browser storage blocked)', 1600, 2);
-  restart.onclick = () => {
+  const saveBtn = row('💾', 'Save game', () => toast.notify(save() ? 'Game saved' : 'Could not save (browser storage blocked)', 1600, 2));
+  const restart = row('↺', 'Restart game', () => {
     if (!confirm('Restart from scratch? Your inventory, microscopes and Microdex will be erased.')) return;
     resetting = true;
     try {
@@ -96,28 +96,15 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
       /* nothing saved */
     }
     location.reload();
-  };
+  });
+  restart.b.classList.add('danger');
   addEventListener('pagehide', save);
   const saveWhenHidden = () => { if (document.hidden) save(); };
   document.addEventListener('visibilitychange', saveWhenHidden);
-  input.placeholder = 'Ask the guide (try "where do I find sand?")';
-  input.style.cssText = 'width:100%;box-sizing:border-box';
-  input.addEventListener('keydown', (e) => {
-    e.stopPropagation(); // typing must not trigger world/scope/menu hotkeys
-    if (e.key === 'Escape' || (e.key === 'Tab' && !e.shiftKey)) {
-      e.preventDefault();
-      input.blur();
-      setMenu(false);
-    } else if (e.key === 'Enter' && input.value.trim()) {
-      ctx.bus.emit('guideAsked', { question: input.value.trim() });
-      input.value = '';
-    }
-  });
-  guide.append(input, reply);
   const title = document.createElement('h4');
-  title.textContent = 'Menu (Tab to close)';
-  title.style.margin = '4px 0 8px';
-  el.append(title, tree, dex, journalBtn, refsBtn, tutorialBtn, mute, saveBtn, restart, guide);
+  title.innerHTML = 'Menu <kbd style="font:11px ui-monospace,monospace;opacity:.6">Tab</kbd>';
+  title.style.margin = '2px 2px 10px';
+  el.append(css, title, tree.b, dex.b, journalBtn.b, refsBtn.b, sep(), tutorialBtn.b, mute.b, sep(), saveBtn.b, restart.b);
 
   let menuOpen = false;
   const setMenu = (open: boolean) => {
@@ -129,8 +116,8 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   const goal = mountGoal(ctx, toast, () => setMenu(!menuOpen), inventory.el);
 
   const render = () => {
-    dex.textContent = `Microdex (M) · ${microdex.summary()}`;
-    journalBtn.textContent = `Journal (J) · ${journal.summary()}`;
+    dex.set('Microdex', microdex.summary());
+    journalBtn.set('Journal', journal.summary());
   };
   render();
 
@@ -139,10 +126,6 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
     if (e.key === 'Tab') {
       e.preventDefault();
       setMenu(!menuOpen);
-    } else if (e.key.toLowerCase() === 'g' && !e.repeat) {
-      e.preventDefault();
-      setMenu(true);
-      input.focus();
     }
   };
   addEventListener('keydown', onKey);
@@ -181,10 +164,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
       const f = Object.values(ctx.data.samples).flatMap((x) => x.features).find((x) => x.id === id);
       toast.notify(`New discovery: ${f?.name ?? id}${f ? ` (${fmtUm(f.sizeUm)})` : ''}. Open the Microdex (M)`, 4000, 2);
     }),
-    ctx.bus.on('guideReplied', ({ text }) => {
-      reply.textContent = text;
-      goal.say(text);
-    }),
+    ctx.bus.on('guideReplied', ({ text }) => goal.say(text)),
   ];
   return {
     dispose() {

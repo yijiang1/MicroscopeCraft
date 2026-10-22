@@ -44,7 +44,7 @@ const STEPS: Step[] = [
   },
   {
     title: 'You know the loop',
-    text: 'Each new microscope resolves smaller things. Light microscopes stop at about 0.2 µm, roughly half the wavelength of light; electrons go down to atoms. Scientists around campus ask for help (J), and G asks the guide.',
+    text: 'Each new microscope resolves smaller things. Light microscopes stop at about 0.2 µm, roughly half the wavelength of light; electrons go down to atoms. Scientists around campus ask for help (J),.',
   },
 ];
 
