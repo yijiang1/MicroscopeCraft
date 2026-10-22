@@ -252,11 +252,11 @@
     "look": { "skin": "#e8c4aa", "hair": "#4a3a2e", "coat": "#2a2a2e", "pants": "#2a2a2e", "hairStyle": "short", "beard": "#4a3a2e" },
     "quests": [
       { "id": "rn_seed", "title": "Inside a seed", "ask": "Show me the inside of a seed without cutting it open.",
-        "hint": "A sunflower seed from the quad, by X-ray tomography at the CHESS beamline.",
+        "hint": "A sunflower seed from the quad, by X-ray tomography at the synchrotron beamline.",
         "thanks": "Every fold of the little plant, and the shell untouched! In 1895 I could only cast shadows.",
         "needs": { "discovered": ["seed_embryo"] } },
       { "id": "rn_fossil", "title": "A hidden fossil", "ask": "Find a fossil hidden inside a rock.",
-        "hint": "The fossil shale in the gorge, by tomography at the CHESS beamline.",
+        "hint": "The fossil shale in the gorge, by tomography at the synchrotron beamline.",
         "thanks": "A creature curled up for hundreds of millions of years, and we see it without a chisel.",
         "needs": { "discovered": ["hidden_trilobite"] } },
       { "id": "rn_bone", "title": "Inside bone", "ask": "My first X-ray picture showed bones. Show me the hollows where bone cells live.",
@@ -274,7 +274,7 @@
     "look": { "skin": "#ecc8b0", "hair": "#6a5a4a", "coat": "#3a3a40", "pants": "#3a3a40", "hairStyle": "short", "beard": "#6a5a4a" },
     "quests": [
       { "id": "bg_mystery", "title": "The unlabelled alloy", "ask": "Accept my unknown sample, measure it with an instrument you build, and bring me a conclusion supported by diffraction evidence.",
-        "hint": "Talk to Bragg in Wilson Lab to accept the mission. Carry his unknown to your TEM or STEM in the science lab, or your CHESS beamline, press F at the instrument, and choose diffraction mode.",
+        "hint": "Talk to Bragg in the Synchrotron Lab to accept the mission. Carry his unknown to your TEM or STEM in the science lab, or your synchrotron beamline, press F at the instrument, and choose diffraction mode.",
         "thanks": "You tested a prediction, measured different plane families, and ruled out alternatives. That is an identification I can trust.",
         "needs": { "stats": { "mystery_identified": 1 } } },
       { "id": "bg_salt", "title": "The structure of salt", "ask": "Record the Bragg peaks of table salt.",
@@ -282,15 +282,15 @@
         "thanks": "Sodium and chlorine alternate in a cubic grid, with no salt molecule at all. Chemists were shocked.",
         "needs": { "discovered": ["salt_bragg"] } },
       { "id": "bg_silicon", "title": "A perfect reflection", "ask": "Show me the (111) reflection of a perfect silicon crystal.",
-        "hint": "The silicon crystal on the CHESS sample rack, by X-ray diffraction.",
+        "hint": "The silicon crystal on the synchrotron sample rack, by X-ray diffraction.",
         "thanks": "0.314 nanometres, exactly as the law says. Your monochromator works by the same reflection.",
         "needs": { "discovered": ["si_111"] } },
       { "id": "bg_steel", "title": "Atoms in metal", "ask": "Show me the rings that the iron in steel makes.",
-        "hint": "The steel sample on the CHESS sample rack, by diffraction.",
+        "hint": "The steel sample on the synchrotron sample rack, by diffraction.",
         "thanks": "Iron atoms in a body-centred cube. Much of my later work was on metals and alloys like this.",
         "needs": { "discovered": ["ferrite_rings"] } },
       { "id": "bg_tune", "title": "Choosing the wavelength", "ask": "Tune the undulator and set your monochromator by Bragg's law.",
-        "hint": "At the CHESS beamline, open Beam tuning in X-ray fluorescence mode.",
+        "hint": "At the synchrotron beamline, open Beam tuning in X-ray fluorescence mode.",
         "thanks": "The crystal picks just one wavelength out of the beam. My law, working for you.",
         "needs": { "best": { "beam_tune": 0.7 } } }
     ]
@@ -304,7 +304,7 @@
     "look": { "skin": "#f0d0b8", "hair": "#3a2a20", "coat": "#f0f0f0", "pants": "#2a2a3a", "hairStyle": "bob" },
     "quests": [
       { "id": "rf_x", "title": "Photo 51", "ask": "Record the X-shaped diffraction pattern of a DNA fibre.",
-        "hint": "The DNA fibre on the CHESS sample rack, by X-ray diffraction.",
+        "hint": "The DNA fibre on the synchrotron sample rack, by X-ray diffraction.",
         "thanks": "The cross means a helix, and the layer lines give its turn: 3.4 nanometres.",
         "needs": { "discovered": ["dna_x"] } },
       { "id": "rf_stacking", "title": "The staircase", "ask": "Find the strong arcs that come from the stacked base pairs.",
@@ -326,7 +326,7 @@
     "look": { "skin": "#f0d0b8", "hair": "#8a7a6a", "coat": "#5a6a8a", "pants": "#3a3a4a", "hairStyle": "bun" },
     "quests": [
       { "id": "hd_cobalt", "title": "The cobalt heart", "ask": "Show me where the cobalt is in vitamin B12 crystals.",
-        "hint": "The B12 crystals on the CHESS sample rack, by X-ray fluorescence with the beam tuned above cobalt's edge at 7.71 keV.",
+        "hint": "The B12 crystals on the synchrotron sample rack, by X-ray fluorescence with the beam tuned above cobalt's edge at 7.71 keV.",
         "thanks": "One cobalt atom in each molecule. That heavy atom was the key that let us solve the rest.",
         "needs": { "discovered": ["b12_cobalt"] } },
       { "id": "hd_b12", "title": "A giant puzzle", "ask": "Record the diffraction pattern of vitamin B12.",
@@ -334,20 +334,20 @@
         "thanks": "Thousands of spots. It took us years of measuring and computing to turn them into atoms.",
         "needs": { "discovered": ["b12_spots"] } },
       { "id": "hd_protein", "title": "A protein crystal", "ask": "Proteins were my great love, insulin above all. Show me the Bragg spots of a protein crystal.",
-        "hint": "The lysozyme crystal on the CHESS sample rack, by X-ray diffraction.",
+        "hint": "The lysozyme crystal on the synchrotron sample rack, by X-ray diffraction.",
         "thanks": "In 1934 I helped record the first X-ray photographs of a protein crystal and knew proteins could be solved. Insulin took me 35 years.",
         "needs": { "discovered": ["lysozyme_spots"] } }
     ]
   },
   {
-    "id": "batterman", "name": "Boris Batterman", "years": "1930–2010", "role": "Founding director of CHESS",
-    "bio": "A Cornell physicist and an expert on how X-rays diffract in perfect crystals. He was the first director of the Cornell High Energy Synchrotron Source, from 1978 to 1997, when its beamlines took their X-rays from CESR while the ring ran for particle physics.",
-    "expertise": "X-ray physics and synchrotron radiation: dynamical diffraction in perfect crystals (your 1964 review with Henderson Cole), anomalous transmission, X-ray standing waves, how a storage ring like CESR produces synchrotron light, beamlines, monochromators and detectors, and the founding and running of CHESS at Cornell (director 1978 to 1997).",
+    "id": "batterman", "name": "Boris Batterman", "years": "1930–2010", "role": "Founding director of a synchrotron X-ray source",
+    "bio": "A physicist and an expert on how X-rays diffract in perfect crystals. He was the first director of a university synchrotron X-ray source, from 1978 to 1997, when its beamlines took their X-rays from an electron-positron storage ring while the ring ran for particle physics.",
+    "expertise": "X-ray physics and synchrotron radiation: dynamical diffraction in perfect crystals (your 1964 review with Henderson Cole), anomalous transmission, X-ray standing waves, how a storage ring produces synchrotron light, beamlines, monochromators and detectors, and the founding and running of a synchrotron X-ray source (director 1978 to 1997).",
     "greeting": "The ring was built to collide particles, and we borrowed its light. Let's build you a beamline.",
     "x": 53.5, "z": -9.5, "facing": -1.5708,
     "look": { "skin": "#e8c4aa", "hair": "#7a7470", "coat": "#4a5a70", "pants": "#3a3a40", "hairStyle": "short" },
     "quests": [
-      { "id": "bt_build", "title": "A beamline of your own", "ask": "Build a beamline on CESR, from the ring magnets to the detectors.",
+      { "id": "bt_build", "title": "A beamline of your own", "ask": "Build a beamline on the storage ring, from the ring magnets to the detectors.",
         "hint": "Follow the goal card: achromat cell, undulator, front end, optics, hutch and detectors.",
         "thanks": "Undulator light from a 6 GeV ring. Our first beamlines ran on the light from bending magnets.",
         "needs": { "owns": ["chess_beamline"] } },
@@ -436,7 +436,7 @@
         "id": "hb_diffraction",
         "title": "Waves in a crystal",
         "ask": "Show me the diffraction peaks of salt.",
-        "hint": "Collect salt from the picnic table in the quad, then use electron diffraction at the science lab TEM or X-ray diffraction at CHESS.",
+        "hint": "Collect salt from the picnic table in the quad, then use electron diffraction at the science lab TEM or X-ray diffraction at the synchrotron beamline.",
         "thanks": "The positions reveal periodic order. Electron diffraction intensities can also depend on multiple scattering inside the crystal.",
         "needs": {
           "discovered": [
@@ -464,7 +464,7 @@
     "name": "Earl Kirkland",
     "years": "Computational electron microscopy",
     "role": "Author of Advanced Computing in Electron Microscopy",
-    "bio": "Earl J. Kirkland is the author of Advanced Computing in Electron Microscopy and has worked on computation in electron microscopy at Cornell. His work covers electron scattering and image simulation; this game uses fictionalized dialogue.",
+    "bio": "Earl J. Kirkland is the author of Advanced Computing in Electron Microscopy and has worked on computation in electron microscopy. His work covers electron scattering and image simulation; this game uses fictionalized dialogue.",
     "greeting": "A good simulation helps explain what the microscope shows. First align the instrument, then examine the crystal.",
     "x": 20,
     "z": 32,
@@ -503,7 +503,7 @@
         }
       }
     ],
-    "expertise": "Author of Advanced Computing in Electron Microscopy. Earl J. Kirkland is the author of Advanced Computing in Electron Microscopy and has worked on computation in electron microscopy at Cornell. His work covers electron scattering and image simulation; this game uses fictionalized dialogue."
+    "expertise": "Author of Advanced Computing in Electron Microscopy. Earl J. Kirkland is the author of Advanced Computing in Electron Microscopy and has worked on computation in electron microscopy. His work covers electron scattering and image simulation; this game uses fictionalized dialogue."
   },
   {
     "id": "zsigmondy", "name": "Richard Zsigmondy", "years": "1865–1929", "role": "Saw gold nanoparticles with the ultramicroscope",
@@ -543,8 +543,8 @@
   },
   {
     "id": "mcclintock", "name": "Barbara McClintock", "years": "1902–1992", "role": "Discovered jumping genes in maize",
-    "bio": "Barbara McClintock earned her PhD in botany at Cornell in 1927, and in 1929 she first told apart all ten maize chromosomes under the microscope. In the 1940s, following spotted kernels and the chromosomes behind them, she found genes that move: transposable elements. She received the 1983 Nobel Prize in Physiology or Medicine.",
-    "expertise": "Maize cytogenetics: staining and identifying chromosomes, crossing over seen in the chromosomes (with Harriet Creighton, 1931), transposable elements Ac and Ds and variegated kernels, Cornell in the 1920s and Cold Spring Harbor, and the 1983 Nobel Prize.",
+    "bio": "Barbara McClintock earned her PhD in botany in 1927, and in 1929 she first told apart all ten maize chromosomes under the microscope. In the 1940s, following spotted kernels and the chromosomes behind them, she found genes that move: transposable elements. She received the 1983 Nobel Prize in Physiology or Medicine.",
+    "expertise": "Maize cytogenetics: staining and identifying chromosomes, crossing over seen in the chromosomes (with Harriet Creighton, 1931), transposable elements Ac and Ds and variegated kernels, her graduate years in the 1920s and Cold Spring Harbor, and the 1983 Nobel Prize.",
     "greeting": "These kernels are speckled for a reason. A gene moved.",
     "x": 2, "z": 119, "facing": 0,
     "look": {"skin": "#f0d6c4", "hair": "#8a8682", "coat": "#6a7a5a", "pants": "#4a4a50", "hairStyle": "short", "glasses": false},
@@ -608,7 +608,7 @@
         "thanks": "Those are they. I took them for fish teeth; you tell me the whole animal was found in 1983.",
         "needs": { "discovered": ["conodont_denticles"] } },
       { "id": "pd_apatite", "title": "Made of tooth", "ask": "What mineral are they made of? Show me with X-rays.",
-        "hint": "Carry the conodonts to the CHESS beamline in Wilson Lab and record an X-ray diffraction pattern.",
+        "hint": "Carry the conodonts to the synchrotron beamline in the Synchrotron Lab and record an X-ray diffraction pattern.",
         "thanks": "Apatite, the mineral of bone and tooth. So they were teeth of a kind after all.",
         "needs": { "discovered": ["conodont_apatite"] } }
     ]

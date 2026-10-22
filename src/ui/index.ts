@@ -78,8 +78,8 @@ export function mountUI(el: HTMLElement, ctx: GameContext, training: TrainingGam
   storeBtn.b.title = 'ScopeCraft Store & wardrobe';
   const labBtn = row('🧪', 'Science lab', () => { setMenu(false); campusActivities.open('lab'); });
   labBtn.b.title = 'Science Building activities';
-  const chessBtn = row('🧲', 'Wilson Lab', () => { setMenu(false); campusActivities.open('chess'); });
-  chessBtn.b.title = 'Wilson Lab activities';
+  const chessBtn = row('🧲', 'Synchrotron', () => { setMenu(false); campusActivities.open('chess'); });
+  chessBtn.b.title = 'Synchrotron Lab activities';
   const tutorialBtn = row('🎓', 'Tutorial', () => {
     setMenu(false);
     tutorial.replay();
@@ -260,7 +260,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext, training: TrainingGam
         : built?.assembly && ctx.state.advanced
         ? 'You put it together yourself: aim at something and press [F]. [Shift+B] takes you back to the workbench to change it.'
         : built?.scope?.site === 'chess'
-        ? 'It is in the CHESS hall of Wilson Lab (east of campus): look [F] at a sample to take some, then carry it there and press [F] at the control desk.'
+        ? 'It is in the synchrotron hall of the Synchrotron Lab (east of campus): look [F] at a sample to take some, then carry it there and press [F] at the control desk.'
         : built?.scope?.site
         ? 'It is installed in the lab of the science building (south-east): look [F] at a sample to take some, then carry it there.'
         : tier === 4

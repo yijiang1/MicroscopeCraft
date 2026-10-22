@@ -85,7 +85,7 @@ export function mountCampusActivities(ctx: GameContext, toast: Toast, training: 
     cleanup = mountFittingRoom(content, ctx);
   };
   const games = (location: 'lab' | 'chess') => {
-    clear(); title.textContent = location === 'lab' ? 'Science Building · Field Lab' : 'Wilson Lab · CHESS Challenges';
+    clear(); title.textContent = location === 'lab' ? 'Science Building · Field Lab' : 'Synchrotron Lab · X-ray Challenges';
     content.append(text('p', 'Earn 10 coins at each new 20% score milestone, plus 1 voucher at 80%. Each milestone pays once per game. Replays let you improve your score. Each console opens once you have built the instrument it trains on.'));
     const launch = (name: string, run: () => (() => void), locked: string | null = null) => {
       const b = button(locked ? `${name} · ${locked}` : name, () => {

@@ -33,11 +33,11 @@ export function missionSample(ctx: GameContext, id: string) {
 /** Rechecked at acquisition, not just by disabling UI controls. No notebook or off-site measurements. */
 export function mysteryScanBlock(ctx: GameContext): string | null {
   const { state } = ctx;
-  if (!state.mystery) return 'Accept the unknown-sample mission from Bragg in Wilson Lab first.';
+  if (!state.mystery) return 'Accept the unknown-sample mission from Bragg in the Synchrotron Lab first.';
   if (state.mystery.conclusion) return 'This investigation is complete. Return to Bragg for another sample.';
   if (state.currentSampleId !== MYSTERY_SAMPLE_ID || !state.carriedSamples.includes(MYSTERY_SAMPLE_ID)) return 'Load Bragg’s unknown powder into a microscope you have built.';
   const instrument = ownedScopes(state.inventory, ctx.data, state.site).find((r) => r.scope.tier === state.scope.tier);
-  if (!instrument?.scope.site || instrument.scope.site !== state.site || state.scope.site !== state.site) return 'Use your built TEM or STEM in the science lab, or your CHESS beamline in Wilson Lab.';
+  if (!instrument?.scope.site || instrument.scope.site !== state.site || state.scope.site !== state.site) return 'Use your built TEM or STEM in the science lab, or your synchrotron beamline in the Synchrotron Lab.';
   const step = state.scope.steps[state.scope.step];
   if (!step || step.mode !== state.scope.mode || !instrument.scope.steps.some((s) => s.mode === state.scope.mode)) return 'Choose a diffraction mode on your instrument.';
   if (!((state.scope.mode === 'ediff' && state.site === 'lab') || (state.scope.mode === 'xrd' && state.site === 'chess'))) return 'Switch to Electron diffraction or X-ray diffraction using the instrument controls below.';
@@ -63,7 +63,7 @@ export function recordMysteryScan(ctx: GameContext, scanId: ScanId): boolean {
 
 export function submitMystery(ctx: GameContext, id: CandidateId, evidence: string[]) {
   const run = ctx.state.mystery;
-  if (!run || !nearBragg(ctx)) return { accepted: false, text: 'Return to Bragg in Wilson Lab and present your conclusion in his dialogue.' };
+  if (!run || !nearBragg(ctx)) return { accepted: false, text: 'Return to Bragg in the Synchrotron Lab and present your conclusion in his dialogue.' };
   if (run.conclusion) return { accepted: false, text: 'Bragg has already accepted this investigation.' };
   const result = assessClaim(run, id, evidence);
   if (result.accepted) {

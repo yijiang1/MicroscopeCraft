@@ -39,9 +39,9 @@ export function mountMinimap(parent: HTMLElement, npcs: readonly { x: number; z:
     a.fillRect((b.x0 + WORLD_RADIUS) * scale, (b.z0 + WORLD_RADIUS) * scale, (b.x1 - b.x0) * scale, (b.z1 - b.z0) * scale);
   }
   const labels = [
-    ...STATIONS.map(s => ({ x: s.x, z: s.z, text: s.activity === 'store' ? 'Store' : s.activity === 'lab' ? 'Games' : 'CHESS games' })),
+    ...STATIONS.map(s => ({ x: s.x, z: s.z, text: s.activity === 'store' ? 'Store' : s.activity === 'lab' ? 'Games' : 'X-ray games' })),
     { x: (SCIENCE.x0 + SCIENCE.x1) / 2, z: SCIENCE.z0 - 4, text: 'Science' },
-    { x: (WILSON.x0 + WILSON.x1) / 2, z: WILSON.z0 - 4, text: 'CHESS' },
+    { x: (WILSON.x0 + WILSON.x1) / 2, z: WILSON.z0 - 4, text: 'Synchrotron' },
     { x: 0, z: -19, text: 'Quad' },
     { x: 0, z: 76, text: 'Engineering' },
     { ...LAKE, text: 'Lake' },

@@ -4,7 +4,7 @@ import { groundAt } from './campus';
 export const STATIONS = [
   { activity: 'fitting' as const, x: -8.6, z: 27.4, name: 'Fitting Room', color: '#507b77' },
   { activity: 'lab' as const, x: 28, z: 17, name: 'Field Lab · Mini-games', color: '#317c80' },
-  { activity: 'chess' as const, x: 54, z: 2, name: 'CHESS · Challenges', color: '#4b608e' },
+  { activity: 'chess' as const, x: 54, z: 2, name: 'Synchrotron · Challenges', color: '#4b608e' },
   { activity: 'store' as const, ...STORE_COUNTER, name: 'ScopeCraft Store', color: '#b32638' },
 ];
 export function buildActivityStation(station: typeof STATIONS[number]) {

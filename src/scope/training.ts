@@ -19,7 +19,7 @@ export function trainingGames(ctx: GameContext): Record<string, { locked: () => 
     tem: { locked: need(() => owns(5), 'the electron microscope'), open: (host) => temTuning(host, ctx, 'crystal', () => {}).dispose },
     corrector: { locked: need(() => owns(6), 'the STEM'), open: (host) => correctorTuning(host, ctx, () => {}).dispose },
     ptycho: { locked: need(() => owns(6), 'the STEM'), open: (host) => ptychoTuning(host, ctx, 'crystal', () => {}).dispose },
-    beam: { locked: need(() => owns(7), 'the CHESS beamline'), open: (host) => beamTuning(host, ctx, ctx.data.samples['sand_grain']!, () => {}).dispose },
-    tomo: { locked: need(() => owns(7), 'the CHESS beamline'), open: (host) => tomoTuning(host, ctx, 'crystal', () => {}).dispose },
+    beam: { locked: need(() => owns(7), 'the synchrotron beamline'), open: (host) => beamTuning(host, ctx, ctx.data.samples['sand_grain']!, () => {}).dispose },
+    tomo: { locked: need(() => owns(7), 'the synchrotron beamline'), open: (host) => tomoTuning(host, ctx, 'crystal', () => {}).dispose },
   };
 }

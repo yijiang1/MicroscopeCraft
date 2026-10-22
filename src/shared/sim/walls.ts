@@ -13,7 +13,7 @@ export const TIER_NAMES: Record<Tier, string> = {
   4: 'fluorescence microscope',
   5: 'transmission electron microscope',
   6: 'aberration-corrected STEM',
-  7: 'CHESS beamline',
+  7: 'synchrotron beamline',
 };
 
 /** What each mode or stain is, and where it is found, for "try this instead" advice. */
@@ -26,9 +26,9 @@ const HOW: Record<ContrastKey, string> = {
   ediff: 'electron diffraction (the transmission electron microscope)',
   haadf: 'annular dark-field STEM, where heavy atoms shine (the aberration-corrected STEM)',
   ptycho: 'electron ptychography (the STEM with its pixel detector)',
-  xct: 'X-ray tomography (the CHESS beamline)',
-  xrf: 'an X-ray fluorescence map (the CHESS beamline)',
-  xrd: 'X-ray diffraction (the CHESS beamline)',
+  xct: 'X-ray tomography (the synchrotron beamline)',
+  xrf: 'an X-ray fluorescence map (the synchrotron beamline)',
+  xrd: 'X-ray diffraction (the synchrotron beamline)',
   iodine: 'an iodine stain (from the reagent shelf in the lab)',
   methylene_blue: 'a methylene blue stain (from the reagent shelf in the lab)',
   gram: 'a Gram stain (from the reagent shelf in the lab)',

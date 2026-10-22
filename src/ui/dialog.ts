@@ -96,7 +96,7 @@ export function mountDialog(ctx: GameContext, toast: Toast, openMystery?: () => 
     if (npc.id === 'bragg' && openMystery) {
       box.append(styled('p', 'color:#b9dfd4', ctx.state.mystery
         ? 'Bring me your diffraction measurements and explain which material they support.'
-        : 'Take this prepared unknown. Build a TEM and measure its diffraction rings in the science lab; your CHESS beamline will work too. Then bring me the evidence.'));
+        : 'Take this prepared unknown. Build a TEM and measure its diffraction rings in the science lab; your synchrotron beamline will work too. Then bring me the evidence.'));
       const mission = styled('button', 'width:100%;padding:12px;margin-bottom:12px;background:#204039;color:#b6ffe7;border:1px solid #79edcb;border-radius:8px;font-weight:700', ctx.state.mystery ? 'Present evidence · The unlabelled alloy' : 'Accept mission · The unlabelled alloy');
       mission.onclick = () => {
         if (!ctx.state.mystery && !acceptMystery(ctx, crypto.getRandomValues(new Uint32Array(1))[0]!)) return;

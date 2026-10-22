@@ -324,7 +324,7 @@
   },
   {
     "id": "empad", "name": "Pixel array detector (EMPAD)", "station": "bench", "color": "#5a6a8a",
-    "about": "Records the whole diffraction pattern at every probe position, fast and without saturating. Built at Cornell; it made electron ptychography practical.",
+    "about": "Records the whole diffraction pattern at every probe position, fast and without saturating. It made electron ptychography practical.",
     "inputs": [{ "itemId": "silicon", "count": 1 }, { "itemId": "copper_ore", "count": 1 }],
     "output": { "itemId": "empad", "count": 1 }
   },
@@ -365,7 +365,7 @@
   },
   {
     "id": "dba_cell", "name": "Double-bend achromat cell", "station": "bench", "color": "#6a8ac8",
-    "about": "Two bending magnets and focusing magnets that leave a straight section for an undulator. The CHESS-U upgrade put six in one sixth of the ring.",
+    "about": "Two bending magnets and focusing magnets that leave a straight section for an undulator. A ring upgrade put six in one sixth of the ring.",
     "inputs": [{ "itemId": "dipole_magnet", "count": 2 }, { "itemId": "quadrupole", "count": 2 }],
     "output": { "itemId": "dba_cell", "count": 1 }
   },
@@ -376,7 +376,7 @@
     "output": { "itemId": "nd_magnets", "count": 1 }
   },
   {
-    "id": "undulator", "name": "CHESS Compact Undulator", "station": "bench", "color": "#d0b040",
+    "id": "undulator", "name": "Compact undulator", "station": "bench", "color": "#d0b040",
     "about": "Rows of magnets with a 28.4 mm period wiggle the positrons so their X-rays add up at one colour. Sliding one row along the other tunes that colour.",
     "inputs": [{ "itemId": "nd_magnets", "count": 2 }, { "itemId": "vacuum_chamber", "count": 1 }],
     "output": { "itemId": "undulator", "count": 1 }
@@ -431,13 +431,13 @@
   },
   {
     "id": "xray_pad", "name": "X-ray pixel array detector", "station": "bench", "color": "#4a5a7a",
-    "about": "Counts X-rays in every pixel to record diffraction patterns and images; Cornell groups pioneered these detectors.",
+    "about": "Counts X-rays in every pixel to record diffraction patterns and images; they were developed for synchrotron science.",
     "inputs": [{ "itemId": "silicon", "count": 2 }, { "itemId": "copper_ore", "count": 1 }],
     "output": { "itemId": "xray_pad", "count": 1 }
   },
   {
-    "id": "chess_beamline", "name": "CHESS beamline", "station": "bench", "color": "#ffd24a",
-    "about": "An X-ray beamline on CESR, the 768 m storage ring under Wilson Lab: 6 GeV positrons, an undulator, optics, a hutch and detectors. Installed in the CHESS hall.",
+    "id": "chess_beamline", "name": "Synchrotron beamline", "station": "bench", "color": "#ffd24a",
+    "about": "An X-ray beamline on the 768 m storage ring under the Synchrotron Lab: 6 GeV positrons, an undulator, optics, a hutch and detectors. Installed in the synchrotron hall.",
     "inputs": [
       { "itemId": "dba_cell", "count": 1 },
       { "itemId": "undulator", "count": 1 },

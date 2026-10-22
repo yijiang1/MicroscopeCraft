@@ -28,7 +28,7 @@ export const REFERENCES: Record<string, Reference[]> = {
     { text: 'Y. Jiang et al. (2018). Electron ptychography of 2D materials to deep sub-ångström resolution. Nature 559, 343–349.' },
     { text: 'Cornell Chronicle: EMPAD and the record resolution.', url: 'https://news.cornell.edu/index%2ephp/node/302026' },
   ],
-  'X-rays, tomography and CHESS': [
+  'X-rays, tomography and synchrotrons': [
     { text: 'W. C. Röntgen (1895). Über eine neue Art von Strahlen. Sitzungsberichte der Physikalisch-Medicinischen Gesellschaft zu Würzburg.' },
     { text: 'W. L. Bragg (1913). The diffraction of short electromagnetic waves by a crystal. Proceedings of the Cambridge Philosophical Society 17, 43–57.' },
     { text: 'A. C. Thompson et al. X-ray Data Booklet (LBNL). (Absorption edges, undulator harmonics.)', url: 'https://xdb.lbl.gov/' },

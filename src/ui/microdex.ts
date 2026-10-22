@@ -6,9 +6,9 @@ import type { GameContext } from '../shared/state';
 import { withKeys } from './keys';
 
 const BIOME_NAMES = {
-  meadow: 'Quad', pond: 'Lake', forest: 'Pine grove', garden: 'Greenhouse', mine: 'Gorge and slope rocks', lab: 'Science lab', chess: 'Wilson Lab (CHESS)', eng: 'Engineering quad', museum: 'Art museum',
+  meadow: 'Quad', pond: 'Lake', forest: 'Pine grove', garden: 'Greenhouse', mine: 'Gorge and slope rocks', lab: 'Science lab', chess: 'Synchrotron Lab', eng: 'Engineering quad', museum: 'Art museum',
   north: 'North campus and the observatory', woods: 'North woods', orchard: 'Orchard and apiary', farm: 'Farm, dairy and cornfield',
-  fields: 'Athletic fields', shore: 'West campus and the Cayuga shore', quarry: 'Fossil quarry',
+  fields: 'Athletic fields', shore: 'West campus and the lake shore', quarry: 'Fossil quarry',
 } as const;
 
 export interface MicrodexHandle {

@@ -148,7 +148,7 @@ export function mountTutorial(ctx: GameContext): TutorialHandle {
       ['beach_sand', 'Gather', 'raw materials around campus: sand, ore, plant oil and more.'],
       ['lens', 'Craft', 'them into parts, and parts into a microscope.'],
       ['compound_microscope', 'Look', 'at leaves, rocks and samples to discover cells, crystals and, in the end, atoms.'],
-      ['electron_microscope', 'Climb the tree', 'from a hand lens to electron microscopes and the CHESS X-ray beamline.'],
+      ['electron_microscope', 'Climb the tree', 'from a hand lens to electron microscopes and an X-ray synchrotron beamline.'],
     ];
     for (const [icon, verb, rest] of points) {
       const row = div('display:flex;gap:10px;align-items:center;margin:8px 0;line-height:1.35');

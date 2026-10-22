@@ -65,7 +65,7 @@ export function scopeThatSees(feature: Feature, data: Pick<GameData, 'recipes'>)
   return data.recipes.filter((r) => stepThatSees(feature, r)).sort((a, b) => a.scope!.tier - b.scope!.tier)[0] ?? null;
 }
 
-export const SITE_NAMES: Record<Site, string> = { lab: 'science lab', chess: 'CHESS hall in Wilson Lab' };
+export const SITE_NAMES: Record<Site, string> = { lab: 'science lab', chess: 'synchrotron hall in the Synchrotron Lab' };
 
 /** The feature the player must discover before this item can be gathered, or null if it is free to gather. */
 export function lockedBy(itemId: string, data: Pick<GameData, 'materials'>, discoveries: readonly string[]): string | null {

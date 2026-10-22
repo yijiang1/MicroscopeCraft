@@ -362,7 +362,7 @@
     "id": "shale", "name": "Fossil shale", "worldObject": "shale", "biome": "mine",
     "features": [
       { "id": "brachiopod", "name": "Brachiopod fossil", "sizeUm": 8000, "contrast": 0.45, "drawing": "lines", "tint": "#a89a80",
-        "blurb": "This shell belonged to a brachiopod that lived on a muddy sea floor about 380 million years ago, when a shallow sea covered this land. The gorge walls around Ithaca are full of them." },
+        "blurb": "This shell belonged to a brachiopod that lived on a muddy sea floor about 380 million years ago, when a shallow sea covered this land. The gorge walls around campus are full of them." },
       { "id": "shell_fibers", "name": "Shell fibers", "sizeUm": 12, "contrast": 0.45, "drawing": "fibers", "tint": "#e0d8c8",
         "blurb": "The fossil shell is a stack of long calcite fibers, each laid down by one cell of the living animal. After 380 million years they are still in place." },
       { "id": "framboids", "name": "Pyrite framboids", "sizeUm": 10, "contrast": 0.5, "drawing": "cluster", "tint": "#d8b84a",
@@ -558,7 +558,7 @@
       { "id": "mos2_atoms", "name": "Molybdenum and sulfur atoms", "sizeUm": 0.00018, "contrast": 0.05, "contrastIn": { "haadf": 0.6 }, "drawing": "honeycomb", "tint": "#ffffff", "onTop": true,
         "blurb": "Each layer is a sheet of molybdenum atoms sandwiched between two sheets of sulfur. In projection the molybdenum and sulfur columns sit 0.18 nanometres apart." },
       { "id": "ptycho_record", "name": "Deep sub-ångström detail", "sizeUm": 0.000039, "contrast": 0.05, "contrastIn": { "ptycho": 0.5 }, "drawing": "atoms", "tint": "#ffffff", "onTop": true,
-        "blurb": "In 2018 electron ptychography with Cornell's EMPAD detector reached a resolution of 0.39 ångström on this material, a world record for any microscope. It works at a gentle 80 kV, so the fragile sheets survive." }
+        "blurb": "In 2018 electron ptychography with the EMPAD detector reached a resolution of 0.39 ångström on this material, a world record for any microscope. It works at a gentle 80 kV, so the fragile sheets survive." }
     ]
   },
   {
@@ -605,7 +605,7 @@
       { "id": "steel_grains", "name": "Steel grains", "sizeUm": 40, "contrast": 0.4, "drawing": "mosaic", "tint": "#a0a8b0",
         "blurb": "Polished and etched, steel shows that it is made of many small crystals, or grains, packed together. Smaller grains generally make a stronger steel." },
       { "id": "grain_map", "name": "3D grain map", "sizeUm": 40, "contrast": 0, "contrastIn": { "xrd": 0.7 }, "drawing": "mosaic",
-        "blurb": "High-energy diffraction microscopy, done at the CHESS FAST beamline, finds the position and orientation of every grain inside a solid piece of metal. Watching the map while the metal is pulled shows how it bends and breaks." },
+        "blurb": "High-energy diffraction microscopy, done at synchrotron beamlines, finds the position and orientation of every grain inside a solid piece of metal. Watching the map while the metal is pulled shows how it bends and breaks." },
       { "id": "ferrite_rings", "name": "Iron lattice rings", "sizeUm": 0.000203, "contrast": 0, "contrastIn": { "xrd": 0.6, "ediff": 0.5 }, "drawing": "rings",
         "blurb": "Most steel is ferrite, iron atoms in a body-centred cubic lattice, and its strongest ring comes from planes 0.203 nanometres apart. Stress in the metal shifts the rings very slightly, which is how engineers measure stress inside parts." }
     ]
@@ -1271,7 +1271,7 @@
       { "id": "apple_cells", "name": "Flesh cells", "sizeUm": 200, "contrast": 0.35, "drawing": "cells", "tint": "#f4f0d0",
         "blurb": "Apple flesh cells are about 0.2 millimetres across, big enough to glint on a freshly cut surface. Air fills the gaps between them, up to a quarter or more of the fruit, which is why apples float." },
       { "id": "apple_starch", "name": "Starch grains", "sizeUm": 8, "contrast": 0.08, "contrastIn": {"iodine": 0.8}, "drawing": "grains", "tint": "#e8e8f0",
-        "blurb": "Iodine stains starch blue-black, and orchards use it to judge when to pick. As an apple ripens its starch turns to sugar, and in a McIntosh the stain clears first around the core, as Cornell's starch-iodine chart shows." },
+        "blurb": "Iodine stains starch blue-black, and orchards use it to judge when to pick. As an apple ripens its starch turns to sugar, and in a McIntosh the stain clears first around the core, as the standard starch-iodine chart shows." },
       { "id": "scab_conidia", "name": "Apple scab spores", "sizeUm": 18, "contrast": 0.45, "drawing": "clubs", "tint": "#5a5a30",
         "blurb": "Olive smudges on an apple are scab, a fungus that buds off pear-shaped spores about 15 to 20 micrometres long. Rain splashes them from fruit to fruit and leaf to leaf." }
     ]
@@ -1349,7 +1349,7 @@
       { "id": "maize_starch", "name": "Starch grains", "sizeUm": 12, "contrast": 0.08, "contrastIn": {"iodine": 0.8}, "drawing": "grains", "tint": "#f8f8f0",
         "blurb": "The hard part of a kernel is packed with angular starch grains 5 to 20 micrometres across, squeezed together as the kernel dried. Iodine stains them blue-black." },
       { "id": "maize_chromosomes", "name": "Chromosomes", "sizeUm": 6, "contrast": 0.05, "contrastIn": {"hematoxylin": 0.7, "methylene_blue": 0.5}, "drawing": "rods", "tint": "#5a3a8a",
-        "blurb": "Squashed and stained, a dividing cell from a root tip shows 20 chromosomes, ten pairs. In 1929 McClintock, then a young researcher at Cornell, first told all ten maize chromosomes apart." }
+        "blurb": "Squashed and stained, a dividing cell from a root tip shows 20 chromosomes, ten pairs. In 1929 McClintock, then a young researcher, first told all ten maize chromosomes apart." }
     ]
   },
   {
@@ -1390,7 +1390,7 @@
     ]
   },
   {
-    "id": "lake_plankton", "name": "Cayuga plankton", "worldObject": "plankton_net", "biome": "shore",
+    "id": "lake_plankton", "name": "Lake plankton", "worldObject": "plankton_net", "biome": "shore",
     "features": [
       { "id": "daphnia", "name": "Water flea", "sizeUm": 2000, "contrast": 0.45, "drawing": "critter", "tint": "#d8c8a8",
         "blurb": "Daphnia, the water flea, is a crustacean a couple of millimetres long, so clear that you can watch its heart beat. Clouds of them graze the algae of the open lake." },
@@ -1403,10 +1403,10 @@
     ]
   },
   {
-    "id": "road_salt", "name": "Rock salt from under Cayuga Lake", "worldObject": "rock_salt", "biome": "shore",
+    "id": "road_salt", "name": "Rock salt from under the lake", "worldObject": "rock_salt", "biome": "shore",
     "features": [
       { "id": "halite_cleavage", "name": "Cleavage cubes", "sizeUm": 2000, "contrast": 0.5, "drawing": "cubes", "tint": "#c8c8c8",
-        "blurb": "This road salt is mined about 700 metres down, in a mine that runs under Cayuga Lake. It is the salt of an ancient sea that dried out over 400 million years ago." },
+        "blurb": "This road salt is mined about 700 metres down, in a mine that runs under the lake. It is the salt of an ancient sea that dried out over 400 million years ago." },
       { "id": "halite_inclusions", "name": "Fluid inclusions", "sizeUm": 20, "contrast": 0.45, "drawing": "cubes", "tint": "#e8e8f0",
         "blurb": "Bands of tiny cube-shaped pockets of brine were trapped as each salt crystal grew on the floor of that sea. Analysing them is one way geologists read the chemistry of ancient seawater." },
       { "id": "halite_220", "name": "Salt (220) reflection", "sizeUm": 0.0001994, "contrast": 0, "contrastIn": {"xrd": 0.6, "ediff": 0.5}, "drawing": "rings",
@@ -1491,7 +1491,7 @@
       { "id": "coral_cup", "name": "Horn coral", "sizeUm": 30000, "contrast": 0.55, "drawing": "rings", "tint": "#c8b898",
         "blurb": "Horn corals like Heliophyllum lived alone on the floor of New York's Devonian sea, each a single polyp in a cone with radiating walls inside. Their whole group died out at the end of the Permian." },
       { "id": "coral_ridges", "name": "Daily growth ridges", "sizeUm": 50, "contrast": 0.4, "drawing": "lines", "tint": "#b8a888",
-        "blurb": "The outside of the cone is ringed by fine ridges, about 200 to the centimetre, thought to be laid down one a day. In 1963 John Wells of Cornell counted about 400 between yearly bands, evidence that a Devonian year had about 400 shorter days." },
+        "blurb": "The outside of the cone is ringed by fine ridges, about 200 to the centimetre, thought to be laid down one a day. In 1963 John Wells counted about 400 between yearly bands, evidence that a Devonian year had about 400 shorter days." },
       { "id": "coral_calcite", "name": "Calcite rings", "sizeUm": 0.0003035, "contrast": 0, "contrastIn": {"xrd": 0.6, "ediff": 0.5}, "drawing": "rings",
         "blurb": "X-rays show the coral's skeleton is calcite, its strongest ring from planes 0.304 nanometres apart. Horn corals built in calcite, while today's reef corals build in aragonite." }
     ]

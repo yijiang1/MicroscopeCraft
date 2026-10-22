@@ -118,10 +118,10 @@ export function mountMystery(parent: HTMLElement, ctx: GameContext) {
     titleWrap.append(title, subtitle);
     head.append(titleWrap, button('Close', () => dialog.close()));
     if (!run) {
-      const intro = section('Meet Bragg in Wilson Lab');
+      const intro = section('Meet Bragg in the Synchrotron Lab');
       intro.classList.add('briefing');
       intro.append(node('p', 'Talk to Bragg [E] and accept “The unlabelled alloy.” He will give you a prepared unknown to carry in your sample bag.'),
-        node('p', 'Build a TEM, STEM, or CHESS beamline through the main crafting tree. Load the unknown at that instrument [F], switch to diffraction, and record evidence. Return to Bragg to present your conclusion.', 'muted'),
+        node('p', 'Build a TEM, STEM, or synchrotron beamline through the main crafting tree. Load the unknown at that instrument [F], switch to diffraction, and record evidence. Return to Bragg to present your conclusion.', 'muted'),
         button('Track Bragg', () => track('bragg'), 'primary'));
       dialog.replaceChildren(head, intro);
       return;
@@ -131,7 +131,7 @@ export function mountMystery(parent: HTMLElement, ctx: GameContext) {
     const briefing = section(`${solved ? '✓' : '•'} The unlabelled alloy`);
     briefing.classList.add('briefing');
     briefing.append(node('p', 'Bragg has an unlabelled powder cartridge. Which of three reference materials explains its diffraction peaks?'),
-      node('div', `William Lawrence Bragg · Wilson Lab · ${solved ? 'Complete' : 'In progress'} · ${run.scans.length}/${SCANS.length} scans recorded`, 'muted'));
+      node('div', `William Lawrence Bragg · Synchrotron Lab · ${solved ? 'Complete' : 'In progress'} · ${run.scans.length}/${SCANS.length} scans recorded`, 'muted'));
     const body = node('div', '', 'body');
     const left = node('div', '', 'column');
     const right = node('div', '', 'column');
@@ -156,7 +156,7 @@ export function mountMystery(parent: HTMLElement, ctx: GameContext) {
     experiment.append(node('div', `${BEAM_BUDGET - beamSpent(run)} / ${BEAM_BUDGET} beam-time credits left`, 'budget'));
     const fixed = ownedScopes(ctx.state.inventory, ctx.data).filter((r) => r.scope.site);
     experiment.append(node('p', fixed.length
-      ? 'Carry the unknown to your TEM/STEM in the science lab or your CHESS beamline in Wilson Lab. Press F at the instrument, select Bragg’s unknown powder, then choose Electron diffraction or X-ray diffraction. Record scans in the eyepiece.'
+      ? 'Carry the unknown to your TEM/STEM in the science lab or your synchrotron beamline in the Synchrotron Lab. Press F at the instrument, select Bragg’s unknown powder, then choose Electron diffraction or X-ray diffraction. Record scans in the eyepiece.'
       : 'Bragg’s prepared unknown is in your sample bag. Continue gathering and crafting until you build a TEM. Then take the sample to the electron microscope in the science lab and press F.', 'muted'));
     experiment.append(button(ctx.state.currentSampleId ? 'Return to eyepiece' : 'Return to the world', () => dialog.close()));
     for (const scan of SCANS) {
@@ -201,7 +201,7 @@ export function mountMystery(parent: HTMLElement, ctx: GameContext) {
       }, 'primary');
       submit.disabled = !withBragg || !nearBragg(ctx);
       conclude.append(label, select, submit);
-      if (submit.disabled) conclude.append(node('p', 'Return to Bragg in Wilson Lab and open the mission in his dialogue to present your evidence.', 'muted'), button('Track Bragg', () => track('bragg')));
+      if (submit.disabled) conclude.append(node('p', 'Return to Bragg in the Synchrotron Lab and open the mission in his dialogue to present your evidence.', 'muted'), button('Track Bragg', () => track('bragg')));
     }
     const status = node('div', solved ? assessClaim(run, run.conclusion!.candidate, run.conclusion!.evidence).text : feedback, `feedback${solved ? ' success' : ''}`);
     status.id = 'mystery-feedback'; status.tabIndex = -1; status.setAttribute('role', 'status');

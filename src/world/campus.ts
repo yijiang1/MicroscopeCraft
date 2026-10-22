@@ -698,7 +698,7 @@ function ringSign(): { mesh: THREE.Mesh; lamps: Record<string, THREE.Mesh> } {
   g2.fillText('768 m around, in a tunnel under the athletic fields', 512, 120);
   g2.fillText('6 GeV positrons, 200 mA', 512, 400);
   g2.fillStyle = '#ffd24a';
-  g2.fillText('CHESS-U: six double-bend achromats', 512, 700);
+  g2.fillText('Upgrade: six double-bend achromats', 512, 700);
   g2.fillText('in the south arc make room for undulators', 512, 740);
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
