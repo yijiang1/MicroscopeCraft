@@ -3,7 +3,7 @@ import { collectSnow, snowAvailable } from '../shared/seasons';
 import { binocularFov, mountBinoculars } from './binoculars';
 import { buildFishingRod, type FishingAction } from './fishing-rod';
 import { buildFish, fishingWaterPoint, mountFishing } from './fishing';
-import { blocksRoadster, buildMiata, driveStep, roadsterGradeOK, TEST_DRIVE_MS } from './miata';
+import { alignRoadster, blocksRoadster, buildMiata, driveStep, roadsterGradeOK, TEST_DRIVE_MS } from './miata';
 import { advanceLift, buildTowerLift, constrainTerrace, LIFT, liftBase, nearLift } from './tower-lift';
 import { mountSpeechOverlay } from './speech-overlay';
 import { buildActivityStation, STATIONS } from './activity-stations';
@@ -324,10 +324,9 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     if (driving) {
       player.root.visible = false;
       camera.rotation.set(0,driveYaw,0,'YXZ');
-      roadster.root.position.set(camera.position.x, camera.position.y - EYE_HEIGHT, camera.position.z);
-      roadster.root.rotation.y = driveYaw;
-      viewCamera.position.set(camera.position.x + Math.sin(driveYaw) * 6, camera.position.y + 2.5, camera.position.z + Math.cos(driveYaw) * 6);
-      viewCamera.lookAt(camera.position.x - Math.sin(driveYaw) * 4, camera.position.y - 0.3, camera.position.z - Math.cos(driveYaw) * 4);
+      viewCamera.position.set(camera.position.x + Math.sin(driveYaw) * 6, roadster.root.position.y + EYE_HEIGHT + 2.5, camera.position.z + Math.cos(driveYaw) * 6);
+      viewCamera.position.y=Math.max(viewCamera.position.y,groundAt(viewCamera.position.x,viewCamera.position.z)+1.5);
+      viewCamera.lookAt(camera.position.x - Math.sin(driveYaw) * 4, roadster.root.position.y + EYE_HEIGHT - 0.3, camera.position.z - Math.cos(driveYaw) * 4);
     }
     const fov=binoculars.active()?binocularFov(camera.fov,binoculars.zoom()):camera.fov;
     if(viewCamera.fov!==fov){viewCamera.fov=fov;viewCamera.updateProjectionMatrix();}
@@ -623,6 +622,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     driving = true; driveSpeed = 0; driveYaw = -Math.PI / 2;
     driveDeadline = trial ? performance.now() + TEST_DRIVE_MS : Infinity;
     camera.position.set(-12, groundAt(-12,42) + EYE_HEIGHT,42);
+    alignRoadster(roadster.root,camera.position.x,camera.position.z,driveYaw,groundAt);
     roadster.root.visible = true;
     if (trial) driveTimer = setTimeout(finishDrive, TEST_DRIVE_MS);
     hud.flash('Micro Roadster · W/S accelerate & reverse · A/D steer · E return to store');
@@ -663,6 +663,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
         if (blocked) driveSpeed = 0;
         else { driveSpeed = step.speed; driveYaw = step.yaw; camera.position.set(x,groundAt(x,z)+EYE_HEIGHT,z); }
       }
+      if(driving)alignRoadster(roadster.root,camera.position.x,camera.position.z,driveYaw,groundAt,dt);
     } else if (ridingLift) {
       if (!paused) liftHeight = advanceLift(liftHeight, liftTarget, dt);
       lift.cabin.position.y = liftBase + liftHeight;

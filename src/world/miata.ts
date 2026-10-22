@@ -13,6 +13,36 @@ export function driveStep(speed: number, throttle: number, steer: number, yaw: n
   const nextYaw = yaw + steer * nextSpeed / TURN_RADIUS * dt;
   return { speed: nextSpeed, yaw: nextYaw, dx: -Math.sin(nextYaw) * nextSpeed * dt, dz: -Math.cos(nextYaw) * nextSpeed * dt };
 }
+// Contact points match the four tyres in the model (front is local -Z).
+export const ROADSTER_CONTACTS = [-.81,.81].flatMap(x => [-1.18,1.2].map(z => new THREE.Vector3(x,.01,z)));
+
+/** Fit a road plane to all four wheel positions, retaining the steering heading. */
+export function roadsterTerrainRotation(x:number,z:number,yaw:number,ground:(x:number,z:number)=>number) {
+  const cos=Math.cos(yaw),sin=Math.sin(yaw);
+  const heights=ROADSTER_CONTACTS.map(p=>ground(x+p.x*cos+p.z*sin,z-p.x*sin+p.z*cos));
+  const across=((heights[2]!+heights[3]!)-(heights[0]!+heights[1]!))/(2*1.62);
+  const along=((heights[1]!+heights[3]!)-(heights[0]!+heights[2]!))/(2*2.38);
+  const right=new THREE.Vector3(cos,across,-sin);
+  const back=new THREE.Vector3(sin,along,cos).normalize();
+  const up=new THREE.Vector3().crossVectors(back,right).normalize();
+  right.crossVectors(up,back).normalize();
+  return new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(right,up,back));
+}
+
+/** Seat the actual tilted wheel footprint above terrain, including during suspension smoothing. */
+export function roadsterGroundHeight(x:number,z:number,rotation:THREE.Quaternion,ground:(x:number,z:number)=>number) {
+  return Math.max(...ROADSTER_CONTACTS.map(p=>{
+    const contact=p.clone().applyQuaternion(rotation);
+    return ground(x+contact.x,z+contact.z)-contact.y+.015;
+  }));
+}
+
+export function alignRoadster(root:THREE.Group,x:number,z:number,yaw:number,ground:(x:number,z:number)=>number,dt=Infinity) {
+  const rotation=roadsterTerrainRotation(x,z,yaw,ground);
+  root.quaternion.slerp(rotation,1-Math.exp(-12*Math.max(0,dt)));
+  root.position.set(x,roadsterGroundHeight(x,z,root.quaternion,ground),z);
+}
+
 /** A compact NA-inspired roadster: open cockpit, pop-up lamps and round rear lights. Front is -Z. */
 export function buildMiata() {
   const root = new THREE.Group();
