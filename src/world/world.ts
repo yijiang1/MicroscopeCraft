@@ -14,6 +14,7 @@ import { buildDecor, buildSky, FOG_COLOR, SUN_DIRECTION, type Blocker } from './
 import type { WorldHandle } from './index';
 import { buildModel } from './models';
 import { buildNpc, type NpcFigure } from './npc';
+import { mountMinimap } from './minimap';
 import { buildPlayer } from './player';
 import { createFootstepTracker } from './footsteps';
 import { AIMS, PLACEMENTS, RADIUS, samplesOf, SPAWN, type Aim, type Kind, type Placement } from './placements';
@@ -281,6 +282,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const picker = document.createElement('div');
   picker.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:12;display:none;min-width:300px;max-width:90vw;padding:12px 16px;border-radius:12px;background:#000d;color:#eee;font:14px system-ui';
   el.append(hint, prompt, compass, trackHud, targetHud, carryHud, cross, picker);
+  const minimap = mountMinimap(el, ctx.data.npcs);
 
   let pick: { ids: string[]; then: (sampleId: string) => void } | null = null;
   const closePicker = () => {
@@ -665,6 +667,8 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       ? `Carrying ${names} · ${sites.map((s) => `${SITE_NAMES[s]} ${arrowTo(doors[s].x, doors[s].z)}`).join(' · ')}`
       : `Your ${sites.map((s) => fixedAt(s)!.name).join(' and ')}: look (F) at a sample to take some along`;
     compass.textContent = `${heading()} · ${px.toFixed(0)}, ${pz.toFixed(0)}`;
+    camera.getWorldDirection(dir);
+    minimap.update(px, pz, dir.x, dir.z, t, paused, targetNode);
     renderer.render(scene, viewCamera);
   });
 
@@ -697,6 +701,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       [offOpen, offClose, offTrack, offTarget, offCrafted, offQuest, offScore, offDiscovery].forEach((off) => off());
       removeEventListener('keydown', onDown);
       removeEventListener('keyup', onUp);
+      minimap.dispose();
       player.dispose();
       controls.dispose();
       renderer.dispose();
