@@ -48,6 +48,7 @@ export function mountSeasons(terrain: THREE.Mesh, decor: THREE.Group, scene: THR
     }
     colors.needsUpdate=true;
     for(const {mesh,type,original} of plants) {
+      if(type==='snow'){mesh.visible=season==='winter';continue;}
       mesh.visible=!(season==='winter'&&(type==='grass'||type==='flowers')) && !(season==='autumn'&&type==='flowers');
       if(!original || (type!=='oak'&&type!=='pine'))continue;
       const attr=mesh.geometry.getAttribute('color') as THREE.BufferAttribute;

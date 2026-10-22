@@ -97,9 +97,12 @@ function farHills(): THREE.Group {
   return g;
 }
 
-export function buildDecor(avoid: { x: number; z: number }[]): { group: THREE.Group; blockers: Blocker[]; update(t: number): void } {
+export interface SnowSite { x: number; z: number; y: number; radius: number }
+
+export function buildDecor(avoid: { x: number; z: number }[]): { group: THREE.Group; blockers: Blocker[]; snowSites: SnowSite[]; update(t: number): void } {
   const group = new THREE.Group();
   const blockers: Blocker[] = [];
+  const snowSites: SnowSite[] = [];
   const rng = mulberry32(2026);
 
   const dry = (x: number, z: number) => heightAt(x, z) > waterLevelAt(x, z) + 0.35 && Math.hypot(x - LAKE.x, z - LAKE.z) > LAKE.r + 4;
@@ -192,6 +195,7 @@ export function buildDecor(avoid: { x: number; z: number }[]): { group: THREE.Gr
       pines.map((p) => {
         const s = 0.75 + rng() * 0.7;
         blockers.push({ x: p.x, z: p.z, r: 0.3 * s });
+        snowSites.push({x:p.x,z:p.z,y:heightAt(p.x,p.z)+2.8*s,radius:1.2*s});
         return placeMatrix(p.x, p.z, s, rng() * 6.28);
       }),
     ),
@@ -231,6 +235,7 @@ export function buildDecor(avoid: { x: number; z: number }[]): { group: THREE.Gr
     oaks.map((p) => {
       const s = 0.8 + rng() * 0.5;
       blockers.push({ x: p.x, z: p.z, r: 0.4 * s });
+      snowSites.push({x:p.x,z:p.z,y:heightAt(p.x,p.z)+3.5*s,radius:1.5*s});
       return placeMatrix(p.x, p.z, s, rng() * 6.28);
     }),
   );
@@ -298,6 +303,32 @@ export function buildDecor(avoid: { x: number; z: number }[]): { group: THREE.Gr
   group.add(instanced(bench, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8 }), benches.map((b) => placeMatrix(b.x, b.z, 1, b.yaw))));
   for (const b of benches) blockers.push({ x: b.x, z: b.z, r: 0.6 });
 
+  // Snow sits above the seat and backrest, rather than sharing the wood's surface.
+  const snowMaterial = new THREE.MeshStandardMaterial({color:'#edf8ff',roughness:.8});
+  const benchSnowGeo = mergeGeometries([
+    new THREE.BoxGeometry(1.58,.07,.43).translate(0,.525,0),
+    new THREE.BoxGeometry(1.58,.06,.09).translate(0,.99,-.22),
+  ])!;
+  const benchSnow=instanced(benchSnowGeo,snowMaterial,benches.map(b=>placeMatrix(b.x,b.z,1,b.yaw)));
+  benchSnow.userData.seasonal='snow';benchSnow.visible=false;group.add(benchSnow);
+  for(const b of benches)snowSites.push({x:b.x,z:b.z,y:heightAt(b.x,b.z)+.55,radius:.8});
+
+  // A pair of outdoor chairs beside the quad picnic table.
+  const chairs=[{x:15,z:-13,yaw:-Math.PI/2},{x:15,z:-11,yaw:-Math.PI/2}];
+  const chairGeo=mergeGeometries([
+    tinted(new THREE.BoxGeometry(.65,.06,.55).translate(0,.45,0),'#7a5634'),
+    tinted(new THREE.BoxGeometry(.65,.45,.06).translate(0,.75,-.25),'#7a5634'),
+    ...[-.26,.26].flatMap(x=>[-.2,.2].map(z=>tinted(new THREE.BoxGeometry(.06,.45,.06).translate(x,.225,z),'#2a2d30'))),
+  ])!;
+  group.add(instanced(chairGeo,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.8}),chairs.map(b=>placeMatrix(b.x,b.z,1,b.yaw))));
+  const chairSnowGeo=mergeGeometries([
+    new THREE.BoxGeometry(.63,.07,.53).translate(0,.525,0),
+    new THREE.BoxGeometry(.63,.06,.09).translate(0,1.01,-.25),
+  ])!;
+  const chairSnow=instanced(chairSnowGeo,snowMaterial,chairs.map(b=>placeMatrix(b.x,b.z,1,b.yaw)));
+  chairSnow.userData.seasonal='snow';chairSnow.visible=false;group.add(chairSnow);
+  for(const b of chairs){blockers.push({x:b.x,z:b.z,r:.4});snowSites.push({x:b.x,z:b.z,y:heightAt(b.x,b.z)+.55,radius:.5});}
+
   // --- birds: three small flocks circling over the quad, the slope and the lake, wings beating
   const wing = new THREE.BufferGeometry();
   wing.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0.12, 0, 0, -0.12, -0.55, 0.12, 0, 0, 0, 0.12, 0, 0, -0.12, 0.55, 0.12, 0], 3));
@@ -315,6 +346,7 @@ export function buildDecor(avoid: { x: number; z: number }[]): { group: THREE.Gr
   return {
     group,
     blockers,
+    snowSites,
     update(t) {
       birds.forEach((b, i) => {
         const a = t * 0.00012 + b.phase;

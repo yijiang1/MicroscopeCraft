@@ -214,8 +214,13 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   crystalLight.position.set(CRYSTAL_SPOT.x, heightAt(CRYSTAL_SPOT.x, CRYSTAL_SPOT.z) + 2.6, CRYSTAL_SPOT.z);
   scene.add(crystalLight);
 
-  const { group: decor, blockers, update: updateDecor } = buildDecor([...PLACEMENTS, ...Object.values(ctx.data.npcs)].map((p) => ({ x: p.x, z: p.z })));
+  const { group: decor, blockers, snowSites, update: updateDecor } = buildDecor([...PLACEMENTS, ...Object.values(ctx.data.npcs)].map((p) => ({ x: p.x, z: p.z })));
   scene.add(decor);
+  // Aim at snow already rendered on seats and tree crowns; no duplicate collision or floating pile.
+  for(const site of snowSites) {
+    const root=new THREE.Group();root.position.set(site.x,site.y,site.z);scene.add(root);
+    nodes.push({kind:'snow',aim:KINDS.snow.aim,root,x:site.x,z:site.z,radius:0,alive:false,index:-1,center:root.position.clone(),aimRadius:site.radius});
+  }
   const seasons=mountSeasons(terrain,decor,scene,ctx.state.seasonStartedAt,(season)=>{
     for(const n of nodes)if(n.kind==='snow') {
       n.alive=season==='winter';n.root.visible=n.alive;

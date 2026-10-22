@@ -1,8 +1,8 @@
 // What stands where in the world. Pure data (plus a seeded scatter), no rendering, so it is easy to test and retune.
 // What each kind of thing is (what it gathers or shows, its model) is in kinds.ts.
-import { ATRIUM, CRYSTAL_SPOT, MUSEUM, SCIENCE } from './campus';
+import { ATRIUM, CRYSTAL_SPOT, insideBuilding, MUSEUM, SCIENCE } from './campus';
 import type { Kind } from './kinds';
-import { gorgeZ, LAKE, mulberry32 } from './terrain';
+import { gorgeZ, heightAt, LAKE, mulberry32, pathAt, waterLevelAt, WORLD_RADIUS } from './terrain';
 
 export interface Placement {
   kind: Kind;
@@ -46,6 +46,8 @@ export const PLACEMENTS: Placement[] = [
   { kind: 'wing', x: 2, z: -11 },
   ...cluster('sunflower', -3, -14, 3, 2.2, 3),
   { kind: 'picnic', x: 13, z: -13, yaw: 0.4 },
+  { kind: 'picnic', x: -8, z: -28, yaw: -.3 },
+  { kind: 'picnic', x: -8, z: 68, yaw: .2 },
   // Felled logwood on the east edge of the lawn: its dark red heartwood gives hematoxylin
   { kind: 'logwood', x: 9.5, z: -8.5, yaw: 0.7 },
   // The lake, sand on its south shore right ahead of the spawn; scum and mud at the water's edge, a feather nearby
@@ -126,3 +128,15 @@ export const PLACEMENTS: Placement[] = [
   { kind: 'pearlgirl', x: -41.3, z: MUSEUM.z1 - 0.34, yaw: Math.PI },
   { kind: 'greatwave', x: -39.3, z: MUSEUM.z1 - 0.34, yaw: Math.PI },
 ];
+
+// Plenty of winter collection spots, kept off paths, steep banks, water and indoor floors.
+const snowRng=mulberry32(2077);
+let snowCount=0;
+for(let attempt=0;attempt<3000&&snowCount<70;attempt++) {
+  const angle=snowRng()*Math.PI*2,r=Math.sqrt(snowRng())*(WORLD_RADIUS-12);
+  const x=Math.cos(angle)*r,z=Math.sin(angle)*r,h=heightAt(x,z);
+  if(insideBuilding(x,z,2)||h<=waterLevelAt(x,z)+.25||pathAt(x,z)>.15)continue;
+  if(Math.hypot(heightAt(x+.6,z)-h,heightAt(x,z+.6)-h)>.3)continue;
+  if(PLACEMENTS.some(p=>Math.hypot(p.x-x,p.z-z)<2.5))continue;
+  PLACEMENTS.push({kind:'snow',x,z});snowCount++;
+}

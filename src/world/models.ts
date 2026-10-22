@@ -453,6 +453,10 @@ export function picnicTable(): THREE.Group {
     const drift = new THREE.Mesh(new THREE.SphereGeometry(.19, 12, 8), std('#edf8ff', .65));
     drift.scale.set(1,.25,1);drift.position.set(x,.80,.1);winterSnow.add(drift);
   }
+  for(const z of [-.55,.55]) {
+    const cap=new THREE.Mesh(new THREE.BoxGeometry(1.58,.05,.23),std('#edf8ff',.65));
+    cap.position.set(0,.505,z);winterSnow.add(cap);
+  }
   g.add(winterSnow);
   return g;
 }
