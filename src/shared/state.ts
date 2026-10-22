@@ -1,3 +1,4 @@
+import { EconomySchema, rewardScore } from './economy';
 // Game state lives here, not in any renderer. Only the actions below mutate it,
 // and each emits its event after mutating. Renderers read ctx.state and call actions.
 import { z } from 'zod';
@@ -33,6 +34,7 @@ const SaveSchema = z.object({
     // The old standalone prototype cannot grant evidence in the main game.
     return run && run.scans.every((s) => s.instrument) ? run : null;
   }),
+  economy: EconomySchema.default(() => EconomySchema.parse({})),
   inventory: z.record(z.string(), z.number()),
   discoveries: z.array(z.string()),
   snapshots: SnapshotsSchema.default({}),
@@ -53,8 +55,8 @@ export const SAVE_KEY = 'microscopecraft:save';
 export const SNAPSHOTS_KEY = 'microscopecraft:snapshots';
 
 /** Everything but the snapshots, which are saved on their own under SNAPSHOTS_KEY. */
-export const toSave = ({ inventory, discoveries, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation, builds, advanced, mystery }: GameState): Omit<SaveData, 'snapshots'> => ({
-  inventory, discoveries, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation, builds, advanced, mystery: mystery ?? null,
+export const toSave = ({ inventory, discoveries, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation, builds, advanced, mystery, economy }: GameState): Omit<SaveData, 'snapshots'> => ({
+  inventory, discoveries, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation, builds, advanced, mystery: mystery ?? null, economy,
 });
 
 /** The save, plus the snapshots saved under their own key (unreadable snapshots are dropped, not the progress). */
@@ -73,7 +75,7 @@ export function parseSave(json: string | null, snapshotsJson: string | null = nu
 
 export function createGame(data: GameData, bus: Bus = createBus(), save?: SaveData | null): GameContext {
   const state: GameState = {
-    inventory: {}, discoveries: [], snapshots: {}, currentSampleId: null, scopeChoice: null, site: null, scope: NAKED_EYE,
+    economy: EconomySchema.parse({}), inventory: {}, discoveries: [], snapshots: {}, currentSampleId: null, scopeChoice: null, site: null, scope: NAKED_EYE,
     achievements: [], quests: [], best: {}, stats: {}, visited: [], align: {}, carriedSamples: [], playerLocation: null, builds: {}, advanced: false, ...save,
   };
   state.carriedSamples = [...new Set(state.carriedSamples)].filter((id) => data.samples[id]).slice(0, SAMPLE_BAG_SIZE);
@@ -258,9 +260,11 @@ export function completeQuest(ctx: GameContext, npcId: string, questId: string):
 
 /** A mini-game result, 0..1. Keeps the best. */
 export function recordScore(ctx: GameContext, game: string, score: number) {
+  if (!Number.isFinite(score)) return;
   const s = Math.min(1, Math.max(0, score));
   const best = s > (ctx.state.best[game] ?? -1);
   if (best) ctx.state.best[game] = s;
+  rewardScore(ctx, game, s);
   ctx.bus.emit('minigameScored', { game, score: s, best });
   checkAchievements(ctx);
 }

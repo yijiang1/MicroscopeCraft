@@ -185,3 +185,33 @@ Pitch points: the instrument is earned by building it, part by part; every upgra
 **Data-driven**: new recipe, material, sample, scientist, request or achievement = one JSON entry in `data/`. `npm test` validates it against the schema and checks cross-references (an unknown discovery, item, mini-game or area in a condition fails). A new object in the world = one entry in `src/world/kinds.ts` (with a model builder in `models.ts` if none fits) plus its spot in `placements.ts`; `npm test` checks it gathers a real item or shows a real sample and stands on dry land, indoors only if marked so.
 
 **The LLM never generates pixels or free-form content.** It outputs a world-spec JSON that `validateWorldSpec` accepts or rejects.
+
+## The Invisible Specimen minigame
+
+Run `npm run dev`, then open `/minigames/invisible-specimen/index.html` on the local server. The standalone game includes ten assignments, optical and electron imaging, magnification, specimen-locked zoom, and a saved discovery journal. You can also open its HTML file directly without a server.
+
+See [integration notes](public/minigames/invisible-specimen/INTEGRATION.txt) for the completion event and iframe setup. Building entry points and inventory rewards are not wired into the main world yet.
+
+### New visitors and footsteps
+
+Hans Bethe stands outside the science building at (20, 20); Earl Kirkland is nearby at (20, 32). Press **E** to talk, or track them from the scientists journal. Each has two requests. Their dialogue and block-style appearances are fictionalized.
+
+Walking and running play quiet, synthesized footsteps, with grass, stone, and water variations. Steps stop in the air, when movement stops, and when controls are unlocked. Use **Tab → Sound** to mute them along with the other game sounds.
+
+Scientists stroll within 12 metres of their home locations, avoiding walls, water, and obstacles. Nearby pairs pause for alternating science conversations in overhead speech bubbles; these are fictional scripted exchanges, not historical quotations. Walk close to a scientist to keep them still for interaction. The bottom-left minimap tracks their live positions.
+
+### Campus rewards and ScopeCraft Store
+
+- Press **E** at the **Field Lab** console inside the Science Building (28, 17) for The Invisible Specimen, Köhler illumination, Gram staining, stain timing, TEM alignment, aberration correction and ptychography. The **Wilson Lab** console (54, 2) offers beam tuning and tomography. The Tab menu also provides direct activity shortcuts.
+- Each new 20% score milestone pays 10 coins; reaching 80% pays one voucher. Rewards are saved per mini-game, so improving a score pays the difference and repeated submissions do not duplicate payouts. Each of Invisible Specimen's ten successfully photographed assignments is a separate completed challenge (50 coins and one voucher).
+- Visit **ScopeCraft Store** in the giant light-microscope building between the quads (counter at -12, 33; entrance on its south side), or open **Tab → ScopeCraft Store & wardrobe**. Buy readable scientist biographies, original microscopy learning notes, clothing, a backpack, and a miniature microscope souvenir using coins or vouchers. Equip cosmetics in the shop and use **V** to see them in third person. Outfits, purchases and balances persist in the save.
+- NPC dialogs now offer **Receive sample** and **View sample**. Gifts relate to their research requests, use the normal eight-slot sample bag, and can be collected again if misplaced. Receiving a sample does not automatically identify its features.
+- Ambient conversations use compact, softly shaded overhead bubbles with speaker labels. Characters pause while talking; each utterance holds a stable anchor. Nearby overlapping bubbles are suppressed, and opaque building walls hide conversations. Text is rendered as an overlay so it cannot intersect ceiling geometry. These ambient conversations remain scripted; player-to-NPC AI chat is a separate optional feature.
+
+Store inventory cards show illustrated item previews. Click a preview to enlarge it before buying. ScopeCraft Store has a walk-in glass shop in the microscope base, a specimen stage, curved support arm, focusing wheels, revolving objectives and an angled eyepiece.
+
+### Clock tower lookout and music
+
+The glass elevator on the east side of the clock tower takes you to a railed terrace 30 metres above campus. Walk up to it and press **E** to ride; press **E** near the cabin upstairs to return. You can look around during the ride.
+
+Two original synthesized background themes accompany campus walks and lab visits. After your first click or key enables audio, the tower plays a bell arrangement of the traditional **Oh Tannenbaum** every five minutes, with distance attenuation. The existing **Sound** toggle mutes all music and effects immediately. No audio downloads or API keys are needed.

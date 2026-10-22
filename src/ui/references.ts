@@ -14,6 +14,8 @@ export const REFERENCES: Record<string, Reference[]> = {
     { text: 'NIOS Senior Secondary Physics, Optical instruments (near point 25 cm).', url: 'https://www.nios.ac.in/media/documents/SrSec312NEW/Learner_Guide/Eng/312_LG_E_L23.pdf' },
   ],
   'Electron microscopy': [
+    { text: 'H. Bethe (1928). Theorie der Beugung von Elektronen an Kristallen. Annalen der Physik 392, 55–129.' },
+    { text: 'E. J. Kirkland (2016). Computation in electron microscopy. Acta Crystallographica A72, 1–27.', url: 'https://journals.iucr.org/a/issues/2016/01/00/mq5037/index.html' },
     { text: 'M. Knoll, E. Ruska (1932). Das Elektronenmikroskop. Zeitschrift für Physik 78, 318–339.' },
     { text: 'O. Scherzer (1949). The theoretical resolution limit of the electron microscope. Journal of Applied Physics 20, 20–29.' },
     { text: 'A. V. Crewe, J. Wall, J. Langmore (1970). Visibility of single atoms. Science 168, 1338–1340.' },

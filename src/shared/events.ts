@@ -4,6 +4,11 @@ import type { Tier } from './schema';
 export interface GameEvents {
   mysteryChanged: Record<string, never>;
   openMysteryNotebook: Record<string, never>;
+  musicScene: { distance: number; indoors: boolean };
+  economyChanged: Record<string, never>;
+  rewardEarned: { coins: number; vouchers: number };
+  openCampusActivity: { activity: 'store' | 'lab' | 'chess' };
+  campusActivityChanged: { open: boolean };
   /** world → scope: player aimed at a sample and pressed the eyepiece key. */
   openEyepiece: { sampleId: string };
   /** scope → world: eyepiece dismissed. */
@@ -13,6 +18,8 @@ export interface GameEvents {
   playerMoved: Record<string, never>;
   /** scope → guide: advice from the rendered image, including focus, alignment, stains and damage. */
   eyepieceStatus: { sampleId: string; text: string };
+  /** Grounded player movement; consumed by the shared audio controller. */
+  footstep: { surface: 'grass' | 'stone' | 'water'; running: boolean };
   itemGathered: { itemId: string; count: number };
   itemCrafted: { itemId: string };
   discoveryUnlocked: { id: string };

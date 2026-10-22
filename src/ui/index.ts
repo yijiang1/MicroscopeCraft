@@ -1,3 +1,4 @@
+import { mountCampusActivities, type TrainingGames } from './campus-activities';
 // Person D. The goal card (always visible, keyboard-first), a menu panel (Tab), the tech tree (T),
 // the Microdex (M), toasts and sound. Plain DOM; swap for anything.
 import { SAVE_KEY, SNAPSHOTS_KEY, setAdvanced, toSave, type GameContext } from '../shared/state';
@@ -20,8 +21,9 @@ export interface UIHandle {
   dispose(): void;
 }
 
-export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
+export function mountUI(el: HTMLElement, ctx: GameContext, training: TrainingGames): UIHandle {
   const toast = createToast();
+  const campusActivities = mountCampusActivities(ctx, toast, training);
   const microdex = mountMicrodex(document.body, ctx);
   const sound = mountSound(ctx);
   const inventory = mountInventory(ctx);
@@ -62,6 +64,9 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   const dex = row('🔬', 'Microdex', () => microdex.toggle(), 'M');
   const journalBtn = row('📓', 'Journal', () => journal.toggle(), 'J');
   const mysteryBtn = row('🧩', 'Mystery samples', () => { setMenu(false); mystery.open(); });
+  const storeBtn = row('🛍️', 'ScopeCraft Store & wardrobe', () => { setMenu(false); campusActivities.open('store'); });
+  const labBtn = row('🧪', 'Science Building activities', () => { setMenu(false); campusActivities.open('lab'); });
+  const chessBtn = row('🔬', 'Wilson Lab activities', () => { setMenu(false); campusActivities.open('chess'); });
   const refsBtn = row('📚', 'References', () => journal.toggle('references'));
   const tutorialBtn = row('🎓', 'Tutorial', () => {
     setMenu(false);
@@ -178,7 +183,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   title.innerHTML = 'Menu <kbd>Tab</kbd>';
   title.style.margin = '2px 2px 10px';
   const heading = (text: string) => Object.assign(document.createElement('div'), { className: 'mc-menu-h', textContent: text });
-  el.append(css, title, tree.b, benchBtn.b, dex.b, journalBtn.b, mysteryBtn.b, refsBtn.b, sep(), heading('Settings'), modeRow.b, mute.b, keyRow.b, keyForm, sep(), tutorialBtn.b, saveBtn.b, restart.b);
+  el.append(css, title, tree.b, benchBtn.b, dex.b, journalBtn.b, mysteryBtn.b, refsBtn.b, storeBtn.b, labBtn.b, chessBtn.b, sep(), heading('Settings'), modeRow.b, mute.b, keyRow.b, keyForm, sep(), tutorialBtn.b, saveBtn.b, restart.b);
 
   let menuOpen = false;
   const setMenu = (open: boolean) => {
@@ -195,6 +200,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
     const mission = ctx.state.mystery;
     mysteryBtn.b.hidden = !mission;
     mysteryBtn.set('Mission notebook', mission?.conclusion ? 'The unlabelled alloy · complete' : mission ? `The unlabelled alloy · ${mission.scans.length}/${SCANS.length} scans` : 'Accept a mystery sample from Bragg');
+    storeBtn.set('ScopeCraft Store & wardrobe', `${ctx.state.economy.coins} coins · ${ctx.state.economy.vouchers} vouchers`);
   };
   render();
 
@@ -213,6 +219,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
       if (!travelSave) travelSave = window.setTimeout(save, 5000);
     }),
     ctx.bus.on('carriedSamplesChanged', save),
+    ctx.bus.on('economyChanged', () => { save(); render(); }),
     ctx.bus.on('mysteryChanged', () => { save(); render(); }),
     ...(['itemGathered', 'itemCrafted', 'discoveryUnlocked', 'scopeChanged', 'questCompleted', 'achievementUnlocked', 'minigameScored', 'areaVisited', 'closeEyepiece', 'closeWorkbench'] as const).map((t) => ctx.bus.on(t, save)),
     ctx.bus.on('openWorkbench', () => setMenu(false)),
@@ -255,6 +262,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
       removeEventListener('pagehide', save);
       document.removeEventListener('visibilitychange', saveWhenHidden);
       clearTimeout(travelSave);
+      campusActivities.dispose();
       goal.dispose();
       journal.dispose();
       mystery.dispose();

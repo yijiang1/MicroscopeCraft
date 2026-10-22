@@ -19,6 +19,7 @@ const GORGE = { bed: 3, top: 10 }; // half-widths of the creek bed and of the go
 /** Flat building pads off the hilltop: Wilson Lab, east of the campus, the engineering quad to the south, the chemistry
  *  building, the athletic fields further east, and the residence halls north of the gorge. */
 const PADS = [
+  { x0: -20, x1: -4, z0: 24, z1: 40 },
   { x0: 47, x1: 74, z0: -17, z1: 9 }, { x0: -46, x1: 50, z0: 40, z1: 110 }, { x0: 50, x1: 70, z0: 14, z1: 32 },
   { x0: 78, x1: 120, z0: -34, z1: 52 }, { x0: -12, x1: 42, z0: -110, z1: -86 }, { x0: -120, x1: -78, z0: -30, z1: 20 },
 ];

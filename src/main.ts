@@ -1,3 +1,4 @@
+import { trainingGames } from './scope/training';
 // Composition root: the only file that imports every module. Wires data → state → modules.
 import { mountGuide } from './guide';
 import { mountScope } from './scope';
@@ -19,7 +20,7 @@ try {
   const ctx = createGame(loadGameData(), undefined, saved);
   mountWorld(el('world'), ctx);
   mountScope(el('scope'), ctx);
-  mountUI(el('ui'), ctx);
+  mountUI(el('ui'), ctx, trainingGames(ctx));
   mountWorkbench(el('workbench'), ctx);
   mountGuide(ctx);
   // Demo mode (?demo): press K to restock every raw material, so a live demo can skip repeat gathering.

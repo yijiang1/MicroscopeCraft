@@ -1,3 +1,5 @@
+import { LIFT } from './tower-lift';
+import { buildScopeStore, storeFloorAt, STORE_FOOTPRINT, STORE_WALLS } from './store-building';
 // Campus buildings on the hilltop: the halls and statues around the quad, a clock tower with a working clock,
 // the science building with the electron microscopy lab on its glass ground floor, and the waterfall; to the south,
 // the engineering quad (after Cornell's): the materials, geology, east and south halls and a glass atrium. Every hall
@@ -117,6 +119,7 @@ const STATUES = [
 
 /** Everything with a footprint, for keeping scenery out of buildings. */
 export const FOOTPRINTS: Box[] = [
+  STORE_FOOTPRINT,
   ...HALLS.map((h) => h.box),
   PORTICO,
   box(TOWER.x - TOWER.half, TOWER.x + TOWER.half, TOWER.z - TOWER.half, TOWER.z + TOWER.half),
@@ -126,7 +129,7 @@ export const FOOTPRINTS: Box[] = [
 ];
 /** Inside a building, or on a structure where no scenery grows: the sports fields and their stands, the bridge. */
 export const insideBuilding = (x: number, z: number, margin = 0) =>
-  [...FOOTPRINTS, GREENHOUSE, WILSON, ATRIUM, box(GRIDIRON.x0 - 2, GRIDIRON.x1 + 2, STANDS.z0, PRACTICE.z1 + 2), box(BRIDGE.x - 2, BRIDGE.x + 2, BRIDGE.z0 - 2, BRIDGE.z1 + 2)].some(
+  [box(LIFT.x - 1.6, LIFT.x + 2.3, LIFT.z - 1.6, LIFT.z + 1.6), ...FOOTPRINTS, GREENHOUSE, WILSON, ATRIUM, box(GRIDIRON.x0 - 2, GRIDIRON.x1 + 2, STANDS.z0, PRACTICE.z1 + 2), box(BRIDGE.x - 2, BRIDGE.x + 2, BRIDGE.z0 - 2, BRIDGE.z1 + 2)].some(
     (b) => x > b.x0 - margin && x < b.x1 + margin && z > b.z0 - margin && z < b.z1 + margin,
   );
 const inside = (b: Box, x: number, z: number) => x > b.x0 && x < b.x1 && z > b.z0 && z < b.z1;
@@ -136,12 +139,12 @@ export const inGreenhouse = (x: number, z: number) => inside(GREENHOUSE, x, z);
 export const inAtrium = (x: number, z: number) => inside(ATRIUM, x, z);
 /** Inside any building's walls: the lab, Wilson Lab, the greenhouse, the atrium or a hall's ground-floor room. */
 export const indoors = (x: number, z: number) =>
-  inLab(x, z) || inChess(x, z) || inGreenhouse(x, z) || inAtrium(x, z) || inside(MUSEUM, x, z) || HALLS.some((h) => inside(h.box, x, z));
+  inside(STORE_FOOTPRINT, x, z) || inLab(x, z) || inChess(x, z) || inGreenhouse(x, z) || inAtrium(x, z) || inside(MUSEUM, x, z) || HALLS.some((h) => inside(h.box, x, z));
 /** Up on the bridge deck, rather than down in the gorge under it, with the feet at `feet`. */
 export const onDeck = (x: number, z: number, feet = Infinity) =>
   Math.abs(x - BRIDGE.x) < BRIDGE.half && z > BRIDGE.z0 && z < BRIDGE.z1 && feet > BRIDGE.y - 1;
-/** Where the feet rest: the deck for someone on the bridge, else the ground. */
-export const groundAt = (x: number, z: number, feet = Infinity) => (onDeck(x, z, feet) ? Math.max(heightAt(x, z), BRIDGE.y) : heightAt(x, z));
+/** Feet rest on the bridge deck, the raised shop floor, or the terrain. */
+export const groundAt = (x: number, z: number, feet = Infinity) => (onDeck(x, z, feet) ? Math.max(heightAt(x, z), BRIDGE.y) : storeFloorAt(x, z) ?? heightAt(x, z));
 /** The bridge's side screens, solid only to someone on the deck. */
 export const BRIDGE_RAILS: Box[] = [-1, 1].map((s) => box(BRIDGE.x + s * BRIDGE.half - 0.05, BRIDGE.x + s * BRIDGE.half + 0.05, BRIDGE.z0, BRIDGE.z1));
 
@@ -1023,8 +1026,9 @@ export function buildCampus(): Campus {
   const group = new THREE.Group();
   const walls: Box[] = [];
   HALLS.forEach((h) => hall(h, group, walls));
+  group.add(buildScopeStore()); walls.push(...STORE_WALLS);
   // solid outside: the tower, the statues and the portico's columns (the halls and the lab build their own walls)
-  walls.push(...FOOTPRINTS.filter((b) => b !== SCIENCE && b !== MUSEUM && b !== PORTICO && !HALLS.some((h) => h.box === b)));
+  walls.push(...FOOTPRINTS.filter((b) => b !== STORE_FOOTPRINT && b !== SCIENCE && b !== MUSEUM && b !== PORTICO && !HALLS.some((h) => h.box === b)));
   walls.push(...PORTICO_COLUMNS.map((c) => box(c.x - 0.35, c.x + 0.35, c.z - 0.35, c.z + 0.35)));
 
   // the domed hall's dome
