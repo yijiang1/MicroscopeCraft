@@ -1,4 +1,5 @@
-import { equip, purchase, SPECIMEN_IDS, storeCatalog } from '../shared/economy';
+import { storePreview } from './store-preview';
+import { equip, purchase, SPECIMEN_IDS, storeCatalog, type StoreItem } from '../shared/economy';
 import { recordScore, type GameContext } from '../shared/state';
 import type { Toast } from './toast';
 
@@ -28,13 +29,24 @@ export function mountCampusActivities(ctx: GameContext, toast: Toast, training: 
   modal.addEventListener('keydown', e => e.stopPropagation());
   modal.addEventListener('close', () => { clear(); activity = ''; ctx.bus.emit('campusActivityChanged', { open: false }); });
   const shop = () => {
-    clear(); title.textContent = 'Cornell Store · Atrium';
+    clear(); title.textContent = 'ScopeCraft Store · Microscope House';
     content.append(text('p', 'Earn coins and vouchers in campus mini-games. Purchases and outfits are saved automatically. Books are readable in-game souvenirs.'));
     content.append(button('Wear original blue shirt', () => { equip(ctx, 'shirt_blue'); shop(); }));
     const grid = document.createElement('div'); grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fit,minmax(225px,1fr));gap:10px';
-    for (const item of storeCatalog(ctx.data)) {
+    const itemCard = (item: StoreItem, expanded = false) => {
       const card = document.createElement('article');
-      card.append(text('h3', item.name));
+      const preview = document.createElement('button');
+      preview.type = 'button';
+      preview.setAttribute('aria-label', `Enlarge preview: ${item.name}`);
+      preview.style.cssText = `display:block;width:100%;height:${expanded ? 260 : 140}px;padding:0;margin:0 0 12px;border:1px solid #a2c8bd26;border-radius:8px;background:radial-gradient(ellipse at 50% 40%,#33585b,#1c333e);cursor:${expanded ? 'default' : 'zoom-in'}`;
+      preview.append(storePreview(item));
+      if (expanded) {
+        card.style.cssText = 'max-width:460px;margin:0 auto';
+        preview.disabled = true; preview.style.opacity = '1';
+      } else preview.onclick = () => {
+        clear(); content.append(button('← Store & collection', shop), itemCard(item, true));
+      };
+      card.append(preview, text('h3', item.name));
       const owned = ctx.state.economy.owned.includes(item.id);
       if (owned) {
         if (item.kind === 'book') card.append(button('Read', () => {
@@ -55,8 +67,9 @@ export function mountCampusActivities(ctx: GameContext, toast: Toast, training: 
           b.disabled = ctx.state.economy[currency] < cost; card.append(b);
         }
       }
-      grid.append(card);
-    }
+      return card;
+    };
+    for (const item of storeCatalog(ctx.data)) grid.append(itemCard(item));
     content.append(grid); sync();
   };
   const games = (location: 'lab' | 'chess') => {

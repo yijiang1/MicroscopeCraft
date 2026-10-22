@@ -1,3 +1,4 @@
+import { buildScopeStore, STORE_FOOTPRINT, STORE_WALLS } from './store-building';
 // Campus buildings on the hilltop: the halls and statues around the quad, a clock tower with a working clock,
 // the science building with the electron microscopy lab on its glass ground floor, and the waterfall; to the south,
 // the engineering quad (after Cornell's): the materials, geology, east and south halls and a glass atrium. Every hall
@@ -117,6 +118,7 @@ const STATUES = [
 
 /** Everything with a footprint, for keeping scenery out of buildings. */
 export const FOOTPRINTS: Box[] = [
+  STORE_FOOTPRINT,
   ...HALLS.map((h) => h.box),
   PORTICO,
   box(TOWER.x - TOWER.half, TOWER.x + TOWER.half, TOWER.z - TOWER.half, TOWER.z + TOWER.half),
@@ -136,7 +138,7 @@ export const inGreenhouse = (x: number, z: number) => inside(GREENHOUSE, x, z);
 export const inAtrium = (x: number, z: number) => inside(ATRIUM, x, z);
 /** Inside any building's walls: the lab, Wilson Lab, the greenhouse, the atrium or a hall's ground-floor room. */
 export const indoors = (x: number, z: number) =>
-  inLab(x, z) || inChess(x, z) || inGreenhouse(x, z) || inAtrium(x, z) || inside(MUSEUM, x, z) || HALLS.some((h) => inside(h.box, x, z));
+  inside(STORE_FOOTPRINT, x, z) || inLab(x, z) || inChess(x, z) || inGreenhouse(x, z) || inAtrium(x, z) || inside(MUSEUM, x, z) || HALLS.some((h) => inside(h.box, x, z));
 /** Up on the bridge deck, rather than down in the gorge under it, with the feet at `feet`. */
 export const onDeck = (x: number, z: number, feet = Infinity) =>
   Math.abs(x - BRIDGE.x) < BRIDGE.half && z > BRIDGE.z0 && z < BRIDGE.z1 && feet > BRIDGE.y - 1;
@@ -1023,8 +1025,9 @@ export function buildCampus(): Campus {
   const group = new THREE.Group();
   const walls: Box[] = [];
   HALLS.forEach((h) => hall(h, group, walls));
+  group.add(buildScopeStore()); walls.push(...STORE_WALLS);
   // solid outside: the tower, the statues and the portico's columns (the halls and the lab build their own walls)
-  walls.push(...FOOTPRINTS.filter((b) => b !== SCIENCE && b !== MUSEUM && b !== PORTICO && !HALLS.some((h) => h.box === b)));
+  walls.push(...FOOTPRINTS.filter((b) => b !== STORE_FOOTPRINT && b !== SCIENCE && b !== MUSEUM && b !== PORTICO && !HALLS.some((h) => h.box === b)));
   walls.push(...PORTICO_COLUMNS.map((c) => box(c.x - 0.35, c.x + 0.35, c.z - 0.35, c.z + 0.35)));
 
   // the domed hall's dome

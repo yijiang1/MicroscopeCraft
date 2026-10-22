@@ -10,7 +10,7 @@ export type Economy = z.infer<typeof EconomySchema>;
 export interface StoreItem { id: string; name: string; price: number; kind: 'book' | 'shirt' | 'backpack' | 'model'; text: string }
 export function storeCatalog(data: GameData): StoreItem[] {
   return [
-    { id: 'shirt_red', name: 'Cornell red shirt', price: 40, kind: 'shirt', text: 'A red campus shirt. Equip it and press V to see your explorer.' },
+    { id: 'shirt_red', name: 'ScopeCraft red shirt', price: 40, kind: 'shirt', text: 'A red campus shirt. Equip it and press V to see your explorer.' },
     { id: 'shirt_lab', name: 'White lab outfit', price: 60, kind: 'shirt', text: 'A white jacket for your next microscopy session.' },
     { id: 'backpack', name: 'Field backpack', price: 50, kind: 'backpack', text: 'A red field bag with dark straps. Cosmetic; sample capacity stays at eight.' },
     { id: 'model', name: 'Miniature microscope', price: 80, kind: 'model', text: 'A wearable miniature microscope souvenir, displayed at your hip.' },

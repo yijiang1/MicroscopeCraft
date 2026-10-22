@@ -1,9 +1,10 @@
+import { STORE_COUNTER } from './store-building';
 import * as THREE from 'three';
 import { groundAt } from './campus';
 export const STATIONS = [
   { activity: 'lab' as const, x: 28, z: 17, name: 'Field Lab · Mini-games', color: '#317c80' },
   { activity: 'chess' as const, x: 54, z: 2, name: 'CHESS · Challenges', color: '#4b608e' },
-  { activity: 'store' as const, x: 12, z: 53, name: 'Cornell Store', color: '#b32638' },
+  { activity: 'store' as const, ...STORE_COUNTER, name: 'ScopeCraft Store', color: '#b32638' },
 ];
 export function buildActivityStation(station: typeof STATIONS[number]) {
   const root = new THREE.Group(); root.position.set(station.x, groundAt(station.x, station.z), station.z);

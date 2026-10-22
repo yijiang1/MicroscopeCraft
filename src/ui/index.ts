@@ -59,7 +59,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext, training: TrainingGam
   const tree = row('🌳', 'Tech tree', () => techTree.toggle(), 'T');
   const dex = row('🔬', 'Microdex', () => microdex.toggle(), 'M');
   const journalBtn = row('📓', 'Journal', () => journal.toggle(), 'J');
-  const storeBtn = row('🛍️', 'Cornell Store & wardrobe', () => { setMenu(false); campusActivities.open('store'); });
+  const storeBtn = row('🛍️', 'ScopeCraft Store & wardrobe', () => { setMenu(false); campusActivities.open('store'); });
   const labBtn = row('🧪', 'Science Building activities', () => { setMenu(false); campusActivities.open('lab'); });
   const chessBtn = row('🔬', 'Wilson Lab activities', () => { setMenu(false); campusActivities.open('chess'); });
   const refsBtn = row('📚', 'References', () => journal.toggle('references'));
@@ -181,7 +181,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext, training: TrainingGam
   const render = () => {
     dex.set('Microdex', microdex.summary());
     journalBtn.set('Journal', journal.summary());
-    storeBtn.set('Cornell Store & wardrobe', `${ctx.state.economy.coins} coins · ${ctx.state.economy.vouchers} vouchers`);
+    storeBtn.set('ScopeCraft Store & wardrobe', `${ctx.state.economy.coins} coins · ${ctx.state.economy.vouchers} vouchers`);
   };
   render();
 
