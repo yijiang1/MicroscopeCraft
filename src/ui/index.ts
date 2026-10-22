@@ -11,6 +11,7 @@ import { mountMicrodex } from './microdex';
 import { mountSound } from './sound';
 import { mountTechTree } from './techtree';
 import { createToast } from './toast';
+import { mountTutorial, TUTORIAL_KEY } from './tutorial';
 
 export interface UIHandle {
   dispose(): void;
@@ -24,6 +25,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   const techTree = mountTechTree(document.body, ctx);
   const journal = mountJournal(document.body, ctx);
   const closeDialog = mountDialog(ctx, toast);
+  const tutorial = mountTutorial(ctx);
 
   // --- menu panel (hidden until Tab): tech tree and microdex buttons, sound, guide
   el.style.cssText += ';background:#000d;padding:8px;box-sizing:border-box;display:none';
@@ -41,6 +43,13 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   dex.onclick = () => microdex.toggle();
   journalBtn.style.cssText = 'display:block;width:100%;margin:2px 0';
   journalBtn.onclick = () => journal.toggle();
+  const tutorialBtn = document.createElement('button');
+  tutorialBtn.style.cssText = 'display:block;width:100%;margin:2px 0';
+  tutorialBtn.textContent = 'Tutorial';
+  tutorialBtn.onclick = () => {
+    setMenu(false);
+    tutorial.replay();
+  };
   const refsBtn = document.createElement('button');
   refsBtn.style.cssText = 'display:block;width:100%;margin:2px 0';
   refsBtn.textContent = 'References';
@@ -79,6 +88,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
     resetting = true;
     try {
       localStorage.removeItem(SAVE_KEY);
+      localStorage.removeItem(TUTORIAL_KEY);
     } catch {
       /* nothing saved */
     }
@@ -102,7 +112,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   const title = document.createElement('h4');
   title.textContent = 'Menu (Tab to close)';
   title.style.margin = '4px 0 8px';
-  el.append(title, tree, dex, journalBtn, refsBtn, mute, saveBtn, restart, guide);
+  el.append(title, tree, dex, journalBtn, refsBtn, tutorialBtn, mute, saveBtn, restart, guide);
 
   let menuOpen = false;
   const setMenu = (open: boolean) => {
@@ -175,6 +185,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
       goal.dispose();
       journal.dispose();
       closeDialog();
+      tutorial.dispose();
       inventory.dispose();
       techTree.dispose();
       microdex.dispose();
