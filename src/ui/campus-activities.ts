@@ -54,6 +54,7 @@ export function mountCampusActivities(ctx: GameContext, toast: Toast, training: 
           clear(); content.append(button('← Store & collection', shop), text('h2', item.name));
           const body = text('p', item.text); body.style.whiteSpace = 'pre-line'; content.append(body);
         }));
+        else if (item.kind === 'tool') card.append(text('p', 'Acquired · Approach water to fish'));
         else if (item.kind === 'car') card.append(text('p', 'Owned · Unlimited campus drives'));
         else {
           const e = ctx.state.economy;
@@ -63,9 +64,9 @@ export function mountCampusActivities(ctx: GameContext, toast: Toast, training: 
         }
       } else {
         card.append(text('p', item.kind === 'book' ? 'A readable addition to your campus collection.' : item.text));
-        for (const currency of ['coins', 'vouchers'] as const) {
+        for (const currency of (item.price === 0 ? ['coins'] as const : ['coins', 'vouchers'] as const)) {
           const cost = currency === 'coins' ? item.price : Math.ceil(item.price / 25);
-          const b = button(`Buy · ${cost} ${cost === 1 ? currency.slice(0, -1) : currency}`, () => { if (purchase(ctx, item.id, currency)) { toast.notify(`Purchased ${item.name}`); shop(); } });
+          const b = button(item.price === 0 ? 'Get free rod · 0 coins' : `Buy · ${cost} ${cost === 1 ? currency.slice(0, -1) : currency}`, () => { if (purchase(ctx, item.id, currency)) { toast.notify(`Purchased ${item.name}`); shop(); } });
           b.disabled = ctx.state.economy[currency] < cost; card.append(b);
         }
       }

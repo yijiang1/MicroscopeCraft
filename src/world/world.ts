@@ -1,3 +1,5 @@
+import { buildFishingRod, type FishingAction } from './fishing-rod';
+import { buildFish, fishingWaterPoint, mountFishing } from './fishing';
 import { blocksRoadster, buildMiata, driveStep, roadsterGradeOK, TEST_DRIVE_MS } from './miata';
 import { advanceLift, buildTowerLift, constrainTerrace, LIFT, liftBase, nearLift } from './tower-lift';
 import { mountSpeechOverlay } from './speech-overlay';
@@ -91,6 +93,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   scene.add(buildTerrain());
   const water = buildWater();
   scene.add(water);
+  const fish = buildFish(); scene.add(fish.group);
   const campus = buildCampus();
   const lift = buildTowerLift(); scene.add(lift.group);
   let liftHeight = 0;
@@ -256,6 +259,9 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const controls = new PointerLockControls(camera, renderer.domElement);
   const player = buildPlayer();
   scene.add(player.root);
+  const fishingRod=buildFishingRod(player.root);scene.add(fishingRod.group);
+  let fishingAction: FishingAction = 'idle';
+  let fishingView = true;
   const viewCamera = camera.clone();
   const driver = buildPlayer(); driver.seated(); driver.root.scale.setScalar(0.72); driver.root.position.set(-0.39,0.24,0.4);
   const roadster = buildMiata(); roadster.root.add(driver.root); roadster.root.visible = false; scene.add(roadster.root);
@@ -564,7 +570,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     collide(p, campus.walls, solids.filter(s => s !== npcNodes.get(walker.id)));
     return Math.hypot(p.x - x, p.z - z) < 0.001 && Math.hypot(x - camera.position.x, z - camera.position.z) > 0.9;
   };
-  const minimap = mountMinimap(el, life.walkers);
+  const minimap = mountMinimap(el, life.walkers, open => ctx.bus.emit('campusActivityChanged', { open }));
   const speech = mountSpeechOverlay(el);
   const offActivity = ctx.bus.on('campusActivityChanged', ({ open }) => { paused = open; keys.clear(); if (open) controls.unlock(); });
   const dress = () => { player.equip(ctx.state.economy); redrawShadows(); };
@@ -589,6 +595,17 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     roadster.root.visible = true;
     if (trial) driveTimer = setTimeout(finishDrive, TEST_DRIVE_MS);
     hud.flash('Micro Roadster · W/S accelerate & reverse · A/D steer · E return to store');
+    redrawShadows();
+  });
+  const fishing = mountFishing(ctx, lookAt, (action,color) => {
+    if(action==='ready'&&fishingAction==='idle'){
+      fishingView=thirdPerson;thirdPerson=true;
+      const water=fishingWaterPoint(camera.position.x,camera.position.z,camera.position.y-EYE_HEIGHT);
+      if(water) camera.rotation.set(-.15,Math.atan2(camera.position.x-water.x,camera.position.z-water.z),0,'YXZ');
+    }
+    if(action==='idle') thirdPerson=fishingView;
+    fishingAction=action;
+    fishingRod.action(action,fishingWaterPoint(camera.position.x,camera.position.z,camera.position.y-EYE_HEIGHT)??undefined,color);
     redrawShadows();
   });
   const footsteps = createFootstepTracker();
@@ -664,7 +681,8 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       const area = areaAt(px, pz);
       if (area) visit(ctx, area);
     }
-    campus.update(t);
+    campus.update(t); fish.update(t);
+    fishing.update(px,pz,camera.position.y-EYE_HEIGHT,!paused&&!driving&&!ridingLift&&!onTerrace,t);
     ctx.bus.emit('musicScene', { distance: Math.hypot(px - TOWER.x, pz - TOWER.z), indoors: inLab(px, pz) || inChess(px, pz) });
     // the tower bells, by the real clock: a chime each quarter hour, and the hour struck on the big bell
     const now = new Date();
@@ -684,6 +702,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       ctx.bus.emit('footstep', { surface, running });
     }
     player.update(distance, dt);
+    if(fishingAction!=='idle') player.fishing(performance.now(),fishingAction==='reel');
     life.update(dt, camera.position, canRoam, paused);
     for (const w of life.walkers) {
       const n = npcNodes.get(w.id)!;
@@ -702,7 +721,8 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       wasMoving.set(w.id, w.moving);
     }
     updateDecor(t);
-    updateView();
+    updateView(); fishingRod.update(performance.now());
+    if(fishingAction!=='idle') redrawShadows();
     if (px !== previousX || pz !== previousZ || camera.position.y !== previousY || player.root.rotation.y !== previousYaw || anims.length) redrawShadows();
 
     // sun and its shadow follow the player
@@ -798,7 +818,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       removeEventListener('keyup', onUp);
       removeEventListener('pagehide', rememberPlayer);
       document.removeEventListener('visibilitychange', rememberPlayer);
-      minimap.dispose();
+      fishing.dispose(); fishingRod.dispose(); minimap.dispose();
       speech.dispose(); offActivity(); offDress(); offDrive(); clearTimeout(driveTimer);
       driver.dispose(); player.dispose();
       controls.dispose();

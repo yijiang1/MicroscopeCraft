@@ -945,5 +945,209 @@
       { "id": "nw_lead_map", "name": "Lead map", "sizeUm": 200, "contrast": 0, "contrastIn": { "xrf": 0.7 }, "edgeKeV": 13.035, "drawing": "map", "tint": "#ffffff",
         "blurb": "Above lead's L edge at 13.04 keV, the map shows a lead layer under all the paint, laid on in big curving brushstrokes. Rembrandt soaked the canvas with lead-rich oil before painting, probably to guard it against the damp wall it would hang on." }
     ]
-  }
+  },
+{
+  "id": "fish_perch",
+  "name": "Yellow perch scale preparation",
+  "worldObject": "fish_scale",
+  "biome": "pond",
+  "features": [
+    {
+      "id": "perch_scale",
+      "name": "Scale surface",
+      "sizeUm": 300,
+      "contrast": 0.6,
+      "drawing": "scales",
+      "tint": "#c4b750",
+      "blurb": "A prepared fish scale seen at low magnification. Compare its outline and surface pattern with scales from other catches."
+    },
+    {
+      "id": "perch_ridges",
+      "name": "Fine scale ridges",
+      "sizeUm": 12,
+      "contrast": 0.45,
+      "drawing": "rings",
+      "blurb": "Increasing magnification reveals finer surface ridges. This is a schematic teaching preparation, not a species-identification measurement."
+    },
+    {
+      "id": "perch_fibres",
+      "name": "Fine fibres in prepared scale",
+      "sizeUm": 0.08,
+      "contrast": 0.3,
+      "drawing": "lines",
+      "criticalDoseENm2": 100,
+      "blurb": "A schematic view of fine fibres in a thin prepared section. Electron microscopy needs suitable preparation; a whole wet fish cannot go directly into a vacuum microscope."
+    }
+  ]
+},
+{
+  "id": "fish_bass",
+  "name": "Largemouth bass scale preparation",
+  "worldObject": "fish_scale",
+  "biome": "pond",
+  "features": [
+    {
+      "id": "bass_scale",
+      "name": "Scale surface",
+      "sizeUm": 300,
+      "contrast": 0.6,
+      "drawing": "scales",
+      "tint": "#6c9363",
+      "blurb": "A prepared fish scale seen at low magnification. Compare its outline and surface pattern with scales from other catches."
+    },
+    {
+      "id": "bass_ridges",
+      "name": "Fine scale ridges",
+      "sizeUm": 12,
+      "contrast": 0.45,
+      "drawing": "rings",
+      "blurb": "Increasing magnification reveals finer surface ridges. This is a schematic teaching preparation, not a species-identification measurement."
+    },
+    {
+      "id": "bass_fibres",
+      "name": "Fine fibres in prepared scale",
+      "sizeUm": 0.08,
+      "contrast": 0.3,
+      "drawing": "lines",
+      "criticalDoseENm2": 100,
+      "blurb": "A schematic view of fine fibres in a thin prepared section. Electron microscopy needs suitable preparation; a whole wet fish cannot go directly into a vacuum microscope."
+    }
+  ]
+},
+{
+  "id": "fish_salmon",
+  "name": "Salmon scale preparation",
+  "worldObject": "fish_scale",
+  "biome": "pond",
+  "features": [
+    {
+      "id": "salmon_scale",
+      "name": "Scale surface",
+      "sizeUm": 300,
+      "contrast": 0.6,
+      "drawing": "scales",
+      "tint": "#d58c86",
+      "blurb": "A prepared fish scale seen at low magnification. Compare its outline and surface pattern with scales from other catches."
+    },
+    {
+      "id": "salmon_ridges",
+      "name": "Fine scale ridges",
+      "sizeUm": 12,
+      "contrast": 0.45,
+      "drawing": "rings",
+      "blurb": "Increasing magnification reveals finer surface ridges. This is a schematic teaching preparation, not a species-identification measurement."
+    },
+    {
+      "id": "salmon_fibres",
+      "name": "Fine fibres in prepared scale",
+      "sizeUm": 0.08,
+      "contrast": 0.3,
+      "drawing": "lines",
+      "criticalDoseENm2": 100,
+      "blurb": "A schematic view of fine fibres in a thin prepared section. Electron microscopy needs suitable preparation; a whole wet fish cannot go directly into a vacuum microscope."
+    }
+  ]
+},
+{
+  "id": "fish_sunfish",
+  "name": "Sunfish scale preparation",
+  "worldObject": "fish_scale",
+  "biome": "pond",
+  "features": [
+    {
+      "id": "sunfish_scale",
+      "name": "Scale surface",
+      "sizeUm": 300,
+      "contrast": 0.6,
+      "drawing": "scales",
+      "tint": "#e3ad50",
+      "blurb": "A prepared fish scale seen at low magnification. Compare its outline and surface pattern with scales from other catches."
+    },
+    {
+      "id": "sunfish_ridges",
+      "name": "Fine scale ridges",
+      "sizeUm": 12,
+      "contrast": 0.45,
+      "drawing": "rings",
+      "blurb": "Increasing magnification reveals finer surface ridges. This is a schematic teaching preparation, not a species-identification measurement."
+    },
+    {
+      "id": "sunfish_fibres",
+      "name": "Fine fibres in prepared scale",
+      "sizeUm": 0.08,
+      "contrast": 0.3,
+      "drawing": "lines",
+      "criticalDoseENm2": 100,
+      "blurb": "A schematic view of fine fibres in a thin prepared section. Electron microscopy needs suitable preparation; a whole wet fish cannot go directly into a vacuum microscope."
+    }
+  ]
+},
+{
+  "id": "fish_trout",
+  "name": "Rainbow trout scale preparation",
+  "worldObject": "fish_scale",
+  "biome": "pond",
+  "features": [
+    {
+      "id": "trout_scale",
+      "name": "Scale surface",
+      "sizeUm": 300,
+      "contrast": 0.6,
+      "drawing": "scales",
+      "tint": "#a6b9c1",
+      "blurb": "A prepared fish scale seen at low magnification. Compare its outline and surface pattern with scales from other catches."
+    },
+    {
+      "id": "trout_ridges",
+      "name": "Fine scale ridges",
+      "sizeUm": 12,
+      "contrast": 0.45,
+      "drawing": "rings",
+      "blurb": "Increasing magnification reveals finer surface ridges. This is a schematic teaching preparation, not a species-identification measurement."
+    },
+    {
+      "id": "trout_fibres",
+      "name": "Fine fibres in prepared scale",
+      "sizeUm": 0.08,
+      "contrast": 0.3,
+      "drawing": "lines",
+      "criticalDoseENm2": 100,
+      "blurb": "A schematic view of fine fibres in a thin prepared section. Electron microscopy needs suitable preparation; a whole wet fish cannot go directly into a vacuum microscope."
+    }
+  ]
+},
+{
+  "id": "fish_carp",
+  "name": "Carp scale preparation",
+  "worldObject": "fish_scale",
+  "biome": "pond",
+  "features": [
+    {
+      "id": "carp_scale",
+      "name": "Scale surface",
+      "sizeUm": 300,
+      "contrast": 0.6,
+      "drawing": "scales",
+      "tint": "#b49c65",
+      "blurb": "A prepared fish scale seen at low magnification. Compare its outline and surface pattern with scales from other catches."
+    },
+    {
+      "id": "carp_ridges",
+      "name": "Fine scale ridges",
+      "sizeUm": 12,
+      "contrast": 0.45,
+      "drawing": "rings",
+      "blurb": "Increasing magnification reveals finer surface ridges. This is a schematic teaching preparation, not a species-identification measurement."
+    },
+    {
+      "id": "carp_fibres",
+      "name": "Fine fibres in prepared scale",
+      "sizeUm": 0.08,
+      "contrast": 0.3,
+      "drawing": "lines",
+      "criticalDoseENm2": 100,
+      "blurb": "A schematic view of fine fibres in a thin prepared section. Electron microscopy needs suitable preparation; a whole wet fish cannot go directly into a vacuum microscope."
+    }
+  ]
+}
 ]

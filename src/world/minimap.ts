@@ -3,9 +3,9 @@ import { ATRIUM, FOOTPRINTS, GREENHOUSE, SCIENCE, WILSON } from './campus';
 import { heightAt, LAKE, pathAt, waterLevelAt, WORLD_RADIUS } from './terrain';
 
 /** North-up, player-centered map. Terrain is painted once; only the viewport and markers move. */
-export function mountMinimap(parent: HTMLElement, npcs: readonly { x: number; z: number }[]) {
-  const size = 180;
-  const range = 70;
+export function mountMinimap(parent: HTMLElement, npcs: readonly { x: number; z: number }[], onMap: (open: boolean) => void = () => {}) {
+  let size = 180;
+  let range = 70;
   const panel = document.createElement('div');
   panel.style.cssText = 'position:fixed;left:12px;bottom:72px;width:clamp(120px,24vw,180px);padding:6px;background:#101c24e8;border:1px solid #aac6c066;border-radius:10px;pointer-events:none;color:#edf8f5;font:10px system-ui;box-shadow:0 3px 16px #0005';
   const canvas = document.createElement('canvas');
@@ -15,7 +15,7 @@ export function mountMinimap(parent: HTMLElement, npcs: readonly { x: number; z:
   canvas.setAttribute('aria-label', 'Campus minimap: north is up; white arrow is you; gold dots are scientists; pink diamond is your tracked target.');
   const caption = document.createElement('div');
   caption.style.cssText = 'padding-top:4px;text-align:center';
-  caption.textContent = 'N ↑ · You △ · Scientists ●';
+  caption.textContent = 'N ↑ · You △ · Scientists ● · U Map';
   panel.append(canvas, caption);
   parent.append(panel);
   const g = canvas.getContext('2d')!;
@@ -47,10 +47,25 @@ export function mountMinimap(parent: HTMLElement, npcs: readonly { x: number; z:
     { ...LAKE, text: 'Lake' },
   ];
   let nextDraw = 0;
+  const map=document.createElement('dialog');map.setAttribute('aria-label','Campus map');
+  map.style.cssText='padding:0;border:1px solid #8bb6ad;border-radius:16px;background:#102029;color:white;width:min(85vw,80vh);max-height:94vh;overflow:auto';
+  const close=document.createElement('button');close.textContent='Close map · U / Esc';close.style.cssText='display:block;margin:8px auto;padding:8px 16px;background:#31515a;color:white;border:1px solid #8bb6ad;border-radius:8px;cursor:pointer';close.onclick=()=>map.close();
+  document.body.append(map);const compactStyle=panel.style.cssText;
+  const resize=()=>{canvas.width=canvas.height=size*2;g.setTransform(2,0,0,2,0,0);nextDraw=0;};
+  const key=(e:KeyboardEvent)=>{
+    if(e.key.toLowerCase()!=='u'||e.repeat||e.target instanceof HTMLInputElement||e.target instanceof HTMLTextAreaElement||e.target instanceof HTMLSelectElement)return;
+    if(map.open){e.preventDefault();map.close();return;}
+    if(document.querySelector('dialog[open]'))return;
+    e.preventDefault();document.exitPointerLock?.();size=520;range=WORLD_RADIUS;resize();panel.style.cssText='padding:12px;color:#edf8f5;font:13px system-ui';map.append(panel,close);map.showModal();onMap(true);
+  };
+  addEventListener('keydown',key);
+  map.addEventListener('close',()=>{size=180;range=70;resize();panel.style.cssText=compactStyle;parent.append(panel);onMap(false);});
   return {
     update(x: number, z: number, directionX: number, directionZ: number, now: number, hidden: boolean, target?: { x: number; z: number } | null) {
-      panel.hidden = hidden;
-      if (hidden || now < nextDraw) return;
+      panel.hidden = hidden && !map.open;
+      if ((hidden && !map.open) || now < nextDraw) return;
+      const playerX=x,playerZ=z;
+      if(map.open){x=0;z=0;}
       nextDraw = now + 80;
       g.fillStyle = '#0b1620';
       g.fillRect(0, 0, size, size);
@@ -84,7 +99,8 @@ export function mountMinimap(parent: HTMLElement, npcs: readonly { x: number; z:
         g.restore();
       }
       g.save();
-      g.translate(size / 2, size / 2);
+      const [playerMapX,playerMapY]=project(playerX,playerZ);
+      g.translate(playerMapX!,playerMapY!);
       g.rotate(Math.atan2(directionX, -directionZ));
       g.beginPath();
       g.moveTo(0, -8);
@@ -104,6 +120,6 @@ export function mountMinimap(parent: HTMLElement, npcs: readonly { x: number; z:
       g.fillRect(8, size - 10, 20 * size / (2 * range), 2);
       g.fillText('20 m', 8, size - 14);
     },
-    dispose() { panel.remove(); },
+    dispose() { removeEventListener('keydown',key);map.remove();panel.remove(); },
   };
 }

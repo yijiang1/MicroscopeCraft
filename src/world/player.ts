@@ -61,6 +61,10 @@ export function buildPlayer() {
   let phase = 0;
   return {
     root,
+    fishing(t: number, reeling: boolean) {
+      arms.forEach((arm,i) => { arm.rotation.x = 1.1 + (reeling ? Math.sin(t*.014+i)*.18 : 0); });
+      legs.forEach(leg => { leg.rotation.x = 0; });
+    },
     seated() {
       arms.forEach(arm => { arm.rotation.x = 1.05; });
       legs.forEach(leg => { leg.rotation.x = Math.PI / 2; });

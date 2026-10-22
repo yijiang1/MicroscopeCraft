@@ -1,3 +1,4 @@
+import { FISH } from '../shared/fishing';
 import { describe, expect, it } from 'vitest';
 import { loadGameData } from '../shared/data';
 import { nextGoalRecipe, planFor } from '../shared/plan';
@@ -23,7 +24,7 @@ describe('world layout', () => {
   it('every raw material and every sample is reachable somewhere', () => {
     const gatherable = new Set(PLACEMENTS.map((p) => KINDS[p.kind].aim.gather).filter(Boolean));
     for (const id of Object.keys(data.materials).filter((m) => m !== 'leaf_fiber')) expect(gatherable.has(id), id).toBe(true);
-    const seen = new Set(PLACEMENTS.flatMap((p) => samplesOf(KINDS[p.kind].aim)));
+    const seen = new Set([...PLACEMENTS.flatMap((p) => samplesOf(KINDS[p.kind].aim)), ...FISH.map(f => `fish_${f.id}`)]);
     for (const id of Object.keys(data.samples)) expect(seen.has(id), id).toBe(true);
   });
 

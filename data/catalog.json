@@ -89,5 +89,6 @@
   "pearlgirl": {"label": "Girl with a Pearl Earring", "drawing": "mosaic", "minSizeUm": 4, "maxSizeUm": 600, "tiers": [1, 2, 3, 4, 5, 6, 7]},
   "greatwave": {"label": "The Great Wave", "drawing": "fibers", "minSizeUm": 0.2, "maxSizeUm": 200, "tiers": [1, 2, 3, 4, 5, 6, 7]},
   "grandejatte": {"label": "A Sunday on La Grande Jatte", "drawing": "droplets", "minSizeUm": 1, "maxSizeUm": 2000, "tiers": [1, 2, 3, 4, 5, 6, 7]},
-  "nightwatch": {"label": "The Night Watch", "drawing": "cluster", "minSizeUm": 0.00035, "maxSizeUm": 200, "tiers": [1, 2, 3, 4, 5, 6, 7]}
+  "nightwatch": {"label": "The Night Watch", "drawing": "cluster", "minSizeUm": 0.00035, "maxSizeUm": 200, "tiers": [1, 2, 3, 4, 5, 6, 7]},
+  "fish_scale": {"label":"Fish scale", "drawing":"scales", "minSizeUm":0.05, "maxSizeUm":600, "tiers":[1,2,3,4]}
 }

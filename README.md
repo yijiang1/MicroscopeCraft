@@ -217,3 +217,9 @@ The glass elevator on the east side of the clock tower takes you to a railed ter
 Two original synthesized background themes accompany campus walks and lab visits. After your first click or key enables audio, the tower plays a bell arrangement of the traditional **Oh Tannenbaum** every five minutes, with distance attenuation. The existing **Sound** toggle mutes all music and effects immediately. No audio downloads or API keys are needed.
 
 The tower elevator, support rails and lookout terrace use faint blue transparent glass. The ScopeCraft Store also displays the **Micro Roadster**, a red classic convertible priced at **600 coins / 24 vouchers**. Try it free for **30 seconds**, then return automatically to the store. Use **W/S** to accelerate or reverse, **A/D** to steer, and **E** to return early. Purchased cars unlock untimed drives.
+
+### Fishing and fish specimens
+
+Claim the **Field fishing rod** for **0 coins** in ScopeCraft Store. Near water at shoreline height, click **Fish** or press **R**. Cast, wait for a bite, then reel with the marker in the green zone: three successful reels land a catch, while three misses let it escape. Perch, bass, salmon, sunfish, trout and carp can be caught; your collection is saved. Select **Prepare scale sample** to consume a catch and add its specimen to the sample bag, then **View sample** to inspect it. The samples use schematic scale surfaces, ridges and fine prepared fibres at different magnifications.
+
+Press **U** to open the full campus map; press **U** or **Esc** to close it. Fishing uses an avatar-held rod with animated casting, reeling, a line and bobber, and a catch reveal. Fish wander randomly within the water.

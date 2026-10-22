@@ -12,7 +12,9 @@ export function storePreview(item: StoreItem): SVGSVGElement {
   // Only fixed markup enters innerHTML; catalog titles are inserted as text below.
   const artwork = document.createElementNS(ns, 'g');
   const shadow = '<ellipse cx="120" cy="132" rx="56" ry="7" fill="#0a161d" opacity=".2"/>';
-  if (item.kind === 'car') {
+  if (item.kind === 'tool') {
+    artwork.innerHTML = shadow + '<path d="M68 123L145 25" stroke="#c69c65" stroke-width="7" stroke-linecap="round"/><path d="M145 25Q178 52 173 104" fill="none" stroke="#e7f4ed" stroke-width="1.5"/><path d="M173 104V116Q173 127 164 119" fill="none" stroke="#b8d0df" stroke-width="2"/><circle cx="85" cy="104" r="10" fill="#628a9f" stroke="#dae8e7" stroke-width="3"/><path d="M65 126L83 104" stroke="#26333b" stroke-width="10"/>';
+  } else if (item.kind === 'car') {
     artwork.innerHTML = shadow + '<path d="M32 101L44 83L91 77L105 53H145L159 78L195 86L207 110H30Z" fill="#d42132" stroke="#721724" stroke-width="2"/><path d="M101 76L111 57H140L151 76Z" fill="#b2e3f0"/><path d="M141 57L156 77H116" fill="#213440"/><rect x="45" y="77" width="22" height="13" rx="2" fill="#ed3442"/><rect x="47" y="80" width="18" height="8" fill="#fff3c9"/><circle cx="66" cy="111" r="18" fill="#14212a"/><circle cx="66" cy="111" r="10" fill="#b9c9d0"/><circle cx="173" cy="111" r="18" fill="#14212a"/><circle cx="173" cy="111" r="10" fill="#b9c9d0"/><path d="M91 87H153" stroke="#ff7a80" stroke-width="2"/>';
   } else if (item.kind === 'shirt') {
     const color = item.id === 'shirt_red' ? '#b32235' : '#f0f2ed';

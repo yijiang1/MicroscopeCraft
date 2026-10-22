@@ -2,14 +2,16 @@ import { z } from 'zod';
 import type { GameContext } from './state';
 import type { GameData } from './schema';
 export const EconomySchema = z.object({
+  fish: z.record(z.string(), z.number().int().nonnegative()).default({}),
   coins: z.number().int().nonnegative().default(0), vouchers: z.number().int().nonnegative().default(0),
   owned: z.array(z.string()).default([]), rewarded: z.record(z.string(), z.number().int().min(0).max(5)).default({}),
   shirt: z.enum(['blue', 'red', 'lab']).default('blue'), backpack: z.boolean().default(false), model: z.boolean().default(false),
 });
 export type Economy = z.infer<typeof EconomySchema>;
-export interface StoreItem { id: string; name: string; price: number; kind: 'book' | 'shirt' | 'backpack' | 'model' | 'car'; text: string }
+export interface StoreItem { id: string; name: string; price: number; kind: 'book' | 'shirt' | 'backpack' | 'model' | 'car' | 'tool'; text: string }
 export function storeCatalog(data: GameData): StoreItem[] {
   return [
+    { id: 'fishing_rod', name: 'Field fishing rod', price: 0, kind: 'tool', text: 'Free field equipment. Approach a lake or stream, then select Fish to catch specimens. Convert your catches into microscope samples.' },
     { id: 'miata_na', name: 'Micro Roadster · Classic red', price: 600, kind: 'car', text: 'A red open-top roadster with pop-up headlights. Take a free 30-second campus test drive, or buy it for unlimited drives. WASD to drive; E returns to the store.' },
     { id: 'shirt_red', name: 'ScopeCraft red shirt', price: 40, kind: 'shirt', text: 'A red campus shirt. Equip it and press V to see your explorer.' },
     { id: 'shirt_lab', name: 'White lab outfit', price: 60, kind: 'shirt', text: 'A white jacket for your next microscopy session.' },
