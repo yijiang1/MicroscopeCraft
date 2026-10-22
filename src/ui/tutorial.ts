@@ -2,7 +2,9 @@
 // one loop: move, gather, craft, build the hand lens, look, discover. Each step ticks off when the player does it,
 // and steps already done in a saved game are skipped. Replay from the menu. Owner: Person D.
 import { ownedScopes, setAdvanced, type GameContext } from '../shared/state';
-import { chooseCharacter } from '../shared/economy';
+import * as THREE from 'three';
+import { chooseCharacter, type Economy } from '../shared/economy';
+import { buildPlayer } from '../visuals/player';
 import { itemIcon } from './icons';
 import { withKeys } from './keys';
 
@@ -62,6 +64,22 @@ const button = (text: string, primary: boolean, onclick: () => void) => {
   b.style.cssText = `padding:6px 14px;border-radius:6px;border:0;font-weight:700;cursor:pointer;${primary ? 'background:#ffd35a;color:#222' : 'background:#ffffff1a;color:#ddd'}`;
   b.onclick = onclick;
   return b;
+};
+
+/** A still picture of a character, rendered once with the in-game model. */
+const portrait = (ctx: GameContext, character: Economy['character']) => {
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+  renderer.setSize(96, 128);
+  const scene = new THREE.Scene();
+  scene.add(new THREE.HemisphereLight('#fff7e4', '#547277', 2.6));
+  const light = new THREE.DirectionalLight('#ffffff', 3); light.position.set(-3, 5, 4); scene.add(light);
+  const model = buildPlayer(); model.equip({ ...ctx.state.economy, character }); model.root.rotation.y = Math.PI + 0.3; scene.add(model.root);
+  const camera = new THREE.PerspectiveCamera(35, 96 / 128, 0.1, 20); camera.position.set(0, 1.1, 4.2); camera.lookAt(0, 1, 0);
+  renderer.render(scene, camera);
+  const img = document.createElement('img');
+  img.src = renderer.domElement.toDataURL(); img.width = 96; img.height = 128; img.alt = ''; img.style.display = 'block';
+  model.dispose(); renderer.dispose(); renderer.forceContextLoss(); // free the GL context now, not at GC
+  return img;
 };
 
 const read = () => {
@@ -143,20 +161,18 @@ export function mountTutorial(ctx: GameContext): TutorialHandle {
     }
     // who to play as: Lena (default) or the original explorer
     card.append(div('margin:14px 0 6px;font-weight:700', 'Choose your character'));
-    const people = div('display:flex;gap:8px;flex-wrap:wrap');
-    const person = (id: 'lena' | 'explorer', title: string, about: string) => {
+    const people = div('display:flex;gap:8px');
+    const person = (id: 'lena' | 'explorer') => {
       const b = document.createElement('button');
-      b.append(div('font-weight:700;margin-bottom:2px', title), div('font-size:12px;line-height:1.35;opacity:.8', about));
+      b.setAttribute('aria-label', id === 'lena' ? 'Long-haired explorer' : 'Short-haired explorer');
+      b.append(portrait(ctx, id));
       b.onclick = () => (chooseCharacter(ctx, id), syncPeople());
       return Object.assign(b, { person: id });
     };
-    const persons = [
-      person('lena', '👩‍🔬 Lena', 'Inspired by Lena Kourkoutis, the Cornell electron microscopist who imaged materials atom by atom.'),
-      person('explorer', '🧑 Explorer', 'The original block-style campus explorer.'),
-    ];
+    const persons = [person('lena'), person('explorer')];
     const syncPeople = () => persons.forEach((b) => {
       const on = b.person === ctx.state.economy.character;
-      b.style.cssText = `flex:1 1 180px;padding:8px 10px;border-radius:8px;text-align:left;cursor:pointer;color:#eee;background:${on ? '#ffd35a26' : '#ffffff0d'};border:1px solid ${on ? '#ffd35a' : '#ffffff22'}`;
+      b.style.cssText = `padding:4px;border-radius:8px;cursor:pointer;background:${on ? '#ffd35a26' : '#ffffff0d'};border:1px solid ${on ? '#ffd35a' : '#ffffff22'}`;
     });
     syncPeople();
     people.append(...persons);
