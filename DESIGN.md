@@ -231,12 +231,12 @@ The MVP was one complete play loop that can be demoed in about five minutes: gat
 
 | Area | Must ship | Stretch | Status |
 | --- | --- | --- | --- |
-| World | One small open 3D map | More biomes | A campus with a quad, lake, gorge, pine grove, greenhouse, science lab, Wilson Lab and an engineering quad |
+| World | One small open 3D map | More biomes | A campus with a quad, lake, gorge, pine grove, greenhouse, science lab, Wilson Lab and an engineering quad, and out in the corners north campus, the north woods, an orchard, a farm, the athletic fields, west campus by Cayuga and a fossil quarry |
 | Crafting | About eight recipes | Full materials property system | 70 recipes, components for every complex instrument, add-ons |
 | Microscopes | Tiers 1 to 3 end to end | Tiers 4 and 6 | Tiers 0 to 7 built, including a CHESS beamline |
-| Samples | About ten discoveries | Samples from a prompt | 170 discoveries in 45 samples |
+| Samples | About ten discoveries | Samples from a prompt | 376 discoveries in 121 samples |
 | Mini-games | None | | Eight: Köhler, Gram stain, progressive stain, TEM alignment, aberration corrector, ptychography, beam tuning, tomography |
-| People and goals | None | | 17 scientists with 60 requests, 123 achievements, a journal |
+| People and goals | None | | 25 scientists with 77 requests, 157 achievements, a journal |
 | AI | Guide grounded in the simulation's numbers | Prompt-to-world, Materials Project, abTEM | Offline guide only; LLM features deferred |
 | Polish | Simple art, readable UI, one sound per action | Music, tutorial | Procedural 3D art, synthesised sounds; no music or tutorial |
 

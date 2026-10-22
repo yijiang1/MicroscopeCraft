@@ -56,6 +56,12 @@ export function areaAt(x: number, z: number): string | null {
   if (x < FALLS_X && Math.abs(z - gorgeZ(x)) < 7 && heightAt(x, z) < -5) return 'gorge';
   if (Math.hypot(x - LAKE.x, z - LAKE.z) < LAKE.r + 9) return 'lake';
   if (Math.hypot(x + 58, z - 22) < 15) return 'forest';
+  // the corners: west campus and the shore, across the gorge, past the lake, beyond the fields, below the west slope
+  if (x < -78 && z > -95 && z < 40) return 'shore';
+  if (z < -84) return x < -14 ? 'woods' : x < 60 ? 'north' : 'orchard';
+  if (x > 60 && z < -40) return 'orchard';
+  if (x < -50 && z >= 40) return 'quarry';
+  if (z > 112 || (x > 60 && z > 56)) return 'farm';
   if (x < -46) return 'slope';
   if (x > -23 && x < 23 && z > -38 && z < 1) return 'quad';
   if (x > -46 && x < 50 && z > 40 && z < 110) return 'engquad';

@@ -384,7 +384,11 @@
       { "id": "so_pearlite", "title": "The pearly constituent", "ask": "In 1863 I polished and etched steel and looked at it by reflected light. Show me the pearly layers I found in it.",
         "hint": "The rusty steel beam in the materials yard, east of the south hall. The plates are under half a micrometre apart: use the high-quality microscope at 400× or more.",
         "thanks": "Plates of soft iron and hard carbide side by side, shimmering like mother-of-pearl. That is why I called it the pearly constituent.",
-        "needs": { "discovered": ["pearlite"] } }
+        "needs": { "discovered": ["pearlite"] } },
+      { "id": "so_fiery_rain", "title": "Fiery rain", "ask": "I once described the round grains in meteorites as fused drops of fiery rain. Find me a drop that fell recently.",
+        "hint": "Gutter dust from the observatory roof on north campus, across the suspension bridge, holds a few micrometeorites. Polish one and look with a compound microscope.",
+        "thanks": "Bars of olivine, frozen as the drop cooled in its fall. Fiery rain still seems the right name to me.",
+        "needs": { "discovered": ["olivine_bars"] } }
     ]
   },
   {
@@ -500,5 +504,113 @@
       }
     ],
     "expertise": "Author of Advanced Computing in Electron Microscopy. Earl J. Kirkland is the author of Advanced Computing in Electron Microscopy and has worked on computation in electron microscopy at Cornell. His work covers electron scattering and image simulation; this game uses fictionalized dialogue."
+  },
+  {
+    "id": "zsigmondy", "name": "Richard Zsigmondy", "years": "1865–1929", "role": "Saw gold nanoparticles with the ultramicroscope",
+    "bio": "Richard Zsigmondy worked on coloured glass at the Schott glassworks in Jena, and set out to explain why ruby glass is red. In 1903 he and the Zeiss physicist Henry Siedentopf described the ultramicroscope, which shows particles far below the resolution limit as points of scattered light. He won the 1925 Nobel Prize in Chemistry for his work on colloids.",
+    "expertise": "Colloid chemistry: gold sols and ruby glass, the slit ultramicroscope (1903, with Henry Siedentopf at Zeiss), coloured glass at the Schott glassworks in Jena, colloid research in Göttingen, and the 1925 Nobel Prize in Chemistry.",
+    "greeting": "Ruby glass is red because of gold, in pieces far too small to see. Or so I thought, until we made them shine.",
+    "x": -85.5, "z": 7.5, "facing": -1.5708,
+    "look": {"skin": "#efd2bc", "hair": "#4a3a2c", "coat": "#2e3446", "pants": "#26262c", "hairStyle": "short", "beard": "#4a3a2c", "glasses": true},
+    "quests": [
+      { "id": "zs_points", "title": "Points of light", "ask": "Find the gold in the ruby glass. You cannot resolve it, but you can make it shine.",
+        "hint": "The ruby window glass is in the Gothic hall in west campus, at the foot of the west slope. Look at it with the dark-field condenser on the fluorescence microscope.",
+        "thanks": "Each glint is a single gold particle, smaller than the light that shows it. That is all the ultramicroscope ever needed.",
+        "needs": { "discovered": ["ruby_gold"] } },
+      { "id": "zs_crystals", "title": "Tiny crystals of gold", "ask": "I argued the colour comes from tiny crystals of metallic gold. Show me the crystal planes inside one particle.",
+        "hint": "Carry the ruby glass to the science lab and look at the gold particles with the TEM at its highest magnification, or with the STEM.",
+        "thanks": "Planes of gold atoms, 0.235 nanometres apart: a crystal of metal, held in glass. Just as I said.",
+        "needs": { "discovered": ["ruby_gold_fringes"] } }
+    ]
+  },
+  {
+    "id": "beijerinck", "name": "Martinus Beijerinck", "years": "1851–1931", "role": "Grew the bacteria of root nodules and named the virus",
+    "bio": "Martinus Beijerinck, a Dutch microbiologist in Delft, grew the nitrogen-fixing bacteria of legume root nodules in pure culture in 1888. His enrichment cultures, which let the conditions select the microbe, helped found environmental microbiology. In 1898 he showed that tobacco mosaic disease passes through filters that stop bacteria, and called the agent a contagious living fluid, an early idea of the virus.",
+    "expertise": "Microbiology in Delft: root-nodule bacteria and nitrogen fixation, enrichment culture, sulfate-reducing and other soil bacteria, tobacco mosaic disease and filterable agents (contagium vivum fluidum), and the Delft school of microbiology.",
+    "greeting": "Every clover on this field makes its own fertiliser. Dig one up and I will show you how.",
+    "x": 79, "z": 31, "facing": 1.5708,
+    "look": {"skin": "#f0d4c0", "hair": "#c8c4bc", "coat": "#3e4a3a", "pants": "#2c2c30", "hairStyle": "short", "beard": "#c8c4bc", "glasses": true},
+    "quests": [
+      { "id": "bj_nodules", "title": "The farmers inside", "ask": "Show me the bacteria living inside a clover root nodule.",
+        "hint": "White clover grows on the edges of the athletic fields, east of campus. Look at it with a compound microscope or better, and try the Gram stain.",
+        "thanks": "Bacteroids, swollen with the work of fixing nitrogen. I grew their free-living form on a plate in 1888.",
+        "needs": { "discovered": ["bacteroids"] } },
+      { "id": "bj_virus", "title": "A contagious living fluid", "ask": "In 1898 I called a disease agent a contagious living fluid, because it went through every filter. Show me a virus.",
+        "hint": "Take some lake water to the electron microscope in the science lab and look for the virus particles.",
+        "thanks": "Particles, not a fluid after all. But they did pass my filters, and they did need living cells to multiply.",
+        "needs": { "discovered": ["pond_virus"] } }
+    ]
+  },
+  {
+    "id": "mcclintock", "name": "Barbara McClintock", "years": "1902–1992", "role": "Discovered jumping genes in maize",
+    "bio": "Barbara McClintock earned her PhD in botany at Cornell in 1927, and in 1929 she first told apart all ten maize chromosomes under the microscope. In the 1940s, following spotted kernels and the chromosomes behind them, she found genes that move: transposable elements. She received the 1983 Nobel Prize in Physiology or Medicine.",
+    "expertise": "Maize cytogenetics: staining and identifying chromosomes, crossing over seen in the chromosomes (with Harriet Creighton, 1931), transposable elements Ac and Ds and variegated kernels, Cornell in the 1920s and Cold Spring Harbor, and the 1983 Nobel Prize.",
+    "greeting": "These kernels are speckled for a reason. A gene moved.",
+    "x": 2, "z": 119, "facing": 0,
+    "look": {"skin": "#f0d6c4", "hair": "#8a8682", "coat": "#6a7a5a", "pants": "#4a4a50", "hairStyle": "short", "glasses": false},
+    "quests": [
+      { "id": "mc_spots", "title": "Speckled kernels", "ask": "Look closely at the purple spots on these kernels and tell me what you see.",
+        "hint": "The variegated corn grows south of the engineering quad, past the south hall. Look at an ear with your own eyes or a hand lens.",
+        "thanks": "Each spot is a patch of cells in which a jumping gene left the pigment gene. The size of a spot tells you when it jumped.",
+        "needs": { "discovered": ["kernel_spots"] } },
+      { "id": "mc_chromosomes", "title": "Ten pairs", "ask": "Show me the chromosomes of maize, stained so you can count them.",
+        "hint": "Look at the corn with a compound microscope at 400× and stain it with hematoxylin or methylene blue.",
+        "thanks": "Twenty, in ten pairs. Learning to tell each one apart was where all my work began.",
+        "needs": { "discovered": ["maize_chromosomes"] } }
+    ]
+  },
+  {
+    "id": "pasteur", "name": "Louis Pasteur", "years": "1822–1895", "role": "Showed that microbes cause fermentation",
+    "bio": "Louis Pasteur showed in 1857 that lactic acid fermentation is the work of living microbes, which he watched under the microscope. In 1861 he found microbes that live without oxygen, which he called anaerobic. His gentle heating of wine to stop it spoiling became pasteurisation, now used for milk.",
+    "expertise": "Fermentation and the microbes behind it, lactic acid bacteria, anaerobic life, the swan-neck flask experiments against spontaneous generation, pasteurisation, silkworm diseases, vaccines against anthrax and rabies, and molecular chirality in tartaric acid crystals.",
+    "greeting": "Milk does not sour by itself. Something small is at work in it.",
+    "x": 93, "z": 82, "facing": -1.5708,
+    "look": {"skin": "#f0d2be", "hair": "#4a3c30", "coat": "#2a2a30", "pants": "#2a2a30", "hairStyle": "short", "beard": "#5a4a3a", "glasses": false},
+    "quests": [
+      { "id": "pa_lactic", "title": "The souring of milk", "ask": "Show me the bacteria that turn milk into yogurt.",
+        "hint": "The Dairy Bar stand on the farm, south-east past the athletic fields, sells yogurt. Look at it with the high-quality microscope and its oil lens.",
+        "thanks": "Little chains of beads, like the lactic ferment I saw in 1857. Give them milk and they give you acid.",
+        "needs": { "discovered": ["yogurt_cocci"] } },
+      { "id": "pa_anaerobes", "title": "Life without air", "ask": "Find me creatures that live without any oxygen at all.",
+        "hint": "Rumen fluid comes from the dairy cow on the farm. Its ciliates are big enough for a hand lens.",
+        "thanks": "A whole world inside a cow, and not one breath of air in it. I called such life anaerobic.",
+        "needs": { "discovered": ["rumen_ciliates"] } }
+    ]
+  },
+  {
+    "id": "burgdorfer", "name": "Willy Burgdorfer", "years": "1925–2014", "role": "Discovered the bacterium of Lyme disease",
+    "bio": "Willy Burgdorfer, a Swiss-born microbiologist at the Rocky Mountain Laboratories in Montana, spent his career on ticks and the microbes they carry. In 1981, dissecting deer ticks from Shelter Island, New York, he found spirochetes in their gut and went on to show they cause Lyme disease. The bacterium, Borrelia burgdorferi, is named after him.",
+    "expertise": "Ticks and the diseases they carry: Lyme disease and its spirochete, Rocky Mountain spotted fever, how microbes pass from tick to host, dissecting ticks, dark-field and immunofluorescence microscopy, and the Rocky Mountain Laboratories in Hamilton, Montana.",
+    "greeting": "Watch your ankles in these woods. The smallest ticks carry the most trouble.",
+    "x": -38, "z": -101, "facing": 0.7,
+    "look": {"skin": "#f2d8c6", "hair": "#d8d4cc", "coat": "#5a6a4a", "pants": "#3a3a34", "hairStyle": "short", "glasses": true},
+    "quests": [
+      { "id": "bu_spirochetes", "title": "Corkscrews in the gut", "ask": "Show me the spirochetes inside a deer tick.",
+        "hint": "Ticks wait on the tall grass in the north woods: cross the suspension bridge and head west. The spirochetes are too thin for bright field, so use dark field, or the electron microscope.",
+        "thanks": "That is what I saw in the Shelter Island ticks in 1981. Nobody had looked in the right place.",
+        "needs": { "discovered": ["lyme_spirochetes"] } },
+      { "id": "bu_flagella", "title": "Flagella on the inside", "ask": "These bacteria swim without any tail on the outside. Show me how they do it.",
+        "hint": "Take the tick to the transmission electron microscope in the science lab and look at the spirochetes up close.",
+        "thanks": "The flagella run under the outer membrane and twist the whole cell. A corkscrew that drills through tissue.",
+        "needs": { "discovered": ["periplasmic_flagella"] } }
+    ]
+  },
+  {
+    "id": "pander", "name": "Christian Pander", "years": "1794–1865", "role": "Found the germ layers and the conodonts",
+    "bio": "Christian Heinrich Pander, a naturalist from Riga, showed in 1817 from chick embryos studied under the microscope that the body develops from layers of cells, the germ layers. Decades later, working on the old rocks around St Petersburg, he found tiny tooth-like fossils, and in 1856 he named them conodonts.",
+    "expertise": "Embryology and the germ layers of the chick embryo, conodonts and the Palaeozoic fossils of the Baltic region, comparative anatomy, and natural history in Riga and St Petersburg.",
+    "greeting": "Dissolve the stone and the teeth remain. Whose teeth, I never learned.",
+    "x": -81.5, "z": 73, "facing": 3.1416,
+    "look": {"skin": "#efd0ba", "hair": "#6a5444", "coat": "#4a3a2a", "pants": "#2e2a26", "hairStyle": "short", "beard": "#6a5444", "glasses": false},
+    "quests": [
+      { "id": "pd_conodonts", "title": "Little cone teeth", "ask": "Show me conodonts, the little teeth I found in 1856.",
+        "hint": "The acid sieve at the fossil quarry, south-west at the foot of the west slope, holds conodonts from dissolved limestone. A hand lens shows their denticles.",
+        "thanks": "Those are they. I took them for fish teeth; you tell me the whole animal was found in 1983.",
+        "needs": { "discovered": ["conodont_denticles"] } },
+      { "id": "pd_apatite", "title": "Made of tooth", "ask": "What mineral are they made of? Show me with X-rays.",
+        "hint": "Carry the conodonts to the CHESS beamline in Wilson Lab and record an X-ray diffraction pattern.",
+        "thanks": "Apatite, the mineral of bone and tooth. So they were teeth of a kind after all.",
+        "needs": { "discovered": ["conodont_apatite"] } }
+    ]
   }
 ]

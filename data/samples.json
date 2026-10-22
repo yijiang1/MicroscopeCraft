@@ -1149,5 +1149,349 @@
       "blurb": "A schematic view of fine fibres in a thin prepared section. Electron microscopy needs suitable preparation; a whole wet fish cannot go directly into a vacuum microscope."
     }
   ]
-}
+},
+  {
+    "id": "dust_bunny", "name": "Dust from under a dorm bed", "worldObject": "dust_bunny", "biome": "north",
+    "features": [
+      { "id": "dust_mite", "name": "House dust mite", "sizeUm": 300, "contrast": 0.35, "drawing": "critter", "tint": "#e8dcc0",
+        "blurb": "House dust mites are about a third of a millimetre long, at the edge of what the eye can see, and they graze on skin flakes in household dust. They never drink, taking water from humid air instead, so dry winter air keeps them in check." },
+      { "id": "skin_flakes", "name": "Skin flakes", "sizeUm": 35, "contrast": 0.2, "contrastIn": {"phase": 0.5}, "drawing": "scales", "tint": "#f0e0d0",
+        "blurb": "Each flake is a corneocyte, a dead, flattened cell from the outermost layer of skin, about 30 to 40 micrometres across. Your skin replaces that layer about once a month, shedding flakes all the time." },
+      { "id": "mite_pellets", "name": "Mite droppings", "sizeUm": 20, "contrast": 0.4, "drawing": "droplets", "tint": "#b89a70",
+        "blurb": "Mite droppings, 10 to 40 micrometres across, carry Der p 1, one of the main proteins behind dust-mite allergy. They are heavy, so they settle within minutes after the dust is stirred up, which is why bedding matters more than air." },
+      { "id": "dust_fibres", "name": "Clothing fibres", "sizeUm": 15, "contrast": 0.45, "drawing": "fibers", "tint": "#8aa0c8",
+        "blurb": "Much of house dust is fibres shed by clothes, towels and bedding. Cotton fibres look like twisted flat ribbons, while polyester ones are smooth rods." }
+    ]
+  },
+  {
+    "id": "data_disc", "name": "Optical discs", "worldObject": "optical_disc", "biome": "north",
+    "features": [
+      { "id": "disc_rainbow", "name": "Rainbow sheen", "sizeUm": 3000, "contrast": 0.6, "drawing": "rings", "tint": "#c8a0ff",
+        "blurb": "Tilt a disc and its surface splits white light into rainbows, like a prism. The spiral of data tracks is so fine and regular that it works as a diffraction grating." },
+      { "id": "cd_tracks", "name": "CD tracks", "sizeUm": 1.6, "contrast": 0.5, "drawing": "lines", "tint": "#d0d0d8",
+        "blurb": "A CD stores its data along a single spiral track, with 1.6 micrometres between turns. Read at 1.2 metres a second for 74 minutes, the spiral is over five kilometres long." },
+      { "id": "cd_pits", "name": "CD pits", "sizeUm": 0.83, "contrast": 0.45, "drawing": "beads", "tint": "#b0b0c0",
+        "blurb": "The data is moulded into the plastic as pits about half a micrometre wide, the shortest 0.83 micrometres long. A laser senses where each pit begins and ends, and those edges are the ones of the code." },
+      { "id": "dvd_tracks", "name": "DVD tracks", "sizeUm": 0.74, "contrast": 0.45, "drawing": "lines", "tint": "#d8d0e8",
+        "blurb": "A DVD packs its tracks 0.74 micrometres apart, less than half the spacing on a CD. With smaller pits read by a red laser instead of an infrared one, it holds about seven times as much." },
+      { "id": "bluray_tracks", "name": "Blu-ray tracks", "sizeUm": 0.32, "contrast": 0.4, "drawing": "lines", "tint": "#a8b8ff",
+        "blurb": "Blu-ray tracks are only 0.32 micrometres apart, near the limit of the best light microscope. They are read through a lens of numerical aperture 0.85 by a 405-nanometre blue-violet laser, and that blue light gives the disc its name." },
+      { "id": "bluray_pits", "name": "Blu-ray marks", "sizeUm": 0.149, "contrast": 0.35, "drawing": "beads", "tint": "#9090c0",
+        "blurb": "The shortest Blu-ray marks are 0.149 micrometres long, smaller than visible light can resolve. An electron microscope shows them as neat rows of tiny dashes." }
+    ]
+  },
+  {
+    "id": "phone_screen", "name": "Phone screen", "worldObject": "phone_screen", "biome": "north",
+    "features": [
+      { "id": "phone_pixels", "name": "Pixels", "sizeUm": 55, "contrast": 0.55, "drawing": "mosaic", "tint": "#e0e0ff",
+        "blurb": "At 460 pixels per inch each pixel is about 55 micrometres across, too small to pick out at reading distance. A hand lens shows the grid at once." },
+      { "id": "phone_subpixels", "name": "Red, green and blue subpixels", "sizeUm": 18, "contrast": 0.6, "drawing": "spots", "tint": "#60ff80",
+        "blurb": "Every colour on the screen is mixed from tiny red, green and blue lights. Many phone OLED screens have twice as many green subpixels as red or blue ones, because the eye is most sensitive to green." },
+      { "id": "phone_tft", "name": "Thin-film transistors", "sizeUm": 4, "contrast": 0.35, "drawing": "boxes", "tint": "#c0c8d0",
+        "blurb": "Beside each subpixel sit thin-film transistors a few micrometres across that switch it on and off. A phone screen holds millions of them, made with chip-making methods on a sheet of glass." }
+    ]
+  },
+  {
+    "id": "micrometeorites", "name": "Gutter dust from the observatory roof", "worldObject": "gutter_dust", "biome": "north",
+    "features": [
+      { "id": "cosmic_spherules", "name": "Magnetic spherules", "sizeUm": 300, "contrast": 0.4, "drawing": "droplets", "tint": "#3a3a40",
+        "blurb": "A magnet pulls hundreds of tiny black balls out of roof-gutter sludge, but almost all of them are industrial, from welding, braking and burning. Only a few are micrometeorites, grains of space dust that melted as they plunged into the atmosphere." },
+      { "id": "olivine_bars", "name": "Barred olivine", "sizeUm": 10, "contrast": 0.45, "drawing": "lines", "tint": "#6a7a5a",
+        "blurb": "Polished, a real micrometeorite shows parallel bars of olivine that crystallised within seconds as the melted droplet cooled. Quench textures like this, with their chemistry, are how the first micrometeorites from city roofs were told apart from industrial spherules in 2016." },
+      { "id": "spherule_magnetite", "name": "Magnetite crystals", "sizeUm": 0.5, "contrast": 0.4, "drawing": "cubes", "tint": "#202024",
+        "blurb": "Between the olivine bars sit magnetite crystals smaller than a micrometre, grown as iron oxidised in the hot air. They make the spherule magnetic, which is why a magnet finds it." },
+      { "id": "spherule_nickel", "name": "Nickel-rich metal bead", "sizeUm": 20, "contrast": 0, "contrastIn": {"xrf": 0.7}, "edgeKeV": 8.333, "drawing": "map", "tint": "#6aff8a",
+        "blurb": "Four of the first 500 city micrometeorites held a bead of nickel-rich metal and sulfide. Nickel is rare in Earth's crust but common in meteorites, so a nickel map helps confirm a spherule came from space." }
+    ]
+  },
+  {
+    "id": "deer_tick", "name": "Deer tick on tall grass", "worldObject": "deer_tick", "biome": "woods",
+    "features": [
+      { "id": "tick_nymph", "name": "Blacklegged tick nymph", "sizeUm": 1500, "contrast": 0.5, "drawing": "critter", "tint": "#6a4a30",
+        "blurb": "Blacklegged tick nymphs are smaller than two millimetres, about the size of a poppy seed, and they wait on grass tips with their front legs held out. Their bites often go unnoticed, so nymphs pass on most cases of Lyme disease." },
+      { "id": "lyme_spirochetes", "name": "Lyme spirochetes", "sizeUm": 0.25, "contrast": 0.03, "contrastIn": {"darkfield": 0.6, "tem": 0.45}, "drawing": "helix", "tint": "#e8e8ff",
+        "blurb": "In the tick's gut swim Borrelia burgdorferi, wavy bacteria only 0.2 to 0.3 micrometres wide but 10 to 30 long. Too thin and pale for bright field, they shine against the black of a dark-field view." },
+      { "id": "periplasmic_flagella", "name": "Inner flagella", "sizeUm": 0.014, "contrast": 0, "contrastIn": {"tem": 0.35, "haadf": 0.3}, "criticalDoseENm2": 5000, "drawing": "hair", "tint": "#c8c8e0",
+        "blurb": "Unlike most bacteria, a spirochete keeps its flagella inside, under its outer membrane, as filaments about 14 nanometres thick. As they turn, they bend the whole cell into a travelling wave that drives it through tissue." }
+    ]
+  },
+  {
+    "id": "slime_mold", "name": "Slime mould on a log", "worldObject": "slime_mould", "biome": "woods",
+    "features": [
+      { "id": "plasmodium_veins", "name": "Plasmodium network", "sizeUm": 500, "contrast": 0.6, "drawing": "veins", "tint": "#f0d020",
+        "blurb": "This yellow slime is a single giant cell with millions of nuclei, a plasmodium spreading over the log as a network of veins. Grown in a maze with food at two exits, it links them by the shortest path." },
+      { "id": "shuttle_streaming", "name": "Shuttle streaming", "sizeUm": 2, "contrast": 0.35, "drawing": "beads", "tint": "#e8c040",
+        "blurb": "Granules race along each vein, then stop and flow back the other way about every minute or two. The veins pump by rhythmic squeezing, driving one of the fastest flows inside any cell." },
+      { "id": "myxo_spores", "name": "Spores", "sizeUm": 10, "contrast": 0.5, "drawing": "droplets", "tint": "#6a4a2a",
+        "blurb": "When food runs out, the plasmodium turns into tiny stalked sporangia full of dark spores, each about ten micrometres across. A spore hatches into a single amoeba-like cell that starts the cycle again." }
+    ]
+  },
+  {
+    "id": "owl_pellet", "name": "Owl pellet", "worldObject": "owl_pellet", "biome": "woods",
+    "features": [
+      { "id": "vole_teeth", "name": "Vole teeth", "sizeUm": 2000, "contrast": 0.55, "drawing": "prisms", "tint": "#f0e8d8",
+        "blurb": "Owls swallow mice and voles whole and cough up the fur and bones they cannot digest as a pellet. Vole molars, with their zigzag grinding surfaces, show what the owl ate." },
+      { "id": "fur_medulla", "name": "Fur with a ladder medulla", "sizeUm": 40, "contrast": 0.4, "drawing": "hair", "tint": "#7a6a58",
+        "blurb": "Rodent guard hairs are a few tens of micrometres wide, with a core of air-filled cells running down the middle. In many rodents this medulla looks like a ladder, which helps identify the prey from hair alone." },
+      { "id": "enamel_prisms", "name": "Enamel prisms", "sizeUm": 5, "contrast": 0.35, "drawing": "honeycomb", "tint": "#e8e0d0",
+        "blurb": "Tooth enamel is built of bundles of crystals called prisms, each a few micrometres across. Rodent incisors cross their prisms in alternating layers, which stops cracks running through." }
+    ]
+  },
+  {
+    "id": "apple", "name": "Apple", "worldObject": "apple", "biome": "orchard",
+    "features": [
+      { "id": "apple_lenticels", "name": "Lenticels", "sizeUm": 500, "contrast": 0.45, "drawing": "spots", "tint": "#e8d8a0",
+        "blurb": "The pale dots on an apple's skin are lenticels, little pores that let the fruit breathe. They start as the stomata of the young fruit and widen as it grows." },
+      { "id": "apple_cells", "name": "Flesh cells", "sizeUm": 200, "contrast": 0.35, "drawing": "cells", "tint": "#f4f0d0",
+        "blurb": "Apple flesh cells are about 0.2 millimetres across, big enough to glint on a freshly cut surface. Air fills the gaps between them, up to a quarter or more of the fruit, which is why apples float." },
+      { "id": "apple_starch", "name": "Starch grains", "sizeUm": 8, "contrast": 0.08, "contrastIn": {"iodine": 0.8}, "drawing": "grains", "tint": "#e8e8f0",
+        "blurb": "Iodine stains starch blue-black, and orchards use it to judge when to pick. As an apple ripens its starch turns to sugar, and in a McIntosh the stain clears first around the core, as Cornell's starch-iodine chart shows." },
+      { "id": "scab_conidia", "name": "Apple scab spores", "sizeUm": 18, "contrast": 0.45, "drawing": "clubs", "tint": "#5a5a30",
+        "blurb": "Olive smudges on an apple are scab, a fungus that buds off pear-shaped spores about 15 to 20 micrometres long. Rain splashes them from fruit to fruit and leaf to leaf." }
+    ]
+  },
+  {
+    "id": "beehive", "name": "Beehive frame", "worldObject": "beehive", "biome": "orchard",
+    "features": [
+      { "id": "comb_cells", "name": "Honeycomb", "sizeUm": 5300, "contrast": 0.6, "drawing": "honeycomb", "tint": "#e8c060",
+        "blurb": "Worker bees build six-sided wax cells about 5.3 millimetres wide, a shape that encloses the most space with the least wax. Each cell holds honey, pollen or a growing larva." },
+      { "id": "varroa_mite", "name": "Varroa mite", "sizeUm": 1100, "contrast": 0.5, "drawing": "critter", "tint": "#8a3a1a",
+        "blurb": "Varroa mites, about 1.1 by 1.5 millimetres and wider than they are long, ride on bees and breed in sealed brood cells. They spread viruses between bees and are the most serious pest of honeybees." },
+      { "id": "honey_pollen", "name": "Pollen in honey", "sizeUm": 25, "contrast": 0.45, "drawing": "pollen", "tint": "#e8c040",
+        "blurb": "Every honey carries pollen from the flowers the bees visited. Counting the kinds of grain under a microscope tells where a honey came from." },
+      { "id": "nosema_spores", "name": "Nosema spores", "sizeUm": 4.4, "contrast": 0.4, "contrastIn": {"phase": 0.6}, "drawing": "droplets", "tint": "#f0f0e0",
+        "blurb": "Bright oval spores about 4 to 6 micrometres long in a bee's gut mean nosema, a parasite related to fungi. Beekeepers count them in crushed bee abdomens at 400 times." },
+      { "id": "wax_chains", "name": "Wax crystal rings", "sizeUm": 0.000415, "contrast": 0, "contrastIn": {"xrd": 0.6}, "drawing": "rings",
+        "blurb": "Beeswax is mostly long straight hydrocarbon chains packed side by side, as in polyethylene. X-rays show their spacing as sharp rings at 0.41 and 0.37 nanometres." }
+    ]
+  },
+  {
+    "id": "fruit_flies", "name": "Fruit flies on fallen apples", "worldObject": "fruit_flies", "biome": "orchard",
+    "features": [
+      { "id": "fruit_fly", "name": "Fruit fly", "sizeUm": 2500, "contrast": 0.5, "drawing": "critter", "tint": "#c08040",
+        "blurb": "Fruit flies gather on fallen apples to feed on the yeasts growing in the rotting fruit. Thomas Hunt Morgan's study of one white-eyed male in 1910 made this fly the workhorse of genetics." },
+      { "id": "fly_ommatidia", "name": "Eye facets", "sizeUm": 15, "contrast": 0.5, "drawing": "facets", "tint": "#c03020",
+        "blurb": "Each compound eye is a dome of about 800 facets, the lenses of separate little eyes called ommatidia, each about 15 micrometres wide. The red comes from pigment packed between them." },
+      { "id": "corneal_nipples", "name": "Corneal nanonipples", "sizeUm": 0.2, "contrast": 0, "contrastIn": {"tem": 0.4}, "drawing": "beads", "tint": "#d0a080",
+        "blurb": "The surface of every facet is covered in bumps about 200 nanometres wide. Like the coating on a camera lens, they cut reflections." }
+    ]
+  },
+  {
+    "id": "ice_cream", "name": "Dairy Bar ice cream", "worldObject": "ice_cream", "biome": "farm",
+    "features": [
+      { "id": "ice_crystals", "name": "Ice crystals", "sizeUm": 40, "contrast": 0.35, "drawing": "facets", "tint": "#e8f4ff",
+        "blurb": "Freshly hardened ice cream holds ice crystals averaging about 40 micrometres, small enough that the tongue feels it as smooth. Let it melt and refreeze, and the crystals grow until it turns gritty." },
+      { "id": "air_cells", "name": "Air cells", "sizeUm": 35, "contrast": 0.4, "drawing": "droplets", "tint": "#ffffff",
+        "blurb": "Whipping while freezing beats in air cells tens of micrometres across, and air can be half the volume. That is why a litre of ice cream can weigh little more than half a kilogram." },
+      { "id": "fat_clusters", "name": "Fat globules", "sizeUm": 1, "contrast": 0.35, "drawing": "beads", "tint": "#fff4c0",
+        "blurb": "Milk fat sits in globules about a micrometre across, which partly stick together while freezing and line every air cell. This fat network holds the air in and keeps the ice cream from collapsing as it melts." },
+      { "id": "casein_micelles", "name": "Casein micelles", "sizeUm": 0.15, "contrast": 0.3, "contrastIn": {"tem": 0.45}, "criticalDoseENm2": 2000, "drawing": "cluster", "tint": "#f0f0e8",
+        "blurb": "Milk protein comes in casein micelles, clusters a tenth to a few tenths of a micrometre across. An electron microscope sees them only in ice cream frozen solid and fractured, or the ice would boil off in the vacuum." }
+    ]
+  },
+  {
+    "id": "yogurt", "name": "Dairy Bar yogurt", "worldObject": "yogurt", "biome": "farm",
+    "features": [
+      { "id": "yogurt_rods", "name": "Lactobacillus rods", "sizeUm": 2, "contrast": 0.3, "contrastIn": {"gram": 0.7, "phase": 0.45}, "gram": "positive", "drawing": "rods", "tint": "#c0a0e0",
+        "blurb": "Yogurt is milk soured by two bacteria working together, and one of them, Lactobacillus, grows as long rods. Their lactic acid makes the milk protein curdle into a soft gel." },
+      { "id": "yogurt_cocci", "name": "Streptococcus chains", "sizeUm": 0.8, "contrast": 0.3, "contrastIn": {"gram": 0.7, "phase": 0.45}, "gram": "positive", "drawing": "beads", "tint": "#b090d8",
+        "blurb": "Its partner, Streptococcus thermophilus, grows as chains of round cells under a micrometre across. Both take the Gram stain purple, like the lactic acid bacteria Pasteur first saw souring milk." },
+      { "id": "yogurt_gel", "name": "Protein gel network", "sizeUm": 0.1, "contrast": 0.3, "contrastIn": {"tem": 0.45}, "criticalDoseENm2": 2000, "drawing": "fibers", "tint": "#e8e8e0",
+        "blurb": "As acid builds, casein micelles lose their charge and link into a sponge-like network that traps the water. An electron microscope shows it as chains and clusters of micelles with pores between them." }
+    ]
+  },
+  {
+    "id": "rumen_fluid", "name": "Rumen fluid", "worldObject": "rumen_fluid", "biome": "farm",
+    "features": [
+      { "id": "rumen_ciliates", "name": "Rumen ciliates", "sizeUm": 40, "contrast": 0.45, "contrastIn": {"phase": 0.6}, "drawing": "ciliate", "tint": "#d8c8a0",
+        "blurb": "A drop from a cow's rumen teems with ciliates like Entodinium, which swallow plant particles and bacteria. They live only where there is no oxygen, the kind of life without air that Pasteur discovered." },
+      { "id": "rumen_fungi", "name": "Anaerobic fungi", "sizeUm": 10, "contrast": 0.35, "contrastIn": {"phase": 0.5}, "drawing": "flagellate", "tint": "#e0d0b0",
+        "blurb": "The many-tailed swimmers are zoospores of anaerobic fungi, mistaken for protozoa until Colin Orpin showed in 1975 that they are fungi. Their threads bore into tough plant fibre and open it to bacteria." },
+      { "id": "methanogen_glow", "name": "Methanogens", "sizeUm": 0.8, "contrast": 0.08, "contrastIn": {"fluorescence": 0.7}, "drawing": "glow", "tint": "#40e0ff",
+        "blurb": "Methane-making archaea glow blue-green under violet light, from a coenzyme called F420 that absorbs at 420 nanometres. They turn hydrogen from fermentation into methane, which cows mostly burp out." },
+      { "id": "fibre_bacteria", "name": "Fibre-digesting bacteria", "sizeUm": 1, "contrast": 0.3, "drawing": "cluster", "tint": "#c8b890",
+        "blurb": "Bacteria crowd onto every scrap of grass, digesting the cellulose the cow itself cannot. The cow lives on the fatty acids they leave behind." }
+    ]
+  },
+  {
+    "id": "maize_ear", "name": "Variegated corn", "worldObject": "maize", "biome": "farm",
+    "features": [
+      { "id": "kernel_spots", "name": "Spotted kernels", "sizeUm": 1000, "contrast": 0.6, "drawing": "spots", "tint": "#6a2a6a",
+        "blurb": "Purple spots and streaks on pale kernels mark cells where a jumping gene hopped out of a pigment gene and switched it back on. Barbara McClintock worked out these transposons from such kernels in the 1940s." },
+      { "id": "maize_pollen", "name": "Corn pollen", "sizeUm": 90, "contrast": 0.45, "drawing": "pollen", "tint": "#f0e080",
+        "blurb": "Corn pollen grains are about 90 micrometres across, huge for a wind-pollinated plant. Each grain has a single pore, from which its tube grows down the silk to the ovule." },
+      { "id": "maize_starch", "name": "Starch grains", "sizeUm": 12, "contrast": 0.08, "contrastIn": {"iodine": 0.8}, "drawing": "grains", "tint": "#f8f8f0",
+        "blurb": "The hard part of a kernel is packed with angular starch grains 5 to 20 micrometres across, squeezed together as the kernel dried. Iodine stains them blue-black." },
+      { "id": "maize_chromosomes", "name": "Chromosomes", "sizeUm": 6, "contrast": 0.05, "contrastIn": {"hematoxylin": 0.7, "methylene_blue": 0.5}, "drawing": "rods", "tint": "#5a3a8a",
+        "blurb": "Squashed and stained, a dividing cell from a root tip shows 20 chromosomes, ten pairs. In 1929 McClintock, then a young researcher at Cornell, first told all ten maize chromosomes apart." }
+    ]
+  },
+  {
+    "id": "clover", "name": "White clover", "worldObject": "clover", "biome": "fields",
+    "features": [
+      { "id": "clover_nodules", "name": "Root nodules", "sizeUm": 1500, "contrast": 0.5, "drawing": "droplets", "tint": "#e89090",
+        "blurb": "Clover roots carry little nodules, pink inside from leghaemoglobin, a plant haemoglobin that mops up oxygen. Inside, bacteria turn nitrogen from the air into ammonia the plant can use." },
+      { "id": "root_hairs", "name": "Root hairs", "sizeUm": 10, "contrast": 0.35, "drawing": "hair", "tint": "#f0f0e0",
+        "blurb": "Rhizobia get in through root hairs, which curl around them and grow an inward tube called an infection thread. The thread carries the bacteria into the root, where a nodule starts to grow." },
+      { "id": "infected_cells", "name": "Infected cells", "sizeUm": 25, "contrast": 0.4, "contrastIn": {"methylene_blue": 0.6}, "drawing": "cells", "tint": "#e0a0a0",
+        "blurb": "In the nodule's core, plant cells swell and fill with thousands of bacteria each. Cells without bacteria sit between them and carry the fixed nitrogen away." },
+      { "id": "bacteroids", "name": "Bacteroids", "sizeUm": 1.5, "contrast": 0.3, "contrastIn": {"gram": 0.6, "phase": 0.45}, "gram": "negative", "drawing": "rods", "tint": "#c06080",
+        "blurb": "Inside the cells the rhizobia become bacteroids, the form that fixes nitrogen. In clover and its relatives the plant feeds them peptides that stop them dividing, and they swell to several times their size." },
+      { "id": "symbiosome_membrane", "name": "Symbiosome membrane", "sizeUm": 0.008, "contrast": 0, "contrastIn": {"tem": 0.35}, "criticalDoseENm2": 3000, "drawing": "rings", "tint": "#e0c0d0",
+        "blurb": "Each bacteroid is wrapped in a membrane made by the plant, a lipid bilayer under ten nanometres thick. Everything the partners trade, carbon one way and ammonia the other, crosses it." }
+    ]
+  },
+  {
+    "id": "turf_infill", "name": "Turf field infill", "worldObject": "crumb_rubber", "biome": "fields",
+    "features": [
+      { "id": "crumb_granules", "name": "Crumb rubber", "sizeUm": 1500, "contrast": 0.5, "drawing": "grains", "tint": "#202020",
+        "blurb": "Artificial turf is filled with granules of ground-up car tyres, a millimetre or two across, that cushion falls. Each one is a jagged chip of vulcanised rubber." },
+      { "id": "carbon_black", "name": "Carbon black", "sizeUm": 0.03, "contrast": 0.5, "drawing": "cluster", "tint": "#303030",
+        "blurb": "Tyre rubber is mixed with carbon black, grape-like clusters of carbon particles around 30 nanometres across. It makes the rubber far tougher, and it is why tyres are black." },
+      { "id": "rubber_zinc", "name": "Zinc", "sizeUm": 30, "contrast": 0, "contrastIn": {"xrf": 0.7}, "edgeKeV": 9.659, "drawing": "map", "tint": "#a0b0ff",
+        "blurb": "Tyre makers add zinc oxide to speed up vulcanisation, the sulfur cross-linking that turns sticky rubber elastic. A zinc map lights up every crumb, which is why runoff from turf fields is tested for zinc." }
+    ]
+  },
+  {
+    "id": "medal", "name": "Gold medal", "worldObject": "medal", "biome": "fields",
+    "features": [
+      { "id": "medal_relief", "name": "Gilded medal", "sizeUm": 800, "contrast": 0.5, "drawing": "lines", "tint": "#e8c050",
+        "blurb": "Olympic gold medals have not been made of solid gold since 1912. They are silver underneath, with at least six grams of gold on top." },
+      { "id": "gold_map", "name": "Gold", "sizeUm": 30, "contrast": 0, "contrastIn": {"xrf": 0.7}, "edgeKeV": 11.919, "drawing": "map", "tint": "#ffd040",
+        "blurb": "Tuned just above gold's L3 edge at 11.92 keV, the beam makes gold give off X-rays of its own. The map shows gold all over the surface, as a plated skin should." },
+      { "id": "gold_skin", "name": "Gold skin over silver", "sizeUm": 20, "contrast": 0, "contrastIn": {"xct": 0.55}, "drawing": "slice", "tint": "#ffe080",
+        "blurb": "In a tomogram the dense gold shows as a bright rim around the silver core. Six grams of gold spread over a medal 85 millimetres wide makes a layer about twenty micrometres thick." }
+    ]
+  },
+  {
+    "id": "lake_plankton", "name": "Cayuga plankton", "worldObject": "plankton_net", "biome": "shore",
+    "features": [
+      { "id": "daphnia", "name": "Water flea", "sizeUm": 2000, "contrast": 0.45, "drawing": "critter", "tint": "#d8c8a8",
+        "blurb": "Daphnia, the water flea, is a crustacean a couple of millimetres long, so clear that you can watch its heart beat. Clouds of them graze the algae of the open lake." },
+      { "id": "asterionella", "name": "Asterionella stars", "sizeUm": 3, "contrast": 0.4, "drawing": "needles", "tint": "#c8b070",
+        "blurb": "Asterionella is a diatom whose needle-like cells, a few micrometres wide and up to about 80 long, join at one end into a star, usually of eight. Its spring blooms feed the lake's grazers." },
+      { "id": "microcystis", "name": "Microcystis colonies", "sizeUm": 5, "contrast": 0.35, "contrastIn": {"fluorescence": 0.7}, "drawing": "beads", "tint": "#4a8a3a",
+        "blurb": "Microcystis is a cyanobacterium whose cells, about five micrometres across, live in jelly-bound colonies that float up in late summer. Its blooms can release microcystins, liver toxins that close beaches." },
+      { "id": "gas_vesicles", "name": "Gas vesicles", "sizeUm": 0.07, "contrast": 0.3, "contrastIn": {"tem": 0.5}, "criticalDoseENm2": 5000, "drawing": "rods", "tint": "#a0c0a0",
+        "blurb": "Microcystis floats on gas vesicles, hollow protein cylinders about 70 nanometres wide that let gas in but keep water out. Squeeze a sealed bottle of bloom water hard and they collapse, and the cells sink." }
+    ]
+  },
+  {
+    "id": "road_salt", "name": "Rock salt from under Cayuga Lake", "worldObject": "rock_salt", "biome": "shore",
+    "features": [
+      { "id": "halite_cleavage", "name": "Cleavage cubes", "sizeUm": 2000, "contrast": 0.5, "drawing": "cubes", "tint": "#c8c8c8",
+        "blurb": "This road salt is mined about 700 metres down, in a mine that runs under Cayuga Lake. It is the salt of an ancient sea that dried out over 400 million years ago." },
+      { "id": "halite_inclusions", "name": "Fluid inclusions", "sizeUm": 20, "contrast": 0.45, "drawing": "cubes", "tint": "#e8e8f0",
+        "blurb": "Bands of tiny cube-shaped pockets of brine were trapped as each salt crystal grew on the floor of that sea. Analysing them is one way geologists read the chemistry of ancient seawater." },
+      { "id": "halite_220", "name": "Salt (220) reflection", "sizeUm": 0.0001994, "contrast": 0, "contrastIn": {"xrd": 0.6, "ediff": 0.5}, "drawing": "rings",
+        "blurb": "Besides table salt's strongest reflection at 0.282 nanometres, rock salt diffracts from planes 0.199 nanometres apart that run diagonally across the cube. It is the same mineral, halite, whether it comes from a shaker or a mine." }
+    ]
+  },
+  {
+    "id": "stained_glass", "name": "Ruby and blue window glass", "worldObject": "stained_glass", "biome": "shore",
+    "features": [
+      { "id": "grisaille_lines", "name": "Painted lines", "sizeUm": 500, "contrast": 0.6, "drawing": "lines", "tint": "#3a2a1a",
+        "blurb": "The dark lines of faces and folds are painted on with powdered glass and iron oxide, then fired into the surface. Strips of lead between the pieces hold the window together." },
+      { "id": "glass_seeds", "name": "Bubbles", "sizeUm": 150, "contrast": 0.45, "drawing": "droplets", "tint": "#f0f0ff",
+        "blurb": "Small bubbles, called seeds, were trapped when the molten glass was blown and flattened. Glassmakers worked to clear them out, but many old windows keep them." },
+      { "id": "ruby_gold", "name": "Gold nanoparticles", "sizeUm": 0.02, "contrast": 0, "contrastIn": {"darkfield": 0.55, "tem": 0.6, "haadf": 0.7}, "drawing": "spots", "tint": "#ff3050",
+        "blurb": "Ruby glass gets its colour from gold crystals only tens of nanometres across, far too small for any light microscope to resolve. In 1903 Richard Zsigmondy and Henry Siedentopf saw them anyway, as points of scattered light in their new ultramicroscope." },
+      { "id": "ruby_gold_fringes", "name": "Gold lattice fringes", "sizeUm": 0.000235, "contrast": 0, "contrastIn": {"tem": 0.45, "haadf": 0.6}, "drawing": "lattice", "tint": "#ffd060",
+        "blurb": "At high magnification each particle shows lattice fringes from gold's (111) planes, 0.235 nanometres apart. Every particle is a tiny crystal of metallic gold, as Zsigmondy concluded long before anyone could see one." },
+      { "id": "cobalt_glass", "name": "Cobalt", "sizeUm": 50, "contrast": 0, "contrastIn": {"xrf": 0.7}, "edgeKeV": 7.709, "drawing": "map", "tint": "#4a7aff",
+        "blurb": "Deep blue window glass is coloured by cobalt, a few hundredths of a per cent being enough. A cobalt map lights up only the blue panes." }
+    ]
+  },
+  {
+    "id": "crinoid_limestone", "name": "Crinoid limestone", "worldObject": "crinoid_limestone", "biome": "quarry",
+    "features": [
+      { "id": "crinoid_columnals", "name": "Crinoid stems", "sizeUm": 3000, "contrast": 0.5, "drawing": "discs", "tint": "#d8d0c0",
+        "blurb": "The little discs and rings in this Devonian limestone are pieces of crinoid stems, from sea lilies on the floor of the sea that covered New York about 385 million years ago. When the animals died, their stems fell apart into these columnals." },
+      { "id": "stereom_mesh", "name": "Stereom", "sizeUm": 10, "contrast": 0.4, "drawing": "honeycomb", "tint": "#e8e0d0",
+        "blurb": "Each plate is not solid but a three-dimensional mesh of calcite called stereom, with pores about 10 micrometres across. In life soft tissue fills the pores, and in fossils later calcite often fills them." },
+      { "id": "crinoid_spots", "name": "Single-crystal spots", "sizeUm": 0.0003035, "contrast": 0, "contrastIn": {"xrd": 0.6, "ediff": 0.5}, "drawing": "spots",
+        "blurb": "Although it is a porous mesh, each crinoid plate diffracts as one single crystal of calcite, giving sharp spots instead of rings. The animal grew the whole plate with its crystal axes lined up." },
+      { "id": "stereom_nanograins", "name": "Nanograins", "sizeUm": 0.1, "contrast": 0.3, "contrastIn": {"tem": 0.4}, "drawing": "grains", "tint": "#d8d0c8",
+        "blurb": "Close up, the stereom is built of grains about 100 nanometres across, all aligned like one crystal. This texture lets it break like glass rather than split along calcite's easy cleavage planes." }
+    ]
+  },
+  {
+    "id": "trilobite", "name": "Trilobite", "worldObject": "trilobite", "biome": "quarry",
+    "features": [
+      { "id": "trilobite_eye", "name": "Lensed eye", "sizeUm": 500, "contrast": 0.5, "drawing": "facets", "tint": "#6a5a48",
+        "blurb": "Eldredgeops rana, long called Phacops rana, is a trilobite common in New York's Devonian shales, with eyes of separate lenses about half a millimetre across. Each eye has 15 to 18 vertical rows of them, made of calcite, the mineral of limestone." },
+      { "id": "lens_bowl", "name": "Doublet lens", "sizeUm": 100, "contrast": 0, "contrastIn": {"xct": 0.5}, "drawing": "slice", "tint": "#c8b8a0",
+        "blurb": "A tomogram shows a second element, the intralensar bowl, set into the base of each lens. Euan Clarkson and Riccardo Levi-Setti argued in 1975 that this doublet corrected spherical aberration, the flaw lens makers fought for centuries." },
+      { "id": "lens_c_axis", "name": "Aligned crystal axis", "sizeUm": 0.0002843, "contrast": 0, "contrastIn": {"xrd": 0.6}, "drawing": "spots",
+        "blurb": "Calcite splits light into two images except along its c axis, and each lens is a calcite crystal with its c axis pointing straight out of the eye. The (006) reflection, from planes 0.284 nanometres apart across that axis, shows how well they are lined up." }
+    ]
+  },
+  {
+    "id": "conodonts", "name": "Conodonts from dissolved limestone", "worldObject": "conodonts", "biome": "quarry",
+    "features": [
+      { "id": "conodont_elements", "name": "Conodont elements", "sizeUm": 500, "contrast": 0.5, "drawing": "needles", "tint": "#d8a050",
+        "blurb": "Dissolving limestone in weak acid leaves amber tooth-like conodont elements, mostly half a millimetre to a millimetre long. Christian Pander described them in 1856, but whose teeth they were stayed a mystery until fossils of the whole eel-like animal turned up in 1983." },
+      { "id": "conodont_denticles", "name": "Denticles", "sizeUm": 60, "contrast": 0.45, "drawing": "needles", "tint": "#c89040",
+        "blurb": "Each element bristles with pointed denticles that worked against each other like shears as the animal fed. Their shapes changed quickly through time, so geologists use conodonts to date rocks." },
+      { "id": "conodont_apatite", "name": "Apatite reflection", "sizeUm": 0.000281, "contrast": 0, "contrastIn": {"xrd": 0.6, "ediff": 0.5}, "drawing": "rings",
+        "blurb": "Conodonts are made of apatite, the calcium phosphate of our own teeth and bones, with its strongest X-ray reflection from planes 0.28 nanometres apart. Burial heat turns them from pale amber to black, and this colour alteration index reads how hot the rock got." }
+    ]
+  },
+  {
+    "id": "cattails", "name": "Cattails at the creek mouth", "worldObject": "cattail", "biome": "shore",
+    "features": [
+      { "id": "cattail_aerenchyma", "name": "Air channels", "sizeUm": 1000, "contrast": 0.5, "drawing": "honeycomb", "tint": "#c8d8a0",
+        "blurb": "Cut a cattail leaf and its inside is mostly air, in channels divided by thin walls. The channels carry oxygen down to roots buried in waterlogged mud, where there is none." },
+      { "id": "cattail_pollen", "name": "Pollen tetrads", "sizeUm": 40, "contrast": 0.45, "drawing": "pollen", "tint": "#f0d860",
+        "blurb": "Broad-leaved cattail sheds its pollen in fours, each tetrad four grains stuck together. Cattails make so much of it that it has been gathered as flour." },
+      { "id": "cattail_fluff", "name": "Seed fluff", "sizeUm": 3000, "contrast": 0.5, "drawing": "hair", "tint": "#e8e0d0",
+        "blurb": "Each tiny fruit floats off on a tuft of fine hairs, and a single brown head releases tens of thousands of them. The fluff is so buoyant and warm that it has been used to stuff life jackets and pillows." }
+    ]
+  },
+  {
+    "id": "dandelion", "name": "Dandelion clock", "worldObject": "dandelion", "biome": "fields",
+    "features": [
+      { "id": "dandelion_clock", "name": "Seed parachutes", "sizeUm": 14000, "contrast": 0.5, "drawing": "hair", "tint": "#f4f4ec",
+        "blurb": "Each seed of a dandelion clock hangs under a parachute, the pappus, about a centimetre and a half across. In 2018 researchers found that air flowing through it forms a ring of swirling air above it, which slows its fall." },
+      { "id": "pappus_bristles", "name": "Pappus bristles", "sizeUm": 16, "contrast": 0.4, "drawing": "hair", "tint": "#e8e8e0",
+        "blurb": "The pappus is about a hundred bristles, each around 16 micrometres thick, so it is mostly empty space. Air leaking between the bristles is what holds the swirling ring steady." },
+      { "id": "dandelion_pollen", "name": "Spiky pollen", "sizeUm": 30, "contrast": 0.45, "drawing": "pollen", "tint": "#f0c830",
+        "blurb": "Dandelion pollen grains are spiky balls whose surface is cut into ridged windows. Yet many common dandelions set seed without pollination, as clones of the mother plant." }
+    ]
+  },
+  {
+    "id": "horn_coral", "name": "Devonian horn coral", "worldObject": "horn_coral", "biome": "quarry",
+    "features": [
+      { "id": "coral_cup", "name": "Horn coral", "sizeUm": 30000, "contrast": 0.55, "drawing": "rings", "tint": "#c8b898",
+        "blurb": "Horn corals like Heliophyllum lived alone on the floor of New York's Devonian sea, each a single polyp in a cone with radiating walls inside. Their whole group died out at the end of the Permian." },
+      { "id": "coral_ridges", "name": "Daily growth ridges", "sizeUm": 50, "contrast": 0.4, "drawing": "lines", "tint": "#b8a888",
+        "blurb": "The outside of the cone is ringed by fine ridges, about 200 to the centimetre, thought to be laid down one a day. In 1963 John Wells of Cornell counted about 400 between yearly bands, evidence that a Devonian year had about 400 shorter days." },
+      { "id": "coral_calcite", "name": "Calcite rings", "sizeUm": 0.0003035, "contrast": 0, "contrastIn": {"xrd": 0.6, "ediff": 0.5}, "drawing": "rings",
+        "blurb": "X-rays show the coral's skeleton is calcite, its strongest ring from planes 0.304 nanometres apart. Horn corals built in calcite, while today's reef corals build in aragonite." }
+    ]
+  },
+  {
+    "id": "sheep_wool", "name": "Sheep's fleece", "worldObject": "fleece", "biome": "farm",
+    "features": [
+      { "id": "fleece_crimp", "name": "Crimp", "sizeUm": 2000, "contrast": 0.5, "drawing": "hair", "tint": "#f0ead8",
+        "blurb": "Fine wool is crimped into regular waves a few millimetres apart, which makes a fleece springy and traps warm air. The finer the fibre, the tighter the crimp." },
+      { "id": "wool_scales", "name": "Cuticle scales", "sizeUm": 20, "contrast": 0.45, "drawing": "scales", "tint": "#e8e0c8",
+        "blurb": "Each fibre, about 20 micrometres thick, is sheathed in overlapping scales like roof tiles, their edges about a micrometre high. Rubbed in hot soapy water the scales lock together, which is how wool felts and shrinks." },
+      { "id": "wool_cortex", "name": "Two-sided cortex", "sizeUm": 5, "contrast": 0.15, "contrastIn": {"methylene_blue": 0.6}, "drawing": "cells", "tint": "#d8d0b8",
+        "blurb": "Inside, spindle-shaped cells about 5 micrometres wide fill the fibre, in two halves that take up dyes differently. The halves are built differently, and they are linked to the fibre's crimp." },
+      { "id": "keratin_coil", "name": "Coiled-coil reflection", "sizeUm": 0.000515, "contrast": 0, "contrastIn": {"xrd": 0.6}, "drawing": "rings",
+        "blurb": "Wool keratin gives an X-ray reflection at 0.51 nanometres along the fibre axis, too short to fit a straight alpha helix. In 1952 Francis Crick explained it: pairs of helices wind around each other as a coiled coil." }
+    ]
+  },
+  {
+    "id": "hornet_nest", "name": "Hornet nest", "worldObject": "hornet_nest", "biome": "orchard",
+    "features": [
+      { "id": "nest_paper", "name": "Banded paper", "sizeUm": 2000, "contrast": 0.5, "drawing": "lines", "tint": "#a8a090",
+        "blurb": "Hornets build their nest of paper, chewing wood into pulp and spreading it in thin layers. Each band of colour is a load of fibre from a different weathered board or branch." },
+      { "id": "nest_fibres", "name": "Chewed wood fibres", "sizeUm": 25, "contrast": 0.45, "drawing": "fibers", "tint": "#b8ac98",
+        "blurb": "Under a microscope the paper is a felt of short wood fibres glued with saliva. Watching wasps, René Réaumur suggested in 1719 that people could make paper from wood too, but it took more than a century to catch on." },
+      { "id": "nest_lignin", "name": "Lignin glow", "sizeUm": 25, "contrast": 0, "contrastIn": {"fluorescence": 0.6}, "drawing": "glow", "tint": "#6a8aff",
+        "blurb": "Under ultraviolet light the fibres glow blue from lignin, the glue that stiffens wood. Papermakers remove it to make white paper, but hornets leave it in." }
+    ]
+  }
 ]

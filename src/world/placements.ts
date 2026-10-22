@@ -123,4 +123,52 @@ export const PLACEMENTS: Placement[] = [
   { kind: 'starry', x: -43.5, z: MUSEUM.z1 - 0.34, yaw: Math.PI },
   { kind: 'pearlgirl', x: -41.3, z: MUSEUM.z1 - 0.34, yaw: Math.PI },
   { kind: 'greatwave', x: -39.3, z: MUSEUM.z1 - 0.34, yaw: Math.PI },
+
+  // The corners of the bigger campus. North campus, across the suspension bridge: a desk and a dusty bed in the
+  // first-floor room of the east residence hall, and the observatory a little north of it
+  { kind: 'desk', x: 20, z: -97.5 },
+  { kind: 'bed', x: 33, z: -100 },
+  { kind: 'observatory', x: 26, z: -118 },
+  // the north woods, west of the residence halls: tall grass with ticks, a slime mould on a log, an owl pellet on a stump
+  ...cluster('tick_grass', -36, -96, 3, 3, 40, 1.5),
+  { kind: 'slime_log', x: -44, z: -106, yaw: 0.6 },
+  { kind: 'pellet', x: -28, z: -112 },
+  // the orchard beyond the lake, its beehives, and windfall apples under the trees
+  ...cluster('apple_tree', 92, -76, 5, 6, 41, 3.5),
+  { kind: 'hive', x: 102, z: -66 },
+  { kind: 'hive', x: 103.5, z: -66.5 },
+  { kind: 'windfall', x: 86, z: -82 },
+  // the farm south-east of the fields: the Dairy Bar's stand and two cows; the cornfield south of the south hall
+  { kind: 'dairy_stand', x: 92, z: 76, yaw: Math.PI },
+  { kind: 'cow', x: 100, z: 84 },
+  { kind: 'cow', x: 104, z: 79 },
+  ...cluster('corn', 6, 126, 4, 5, 42, 2.2),
+  // the athletic fields: clover by the field house path, a roll of turf by the stands, the trophy case inside
+  ...cluster('clover', 77, 28, 3, 2.5, 43, 1.5),
+  { kind: 'turf', x: 79.5, z: -28 },
+  { kind: 'trophy', x: 80.7, z: 40, yaw: Math.PI / 2 },
+  // west campus and the Cayuga shore: a dock on the big lake, the road-salt heap, a window panel in the Gothic hall
+  { kind: 'dock', x: -137, z: 2, yaw: Math.PI / 2 },
+  { kind: 'salt_pile', x: -96, z: 24 },
+  { kind: 'window', x: -100, z: 3, yaw: Math.PI / 2 },
+  // the fossil quarry at the foot of the west slope, south-west
+  ...cluster('ledge', -88, 80, 3, 4, 44, 2.6),
+  { kind: 'trilobite', x: -80, z: 84 },
+  { kind: 'sieve', x: -84, z: 70 },
+  // and out at the edges: cattails where the creek meets Cayuga (reached through the north woods), dandelions east of
+  // the fields, horn corals beyond the quarry, sheep at the far end of the farm, a hornet nest past the orchard
+  ...cluster('cattail', -100, -88, 4, 3, 45, 1.6),
+  ...cluster('dandelion', 130, 12, 4, 7, 46, 3),
+  { kind: 'horn_coral', x: -75, z: 105 },
+  { kind: 'sheep', x: 88, z: 100 },
+  { kind: 'sheep', x: 91, z: 103 },
+  { kind: 'hornet_nest', x: 120, z: -50 },
+  // more of the same to keep the outer edges from being empty
+  ...cluster('cattail', -121, -48, 3, 2.5, 47, 1.6),
+  { kind: 'ledge', x: -116, z: 50 },
+  ...cluster('apple_tree', 78, -110, 3, 4, 48, 3.5),
+  ...cluster('clover', 120, 50, 3, 2.5, 49, 1.5),
+  ...cluster('dandelion', 56, 66, 3, 3, 50, 2),
+  ...cluster('corn', -34, 122, 3, 3, 51, 2.2),
+  { kind: 'sheep', x: 62, z: 120 },
 ];

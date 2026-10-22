@@ -870,3 +870,324 @@ export function painting(id: PaintingId): THREE.Group {
   g.add(mesh(new THREE.PlaneGeometry(0.64, 0.08), placard, w / 2 + f + 0.4, 1.3, 0.01));
   return g;
 }
+
+// ---------------------------------------------------------------- the corners of the bigger campus
+
+/** A dorm desk with a stack of discs and a phone on it, and a reading lamp. */
+export function dormDesk(): THREE.Group {
+  const g = new THREE.Group();
+  const wood = std('#a07a52', 0.8);
+  g.add(mesh(box(1.2, 0.05, 0.6), wood, 0, 0.75, 0), mesh(box(0.4, 0.7, 0.55), wood, 0.38, 0.375, 0));
+  for (const x of [-0.56]) for (const z of [-0.26, 0.26]) g.add(mesh(box(0.05, 0.75, 0.05), wood, x, 0.375, z));
+  const disc = std('#d8dce4', 0.15, 0.7);
+  for (let i = 0; i < 3; i++) g.add(mesh(cyl(0.06, 0.06, 0.004, 24), disc, -0.3, 0.78 + i * 0.006, 0.05));
+  g.add(mesh(box(0.075, 0.008, 0.155), std('#16181c', 0.25, 0.3), 0.05, 0.779, 0.08, 0, 0.3, 0)); // the phone
+  g.add(mesh(cyl(0.07, 0.08, 0.02, 12), std('#3a3a40', 0.5), 0.35, 0.785, -0.18), mesh(cyl(0.01, 0.01, 0.3, 6), std('#3a3a40', 0.5), 0.35, 0.94, -0.18));
+  g.add(mesh(cyl(0.05, 0.1, 0.1, 12), std('#e8e0c0', 0.6, 0, { emissive: '#ffe8a0', emissiveIntensity: 0.4 }), 0.35, 1.1, -0.18));
+  return g;
+}
+
+/** A low bed with grey dust bunnies under its edge. */
+export function dustBunnies(rng: () => number): THREE.Group {
+  const g = new THREE.Group();
+  g.add(mesh(box(1.0, 0.25, 1.9), std('#6a5a48', 0.85), 0, 0.3, 0), mesh(box(0.95, 0.12, 1.85), std('#8aa0c0', 0.95), 0, 0.48, 0));
+  for (const x of [-0.45, 0.45]) for (const z of [-0.9, 0.9]) g.add(mesh(box(0.06, 0.2, 0.06), std('#5a4a3a', 0.85), x, 0.1, z));
+  const fluff = std('#9a9690', 1);
+  for (let i = 0; i < 5; i++) {
+    const b = mesh(memo('fluff', () => new THREE.IcosahedronGeometry(1, 1)), fluff, 0.55 + rng() * 0.15, 0.04, (rng() - 0.5) * 1.4);
+    b.scale.set(0.05 + rng() * 0.04, 0.035, 0.05 + rng() * 0.04);
+    g.add(b);
+  }
+  return g;
+}
+
+/** A small observatory: a white drum under a dome with its shutter slit, and a bucket under the gutter's downspout. */
+export function observatory(): THREE.Group {
+  const g = new THREE.Group();
+  const white = std('#e8e6e0', 0.7);
+  g.add(mesh(cyl(1.8, 1.8, 2.4, 24), white, 0, 1.2, 0));
+  g.add(mesh(memo('obsdome', () => new THREE.SphereGeometry(1.85, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2)), std('#c8ccd0', 0.35, 0.6), 0, 2.4, 0));
+  g.add(mesh(box(0.5, 1.9, 0.08), std('#2a2e34', 0.6), 0, 3.2, -1.2, -0.75, 0, 0)); // the shutter slit
+  g.add(mesh(box(0.9, 1.9, 0.06), std('#5a4a3a', 0.8), 0, 0.95, 1.79)); // the door
+  g.add(mesh(memo('gutter', () => new THREE.TorusGeometry(1.86, 0.05, 6, 32)), std('#9aa0a8', 0.5, 0.6), 0, 2.38, 0, Math.PI / 2));
+  g.add(mesh(cyl(0.05, 0.05, 2.3, 8), std('#9aa0a8', 0.5, 0.6), 1.3, 1.25, 1.3));
+  g.add(mesh(cyl(0.16, 0.13, 0.3, 14), std('#3a6ab0', 0.6), 1.42, 0.15, 1.42)); // the bucket of gutter sludge
+  return g;
+}
+
+/** A clump of tall grass at the edge of the woods, where ticks wait on the blade tips. */
+export function tallGrass(rng: () => number): THREE.Group {
+  const g = new THREE.Group();
+  const greens = ['#6a8a3a', '#7a9a48', '#8a9a50'].map((c) => std(c, 0.9, 0, { side: THREE.DoubleSide }));
+  for (let i = 0; i < 22; i++) {
+    const h = 0.6 + rng() * 0.5;
+    const blade = mesh(memo('tallblade', () => new THREE.ConeGeometry(0.025, 1, 3)), greens[i % 3]!, (rng() - 0.5) * 0.5, h / 2, (rng() - 0.5) * 0.5, (rng() - 0.5) * 0.4, rng() * 6, (rng() - 0.5) * 0.4);
+    blade.scale.y = h;
+    g.add(blade);
+  }
+  return g;
+}
+
+/** A fallen log with the yellow veins of a slime mould spreading over it, and a few dark sporangia. */
+export function slimeLog(rng: () => number): THREE.Group {
+  const g = fallenLog();
+  const yellow = std('#f0d020', 0.5, 0, { emissive: '#806a00', emissiveIntensity: 0.25 });
+  for (let i = 0; i < 9; i++) {
+    const vein = mesh(cyl(0.025, 0.035, 0.5 + rng() * 0.4, 6), yellow, -0.7 + i * 0.18, 0.56, (rng() - 0.5) * 0.24, 0, rng() * 3, Math.PI / 2);
+    g.add(vein);
+  }
+  g.add(mesh(memo('slimefan', () => new THREE.CircleGeometry(0.28, 16)), yellow, 0.6, 0.6, 0, -Math.PI / 2));
+  for (let i = 0; i < 6; i++) g.add(mesh(ball(0.025, 8, 6), std('#4a3a2a', 0.8), -0.2 + (rng() - 0.5) * 0.4, 0.62, (rng() - 0.5) * 0.2));
+  return g;
+}
+
+/** A grey owl pellet on a mossy stump. */
+export function owlPellet(rng: () => number): THREE.Group {
+  const g = new THREE.Group();
+  g.add(mesh(cyl(0.3, 0.36, 0.45, 12), std('#6a5038', 0.95), 0, 0.225, 0), mesh(cyl(0.29, 0.29, 0.02, 12), std('#b89a6a', 0.9), 0, 0.455, 0));
+  const pellet = mesh(memo('pellet', () => new THREE.IcosahedronGeometry(1, 1)), std('#7a7470', 1, 0, { flatShading: true }), 0.02, 0.5, 0.03, 0, rng() * 3, 0);
+  pellet.scale.set(0.09, 0.045, 0.05);
+  g.add(pellet, mesh(cyl(0.004, 0.004, 0.08, 4), std('#f0ead8', 0.6), 0.06, 0.53, 0.02, 0, 0.4, Math.PI / 2)); // a bone poking out
+  return g;
+}
+
+/** A small apple tree laden with red apples, a couple fallen in the grass. */
+export function appleTree(rng: () => number): THREE.Group {
+  const g = new THREE.Group();
+  const bark = std('#5a4430', 0.95);
+  g.add(mesh(cyl(0.12, 0.18, 1.4, 8), bark, 0, 0.7, 0));
+  for (const [x, z] of [[0.35, 0.1], [-0.3, -0.2], [0.05, 0.4]]) g.add(mesh(cyl(0.05, 0.08, 0.9, 6), bark, x! * 0.6, 1.5, z! * 0.6, z! * 0.9, 0, -x! * 0.9));
+  const leaves = std('#4a7a32', 0.9, 0, { flatShading: true });
+  for (const [x, y, z, r] of [[0, 2.2, 0, 1.0], [0.6, 1.9, 0.2, 0.7], [-0.55, 2.0, -0.3, 0.75], [0.1, 2.0, 0.6, 0.65]] as const) {
+    g.add(mesh(memo(`appcrown:${r}`, () => new THREE.IcosahedronGeometry(r, 1)), leaves, x, y, z));
+  }
+  const red = std('#c0281e', 0.45);
+  for (let i = 0; i < 16; i++) {
+    const a = rng() * 6.28;
+    const r = 0.75 + rng() * 0.25;
+    g.add(mesh(ball(0.07, 8, 6), red, Math.cos(a) * r, 1.6 + rng() * 0.9, Math.sin(a) * r));
+  }
+  for (const [x, z] of [[0.9, 0.4], [-0.7, 0.8]]) g.add(mesh(ball(0.07, 8, 6), red, x!, 0.07, z!));
+  return g;
+}
+
+/** A beehive: two white brood boxes and a honey super on a stand, under a tin lid. */
+export function beehive(): THREE.Group {
+  const g = new THREE.Group();
+  g.add(mesh(box(0.6, 0.35, 0.6), std('#5a4a3a', 0.9), 0, 0.175, 0));
+  const paint = ['#f2f0e8', '#e8e4d8', '#f4e8c0'];
+  paint.forEach((c, i) => g.add(mesh(box(0.5, 0.24, 0.42), std(c, 0.8), 0, 0.47 + i * 0.245, 0)));
+  g.add(mesh(box(0.56, 0.06, 0.48), std('#b8bcc0', 0.4, 0.7), 0, 1.13, 0));
+  g.add(mesh(box(0.2, 0.02, 0.03), std('#2a2a2a', 0.8), 0, 0.37, 0.215)); // the entrance
+  return g;
+}
+
+/** Fallen apples in the grass, with fruit flies hovering over them. */
+export function fallenApples(rng: () => number): THREE.Group {
+  const g = new THREE.Group();
+  const colours = ['#a83020', '#8a5a2a', '#6a4a20'].map((c) => std(c, 0.6));
+  for (let i = 0; i < 7; i++) g.add(mesh(ball(0.07, 8, 6), colours[i % 3]!, (rng() - 0.5) * 0.7, 0.06, (rng() - 0.5) * 0.7, 0, 0, rng()));
+  const fly = std('#b8763a', 0.6);
+  for (let i = 0; i < 9; i++) g.add(mesh(ball(0.008, 4, 3), fly, (rng() - 0.5) * 0.6, 0.15 + rng() * 0.25, (rng() - 0.5) * 0.6));
+  return g;
+}
+
+/** The Dairy Bar's stand: a counter under a striped awning, with an ice cream cone and cups of yogurt. */
+export function dairyStand(): THREE.Group {
+  const g = new THREE.Group();
+  g.add(mesh(box(1.8, 1.0, 0.7), std('#e8e4dc', 0.6), 0, 0.5, 0), mesh(box(1.9, 0.05, 0.8), std('#3a5aa0', 0.5), 0, 1.02, 0));
+  for (const x of [-0.85, 0.85]) g.add(mesh(cyl(0.03, 0.03, 1.4, 6), std('#c8ccd0', 0.4, 0.6), x, 1.7, -0.2));
+  for (let i = 0; i < 6; i++) g.add(mesh(box(0.32, 0.04, 1.0), std(i % 2 ? '#c8283a' : '#f4f0e8', 0.8), -0.8 + i * 0.32, 2.42, 0.05, 0.35, 0, 0));
+  g.add(mesh(memo('cone', () => new THREE.ConeGeometry(0.04, 0.14, 10)), std('#d8a860', 0.8), -0.4, 1.12, 0.1, Math.PI, 0, 0), mesh(ball(0.05, 10, 8), std('#f8f0e0', 0.7), -0.4, 1.22, 0.1));
+  for (const x of [0.2, 0.38, 0.56]) g.add(mesh(cyl(0.05, 0.04, 0.09, 12), std('#f4f4f0', 0.5), x, 1.09, 0.1));
+  return g;
+}
+
+/** A blocky Holstein cow, white with black patches. */
+export function cow(): THREE.Group {
+  const g = new THREE.Group();
+  const white = std('#f2f0ea', 0.9);
+  const black = std('#1e1e20', 0.9);
+  g.add(mesh(box(0.7, 0.6, 1.5), white, 0, 1.0, 0), mesh(box(0.72, 0.4, 0.5), black, 0, 1.12, -0.2), mesh(box(0.72, 0.3, 0.35), black, 0.0, 0.95, 0.45));
+  g.add(mesh(box(0.42, 0.42, 0.5), white, 0, 1.25, -0.95), mesh(box(0.32, 0.22, 0.18), std('#e0a8a0', 0.8), 0, 1.12, -1.25));
+  for (const s of [-1, 1]) g.add(mesh(box(0.06, 0.1, 0.06), std('#e8e0c8', 0.6), s * 0.18, 1.5, -0.95), mesh(box(0.14, 0.08, 0.06), black, s * 0.27, 1.38, -0.88));
+  for (const x of [-0.25, 0.25]) for (const z of [-0.6, 0.6]) g.add(mesh(box(0.16, 0.7, 0.16), white, x, 0.35, z));
+  g.add(mesh(box(0.06, 0.6, 0.06), black, 0, 0.9, 0.78));
+  return g;
+}
+
+/** A few rows of tall corn: stalks, strap leaves, and ears in husks with a silk tuft. */
+export function cornStalks(rng: () => number): THREE.Group {
+  const g = new THREE.Group();
+  const stalk = std('#7a9a3a', 0.8);
+  const leaf = std('#6a8a32', 0.85, 0, { side: THREE.DoubleSide });
+  for (let i = 0; i < 9; i++) {
+    const x = (i % 3 - 1) * 0.55 + (rng() - 0.5) * 0.1;
+    const z = (Math.floor(i / 3) - 1) * 0.55 + (rng() - 0.5) * 0.1;
+    const h = 1.8 + rng() * 0.5;
+    g.add(mesh(cyl(0.018, 0.028, h, 6), stalk, x, h / 2, z));
+    for (let k = 0; k < 4; k++) g.add(mesh(box(0.05, 0.006, 0.6), leaf, x, 0.5 + k * 0.38, z, 0.5, rng() * 6, 0));
+    g.add(mesh(cyl(0.035, 0.04, 0.2, 8), std('#9ab060', 0.8), x + 0.05, 1.1, z, 0, 0, 0.3), mesh(cyl(0.004, 0.02, 0.06, 6), std('#c87a3a', 0.9), x + 0.08, 1.23, z, 0, 0, 0.3));
+  }
+  return g;
+}
+
+/** A patch of white clover: three-leaved stems and round white flower heads. */
+export function cloverPatch(rng: () => number): THREE.Group {
+  const g = new THREE.Group();
+  const green = std('#4a8a3a', 0.85, 0, { side: THREE.DoubleSide });
+  for (let i = 0; i < 14; i++) {
+    const x = (rng() - 0.5) * 0.9;
+    const z = (rng() - 0.5) * 0.9;
+    const h = 0.06 + rng() * 0.06;
+    for (let k = 0; k < 3; k++) {
+      const a = (k / 3) * 6.28 + rng();
+      g.add(mesh(memo('cloverleaf', () => new THREE.CircleGeometry(0.03, 8)), green, x + Math.cos(a) * 0.025, h, z + Math.sin(a) * 0.025, -Math.PI / 2 + 0.2));
+    }
+  }
+  for (let i = 0; i < 5; i++) g.add(mesh(ball(0.025, 8, 6), std('#f4f0e6', 0.8), (rng() - 0.5) * 0.8, 0.16, (rng() - 0.5) * 0.8));
+  return g;
+}
+
+/** A roll of spare artificial turf and a mound of black crumb rubber. */
+export function turfRoll(rng: () => number): THREE.Group {
+  const g = new THREE.Group();
+  g.add(mesh(cyl(0.25, 0.25, 1.6, 16), std('#3a8a3a', 0.95), 0, 0.25, 0, 0, 0, Math.PI / 2));
+  g.add(mesh(memo('turfend', () => new THREE.RingGeometry(0.05, 0.25, 16)), std('#1a3a1a', 0.9, 0, { side: THREE.DoubleSide }), 0.801, 0.25, 0, 0, Math.PI / 2, 0));
+  const crumb = sandNode(rng, ['#1e1e1e', '#2c2a28'], 0.45);
+  crumb.position.set(0, 0, 0.6);
+  g.add(crumb);
+  return g;
+}
+
+/** The field house trophy case, with a gold medal on its ribbon and a cup. */
+export const trophyCase = () =>
+  displayCase((g) => {
+    g.add(mesh(cyl(0.085, 0.085, 0.012, 24), std('#e8c050', 0.25, 0.9), -0.25, 1.2, 0, Math.PI / 2, 0, 0));
+    g.add(mesh(box(0.05, 0.16, 0.004), std('#2a4aa0', 0.7), -0.25, 1.33, 0));
+    g.add(mesh(cyl(0.09, 0.04, 0.16, 14), std('#d8b040', 0.3, 0.85), 0.3, 1.2, 0), mesh(cyl(0.06, 0.06, 0.06, 12), std('#2a2a2a', 0.6), 0.3, 1.08, 0));
+  });
+
+/** A short wooden dock at the water's edge, with a plankton net hung on a post. */
+export function plankDock(): THREE.Group {
+  const g = new THREE.Group();
+  const wood = std('#8a7050', 0.9);
+  for (let i = 0; i < 9; i++) g.add(mesh(box(1.4, 0.05, 0.22), wood, 0, 0.32, -1.0 + i * 0.25));
+  for (const x of [-0.6, 0.6]) for (const z of [-1.0, 1.0]) g.add(mesh(cyl(0.06, 0.06, 1.2, 8), std('#6a5638', 0.9), x, -0.25, z));
+  g.add(mesh(cyl(0.035, 0.035, 1.4, 6), wood, 0.6, 1.0, -1.0));
+  g.add(mesh(memo('netcone', () => new THREE.ConeGeometry(0.16, 0.5, 12, 1, true)), std('#e8e8e0', 0.9, 0, { transparent: true, opacity: 0.6, side: THREE.DoubleSide }), 0.6, 1.2, -0.84, Math.PI, 0, 0));
+  g.add(mesh(cyl(0.03, 0.03, 0.06, 8), std('#c8c8c0', 0.4, 0.5), 0.6, 0.92, -0.84));
+  return g;
+}
+
+/** A grey heap of road salt outside west campus's grounds shed. */
+export const saltPile = (rng: () => number) => sandNode(rng, ['#c8c6c0', '#a8a6a0'], 1.5);
+
+/** A leaded window panel on a stand: ruby, cobalt blue and amber panes with painted lines. */
+export function stainedGlass(): THREE.Group {
+  const g = new THREE.Group();
+  const lead = std('#3a3a3c', 0.6, 0.5);
+  const panes = ['#c01830', '#2a4ab0', '#d89a2a', '#2a4ab0', '#c01830', '#e8e0c8'];
+  panes.forEach((c, i) => g.add(mesh(box(0.28, 0.4, 0.01), std(c, 0.15, 0, { transparent: true, opacity: 0.7, emissive: c, emissiveIntensity: 0.25 }), -0.3 + (i % 3) * 0.3, 1.0 + Math.floor(i / 3) * 0.42, 0)));
+  for (const x of [-0.45, -0.15, 0.15, 0.45]) g.add(mesh(box(0.02, 0.86, 0.02), lead, x, 1.21, 0));
+  for (const y of [0.79, 1.21, 1.63]) g.add(mesh(box(0.92, 0.02, 0.02), lead, 0, y, 0));
+  const oak = std('#6a5038', 0.85);
+  for (const x of [-0.5, 0.5]) g.add(mesh(box(0.05, 1.7, 0.05), oak, x, 0.85, 0), mesh(box(0.05, 0.05, 0.5), oak, x, 0.03, 0));
+  return g;
+}
+
+/** A ledge of pale limestone in layers, crinoid stems weathering out of it. */
+export function limestoneLedge(rng: () => number): THREE.Group {
+  const g = new THREE.Group();
+  for (let i = 0; i < 5; i++) g.add(mesh(box(1.8 - i * 0.2, 0.18, 1.0 - i * 0.08), std(i % 2 ? '#b8b0a0' : '#c8c0b0', 0.95), (rng() - 0.5) * 0.12, 0.09 + i * 0.18, (rng() - 0.5) * 0.1));
+  for (let i = 0; i < 8; i++) g.add(mesh(cyl(0.025, 0.025, 0.03, 10), std('#e8e0d0', 0.9), (rng() - 0.5) * 1.2, 0.2 + Math.floor(rng() * 4) * 0.18, 0.5 - rng() * 0.05, Math.PI / 2, 0, 0));
+  return g;
+}
+
+/** A shale slab with a trilobite on it: a brown segmented body with the bumps of its eyes. */
+export function trilobiteSlab(rng: () => number): THREE.Group {
+  const g = shaleSlab(rng);
+  const brown = std('#7a5a3a', 0.6);
+  const body = new THREE.Group();
+  body.add(mesh(memo('trilohead', () => new THREE.CircleGeometry(0.07, 14, 0, Math.PI)), brown, 0, 0, -0.04, -Math.PI / 2));
+  for (let i = 0; i < 6; i++) body.add(mesh(box(0.12 - i * 0.012, 0.012, 0.018), brown, 0, 0.004, -0.02 + i * 0.022));
+  for (const s of [-1, 1]) body.add(mesh(ball(0.016, 8, 6), std('#4a3a2a', 0.4), s * 0.035, 0.008, -0.06));
+  body.position.set(-0.2, 0.287, -0.05);
+  g.add(body);
+  return g;
+}
+
+/** A sieve tray of acid-washed residue on a trestle: what is left of dissolved limestone, conodonts and all. */
+export function acidSieve(): THREE.Group {
+  const g = new THREE.Group();
+  const wood = std('#8a6a48', 0.9);
+  for (const x of [-0.4, 0.4]) g.add(mesh(box(0.06, 0.8, 0.5), wood, x, 0.4, 0));
+  g.add(mesh(cyl(0.3, 0.3, 0.08, 20), std('#a8acb0', 0.4, 0.6), 0, 0.84, 0), mesh(cyl(0.28, 0.28, 0.01, 20), std('#c8a878', 1), 0, 0.86, 0));
+  g.add(mesh(cyl(0.08, 0.07, 0.16, 12), std('#e8f0f8', 0.1, 0, { transparent: true, opacity: 0.5 }), 0.5, 0.88, 0.1)); // a beaker of weak acid
+  return g;
+}
+
+/** A stand of cattails: tall strap leaves and brown cigar-shaped heads on stiff stalks. */
+export function cattails(rng: () => number): THREE.Group {
+  const g = new THREE.Group();
+  const leaf = std('#6a8a3a', 0.85, 0, { side: THREE.DoubleSide });
+  for (let i = 0; i < 7; i++) {
+    const x = (rng() - 0.5) * 0.6;
+    const z = (rng() - 0.5) * 0.6;
+    const h = 1.5 + rng() * 0.5;
+    g.add(mesh(cyl(0.012, 0.016, h, 5), std('#7a8a48', 0.8), x, h / 2, z));
+    g.add(mesh(cyl(0.035, 0.035, 0.22, 8), std('#5a3a22', 0.95), x, h - 0.25, z));
+    for (let k = 0; k < 2; k++) g.add(mesh(box(0.03, 1.4 + rng() * 0.4, 0.004), leaf, x + (rng() - 0.5) * 0.1, 0.75, z + (rng() - 0.5) * 0.1, (rng() - 0.5) * 0.3, rng() * 6, (rng() - 0.5) * 0.3));
+  }
+  return g;
+}
+
+/** A few dandelions: white seed clocks and yellow flowers on hollow stems over a rosette of leaves. */
+export function dandelions(rng: () => number): THREE.Group {
+  const g = new THREE.Group();
+  const green = std('#4a8a32', 0.85, 0, { side: THREE.DoubleSide });
+  for (let k = 0; k < 6; k++) g.add(mesh(box(0.05, 0.004, 0.22), green, 0, 0.01, 0, 0, (k / 6) * 6.28, 0));
+  for (let i = 0; i < 4; i++) {
+    const x = (rng() - 0.5) * 0.4;
+    const z = (rng() - 0.5) * 0.4;
+    const h = 0.2 + rng() * 0.12;
+    g.add(mesh(cyl(0.004, 0.005, h, 5), std('#7a9a48', 0.8), x, h / 2, z));
+    g.add(i % 2
+      ? mesh(ball(0.045, 10, 8), std('#f4f4ec', 1, 0, { transparent: true, opacity: 0.85 }), x, h + 0.03, z)
+      : mesh(cyl(0.03, 0.02, 0.02, 10), std('#f0c020', 0.7), x, h + 0.01, z));
+  }
+  return g;
+}
+
+/** Horn corals weathering out of a block of Devonian limestone. */
+export function hornCorals(rng: () => number): THREE.Group {
+  const g = new THREE.Group();
+  g.add(mesh(box(1.0, 0.35, 0.7), std('#b8b0a0', 0.95), 0, 0.175, 0));
+  for (let i = 0; i < 3; i++) {
+    const c = mesh(memo('horn', () => new THREE.ConeGeometry(0.06, 0.22, 10)), std('#c8b898', 0.9), -0.3 + i * 0.28, 0.42, (rng() - 0.5) * 0.3, Math.PI + (rng() - 0.5) * 0.6, 0, (rng() - 0.5) * 0.6);
+    g.add(c);
+  }
+  return g;
+}
+
+/** A blocky sheep in a thick cream fleece. */
+export function sheep(): THREE.Group {
+  const g = new THREE.Group();
+  const wool = std('#efe8d6', 1);
+  const dark = std('#2a2622', 0.8);
+  g.add(mesh(box(0.6, 0.5, 0.9), wool, 0, 0.7, 0), mesh(box(0.26, 0.28, 0.3), dark, 0, 0.82, -0.55), mesh(box(0.28, 0.12, 0.3), wool, 0, 0.98, -0.52));
+  for (const x of [-0.18, 0.18]) for (const z of [-0.3, 0.3]) g.add(mesh(box(0.1, 0.45, 0.1), dark, x, 0.225, z));
+  return g;
+}
+
+/** A grey paper hornet nest hanging from a branch on a post. */
+export function hornetNest(): THREE.Group {
+  const g = new THREE.Group();
+  const wood = std('#5a4430', 0.95);
+  g.add(mesh(cyl(0.08, 0.1, 2.0, 8), wood, 0, 1.0, 0), mesh(cyl(0.03, 0.04, 1.0, 6), wood, 0.35, 1.9, 0, 0, 0, -1.1));
+  const nest = mesh(memo('nest', () => new THREE.SphereGeometry(0.2, 12, 10)), std('#9a948a', 1), 0.55, 1.6, 0);
+  nest.scale.set(1, 1.35, 1);
+  g.add(nest);
+  for (let i = 0; i < 4; i++) g.add(mesh(memo('nestband', () => new THREE.TorusGeometry(0.2, 0.008, 4, 20)), std(i % 2 ? '#b8ae98' : '#7a746a', 1), 0.55, 1.45 + i * 0.1, 0, Math.PI / 2));
+  return g;
+}

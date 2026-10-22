@@ -27,6 +27,10 @@ describe('walking around', () => {
   it('names the area and points the way', () => {
     expect(areaAt(LAKE.x, LAKE.z)).toBe('lake');
     expect(areaAt(0, -20)).toBe('quad');
+    // the corners: the dorms, the woods west of them, past the lake, west campus, the quarry, the farm and the cornfield
+    expect([[26, -100], [-40, -100], [95, -75], [-100, 5], [-82, 74], [95, 80], [0, 125]].map(([x, z]) => areaAt(x!, z!)))
+      .toEqual(['north', 'woods', 'orchard', 'shore', 'quarry', 'farm', 'farm']);
+    expect(areaAt(-60, 0)).toBe('slope'); // the slope lawn stays the slope
     expect(heading(0, -1)).toBe('N');
     expect(heading(1, 0)).toBe('E');
     expect(arrowTo(0, -10, 0, -1)).toBe('↑ 10 m'); // looking north, target to the north
