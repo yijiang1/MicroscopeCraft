@@ -62,6 +62,8 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
     setMenu(false);
     tutorial.replay();
   });
+  const benchBtn = row('🛠️', 'Workbench', () => ctx.bus.emit('openWorkbench', { recipeId: null }), 'B');
+  benchBtn.set('Workbench', 'Build a microscope by hand');
   const mute = row('', 'Sound', () => {
     sound.toggleMute();
     syncMute();
@@ -162,7 +164,7 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
   title.innerHTML = 'Menu <kbd>Tab</kbd>';
   title.style.margin = '2px 2px 10px';
   const heading = (text: string) => Object.assign(document.createElement('div'), { className: 'mc-menu-h', textContent: text });
-  el.append(css, title, tree.b, dex.b, journalBtn.b, refsBtn.b, sep(), heading('Settings'), mute.b, keyRow.b, keyForm, sep(), tutorialBtn.b, saveBtn.b, restart.b);
+  el.append(css, title, tree.b, benchBtn.b, dex.b, journalBtn.b, refsBtn.b, sep(), heading('Settings'), mute.b, keyRow.b, keyForm, sep(), tutorialBtn.b, saveBtn.b, restart.b);
 
   let menuOpen = false;
   const setMenu = (open: boolean) => {
@@ -194,7 +196,8 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
       if (!travelSave) travelSave = window.setTimeout(save, 5000);
     }),
     ctx.bus.on('carriedSamplesChanged', save),
-    ...(['itemGathered', 'itemCrafted', 'discoveryUnlocked', 'scopeChanged', 'questCompleted', 'achievementUnlocked', 'minigameScored', 'areaVisited', 'closeEyepiece'] as const).map((t) => ctx.bus.on(t, save)),
+    ...(['itemGathered', 'itemCrafted', 'discoveryUnlocked', 'scopeChanged', 'questCompleted', 'achievementUnlocked', 'minigameScored', 'areaVisited', 'closeEyepiece', 'closeWorkbench'] as const).map((t) => ctx.bus.on(t, save)),
+    ctx.bus.on('openWorkbench', () => setMenu(false)),
     ctx.bus.on('itemGathered',({ itemId, count }) => {
       render();
       toast.notify(`+${count} ${name(itemId)}`, 1200);
@@ -202,7 +205,9 @@ export function mountUI(el: HTMLElement, ctx: GameContext): UIHandle {
     ctx.bus.on('itemCrafted', render),
     ctx.bus.on('tierChanged', ({ tier }) => {
       const built = ctx.data.recipes.find((r) => r.scope?.tier === tier);
-      const how = built?.scope?.site === 'chess'
+      const how = built?.assembly
+        ? 'You put it together yourself: aim at something and press [F]. [B] takes you back to the workbench to change it.'
+        : built?.scope?.site === 'chess'
         ? 'It is in the CHESS hall of Wilson Lab (east of campus): look [F] at a sample to take some, then carry it there and press [F] at the control desk.'
         : built?.scope?.site
         ? 'It is installed in the lab of the science building (south-east): look [F] at a sample to take some, then carry it there.'

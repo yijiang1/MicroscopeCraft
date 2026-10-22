@@ -37,7 +37,7 @@ const setText = (e: HTMLElement, text: string) => {
 /** Moving and acting, then the panels: when both do not fit on one line, they break between the groups. */
 const HINTS = [
   ['[Click] look', '[WASD] move', '[Shift] run', '[Space] jump', '[E] gather/talk', '[F] look closer', '[V] view'],
-  ['[C] craft', '[T] tree', '[I] inventory', '[J] journal', '[M] Microdex', '[Tab] menu'],
+  ['[C] craft', '[B] workbench', '[T] tree', '[I] inventory', '[J] journal', '[M] Microdex', '[Tab] menu'],
 ];
 
 export function createHud(el: HTMLElement): Hud {
