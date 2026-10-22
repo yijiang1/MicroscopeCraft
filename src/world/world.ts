@@ -278,6 +278,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   let paused = false;
 
   const hud = createHud(el);
+  hud.workbench(ctx.state.advanced);
   const picker = createPicker(el, ctx);
 
   const keys = new Set<string>();
@@ -438,6 +439,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     atBench = false;
     resumeWorld();
   });
+  const offMode = ctx.bus.on('modeChanged', ({ advanced }) => hud.workbench(advanced));
 
   const resize = () => {
     renderer.setSize(el.clientWidth, el.clientHeight);
@@ -658,7 +660,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       loop.stop();
       timers.forEach((id) => clearTimeout(id));
       ro.disconnect();
-      [offOpen, offClose, offBench, offBenchClose, offTrack, offTarget, offCrafted, offQuest, offScore, offDiscovery].forEach((off) => off());
+      [offOpen, offClose, offBench, offBenchClose, offMode, offTrack, offTarget, offCrafted, offQuest, offScore, offDiscovery].forEach((off) => off());
       removeEventListener('keydown', onDown);
       removeEventListener('keyup', onUp);
       removeEventListener('pagehide', rememberPlayer);

@@ -44,6 +44,8 @@ export interface GameEvents {
   openWorkbench: { recipeId: string | null };
   /** workbench → world, ui: the workbench was closed. */
   closeWorkbench: Record<string, never>;
+  /** Easy or advanced mode was picked (setAdvanced). */
+  modeChanged: { advanced: boolean };
 }
 
 export type Bus = ReturnType<typeof createBus>;

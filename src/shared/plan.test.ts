@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameData } from './data';
 import { actionText, currentAction, howToGet, itemsMentioned, lockedBy, nextGoalRecipe, planFor, scopeThatSees } from './plan';
-import { assemble, craft, createGame, gather } from './state';
+import { assemble, craft, createGame, gather, setAdvanced } from './state';
 
 const data = loadGameData();
 const totals = (p: ReturnType<typeof planFor>) => Object.fromEntries(p.missing.map((m) => [m.itemId, m.count]));
@@ -149,11 +149,15 @@ describe('microscopes built at the workbench', () => {
   it('the compound microscope is built at the workbench, not crafted', () => {
     const goal = data.recipes.find((r) => r.id === 'compound_microscope')!;
     const action = currentAction(planFor(goal, data, parts))!;
-    expect(actionText(action, data)).toBe('Press [C] to build the Compound microscope at the workbench');
-    expect(howToGet('compound_microscope', data)).toMatch(/workbench/);
+    expect(actionText(action, data, true)).toBe('Press [C] to build the Compound microscope at the workbench');
+    expect(howToGet('compound_microscope', data, [], true)).toMatch(/workbench/);
+    // easy mode: crafted with C like every other instrument
+    expect(actionText(action, data)).toBe('Press C to craft Compound microscope');
+    expect(howToGet('compound_microscope', data)).not.toMatch(/workbench/);
   });
   it('if your own build cannot show what unlocks the next tier, the goal says to rebuild it', () => {
     const ctx = createGame(data);
+    setAdvanced(ctx, true);
     for (const [id, n] of Object.entries(parts)) gather(ctx, id, n);
     const weak = { objectives: [{ radiusMm: 16 }], eyepiece: { radiusMm: 25 }, tubeMm: 201, style: {}, name: '' };
     expect(assemble(ctx, 'compound_microscope', weak)).toBe(true);

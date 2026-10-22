@@ -46,14 +46,15 @@ const SaveSchema = z.object({
   carriedSamples: z.array(z.string()).catch([]).default([]),
   playerLocation: PlayerLocationSchema.nullable().catch(null).default(null),
   builds: z.record(z.string(), CompoundBuildSchema).catch({}).default({}),
+  advanced: z.boolean().catch(false).default(false),
 });
 export type SaveData = z.infer<typeof SaveSchema>;
 export const SAVE_KEY = 'microscopecraft:save';
 export const SNAPSHOTS_KEY = 'microscopecraft:snapshots';
 
 /** Everything but the snapshots, which are saved on their own under SNAPSHOTS_KEY. */
-export const toSave = ({ inventory, discoveries, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation, builds, mystery }: GameState): Omit<SaveData, 'snapshots'> => ({
-  inventory, discoveries, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation, builds, mystery: mystery ?? null,
+export const toSave = ({ inventory, discoveries, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation, builds, advanced, mystery }: GameState): Omit<SaveData, 'snapshots'> => ({
+  inventory, discoveries, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation, builds, advanced, mystery: mystery ?? null,
 });
 
 /** The save, plus the snapshots saved under their own key (unreadable snapshots are dropped, not the progress). */
@@ -73,7 +74,7 @@ export function parseSave(json: string | null, snapshotsJson: string | null = nu
 export function createGame(data: GameData, bus: Bus = createBus(), save?: SaveData | null): GameContext {
   const state: GameState = {
     inventory: {}, discoveries: [], snapshots: {}, currentSampleId: null, scopeChoice: null, site: null, scope: NAKED_EYE,
-    achievements: [], quests: [], best: {}, stats: {}, visited: [], align: {}, carriedSamples: [], playerLocation: null, builds: {}, ...save,
+    achievements: [], quests: [], best: {}, stats: {}, visited: [], align: {}, carriedSamples: [], playerLocation: null, builds: {}, advanced: false, ...save,
   };
   state.carriedSamples = [...new Set(state.carriedSamples)].filter((id) => data.samples[id]).slice(0, SAMPLE_BAG_SIZE);
   if (state.mystery) state.carriedSamples = [MYSTERY_SAMPLE_ID, ...state.carriedSamples].slice(0, SAMPLE_BAG_SIZE);
@@ -115,7 +116,20 @@ export function setPlayerLocation(ctx: GameContext, location: PlayerLocation) {
 
 /** The microscope in use, at its lowest zoom step: the chosen one if usable here, else the best usable one. */
 const usableScope = ({ data, state }: GameContext, step = 0) =>
-  scopeFromInventory(state.inventory, data, step, state.scopeChoice, state.site, state.builds);
+  scopeFromInventory(state.inventory, data, step, state.scopeChoice, state.site, activeBuilds(state));
+
+/** Hand-built microscopes count only in advanced mode; easy mode uses every recipe as it is. */
+export const activeBuilds = (state: Pick<GameState, 'advanced' | 'builds'>) => (state.advanced ? state.builds : {});
+
+/** Switch between easy mode (C crafts every instrument) and advanced mode (the workbench). A build is kept either way,
+ *  so switching back to advanced brings it back. */
+export function setAdvanced(ctx: GameContext, advanced: boolean) {
+  if (ctx.state.advanced === advanced) return;
+  ctx.state.advanced = advanced;
+  ctx.state.scope = usableScope(ctx, ctx.state.scope.step);
+  ctx.bus.emit('scopeChanged', { tier: ctx.state.scope.tier });
+  ctx.bus.emit('modeChanged', { advanced });
+}
 
 /** The world calls this as the player walks in or out of a site: fixed instruments only work where they are installed. */
 export function setSite(ctx: GameContext, site: Site | null) {

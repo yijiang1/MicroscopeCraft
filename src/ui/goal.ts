@@ -3,7 +3,7 @@
 // point at (trackItem). Owner: Person D.
 import { actionText, currentAction, nextGoalRecipe, planFor, type Plan } from '../shared/plan';
 import type { Recipe } from '../shared/schema';
-import { canCraft, craft, type GameContext } from '../shared/state';
+import { activeBuilds, canCraft, craft, type GameContext } from '../shared/state';
 import { itemIcon } from './icons';
 import { drawTree, goalLayout } from './techtree';
 import type { Toast } from './toast';
@@ -49,12 +49,12 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void, 
     card.replaceChildren();
     let tree: ((size: 'small' | 'tiny') => HTMLElement) | null = null;
     const goal = nextGoalRecipe(data, state);
-    plan = goal ? planFor(goal, data, state.inventory, state.discoveries, state.builds) : null;
+    plan = goal ? planFor(goal, data, state.inventory, state.discoveries, activeBuilds(state)) : null;
     const action = plan ? currentAction(plan) : null;
 
     // --- header: the one thing to do now
     const head = div('display:flex;gap:8px;align-items:flex-start');
-    const now = div('flex:1;font-size:14px;font-weight:600;color:#ffe08a', plan ? (action ? actionText(action, data) : 'Look around') : 'You built every instrument!');
+    const now = div('flex:1;font-size:14px;font-weight:600;color:#ffe08a', plan ? (action ? actionText(action, data, state.advanced) : 'Look around') : 'You built every instrument!');
     const toggle = document.createElement('button');
     toggle.textContent = expanded ? '▾' : '▸';
     toggle.title = 'Show or hide the tree';
@@ -148,8 +148,9 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void, 
     out.append(itemIcon(recipe.output.itemId, data, 22), `${data.items[recipe.output.itemId]?.name ?? recipe.output.itemId}`);
     line.append(div('color:#9ab;font-size:16px', '→'), out);
     const btn = document.createElement('button');
-    withKeys(btn, recipe.assembly ? 'Build it [C]' : 'Craft [C]');
-    btn.title = recipe.assembly ? 'Opens the workbench: you grind the lenses and put the microscope together yourself' : '';
+    const handBuilt = recipe.assembly && ctx.state.advanced;
+    withKeys(btn, handBuilt ? 'Build it [C]' : 'Craft [C]');
+    btn.title = handBuilt ? 'Opens the workbench: you grind the lenses and put the microscope together yourself' : '';
     btn.disabled = !ready;
     btn.style.cssText = `margin-left:auto;padding:3px 10px;border-radius:6px;border:0;font-weight:700;${ready ? 'background:#ffd35a;color:#222;cursor:pointer;box-shadow:0 0 8px #ffd35a88' : 'background:#444;color:#999'}`;
     btn.onclick = () => doCraft(recipe.id);
@@ -161,7 +162,7 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void, 
 
   const doCraft = (recipeId: string) => {
     const recipe = ctx.data.recipes.find((r) => r.id === recipeId);
-    if (recipe?.assembly) return ctx.bus.emit('openWorkbench', { recipeId }); // built by hand, not crafted
+    if (recipe?.assembly && ctx.state.advanced) return ctx.bus.emit('openWorkbench', { recipeId }); // built by hand, not crafted
     if (craft(ctx, recipeId)) toast.notify(`Crafted ${ctx.data.items[recipe!.output.itemId]?.name}`);
   };
 
@@ -171,7 +172,7 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void, 
     if (plan?.nextStep) doCraft(plan.nextStep.recipe.id);
     else {
       const action = plan ? currentAction(plan) : null;
-      toast.notify(`Nothing to craft yet. ${action ? actionText(action, ctx.data) : ''}`, 2600);
+      toast.notify(`Nothing to craft yet. ${action ? actionText(action, ctx.data, ctx.state.advanced) : ''}`, 2600);
     }
   };
   addEventListener('keydown', onKey);
@@ -190,6 +191,7 @@ export function mountGoal(ctx: GameContext, toast: Toast, openMenu: () => void, 
       render();
     }),
     ctx.bus.on('openWorkbench', () => (card.style.display = 'none')),
+    ctx.bus.on('modeChanged', render),
     ctx.bus.on('closeWorkbench', () => {
       card.style.display = ctx.state.currentSampleId ? 'none' : '';
       render();

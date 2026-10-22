@@ -347,6 +347,9 @@ export interface GameState {
   align: Record<string, number>;
   /** Microscopes the player built by hand at the workbench, by item id. */
   builds: Record<string, CompoundBuild>;
+  /** Advanced mode: the compound microscope is built by hand at the workbench. Easy mode (the default) crafts it with
+   *  C like every other instrument, and any hand-built optics are set aside. */
+  advanced: boolean;
 }
 
 /** Everything the app loads from /data, validated, with cross-references checked. */

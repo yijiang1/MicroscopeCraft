@@ -19,6 +19,8 @@ export interface Hud {
   /** What you carry for the fixed instruments, and where to take it. */
   carry(text: string): void;
   compass(text: string): void;
+  /** Show the [B] workbench hint (advanced mode only). */
+  workbench(on: boolean): void;
 }
 
 const div = (css: string) => {
@@ -43,12 +45,14 @@ const HINTS = [
 ];
 
 export function createHud(el: HTMLElement): Hud {
+  let benchHint: HTMLElement | null = null;
   const hint = div(`${CSS};left:12px;bottom:12px;max-width:calc(100% - 340px);display:flex;flex-wrap:wrap;gap:4px 20px;padding:6px 12px;border-radius:10px;background:#0009;font-size:12px;line-height:1.6;color:#dde`);
   hint.append(...HINTS.map((group) => {
     const g = div('display:flex;flex-wrap:wrap;gap:4px 10px');
     g.append(...group.map((h) => {
       const chip = div('white-space:nowrap');
       setText(chip, h);
+      if (h === '[B] workbench') benchHint = chip;
       return chip;
     }));
     return g;
@@ -75,6 +79,7 @@ export function createHud(el: HTMLElement): Hud {
       flashUntil = performance.now() + FLASH_MS;
     },
     track: (text) => setText(track, text),
+    workbench: (on) => benchHint && (benchHint.style.display = on ? '' : 'none'),
     target: (text) => setText(target, text),
     carry: (text) => setText(carry, text),
     compass: (text) => setText(compass, text),

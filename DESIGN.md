@@ -131,7 +131,7 @@ The Microdex is a collection log with one card per discovery: a picture of what 
 
 ## The workbench (prototype)
 
-Crafting with C is quick, but a notice that the microscope is built does not make it feel like yours. In a sandbox game the hook is the building, and a microscope suits that better than most things, because its optics are geometry: how you put it together decides what it can see. The workbench (B, the menu, or C when the goal says to build the compound microscope) lets the player do that for tier 2.
+Crafting with C is quick, but a notice that the microscope is built does not make it feel like yours. In a sandbox game the hook is the building, and a microscope suits that better than most things, because its optics are geometry: how you put it together decides what it can see. The workbench (B, the menu, or C when the goal says to build the compound microscope) lets the player do that for tier 2. It is advanced mode: a new game starts in easy mode, where C crafts the compound microscope like every other instrument, for younger players; Tab → Settings → Mode switches. A build is kept while in easy mode and comes back on switching to advanced.
 
 **What you do.** Put up the stand (base, arm, stage), put the lamp under the stage, mount the tube and the focus knobs, grind a lens blank and screw it in as the objective, grind another and drop it in as the eyepiece, set the stop in front of the objective, then turn the knobs until the slide is sharp. A live eyepiece view and a traced light path show the result while you build. Up to three objectives fit on the nosepiece; each one after the first takes one more glass lens. Without the parts, the workbench opens in practice mode and nothing is kept.
 

@@ -4,7 +4,7 @@ import type { GameEvents } from './events';
 import { scopeFromInventory } from './sim/scope';
 import {
   assemble, carrySample, completeQuest, craft, createGame, discover, gather, parseSave, recordScore, SAMPLE_BAG_SIZE, selectScope, setPlayerLocation,
-  setSite, setZoom, toSave, visit,
+  setAdvanced, setSite, setZoom, toSave, visit,
 } from './state';
 
 const gatherAll = (ctx: ReturnType<typeof createGame>, have: Record<string, number>) => {
@@ -265,12 +265,17 @@ describe('saved journey', () => {
 
 describe('microscopes built by hand at the workbench', () => {
   const parts = { lens: 3, tube: 1, light_source: 1, focus_knob: 1 };
+  const advancedGame = () => {
+    const ctx = createGame(loadGameData());
+    setAdvanced(ctx, true);
+    return ctx;
+  };
   const build = (objectives: number[], eyepiece = 25) => ({
     objectives: objectives.map((radiusMm) => ({ radiusMm })), eyepiece: { radiusMm: eyepiece }, tubeMm: 201, style: { base: 'horseshoe' }, name: 'Mine',
   });
 
   it('assemble crafts the microscope from its parts, with one more lens per extra objective, and uses its optics', () => {
-    const ctx = createGame(loadGameData());
+    const ctx = advancedGame();
     gatherAll(ctx, parts);
     const seen: string[] = [];
     (['itemCrafted', 'tierChanged'] as (keyof GameEvents)[]).forEach((t) => ctx.bus.on(t, () => seen.push(t)));
@@ -283,7 +288,7 @@ describe('microscopes built by hand at the workbench', () => {
   });
 
   it('refuses a build that cannot focus, or missing parts, and changes nothing', () => {
-    const ctx = createGame(loadGameData());
+    const ctx = advancedGame();
     gatherAll(ctx, { ...parts, lens: 2 });
     expect(assemble(ctx, 'compound_microscope', build([16], 200))).toBe(false); // the eyepiece was never ground
     expect(assemble(ctx, 'compound_microscope', build([40, 16]))).toBe(false); // a second objective needs a third lens
@@ -293,7 +298,7 @@ describe('microscopes built by hand at the workbench', () => {
   });
 
   it('rebuilding one you own swaps in the new optics: an added objective costs a lens, a removed one comes back', () => {
-    const ctx = createGame(loadGameData());
+    const ctx = advancedGame();
     gatherAll(ctx, { ...parts, lens: 2 });
     expect(assemble(ctx, 'compound_microscope', build([16]))).toBe(true);
     expect(assemble(ctx, 'compound_microscope', build([16, 4]))).toBe(false); // no spare lens
@@ -309,7 +314,7 @@ describe('microscopes built by hand at the workbench', () => {
   });
 
   it('the build is saved with the game, and an older save without builds still loads', () => {
-    const ctx = createGame(loadGameData());
+    const ctx = advancedGame();
     gatherAll(ctx, parts);
     assemble(ctx, 'compound_microscope', build([16]));
     const loaded = createGame(loadGameData(), undefined, parseSave(JSON.stringify(toSave(ctx.state))));
@@ -318,5 +323,20 @@ describe('microscopes built by hand at the workbench', () => {
     const old = { ...toSave(ctx.state) } as Partial<ReturnType<typeof toSave>>;
     delete old.builds;
     expect(parseSave(JSON.stringify(old))!.builds).toEqual({});
+  });
+
+  it('easy mode sets a build aside and uses the recipe; switching back brings the build back, and the mode is saved', () => {
+    const ctx = advancedGame();
+    gatherAll(ctx, parts);
+    assemble(ctx, 'compound_microscope', build([16]));
+    const modes: boolean[] = [];
+    ctx.bus.on('modeChanged', ({ advanced }) => modes.push(advanced));
+    setAdvanced(ctx, false);
+    expect(ctx.state.scope.steps[0]!.label).toBe('40× (4× objective)');
+    expect(createGame(loadGameData(), undefined, parseSave(JSON.stringify(toSave(ctx.state)))).state.advanced).toBe(false);
+    setAdvanced(ctx, true);
+    expect(ctx.state.scope.steps[0]!.label).toBe('100× (16 mm objective)');
+    expect(modes).toEqual([false, true]);
+    expect(createGame(loadGameData()).state.advanced).toBe(false); // a new game starts in easy mode
   });
 });

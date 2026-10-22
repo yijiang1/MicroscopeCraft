@@ -21,7 +21,7 @@ export function mountGuide(ctx: GameContext): () => void {
 
     const items = itemsMentioned(question, data);
     if (items.length) {
-      reply(items.slice(0, 2).map((id) => howToGet(id, data, state.discoveries)).filter(Boolean).join(' '));
+      reply(items.slice(0, 2).map((id) => howToGet(id, data, state.discoveries, state.advanced)).filter(Boolean).join(' '));
       return;
     }
 
@@ -31,7 +31,7 @@ export function mountGuide(ctx: GameContext): () => void {
       const plan = planFor(goal, data, state.inventory, state.discoveries);
       const action = currentAction(plan);
       const where = action && action.kind !== 'craft' ? data.materials[action.raw.itemId]?.where : undefined;
-      reply(`Next goal: ${goal.name}. ${action ? actionText(action, data) : 'Look around.'}.${where ? ` ${where}.` : ''}`);
+      reply(`Next goal: ${goal.name}. ${action ? actionText(action, data, state.advanced) : 'Look around.'}.${where ? ` ${where}.` : ''}`);
       return;
     }
 

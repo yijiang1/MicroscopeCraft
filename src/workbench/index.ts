@@ -838,7 +838,7 @@ export function mountWorkbench(el: HTMLElement, ctx: GameContext): WorkbenchHand
   };
 
   function open() {
-    if (isOpen()) return;
+    if (isOpen() || !ctx.state.advanced) return; // easy mode crafts the microscope with C instead
     if (ctx.state.currentSampleId) ctx.bus.emit('closeEyepiece', {});
     mode = modeNow();
     draft = draftFor(mode);

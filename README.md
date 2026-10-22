@@ -58,8 +58,8 @@ Simplified physics is labelled in comments next to the formula.
 | V | Switch between the over-the-shoulder view (the default) and first-person |
 | E | Gather the item you are aiming at, or talk to the scientist you are aiming at (their dialog has a chat box: ask them about their own field, answered by Google Gemini, OpenAI or Anthropic Claude once you pick one and add your own API key under Tab → Settings; it is kept only in your browser) |
 | F | Look at the aimed sample through your newest portable instrument (F or Esc to leave). At a cabinet or table, pick a sample first (1–9). Once you own a fixed instrument this also takes a bit of the sample along; F at the electron microscope in the science lab, or at the beamline desk in Wilson Lab, puts one in |
-| C | Craft the next ready step of your goal (no mouse needed). For the compound microscope it opens the workbench |
-| B | Workbench: build the compound microscope by hand. Grind the lenses, put the parts together, focus it, style it. Without the parts it opens in practice mode |
+| C | Craft the next ready step of your goal (no mouse needed). In advanced mode, for the compound microscope it opens the workbench |
+| B | Workbench (advanced mode, Tab → Settings → Mode): build the compound microscope by hand. Grind the lenses, put the parts together, focus it, style it. Without the parts it opens in practice mode |
 | 1, 2, 3… | In the eyepiece: switch to another instrument you own, to compare (or click its button) |
 | Wheel or slider | Focus (light microscopes) |
 | T | Tech tree: every part, with add-ons shown by dashed links |

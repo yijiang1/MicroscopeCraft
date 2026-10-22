@@ -159,7 +159,8 @@ export function currentAction(plan: Plan): Action | null {
   return raw.identify && !raw.identify.done ? { kind: 'identify', raw, identify: raw.identify } : { kind: 'gather', raw };
 }
 
-export function actionText(action: Action, data: Pick<GameData, 'items'>): string {
+/** advanced: the compound microscope is built at the workbench (advanced mode) instead of crafted with C. */
+export function actionText(action: Action, data: Pick<GameData, 'items'>, advanced = false): string {
   switch (action.kind) {
     case 'identify': {
       const { sample, feature, scope, step, rebuild } = action.identify;
@@ -172,7 +173,7 @@ export function actionText(action: Action, data: Pick<GameData, 'items'>): strin
     case 'gather':
       return `Gather ${action.raw.missing} ${data.items[action.raw.itemId]?.name ?? action.raw.itemId} (aim and press [E])`;
     case 'craft':
-      return action.step.recipe.assembly
+      return action.step.recipe.assembly && advanced
         ? `Press [C] to build the ${action.step.recipe.name} at the workbench`
         : `Press C to craft ${action.step.recipe.name}`;
   }
@@ -183,6 +184,7 @@ export function howToGet(
   itemId: string,
   data: Pick<GameData, 'recipes' | 'materials' | 'items' | 'samples'>,
   discoveries: readonly string[] = [],
+  advanced = false,
 ): string | null {
   const name = data.items[itemId]?.name;
   if (!name) return null;
@@ -196,7 +198,7 @@ export function howToGet(
     return `${name}: ${where}.${locked && scope ? ` You can only gather it after you have looked at it with a ${scope.name} and spotted ${found!.feature.name}.` : ' Aim at it and press [E].'}`;
   }
   const parts = recipe.inputs.map((i) => `${i.count} ${data.items[i.itemId]?.name ?? i.itemId}`);
-  if (recipe.assembly) return `${name} is built by hand at the workbench [B], from ${parts.join(' and ')}: you grind the lenses and put the parts together.`;
+  if (recipe.assembly && advanced) return `${name} is built by hand at the workbench [B], from ${parts.join(' and ')}: you grind the lenses and put the parts together.`;
   return `${name} is crafted, not found in the world. Make it in the crafting panel from ${parts.join(' and ')}.`;
 }
 
