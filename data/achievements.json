@@ -6,7 +6,7 @@
   { "id": "discover_100", "name": "Microdex scholar", "description": "Make 100 discoveries.", "when": { "discoveries": 100 } },
   { "id": "discover_150", "name": "Microdex master", "description": "Make 150 discoveries.", "when": { "discoveries": 150 } },
   { "id": "discover_200", "name": "Microdex sage", "description": "Make 200 discoveries.", "when": { "discoveries": 200 } },
-  { "id": "discover_all", "name": "Everything, seen", "description": "Fill the whole Microdex: all 274 discoveries.", "when": { "discoveries": 274 } },
+  { "id": "discover_all", "name": "Everything, seen", "description": "Fill the whole Microdex: all 276 discoveries.", "when": { "discoveries": 276 } },
   { "id": "naked_eye", "name": "No lens needed", "description": "With your bare eyes, spot salt cubes, a Volvox ball and a Paramecium.", "when": { "discovered": ["salt_cubes", "volvox", "paramecium"] } },
   { "id": "leaf_scales", "name": "A leaf at every scale", "description": "See a leaf's veins, its cells, their chloroplasts and the stacks inside them.", "when": { "discovered": ["leaf_veins", "leaf_cells", "chloroplasts", "grana_stacks"] } },
   { "id": "all_gates", "name": "Hidden in plain sight", "description": "Identify every material that only a microscope can recognise.", "when": { "discovered": ["copper_veins", "pressed_oil", "tungsten_grains", "fluorite_cubes", "willemite_glow", "monazite_diffraction", "beryllium_atoms"] } },

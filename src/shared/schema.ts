@@ -37,7 +37,7 @@ export const DrawingSchema = z.enum([
   'veins', 'grains', 'hair', 'cells', 'pollen', 'rods', 'algae', 'scales', 'virus', 'droplets', 'lattice',
   'stomata', 'fibers', 'lines', 'ciliate', 'colony', 'beads', 'flagellate', 'cubes', 'prisms', 'needles', 'spots',
   'rings', 'helix', 'glow', 'map', 'slice', 'honeycomb', 'atoms', 'dumbbells', 'discs', 'neurons', 'critter',
-  'facets', 'boxes', 'mosaic', 'cluster', 'diatoms', 'saccate', 'clubs',
+  'snowflake', 'facets', 'boxes', 'mosaic', 'cluster', 'diatoms', 'saccate', 'clubs',
 ]);
 export type Drawing = z.infer<typeof DrawingSchema>;
 
@@ -318,6 +318,7 @@ export const PlayerLocationSchema = z.object({
 export type PlayerLocation = z.infer<typeof PlayerLocationSchema>;
 
 export interface GameState {
+  seasonStartedAt: number;
   /** NPC-issued investigation, saved with the main game. */
   mystery?: MysteryRun | null;
   economy: Economy;

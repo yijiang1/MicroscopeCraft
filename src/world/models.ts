@@ -446,6 +446,14 @@ export function picnicTable(): THREE.Group {
   for (const x of [-0.65, 0.65]) for (const z of [-0.3, 0.3]) g.add(mesh(box(0.06, 0.75, 0.06), wood, x, 0.375, z, z > 0 ? 0.35 : -0.35));
   g.add(mesh(cyl(0.025, 0.03, 0.09), std('#f0f0f0', 0.3), -0.3, 0.825, 0.05), mesh(cyl(0.026, 0.026, 0.02), std('#c0c4c8', 0.3, 0.8), -0.3, 0.88, 0.05));
   g.add(mesh(box(0.3, 0.015, 0.22), std('#f4f1e6'), 0.25, 0.79, -0.05, 0, 0.3, 0), mesh(box(0.3, 0.004, 0.22), std('#3a5a9a'), 0.25, 0.8, -0.05, 0, 0.3, 0));
+  const winterSnow = new THREE.Group();
+  winterSnow.userData.winterSnow = true;
+  winterSnow.visible = false;
+  for (const x of [-.6, -.1, .55]) {
+    const drift = new THREE.Mesh(new THREE.SphereGeometry(.19, 12, 8), std('#edf8ff', .65));
+    drift.scale.set(1,.25,1);drift.position.set(x,.80,.1);winterSnow.add(drift);
+  }
+  g.add(winterSnow);
   return g;
 }
 

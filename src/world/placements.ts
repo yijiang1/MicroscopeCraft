@@ -35,6 +35,8 @@ const creekBank = (kind: Kind, xs: number[], side: number): Placement[] => xs.ma
 export const SPAWN = { x: 38, z: -38 };
 
 export const PLACEMENTS: Placement[] = [
+  // Winter-only snowbanks, on the open quad and near the starting shore.
+  {kind:'snow',x:35,z:-35}, {kind:'snow',x:9,z:-20}, {kind:'snow',x:-9,z:-14}, {kind:'snow',x:8,z:65},
   // A couple of leafy plants by the spawn, for a first look with the naked eye
   ...cluster('leaf', 33, -37, 2, 1.5, 10),
   // Quad lawn, south-west of the spawn

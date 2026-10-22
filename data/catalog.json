@@ -1,4 +1,5 @@
 {
+  "snow_crystal": {"label":"Snow crystal", "drawing":"snowflake", "minSizeUm":8, "maxSizeUm":500, "tiers":[1,2,3,4]},
   "leaf": {"label": "Leaf", "drawing": "veins", "minSizeUm": 20, "maxSizeUm": 500, "tiers": [1, 2, 3]},
   "sand_grain": {"label": "Sand grain", "drawing": "grains", "minSizeUm": 50, "maxSizeUm": 500, "tiers": [1, 2, 3]},
   "pollen": {"label": "Pollen", "drawing": "pollen", "minSizeUm": 10, "maxSizeUm": 100, "tiers": [2, 3]},

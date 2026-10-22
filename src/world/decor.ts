@@ -147,11 +147,14 @@ export function buildDecor(avoid: { x: number; z: number }[]): { group: THREE.Gr
     ),
   );
 
+  group.children.at(-1)!.userData.seasonal = 'grass';
+
   // --- wild flowers: stems and coloured heads
   const flowers = points(2400, (x, z) => meadow(x, z) && !quadLawn(x, z) && clear(x, z, 0.8), 0, 0, WORLD_RADIUS - 10);
   const stemGeo = new THREE.CylinderGeometry(0.004, 0.005, 0.26, 4);
   stemGeo.translate(0, 0.13, 0);
   group.add(instanced(stemGeo, new THREE.MeshStandardMaterial({ color: '#3f7a2c', roughness: 1 }), flowers.map((p) => placeMatrix(p.x, p.z, 1, 0))));
+  group.children.at(-1)!.userData.seasonal = 'flowers';
   const headGeo = new THREE.CircleGeometry(0.045, 7);
   headGeo.rotateX(-1.1);
   headGeo.translate(0, 0.27, 0.01);
@@ -164,6 +167,8 @@ export function buildDecor(avoid: { x: number; z: number }[]): { group: THREE.Gr
       flowers.map(() => palette[Math.floor(rng() * palette.length)]!),
     ),
   );
+
+  group.children.at(-1)!.userData.seasonal = 'flowers';
 
   // --- pine trees: one merged geometry, a grove on the lower west slope plus scattered ones off the campus hilltop
   const pineParts: THREE.BufferGeometry[] = [];
@@ -192,6 +197,8 @@ export function buildDecor(avoid: { x: number; z: number }[]): { group: THREE.Gr
     ),
   );
   group.children.at(-1)!.castShadow = true;
+
+  group.children.at(-1)!.userData.seasonal = 'pine';
 
   // --- oak-like trees: trunk plus lumpy crowns
   const oakParts: THREE.BufferGeometry[] = [];
@@ -227,6 +234,7 @@ export function buildDecor(avoid: { x: number; z: number }[]): { group: THREE.Gr
       return placeMatrix(p.x, p.z, s, rng() * 6.28);
     }),
   );
+  oakMesh.userData.seasonal = 'oak';
   oakMesh.castShadow = true;
   group.add(oakMesh);
 

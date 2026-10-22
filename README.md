@@ -229,3 +229,9 @@ Press **U** to open the full campus map; press **U** or **Esc** to close it. Fis
 Buy **Field binoculars** for **75 coins** in ScopeCraft Store. Once acquired, they appear in the bottom-right inventory with **=** to raise/lower the view. Scroll to adjust magnification from **2× to 8×**. **Esc** releases the mouse but keeps binoculars raised; click the world to resume looking around. Only **=** lowers them. The shortcut is hidden until purchase. The advanced microscope workbench uses **Shift+B** (or its menu button).
 
 Microdex (**M**) includes a fish collection for all six species. Catches stay recorded after preparing their scales; prepare and view samples directly from the collection, and track microscopic discoveries separately.
+
+### Seasons and snow
+
+Spring → summer → autumn → winter, **10 real-time minutes per season** (40-minute cycle). The season and countdown appear at the upper left. The cycle starts in spring and is saved, so time away also advances it. Trees and lawns change color; winter adds snow cover and snowfall without adding overlapping ground surfaces.
+
+In winter, find snow on the outdoor picnic table on the quad, or snowbanks on the lawn and near the starting shore. **E** collects snow and a chilled slide; **F** examines it. At the picnic table, use its ordinary **F** sample picker to choose snow crystals. The slide stays available after winter, with six-armed crystals and hexagonal plates to discover in Microdex. These are idealized educational drawings; see [NOAA's explanation of snow-crystal symmetry](https://www.noaa.gov/stories/how-do-snowflakes-form-science-behind-snow).

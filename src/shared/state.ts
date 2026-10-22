@@ -29,6 +29,7 @@ const SnapshotsSchema = z.record(z.string(), z.object({ image: z.string(), quali
  *  without the newer fields gets their defaults. Snapshots (the Microdex pictures, megabytes by the end) are kept
  *  under their own key, so the frequent progress saves stay small; older saves still hold them inline. */
 const SaveSchema = z.object({
+  seasonStartedAt: z.number().finite().nonnegative().catch(() => Date.now()).default(() => Date.now()),
   mystery: z.unknown().optional().transform((v) => {
     const run = parseMystery(JSON.stringify(v) ?? null);
     // The old standalone prototype cannot grant evidence in the main game.
@@ -55,8 +56,8 @@ export const SAVE_KEY = 'microscopecraft:save';
 export const SNAPSHOTS_KEY = 'microscopecraft:snapshots';
 
 /** Everything but the snapshots, which are saved on their own under SNAPSHOTS_KEY. */
-export const toSave = ({ inventory, discoveries, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation, builds, advanced, mystery, economy }: GameState): Omit<SaveData, 'snapshots'> => ({
-  inventory, discoveries, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation, builds, advanced, mystery: mystery ?? null, economy,
+export const toSave = ({ inventory, discoveries, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation, builds, advanced, mystery, economy, seasonStartedAt }: GameState): Omit<SaveData, 'snapshots'> => ({
+  inventory, discoveries, scopeChoice, achievements, quests, best, stats, visited, align, carriedSamples, playerLocation, builds, advanced, mystery: mystery ?? null, economy, seasonStartedAt,
 });
 
 /** The save, plus the snapshots saved under their own key (unreadable snapshots are dropped, not the progress). */
@@ -75,7 +76,7 @@ export function parseSave(json: string | null, snapshotsJson: string | null = nu
 
 export function createGame(data: GameData, bus: Bus = createBus(), save?: SaveData | null): GameContext {
   const state: GameState = {
-    economy: EconomySchema.parse({}), inventory: {}, discoveries: [], snapshots: {}, currentSampleId: null, scopeChoice: null, site: null, scope: NAKED_EYE,
+    seasonStartedAt: Date.now(), economy: EconomySchema.parse({}), inventory: {}, discoveries: [], snapshots: {}, currentSampleId: null, scopeChoice: null, site: null, scope: NAKED_EYE,
     achievements: [], quests: [], best: {}, stats: {}, visited: [], align: {}, carriedSamples: [], playerLocation: null, builds: {}, advanced: false, ...save,
   };
   state.carriedSamples = [...new Set(state.carriedSamples)].filter((id) => data.samples[id]).slice(0, SAMPLE_BAG_SIZE);

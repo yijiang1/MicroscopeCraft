@@ -928,10 +928,36 @@ const helix: Drawer = (g, f, v) => {
   }
 };
 
+/** Idealized hexagonal ice: six identical arms, or a faceted plate, at sixty-degree intervals. */
+const snowflake: Drawer = (g,f,v) => {
+  const radius=f.sizeUm/2;
+  forGrid(v,f.sizeUm*1.6,(_i,_j,x,y)=>{
+    g.save();g.translate(x,y);g.strokeStyle=f.tint??'#d4f2ff';g.fillStyle=f.tint??'#d4f2ff';
+    g.lineWidth=radius*.035;g.lineJoin='round';
+    const plate=f.id.includes('plate');
+    const core=plate?radius:radius*.22;
+    g.beginPath();
+    for(let arm=0;arm<6;arm++) {
+      const a=arm*Math.PI/3, px=Math.cos(a)*core,py=Math.sin(a)*core;
+      if(arm===0)g.moveTo(px,py);else g.lineTo(px,py);
+    }
+    g.closePath();g.stroke();
+    if(!plate)for(let arm=0;arm<6;arm++) {
+      g.save();g.rotate(arm*Math.PI/3);g.beginPath();g.moveTo(0,0);g.lineTo(radius,0);
+      for(const fraction of [.36,.58,.78])for(const side of [-1,1]) {
+        const length=radius*(1-fraction)*.48;
+        g.moveTo(radius*fraction,0);g.lineTo(radius*fraction-length*.5,side*length*Math.sqrt(3)/2);
+      }
+      g.stroke();g.restore();
+    }
+    g.restore();
+  });
+};
+
 export const PATTERNS = new Set<Drawing>(['spots', 'rings', 'helix']);
 
 export const DRAWERS: Record<Drawing, Drawer> = {
-  veins, cells, grains, pollen, rods, algae, hair, scales, virus, droplets, lattice,
+  snowflake, veins, cells, grains, pollen, rods, algae, hair, scales, virus, droplets, lattice,
   stomata, fibers, lines, ciliate, colony, beads, flagellate, cubes, prisms, needles, spots, rings, helix, glow, map, slice,
   honeycomb, atoms, dumbbells, discs, neurons, critter, facets, boxes, mosaic, cluster, diatoms, saccate, clubs,
 };

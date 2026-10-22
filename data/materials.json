@@ -1,4 +1,5 @@
 [
+  {"id": "snow", "name": "Snow crystals", "color": "#e3f4ff", "properties": {}, "where": "Snow on the quad picnic table and snowbanks near the starting shore in winter; E collects a chilled sample, F examines it"},
   {"id": "beach_sand", "name": "Beach sand", "color": "#e8d9a0", "properties": {"purity": 0.6}, "where": "Tan sand mounds on the south shore of the lake, just ahead of where you start"},
   {"id": "quartz_sand", "name": "Quartz sand", "color": "#f4f1ea", "properties": {"purity": 0.95}, "where": "White crystal clusters on the rim of the gorge, north-west behind the west row of halls"},
   {"id": "iron_ore", "name": "Iron ore", "color": "#8a5a44", "properties": {"strength": 0.7}, "where": "Dark rust-flecked rocks on the rim of the gorge, west of the lake near the waterfall, and more at the top of the west slope"},

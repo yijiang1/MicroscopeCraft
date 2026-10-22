@@ -1,3 +1,5 @@
+import { mountSeasons } from './seasons';
+import { collectSnow, snowAvailable } from '../shared/seasons';
 import { binocularFov, mountBinoculars } from './binoculars';
 import { buildFishingRod, type FishingAction } from './fishing-rod';
 import { buildFish, fishingWaterPoint, mountFishing } from './fishing';
@@ -91,7 +93,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   sun.shadow.normalBias = 0.05;
   scene.add(sun, sun.target);
 
-  scene.add(buildTerrain());
+  const terrain=buildTerrain();scene.add(terrain);
   const water = buildWater();
   scene.add(water);
   const fish = buildFish(); scene.add(fish.group);
@@ -214,6 +216,16 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
 
   const { group: decor, blockers, update: updateDecor } = buildDecor([...PLACEMENTS, ...Object.values(ctx.data.npcs)].map((p) => ({ x: p.x, z: p.z })));
   scene.add(decor);
+  const seasons=mountSeasons(terrain,decor,scene,ctx.state.seasonStartedAt,(season)=>{
+    for(const n of nodes)if(n.kind==='snow') {
+      n.alive=season==='winter';n.root.visible=n.alive;
+    }
+    for(const n of nodes)if(n.kind==='picnic') {
+      n.aim=season==='winter' ? {gather:'snow',samples:['snow_crystal',...(KINDS.picnic.aim.samples ?? [])]} : KINDS.picnic.aim;
+      n.root.traverse(obj=>{if(obj.userData.winterSnow)obj.visible=season==='winter';});
+    }
+    redrawShadows();
+  });
 
   // --- aim ring
   const ring = new THREE.Mesh(
@@ -368,12 +380,16 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   };
 
   const gatherNode = (n: Node) => {
-    gather(ctx, n.aim.gather!);
+    if(n.aim.gather==='snow') {
+      if(!collectSnow(ctx))return;
+      if(n.kind==='picnic'){hud.flash('Collected snow crystals · [F] to examine a chilled sample');return;}
+    } else gather(ctx, n.aim.gather!);
     n.alive = false;
     animate(n.root, 1, 0.001, () => scene.remove(n.root));
     timers.add(
       window.setTimeout(() => {
-        n.alive = true;
+        n.alive = n.kind!=='snow'||snowAvailable(ctx.state.seasonStartedAt,Date.now());
+        n.root.visible=n.alive;
         n.root.scale.setScalar(0.001);
         scene.add(n.root);
         animate(n.root, 0.001, 1);
@@ -388,7 +404,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   };
   /** F at a sample: take a bit along if you own a fixed instrument, and look through your best portable microscope. */
   const lookAt = (sampleId: string) => {
-    if (ownsFixed()) carrySample(ctx, sampleId);
+    if (ownsFixed() || sampleId==='snow_crystal') carrySample(ctx, sampleId);
     const portable = ownedScopes(ctx.state.inventory, ctx.data, null).at(-1);
     if (ctx.state.scope.site && portable) selectScope(ctx, portable.scope.tier);
     look(sampleId);
@@ -691,6 +707,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       const area = areaAt(px, pz);
       if (area) visit(ctx, area);
     }
+    seasons.update(Date.now(),camera.position);
     campus.update(t); fish.update(t);
     fishing.update(px,pz,camera.position.y-EYE_HEIGHT,!paused&&!driving&&!ridingLift&&!onTerrace,t);
     ctx.bus.emit('musicScene', { distance: Math.hypot(px - TOWER.x, pz - TOWER.z), indoors: inLab(px, pz) || inChess(px, pz) });
@@ -829,7 +846,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       removeEventListener('pagehide', rememberPlayer);
       document.removeEventListener('visibilitychange', rememberPlayer);
       offBinoculars();binoculars.dispose();
-      fishing.dispose(); fishingRod.dispose(); minimap.dispose();
+      seasons.dispose(); fishing.dispose(); fishingRod.dispose(); minimap.dispose();
       speech.dispose(); offActivity(); offDress(); offDrive(); clearTimeout(driveTimer);
       driver.dispose(); player.dispose();
       controls.dispose();

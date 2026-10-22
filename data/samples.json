@@ -1149,5 +1149,31 @@
       "blurb": "A schematic view of fine fibres in a thin prepared section. Electron microscopy needs suitable preparation; a whole wet fish cannot go directly into a vacuum microscope."
     }
   ]
+},
+{
+  "id": "snow_crystal",
+  "name": "Snow crystals \u00b7 chilled slide",
+  "worldObject": "snow_crystal",
+  "biome": "meadow",
+  "features": [
+    {
+      "id": "ice_sixfold",
+      "name": "Six-armed ice crystal",
+      "sizeUm": 250,
+      "contrast": 0.7,
+      "drawing": "snowflake",
+      "tint": "#d4f2ff",
+      "blurb": "This idealized snow crystal has six arms spaced sixty degrees apart, reflecting the hexagonal structure of ordinary ice. Real snow crystals may have unequal arms or join into irregular aggregates."
+    },
+    {
+      "id": "ice_hexagonal_plate",
+      "name": "Hexagonal ice plate",
+      "sizeUm": 40,
+      "contrast": 0.6,
+      "drawing": "snowflake",
+      "tint": "#bbdfff",
+      "blurb": "A thin plate of ice has six sides, another common snow-crystal form. The game keeps this sample on a chilled slide so you can examine it after winter ends."
+    }
+  ]
 }
 ]

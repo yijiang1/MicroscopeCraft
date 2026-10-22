@@ -37,6 +37,15 @@ const big = (g: THREE.Group) => {
 };
 
 const kinds = {
+  snow: { aim: { gather: 'snow', sample: 'snow_crystal' }, radius: 0, model: () => {
+    const group = new THREE.Group();
+    const material = new THREE.MeshStandardMaterial({ color: '#edf8ff', roughness: .6 });
+    for (const [x,z,r] of [[0,0,.65],[.45,.2,.38],[-.4,.15,.42]] as const) {
+      const mound = new THREE.Mesh(new THREE.SphereGeometry(r,12,8),material);
+      mound.scale.y=.38;mound.position.set(x,.1,z);group.add(mound);
+    }
+    return group;
+  } },
   // gatherable (the ores, gathering locked until the Microdex discovery named by the material's unlockedBy)
   sand: { aim: { gather: 'beach_sand', sample: 'sand_grain' }, radius: 0.8, model: (rng) => sandNode(rng) },
   quartz: {
