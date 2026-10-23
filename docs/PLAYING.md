@@ -183,3 +183,5 @@ Open **Tab → Character** to preview **David** and **Lena** and choose either a
 The Micro Roadster has synthesized V8-style engine and exhaust audio: deep, uneven exhaust-bank pulses and idle rumble, rising revs under acceleration, and pitch changes through simulated gears. **Tab → Sound** mutes it along with other game audio. Sound fades out when you leave the car or hide the tab.
 
 **Campus hiking boots** cost **100 coins** (or **4 vouchers**). Equip them in the store or fitting room for **50% faster walking** (5 → 7.5 m/s). Running speed stays at 8.5 m/s. Buying alone does not activate the bonus; removing the boots restores normal walking speed. Ownership and equipped state are saved.
+
+Season changes blend over **12 seconds**: ground and tree colors, vegetation, snow cover and snowfall transition gradually. In winter, walking leaves alternating footprints and the Roadster leaves two tire tracks on outdoor snow. Tracks fade over two minutes and disappear with the snow; they do not appear on indoor floors, water or elevated platforms.

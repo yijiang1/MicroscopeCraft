@@ -1,3 +1,4 @@
+import { mountSnowTracks } from './snow-tracks';
 import { walkingMultiplier } from '../shared/economy';
 import { canFreeLook, freeLookStep } from './free-look';
 import { mountSeasons } from './seasons';
@@ -225,14 +226,16 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   }
   const seasons=mountSeasons(terrain,decor,scene,ctx.state.seasonStartedAt,(season)=>{
     for(const n of nodes)if(n.kind==='snow') {
-      n.alive=season==='winter';n.root.visible=n.alive;
+      n.alive=season==='winter';n.root.visible=true;
     }
     for(const n of nodes)if(n.kind==='picnic') {
       n.aim=season==='winter' ? {gather:'snow',samples:['snow_crystal',...(KINDS.picnic.aim.samples ?? [])]} : KINDS.picnic.aim;
-      n.root.traverse(obj=>{if(obj.userData.winterSnow)obj.visible=season==='winter';});
+      n.root.traverse(obj=>{if(obj.userData.winterSnow)obj.visible=true;});
     }
     redrawShadows();
-  });
+  },nodes.filter(n=>n.kind==='snow').map(n=>n.root));
+
+  const snowTracks = mountSnowTracks(scene);
 
   // --- aim ring
   const ring = new THREE.Mesh(
@@ -760,6 +763,8 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       if (area) visit(ctx, area);
     }
     seasons.update(Date.now(),camera.position);
+    snowTracks.update(t,seasons.snowAmount());
+    snowTracks.car(roadster.root,driving&&!paused);
     campus.update(t); fish.update(t);
     fishing.update(px,pz,camera.position.y-EYE_HEIGHT,!paused&&!driving&&!ridingLift&&!onTerrace,t);
     ctx.bus.emit('musicScene', { distance: Math.hypot(px - TOWER.x, pz - TOWER.z), indoors: inLab(px, pz) || inChess(px, pz) });
@@ -779,6 +784,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       const surface = heightAt(px, pz) < waterLevelAt(px, pz) ? 'water'
         : pathAt(px, pz) > 0.5 || inLab(px, pz) || inChess(px, pz) ? 'stone' : 'grass';
       ctx.bus.emit('footstep', { surface, running });
+      snowTracks.foot(px,pz,player.root.rotation.y,camera.position.y-EYE_HEIGHT);
     }
     player.update(distance, dt);
     if(fishingAction!=='idle') player.fishing(performance.now(),fishingAction==='reel');
@@ -900,7 +906,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       removeEventListener('pagehide', rememberPlayer);
       document.removeEventListener('visibilitychange', rememberPlayer);
       offBinoculars();binoculars.dispose();
-      seasons.dispose(); fishing.dispose(); fishingRod.dispose(); minimap.dispose();
+      snowTracks.dispose(); seasons.dispose(); fishing.dispose(); fishingRod.dispose(); minimap.dispose();
       ctx.bus.emit('roadsterSound', { driving: false, speed: 0, throttle: 0 });
       speech.dispose(); offActivity(); offDress(); offDrive(); clearTimeout(driveTimer);
       driver.dispose(); player.dispose();
