@@ -7,13 +7,15 @@ export const EconomySchema = z.object({
   coins: z.number().int().nonnegative().default(0), vouchers: z.number().int().nonnegative().default(0),
   owned: z.array(z.string()).default([]), rewarded: z.record(z.string(), z.number().int().min(0).max(5)).default({}),
   character: z.enum(['lena', 'explorer']).default('lena'),
+  hikingBoots: z.boolean().default(false),
   eyewear: z.enum(['none', 'glasses', 'sunglasses']).default('none'),
   shirt: z.enum(['blue', 'red', 'lab']).default('blue'), backpack: z.boolean().default(false), model: z.boolean().default(false),
 });
 export type Economy = z.infer<typeof EconomySchema>;
-export interface StoreItem { id: string; name: string; price: number; kind: 'book' | 'shirt' | 'backpack' | 'model' | 'car' | 'tool' | 'eyewear'; text: string }
+export interface StoreItem { id: string; name: string; price: number; kind: 'book' | 'shirt' | 'backpack' | 'model' | 'car' | 'tool' | 'eyewear' | 'boots'; text: string }
 export function storeCatalog(data: GameData): StoreItem[] {
   return [
+    { id: 'hiking_boots', name: 'Campus hiking boots', price: 100, kind: 'boots', text: 'Sturdy leather boots with grippy soles. Equip them for 50% faster walking. Running speed stays unchanged. Remove them in the fitting room to return to ordinary shoes.' },
     { id: 'glasses', name: 'Classic glasses', price: 30, kind: 'eyewear', text: 'Dark rectangular frames with clear lenses. Wear them in the fitting room; cosmetic only.' },
     { id: 'sunglasses', name: 'Campus sunglasses', price: 45, kind: 'eyewear', text: 'Gold frames with dark lenses for campus afternoons. Wear them in the fitting room; cosmetic only.' },
     { id: 'binoculars', name: 'Field binoculars · 2×–8×', price: 75, kind: 'tool', text: 'Survey the campus with adjustable 2×–8× magnification. After purchase, press = to raise or lower them and scroll to zoom. Kept in your field gear inventory.' },
@@ -59,6 +61,7 @@ export function equip(ctx: GameContext, id: string) {
   if (id === 'shirt_blue') e.shirt = 'blue';
   else if (id === 'shirt_red') e.shirt = 'red';
   else if (id === 'shirt_lab') e.shirt = 'lab';
+  else if (id === 'hiking_boots') e.hikingBoots = !e.hikingBoots;
   else if (id === 'backpack') e.backpack = !e.backpack;
   else if (id === 'glasses' || id === 'sunglasses') e.eyewear = e.eyewear === id ? 'none' : id;
   else if (id === 'model') e.model = !e.model;
@@ -72,3 +75,7 @@ export function npcSample(ctx: GameContext, npcId: string) {
   const features = new Set(npc.quests.flatMap(q => q.needs.discovered ?? []));
   return Object.values(ctx.data.samples).find(s => s.features.some(f => features.has(f.id))) ?? ctx.data.samples['pond_water'] ?? Object.values(ctx.data.samples)[0];
 }
+
+/** Boots improve walking only; buying without equipping grants no speed boost. */
+export const walkingMultiplier = (economy: Economy, running: boolean) =>
+  !running && economy.hikingBoots && economy.owned.includes('hiking_boots') ? 1.5 : 1;

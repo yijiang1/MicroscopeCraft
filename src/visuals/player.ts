@@ -11,6 +11,8 @@ export function buildPlayer() {
     skin: new THREE.MeshStandardMaterial({ color: '#f3d6c2', roughness: 1 }),
     hair: new THREE.MeshStandardMaterial({ color: '#a9adb3', roughness: 1 }),
     hairTips: new THREE.MeshStandardMaterial({ color: '#c09a62', roughness: 1 }),
+    leather: new THREE.MeshStandardMaterial({ color: '#a76e3d', roughness: .95 }),
+    laces: new THREE.MeshStandardMaterial({ color: '#e7d2a3', roughness: 1 }),
     boots: new THREE.MeshStandardMaterial({ color: '#49382c', roughness: 1 }),
     eyes: new THREE.MeshStandardMaterial({ color: '#24272b' }),
   };
@@ -45,6 +47,7 @@ export function buildPlayer() {
   const arms: THREE.Group[] = [];
   const legs: THREE.Group[] = [];
   const knees: THREE.Group[] = [];
+  const shoes: THREE.Mesh[] = [], hikingPairs: THREE.Group[] = [];
   for (const side of [-1, 1]) {
     const arm = new THREE.Group();
     arm.position.set(side * 0.38, 1.4, 0);
@@ -57,7 +60,11 @@ export function buildPlayer() {
     box(leg, [0.23, 0.34, 0.28], [0, -0.15, 0], materials.pants);
     const knee = new THREE.Group(); knee.position.y = -0.32; leg.add(knee); knees.push(knee);
     box(knee, [0.23, 0.32, 0.28], [0, -0.15, 0], materials.pants);
-    box(knee, [0.25, 0.16, 0.39], [0, -0.4, -0.05], materials.boots);
+    shoes.push(box(knee, [0.25, 0.16, 0.39], [0, -0.4, -0.05], materials.boots));
+    const hiking = new THREE.Group(); knee.add(hiking); hikingPairs.push(hiking); hiking.visible = false;
+    box(hiking, [.26,.23,.39], [0,-.335,-.05], materials.leather);
+    box(hiking, [.27,.06,.41], [0,-.45,-.05], materials.boots);
+    for (const y of [-.26,-.31,-.36]) box(hiking, [.16,.018,.015], [0,y,-.253], materials.laces);
     root.add(leg);
     legs.push(leg);
   }
@@ -87,6 +94,9 @@ export function buildPlayer() {
     },
     equip(economy: Economy) {
       const lena = economy.character === 'lena';
+      const hiking = economy.hikingBoots && economy.owned.includes('hiking_boots');
+      shoes.forEach(shoe => { shoe.visible = !hiking; });
+      hikingPairs.forEach(pair => { pair.visible = hiking; });
       shortHair.visible = !lena; longHair.visible = lena;
       materials.hair.color.set(lena ? '#8a6640' : '#a9adb3');
       materials.pants.color.set(lena ? '#2c313b' : '#c3ac78'); // Lena: dark jeans

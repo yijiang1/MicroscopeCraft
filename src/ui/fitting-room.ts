@@ -23,16 +23,17 @@ export function mountFittingRoom(host: HTMLElement, ctx: GameContext) {
   const ro=new ResizeObserver(resize);ro.observe(mirror);
   const button=(label:string,fn:()=>void)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=fn;return b;};
   controls.append(button('↶ Rotate',()=>{character.root.rotation.y-=Math.PI/4;render();}),button('Rotate ↷',()=>{character.root.rotation.y+=Math.PI/4;render();}));
-  const items:StoreItem[]=[{id:'shirt_blue',name:ctx.state.economy.character==='lena'?'Black turtleneck':'Original blue shirt',kind:'shirt',price:0,text:'Always available'},...storeCatalog(ctx.data).filter(i=>['shirt','backpack','model','eyewear'].includes(i.kind)&&ctx.state.economy.owned.includes(i.id))];
+  const items:StoreItem[]=[{id:'shirt_blue',name:ctx.state.economy.character==='lena'?'Black turtleneck':'Original blue shirt',kind:'shirt',price:0,text:'Always available'},...storeCatalog(ctx.data).filter(i=>['shirt','backpack','model','eyewear','boots'].includes(i.kind)&&ctx.state.economy.owned.includes(i.id))];
   const draw=()=>{
     wardrobe.replaceChildren();
     for(const item of items){
-      const e=ctx.state.economy;const worn=item.id==='backpack'?e.backpack:item.id==='model'?e.model:item.kind==='eyewear'?e.eyewear===item.id:item.id===`shirt_${e.shirt}`;
+      const e=ctx.state.economy;const worn=item.id==='hiking_boots'?e.hikingBoots:item.id==='backpack'?e.backpack:item.id==='model'?e.model:item.kind==='eyewear'?e.eyewear===item.id:item.id===`shirt_${e.shirt}`;
       const card=document.createElement('article');card.style.border=worn?'1px solid #b4d9a0':'1px solid transparent';
       const picture=document.createElement('div');picture.style.height='100px';picture.append(storePreview(item));
       const name=document.createElement('h3');name.textContent=item.name;name.style.fontSize='14px';
       const b=button(worn?(item.kind==='shirt'?'Wearing':'Remove'):'Wear',()=>{equip(ctx,item.id);draw();render();});b.disabled=worn&&item.kind==='shirt';b.setAttribute('aria-pressed',String(worn));
-      card.append(picture,name,b);wardrobe.append(card);
+      card.append(picture,name,b);
+      if(item.kind==='boots'){const perk=document.createElement('p');perk.textContent='+50% walking speed';perk.style.cssText='font-size:12px;color:#b4d9a0';card.append(perk);}wardrobe.append(card);
     }
     if(items.length===1){const hint=document.createElement('p');hint.textContent=`Your ${items[0]!.name.toLowerCase()} is ready to wear. Buy clothing and accessories in the store to add them here.`;wardrobe.append(hint);}
   };

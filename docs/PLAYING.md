@@ -181,3 +181,5 @@ Classic glasses cost **30 coins** and Campus sunglasses cost **45 coins**. Both 
 Open **Tab → Character** to preview **David** and **Lena** and choose either at any time. Selection applies immediately and saves automatically, including the seated driver model. Purchases and scientific progress are preserved. Switching to Lena removes eyewear by default; you can equip purchased glasses again in the fitting room. Close with **Done** or **Esc**.
 
 The Micro Roadster has synthesized engine and exhaust audio: idle rumble, rising revs under acceleration, and pitch changes through simulated gears. **Tab → Sound** mutes it along with other game audio. Sound fades out when you leave the car or hide the tab.
+
+**Campus hiking boots** cost **100 coins** (or **4 vouchers**). Equip them in the store or fitting room for **50% faster walking** (5 → 7.5 m/s). Running speed stays at 8.5 m/s. Buying alone does not activate the bonus; removing the boots restores normal walking speed. Ownership and equipped state are saved.

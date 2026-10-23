@@ -1,3 +1,4 @@
+import { walkingMultiplier } from '../shared/economy';
 import { freeLookStep } from './free-look';
 import { mountSeasons } from './seasons';
 import { collectSnow, snowAvailable } from '../shared/seasons';
@@ -686,7 +687,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       const fwd = (keys.has('w') ? 1 : 0) - (keys.has('s') ? 1 : 0);
       const right = (keys.has('d') ? 1 : 0) - (keys.has('a') ? 1 : 0);
       // divide by the input length so diagonals aren't √2 faster
-      const speed = ((keys.has('shift') ? RUN : WALK) * (wading ? 0.55 : 1) * dt) / (Math.hypot(fwd, right) || 1);
+      const speed = ((keys.has('shift') ? RUN : WALK) * walkingMultiplier(ctx.state.economy, keys.has('shift')) * (wading ? 0.55 : 1) * dt) / (Math.hypot(fwd, right) || 1);
       if (freeLook) {
         const step = freeLookStep(lockedHeading, fwd, right, speed);
         p.x += step.x; p.z += step.z;

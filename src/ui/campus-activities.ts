@@ -59,7 +59,7 @@ export function mountCampusActivities(ctx: GameContext, toast: Toast, training: 
         else if (item.kind === 'car') card.append(text('p', 'Owned · Unlimited campus drives'));
         else {
           const e = ctx.state.economy;
-          const worn = item.id === 'backpack' ? e.backpack : item.id === 'model' ? e.model : item.kind === 'eyewear' ? e.eyewear === item.id : item.id === `shirt_${e.shirt}`;
+          const worn = item.id === 'hiking_boots' ? e.hikingBoots : item.id === 'backpack' ? e.backpack : item.id === 'model' ? e.model : item.kind === 'eyewear' ? e.eyewear === item.id : item.id === `shirt_${e.shirt}`;
           card.append(text('p', worn ? 'Equipped · press V in the world to see it' : 'Owned'));
           card.append(button(worn && item.kind !== 'shirt' ? 'Remove' : 'Equip', () => { equip(ctx, item.id); shop(); }));
         }

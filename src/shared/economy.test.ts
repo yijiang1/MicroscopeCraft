@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameData } from './data';
-import { chooseCharacter, equip, npcSample, purchase, SPECIMEN_IDS, storeCatalog } from './economy';
+import { walkingMultiplier, chooseCharacter, equip, npcSample, purchase, SPECIMEN_IDS, storeCatalog } from './economy';
 import { createGame, parseSave, recordScore, toSave } from './state';
 const game = () => createGame(loadGameData());
 describe('campus economy', () => {
@@ -19,6 +19,31 @@ describe('campus economy', () => {
     expect(equip(ctx, 'glasses')).toBe(true);
     chooseCharacter(ctx, 'lena');
     expect(ctx.state.economy.eyewear).toBe('glasses');
+  });
+  it('charges for hiking boots and boosts only equipped walking, including after reload', () => {
+    const ctx = game();
+    expect(equip(ctx, 'hiking_boots')).toBe(false);
+    expect(walkingMultiplier(ctx.state.economy, false)).toBe(1);
+    ctx.state.economy.coins = 99;
+    expect(purchase(ctx, 'hiking_boots', 'coins')).toBe(false);
+    ctx.state.economy.coins = 100;
+    expect(purchase(ctx, 'hiking_boots', 'coins')).toBe(true);
+    expect(ctx.state.economy.coins).toBe(0);
+    expect(walkingMultiplier(ctx.state.economy, false)).toBe(1);
+    expect(equip(ctx, 'hiking_boots')).toBe(true);
+    expect(walkingMultiplier(ctx.state.economy, false)).toBe(1.5);
+    expect(walkingMultiplier(ctx.state.economy, true)).toBe(1);
+    const restored = createGame(ctx.data, undefined, parseSave(JSON.stringify(toSave(ctx.state))));
+    expect(walkingMultiplier(restored.state.economy, false)).toBe(1.5);
+    chooseCharacter(restored, 'explorer');
+    expect(walkingMultiplier(restored.state.economy, false)).toBe(1.5);
+    equip(restored, 'hiking_boots');
+    expect(walkingMultiplier(restored.state.economy, false)).toBe(1);
+    const old = JSON.parse(JSON.stringify(toSave(ctx.state))); delete old.economy.hikingBoots;
+    expect(parseSave(JSON.stringify(old))!.economy.hikingBoots).toBe(false);
+    const vouchers = game(); vouchers.state.economy.vouchers = 4;
+    expect(purchase(vouchers, 'hiking_boots', 'vouchers')).toBe(true);
+    expect(vouchers.state.economy.vouchers).toBe(0);
   });
   it('pays new score milestones once and adds one voucher at 80 percent', () => {
     const ctx = game();
