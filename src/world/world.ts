@@ -1,5 +1,5 @@
 import { walkingMultiplier } from '../shared/economy';
-import { freeLookStep } from './free-look';
+import { canFreeLook, freeLookStep } from './free-look';
 import { mountSeasons } from './seasons';
 import { collectSnow, snowAvailable } from '../shared/seasons';
 import { binocularFov, mountBinoculars } from './binoculars';
@@ -326,10 +326,21 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     }
     if (driving) {
       player.root.visible = false;
-      camera.rotation.set(0,driveYaw,0,'YXZ');
-      viewCamera.position.set(camera.position.x + Math.sin(driveYaw) * 6, roadster.root.position.y + EYE_HEIGHT + 2.5, camera.position.z + Math.cos(driveYaw) * 6);
-      viewCamera.position.y=Math.max(viewCamera.position.y,groundAt(viewCamera.position.x,viewCamera.position.z)+1.5);
-      viewCamera.lookAt(camera.position.x - Math.sin(driveYaw) * 4, roadster.root.position.y + EYE_HEIGHT - 0.3, camera.position.z - Math.cos(driveYaw) * 4);
+      if (!freeLook) camera.rotation.set(0,driveYaw,0,'YXZ');
+      if (freeLook) {
+        camera.getWorldDirection(viewDirection);
+        lookPoint.set(camera.position.x, roadster.root.position.y + 1.1, camera.position.z);
+        boom.copy(viewDirection).multiplyScalar(-6);
+        boomRay.set(lookPoint, boom.normalize()); boomRay.far = 6;
+        const hit = boomRay.intersectObject(campus.group)[0];
+        viewCamera.position.copy(lookPoint).addScaledVector(viewDirection, -(hit ? Math.max(.6, hit.distance - .3) : 6));
+        viewCamera.position.y = Math.max(viewCamera.position.y, groundAt(viewCamera.position.x,viewCamera.position.z)+.5);
+        viewCamera.lookAt(lookPoint);
+      } else {
+        viewCamera.position.set(camera.position.x + Math.sin(driveYaw) * 6, roadster.root.position.y + EYE_HEIGHT + 2.5, camera.position.z + Math.cos(driveYaw) * 6);
+        viewCamera.position.y=Math.max(viewCamera.position.y,groundAt(viewCamera.position.x,viewCamera.position.z)+1.5);
+        viewCamera.lookAt(camera.position.x - Math.sin(driveYaw) * 4, roadster.root.position.y + EYE_HEIGHT - 0.3, camera.position.z - Math.cos(driveYaw) * 4);
+      }
     }
     const fov=binoculars.active()?binocularFov(camera.fov,binoculars.zoom()):camera.fov;
     if(viewCamera.fov!==fov){viewCamera.fov=fov;viewCamera.updateProjectionMatrix();}
@@ -452,12 +463,6 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     }
     if (paused || (!controls.isLocked && !driving)) return;
     if (driving) { if (k === 'e' && !e.repeat) finishDrive(); return; }
-    if (k === 'z' && !e.repeat && fishingAction === 'idle') {
-      freeLook = !freeLook; lockedHeading = player.root.rotation.y;
-      if (freeLook) thirdPerson = true;
-      hud.flash(freeLook ? 'Free look · Mouse orbits; walking direction fixed · Z to release' : 'Normal view · Mouse steers your character');
-      return;
-    }
     if (k === 'v' && !e.repeat) {
       thirdPerson = !thirdPerson;
       updateView();
@@ -488,6 +493,31 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
     else if (n.aim.samples) picker.open(n.kind === 'picnic' ? 'On the table' : n.kind === 'pine_branch' ? 'From the branch' : 'Pick a sample', n.aim.samples, lookAt);
     else if (n.aim.sample) lookAt(n.aim.sample);
   };
+  // Capture Z even while the fishing dialog owns keyboard focus.
+  const toggleFreeLook = (e: KeyboardEvent) => {
+    if (e.key.toLowerCase() !== 'z' || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+    const target = e.target as HTMLElement;
+    if (target.isContentEditable || ['INPUT','TEXTAREA','SELECT'].includes(target.tagName)) return;
+    const fishingNow = fishingAction !== 'idle';
+    if (!canFreeLook({ fishing: fishingNow, driving, paused, pointerLocked: controls.isLocked })) return;
+    e.preventDefault(); e.stopPropagation();
+    freeLook = !freeLook;
+    if (freeLook) {
+      lockedHeading = player.root.rotation.y; thirdPerson = true;
+      if (driving) camera.rotation.set(-.28,driveYaw,0,'YXZ');
+    } else if (fishingNow) camera.rotation.set(-.15,lockedHeading,0,'YXZ');
+    hud.flash(freeLook ? 'Free look · Move mouse to orbit · Z to return' : 'Normal camera restored');
+    updateView(); redrawShadows();
+  };
+  const orbitUnlocked = (e: MouseEvent) => {
+    if (!freeLook || controls.isLocked || !((driving && !paused) || fishingAction !== 'idle')) return;
+    const rotation = new THREE.Euler().setFromQuaternion(camera.quaternion, 'YXZ');
+    rotation.y -= e.movementX * .003;
+    rotation.x = THREE.MathUtils.clamp(rotation.x - e.movementY * .003, -1.1, 1.1);
+    camera.quaternion.setFromEuler(rotation);
+  };
+  addEventListener('keydown', toggleFreeLook, true);
+  addEventListener('mousemove', orbitUnlocked);
   const onDown = (e: KeyboardEvent) => onKey(e, true);
   const onUp = (e: KeyboardEvent) => onKey(e, false);
   const onClick = () => !paused && !picker.isOpen() && controls.lock();
@@ -617,7 +647,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const finishDrive = () => {
     if (!driving) return;
     ctx.bus.emit('roadsterSound', { driving: false, speed: 0, throttle: 0 });
-    driving = false; clearTimeout(driveTimer); driveSpeed = 0; keys.clear();
+    freeLook = false; driving = false; clearTimeout(driveTimer); driveSpeed = 0; keys.clear();
     roadster.root.visible = false; thirdPerson = savedThirdPerson; vy = 0;
     camera.position.set(-12, groundAt(-12,35.5) + EYE_HEIGHT,35.5);
     camera.rotation.set(0,0,0,'YXZ'); rememberPlayer(); redrawShadows();
@@ -644,7 +674,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       const water=fishingWaterPoint(camera.position.x,camera.position.z,camera.position.y-EYE_HEIGHT);
       if(water) camera.rotation.set(-.15,Math.atan2(camera.position.x-water.x,camera.position.z-water.z),0,'YXZ');
     }
-    if(action==='idle') thirdPerson=fishingView;
+    if(action==='idle') { if(freeLook) camera.rotation.set(-.15,lockedHeading,0,'YXZ'); freeLook=false;thirdPerson=fishingView; }
     fishingAction=action;
     fishingRod.action(action,fishingWaterPoint(camera.position.x,camera.position.z,camera.position.y-EYE_HEIGHT)??undefined,color);
     redrawShadows();
@@ -863,6 +893,8 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       timers.forEach((id) => clearTimeout(id));
       ro.disconnect();
       [offOpen, offClose, offBench, offBenchClose, offMode, offTrack, offTarget, offCrafted, offQuest, offScore, offDiscovery].forEach((off) => off());
+      removeEventListener('keydown', toggleFreeLook, true);
+      removeEventListener('mousemove', orbitUnlocked);
       removeEventListener('keydown', onDown);
       removeEventListener('keyup', onUp);
       removeEventListener('pagehide', rememberPlayer);

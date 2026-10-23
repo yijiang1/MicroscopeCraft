@@ -172,7 +172,7 @@ In winter, find snow on outdoor picnic tables, bench and chair seats, tree crown
 
 The ScopeCraft Store has clothing rails, field backpacks, bookshelves and science souvenir displays. Enter the fitting booth at the back right and press **E**, or choose **Fitting room** at the store counter. Rotate the character preview and equip your original blue shirt or purchased shirts, backpack and miniature microscope. Unpurchased items cannot be equipped.
 
-Press **Z** to toggle free look while on foot. Mouse movement turns the camera without changing your character’s facing or WASD movement direction. Press Z again to restore mouse steering. Driving and fishing return to their normal camera controls.
+Press **Z** to toggle free look while walking, driving or fishing. Mouse movement turns the camera without changing your character’s facing or WASD movement direction. Press Z again to restore mouse steering. While driving, mouse movement orbits the car and WASD still controls the vehicle. While fishing, Z works with the fishing panel open: move the pointer to look around without turning the character or rod. Press Z again to restore the activity camera.
 
 Classic glasses cost **30 coins** and Campus sunglasses cost **45 coins**. Both appear on the store souvenir shelf and in the catalog. Purchased pairs are available in the fitting room: wear one pair at a time, or choose Remove to go without. Eyewear is cosmetic and saved with your outfit.
 
@@ -180,6 +180,6 @@ Classic glasses cost **30 coins** and Campus sunglasses cost **45 coins**. Both 
 
 Open **Tab → Character** to preview **David** and **Lena** and choose either at any time. Selection applies immediately and saves automatically, including the seated driver model. Purchases and scientific progress are preserved. Switching to Lena removes eyewear by default; you can equip purchased glasses again in the fitting room. Close with **Done** or **Esc**.
 
-The Micro Roadster has synthesized engine and exhaust audio: idle rumble, rising revs under acceleration, and pitch changes through simulated gears. **Tab → Sound** mutes it along with other game audio. Sound fades out when you leave the car or hide the tab.
+The Micro Roadster has synthesized V8-style engine and exhaust audio: deep, uneven exhaust-bank pulses and idle rumble, rising revs under acceleration, and pitch changes through simulated gears. **Tab → Sound** mutes it along with other game audio. Sound fades out when you leave the car or hide the tab.
 
 **Campus hiking boots** cost **100 coins** (or **4 vouchers**). Equip them in the store or fitting room for **50% faster walking** (5 → 7.5 m/s). Running speed stays at 8.5 m/s. Buying alone does not activate the bonus; removing the boots restores normal walking speed. Ownership and equipped state are saved.
