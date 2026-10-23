@@ -179,3 +179,5 @@ Classic glasses cost **30 coins** and Campus sunglasses cost **45 coins**. Both 
 ### Change character
 
 Open **Tab → Character** to preview **David** and **Lena** and choose either at any time. Selection applies immediately and saves automatically, including the seated driver model. Purchases and scientific progress are preserved. Switching to Lena removes eyewear by default; you can equip purchased glasses again in the fitting room. Close with **Done** or **Esc**.
+
+The Micro Roadster has synthesized engine and exhaust audio: idle rumble, rising revs under acceleration, and pitch changes through simulated gears. **Tab → Sound** mutes it along with other game audio. Sound fades out when you leave the car or hide the tab.

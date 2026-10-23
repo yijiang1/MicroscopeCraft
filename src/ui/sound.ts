@@ -1,3 +1,4 @@
+import { mountRoadsterAudio } from './roadster-audio';
 import { CAMPUS_THEME, LAB_THEME, midiHz, TANNENBAUM, TOWER_MUSIC_INTERVAL } from './music';
 // One short WebAudio sound per game action, synthesised (no asset files). Owner: Person D.
 // Browsers only allow audio after a user gesture, so the AudioContext starts on the first click or key.
@@ -112,6 +113,7 @@ export function mountSound(ctx: GameContext): SoundHandle {
     play([{ freq: stone ? 150 : 95, to: 45, dur: 0.07, type: 'sine', gain: running ? 0.09 : 0.06 }]);
   };
   const offStep = ctx.bus.on('footstep', step);
+  const roadsterAudio = mountRoadsterAudio(ctx, () => ac, () => master);
   /** One stroke of a bell: the hum, prime, minor-third tierce, quint and nominal partials of a tuned bell, each dying away. */
   const bell = (freq: number, at: number, gain: number) => {
     if (muted || !ac || ac.state !== 'running') return;
@@ -182,6 +184,7 @@ export function mountSound(ctx: GameContext): SoundHandle {
     },
     muted: () => muted,
     dispose() {
+      roadsterAudio.dispose();
       offMusic();
       offStep();
       offs.forEach((off) => off());

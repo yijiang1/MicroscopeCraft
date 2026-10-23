@@ -5,6 +5,7 @@ export interface GameEvents {
   toggleBinoculars: Record<string, never>;
   mysteryChanged: Record<string, never>;
   openMysteryNotebook: Record<string, never>;
+  roadsterSound: { driving: boolean; speed: number; throttle: number };
   driveMiata: { trial: boolean };
   musicScene: { distance: number; indoors: boolean };
   economyChanged: Record<string, never>;

@@ -615,6 +615,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
   const offDress = ctx.bus.on('economyChanged', dress);
   const finishDrive = () => {
     if (!driving) return;
+    ctx.bus.emit('roadsterSound', { driving: false, speed: 0, throttle: 0 });
     driving = false; clearTimeout(driveTimer); driveSpeed = 0; keys.clear();
     roadster.root.visible = false; thirdPerson = savedThirdPerson; vy = 0;
     camera.position.set(-12, groundAt(-12,35.5) + EYE_HEIGHT,35.5);
@@ -671,6 +672,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
         if (blocked) driveSpeed = 0;
         else { driveSpeed = step.speed; driveYaw = step.yaw; camera.position.set(x,groundAt(x,z)+EYE_HEIGHT,z); }
       }
+      ctx.bus.emit('roadsterSound', { driving: driving && !paused, speed: driveSpeed, throttle: (keys.has('w') ? 1 : 0) - (keys.has('s') ? 1 : 0) });
       if(driving)alignRoadster(roadster.root,camera.position.x,camera.position.z,driveYaw,groundAt,dt);
     } else if (ridingLift) {
       if (!paused) liftHeight = advanceLift(liftHeight, liftTarget, dt);
@@ -866,6 +868,7 @@ export function mountOpenWorld(el: HTMLElement, ctx: GameContext): WorldHandle {
       document.removeEventListener('visibilitychange', rememberPlayer);
       offBinoculars();binoculars.dispose();
       seasons.dispose(); fishing.dispose(); fishingRod.dispose(); minimap.dispose();
+      ctx.bus.emit('roadsterSound', { driving: false, speed: 0, throttle: 0 });
       speech.dispose(); offActivity(); offDress(); offDrive(); clearTimeout(driveTimer);
       driver.dispose(); player.dispose();
       controls.dispose();
